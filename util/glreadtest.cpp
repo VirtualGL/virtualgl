@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2010-2011, 2013-2014, 2017-2018 D. R. Commander
+// Copyright (C)2010-2011, 2013-2014, 2017-2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -136,7 +136,7 @@ void findVisual(int bpc)
 				XVisualInfo vtemp;  int n = 0;
 				vtemp.visualid = visualID;
 				v = XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n);
-				if(!v || !n) _throw("Could not obtain visual");
+				if(!v || !n) THROW("Could not obtain visual");
 				printf("Visual = 0x%.2x\n", (unsigned int)v->visualid);
 				return;
 			}
@@ -147,7 +147,7 @@ void findVisual(int bpc)
 			}
 			if(!(v = glXChooseVisual(dpy, DefaultScreen(dpy), winattribs))
 				&& !(v = glXChooseVisual(dpy, DefaultScreen(dpy), winattribsdb)))
-				_throw("Could not obtain Visual");
+				THROW("Could not obtain Visual");
 			printf("Visual = 0x%.2x\n", (unsigned int)v->visualid);
 			return;
 		}
@@ -170,7 +170,7 @@ void findVisual(int bpc)
 	if(!nelements || !fbconfigs)
 	{
 		if(fbconfigs) XFree(fbconfigs);
-		_throw("Could not obtain Visual");
+		THROW("Could not obtain Visual");
 	}
 	c = fbconfigs[0];  XFree(fbconfigs);
 
@@ -189,12 +189,12 @@ void drawableInit(void)
 	if(useWindow || usePixmap || useFBO)
 	{
 		if(!(ctx = glXCreateContext(dpy, v, NULL, True)))
-			_throw("Could not create GL context");
+			THROW("Could not create GL context");
 
 		if(usePixmap)
 		{
 			if(!(glxpm = glXCreateGLXPixmap(dpy, v, pm)))
-				_throw("Could not creaate GLX pixmap");
+				THROW("Could not creaate GLX pixmap");
 		}
 		glXMakeCurrent(dpy, usePixmap ? glxpm : win, ctx);
 
@@ -229,18 +229,18 @@ void drawableInit(void)
 			}
 			if(glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT)
 				!= GL_FRAMEBUFFER_COMPLETE_EXT)
-				_throw("Could not create FBO");
+				THROW("Could not create FBO");
 		}
 		#endif
 		return;
 	}
 
 	ctx = glXCreateNewContext(dpy, c, GLX_RGBA_TYPE, NULL, True);
-	if(!ctx) _throw("Could not create GL context");
+	if(!ctx) THROW("Could not create GL context");
 
 	pbattribs[1] = drawableWidth;  pbattribs[3] = drawableHeight;
 	pbuffer = glXCreatePbuffer(dpy, c, pbattribs);
-	if(!pbuffer) _throw("Could not create Pbuffer");
+	if(!pbuffer) THROW("Could not create Pbuffer");
 
 	glXMakeContextCurrent(dpy, pbuffer, pbuffer, ctx);
 }
@@ -260,7 +260,7 @@ static void check_errors(const char *tag)
 		else snprintf(glerrstr, STRLEN - 1, "OpenGL ERROR #%d in %s\n", i, tag);
 		i = glGetError();
 	}
-	if(error) _throw(glerrstr);
+	if(error) THROW(glerrstr);
 }
 
 
@@ -320,7 +320,7 @@ void clearFB(void)
 	size_t bufSize = drawableWidth * drawableHeight * 3;
 
 	if((buf = (unsigned char *)malloc(bufSize)) == NULL)
-		_throw("Could not allocate buffer");
+		THROW("Could not allocate buffer");
 	memset(buf, 0xFF, bufSize);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
@@ -372,7 +372,7 @@ int writeTest(int format)
 		clearFB();
 		if((rgbaBuffer = (unsigned char *)malloc(drawableWidth * drawableHeight *
 			pf->size)) == NULL)
-			_throw("Could not allocate buffer");
+			THROW("Could not allocate buffer");
 		initBuf(0, 0, drawableWidth, drawableHeight, pf, rgbaBuffer);
 		n = 0;
 		timer.start();
@@ -434,9 +434,9 @@ int readTest(int format)
 		{
 			const char *ext = (const char *)glGetString(GL_EXTENSIONS);
 			if(!ext || !strstr(ext, "GL_ARB_pixel_buffer_object"))
-				_throw("GL_ARB_pixel_buffer_object extension not available");
+				THROW("GL_ARB_pixel_buffer_object extension not available");
 			glGenBuffers(1, &bufferID);
-			if(!bufferID) _throw("Could not generate PBO buffer");
+			if(!bufferID) THROW("Could not generate PBO buffer");
 			glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, bufferID);
 			glBufferData(GL_PIXEL_PACK_BUFFER_EXT, bufSize, NULL, GL_STREAM_READ);
 			check_errors("PBO initialization");
@@ -444,10 +444,10 @@ int readTest(int format)
 			glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_EXT, GL_BUFFER_SIZE,
 				&temp);
 			if((size_t)temp != bufSize)
-				_throw("Could not generate PBO buffer");
+				THROW("Could not generate PBO buffer");
 			temp = 0;
 			glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING_EXT, &temp);
-			if(temp != pbo) _throw("Could not bind PBO buffer");
+			if(temp != pbo) THROW("Could not bind PBO buffer");
 		}
 		#endif
 		#ifdef USEIFR
@@ -460,12 +460,12 @@ int readTest(int format)
 			ifrConfig.customType = pf_gldatatype[format];
 			if(ifr.nvIFROGLCreateTransferToSysObject(ifrSession, &ifrConfig,
 				&ifrTransfer) != NV_IFROGL_SUCCESS)
-				_throw("Could not create IFR transfer object\n");
+				THROW("Could not create IFR transfer object\n");
 		}
 		#endif
 
 		if((rgbaBuffer = (unsigned char *)malloc(bufSize)) == NULL)
-			_throw("Could not allocate buffer");
+			THROW("Could not allocate buffer");
 		memset(rgbaBuffer, 0, bufSize);
 		n = 0;  rbtime = readPixelsTime = 0.;
 		double tmin = 0., tmax = 0., ssq = 0., sum = 0.;  bool first = true;
@@ -483,7 +483,7 @@ int readTest(int format)
 				readPixelsTime += timer2.elapsed();
 				pixels = (unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER_EXT,
 					GL_READ_ONLY);
-				if(!pixels) _throw("Could not map buffer");
+				if(!pixels) THROW("Could not map buffer");
 				memcpy(rgbaBuffer, pixels, bufSize);
 				glUnmapBuffer(GL_PIXEL_PACK_BUFFER_EXT);
 			}
@@ -500,16 +500,16 @@ int readTest(int format)
 					useFBO ? GL_COLOR_ATTACHMENT0_EXT : GL_FRONT,
 					NV_IFROGL_TRANSFER_FRAMEBUFFER_FLAG_NONE, 0, 0, 0, 0)
 					!= NV_IFROGL_SUCCESS)
-					_throw("Could not transfer pixels from the framebuffer");
+					THROW("Could not transfer pixels from the framebuffer");
 				readPixelsTime += timer2.elapsed();
 				if(ifr.nvIFROGLLockTransferData(ifrTransfer, &dataSize, &pixels)
 					!= NV_IFROGL_SUCCESS)
-					_throw("Could not lock transferred pixels");
+					THROW("Could not lock transferred pixels");
 				if(dataSize != (uintptr_t)bufSize)
-					_throw("Transferred pixel buffer is the wrong size");
+					THROW("Transferred pixel buffer is the wrong size");
 				memcpy(rgbaBuffer, (unsigned char *)pixels, bufSize);
 				if(ifr.nvIFROGLReleaseTransferData(ifrTransfer) != NV_IFROGL_SUCCESS)
-					_throw("Could not release transferred pixels");
+					THROW("Could not release transferred pixels");
 			}
 			else
 			#endif
@@ -539,7 +539,7 @@ int readTest(int format)
 		} while(rbtime < benchTime || n < 2);
 
 		if(!cmpBuf(0, 0, drawableWidth, drawableHeight, pf, rgbaBuffer, 0))
-			_throw("ERROR: Bogus data read back.");
+			THROW("ERROR: Bogus data read back.");
 
 		double mean = sum / (double)n;
 		double stddev =
@@ -814,13 +814,13 @@ int main(int argc, char **argv)
 			swa.event_mask = 0;
 
 			swa.colormap = XCreateColormap(dpy, root, v->visual, AllocNone);
-			_errifnot(win = XCreateWindow(dpy, root, 0, 0,
+			ERRIFNOT(win = XCreateWindow(dpy, root, 0, 0,
 				(usePixmap || useFBO) ? 1 : drawableWidth,
 				(usePixmap || useFBO) ? 1 : drawableHeight, 0, v->depth, InputOutput,
 				v->visual, CWBorderPixel | CWColormap | CWEventMask, &swa));
 			if(usePixmap)
 			{
-				_errifnot(pm = XCreatePixmap(dpy, win, drawableWidth, drawableHeight,
+				ERRIFNOT(pm = XCreatePixmap(dpy, win, drawableWidth, drawableHeight,
 					v->depth));
 			}
 			else if(!useFBO) XMapWindow(dpy, win);
@@ -838,9 +838,9 @@ int main(int argc, char **argv)
 		if(useIFR)
 		{
 			if(!ifr.initialize())
-				_throw("Failed to initialize IFR");
+				THROW("Failed to initialize IFR");
 			if(ifr.nvIFROGLCreateSession(&ifrSession, NULL) != NV_IFROGL_SUCCESS)
-				_throw("Could not create IFR session");
+				THROW("Could not create IFR session");
 		}
 		#endif
 		display();

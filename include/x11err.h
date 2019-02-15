@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
+ * Copyright (C)2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -12,7 +13,7 @@
  * wxWindows Library License for more details.
  */
 
-#define __case(m)  case m:  return #m;
+#define CASE(m)  case m:  return #m;
 
 static const char *x11error(int code)
 {
@@ -20,23 +21,23 @@ static const char *x11error(int code)
 		return "Extension error";
 	switch(code)
 	{
-		__case(BadRequest)
-		__case(BadValue)
-		__case(BadWindow)
-		__case(BadPixmap)
-		__case(BadAtom)
-		__case(BadCursor)
-		__case(BadFont)
-		__case(BadMatch)
-		__case(BadDrawable)
-		__case(BadAccess)
-		__case(BadAlloc)
-		__case(BadColor)
-		__case(BadGC)
-		__case(BadIDChoice)
-		__case(BadName)
-		__case(BadLength)
-		__case(BadImplementation)
+		CASE(BadRequest)
+		CASE(BadValue)
+		CASE(BadWindow)
+		CASE(BadPixmap)
+		CASE(BadAtom)
+		CASE(BadCursor)
+		CASE(BadFont)
+		CASE(BadMatch)
+		CASE(BadDrawable)
+		CASE(BadAccess)
+		CASE(BadAlloc)
+		CASE(BadColor)
+		CASE(BadGC)
+		CASE(BadIDChoice)
+		CASE(BadName)
+		CASE(BadLength)
+		CASE(BadImplementation)
 		default:  return "Unknown error code";
 	}
 }

@@ -61,7 +61,7 @@ namespace vglserver
 			{
 				HashEntry *entry = NULL;
 
-				if(!key1) _throw("Invalid argument");
+				if(!key1) THROW("Invalid argument");
 				vglutil::CriticalSection::SafeLock l(mutex);
 
 				if((entry = findEntry(key1, key2)) != NULL)
@@ -70,7 +70,7 @@ namespace vglserver
 					if(useRef) entry->refCount++;
 					return 0;
 				}
-				_newcheck(entry = new HashEntry);
+				NEWCHECK(entry = new HashEntry);
 				memset(entry, 0, sizeof(HashEntry));
 				entry->prev = end;  if(end) end->next = entry;
 				if(!start) start = entry;

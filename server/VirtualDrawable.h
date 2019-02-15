@@ -57,7 +57,7 @@ namespace vglserver
 
 					Pixmap getPixmap(void)
 					{
-						if(!isPixmap) _throw("Not a pixmap");
+						if(!isPixmap) THROW("Not a pixmap");
 						return pm;
 					}
 

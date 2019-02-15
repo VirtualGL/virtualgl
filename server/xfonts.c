@@ -134,12 +134,12 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
    if (!draw) return;
    if (winhash.find(draw, pbw)) {
       /* Current drawable is a virtualized Window */
-      _errifnot(dpy = pbw->getX11Display());
-      _errifnot(win = pbw->getX11Drawable());
+      ERRIFNOT(dpy = pbw->getX11Display());
+      ERRIFNOT(win = pbw->getX11Drawable());
    }
    else if ((win = pmhash.reverseFind(draw)) != 0) {
       /* Current drawable is a virtualized Pixmap */
-      _errifnot(dpy = glxdhash.getCurrentDisplay(draw));
+      ERRIFNOT(dpy = glxdhash.getCurrentDisplay(draw));
    }
    else {
       /* Current drawable must be a Pbuffer that the application created.
@@ -149,7 +149,7 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
       XSetWindowAttributes swa;
       int nv = 0;
 
-      _errifnot(dpy = glxdhash.getCurrentDisplay(draw));
+      ERRIFNOT(dpy = glxdhash.getCurrentDisplay(draw));
       vtemp.c_class = TrueColor;
       vtemp.depth = DefaultDepth(dpy, DefaultScreen(dpy));
       vtemp.screen = DefaultScreen(dpy);
@@ -157,7 +157,7 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
       if((v = XGetVisualInfo(dpy, VisualDepthMask | VisualClassMask |
                                   VisualScreenMask, &vtemp, &nv)) == NULL ||
          nv < 1)
-         _throw("Could not create temporary window for font rendering");
+         THROW("Could not create temporary window for font rendering");
       swa.colormap = XCreateColormap(dpy, root, v->visual, AllocNone);
       swa.border_pixel = 0;
       swa.event_mask = 0;
@@ -166,7 +166,7 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
                                 CWBorderPixel | CWColormap | CWEventMask,
                                 &swa)) == 0) {
          XFree(v);
-         _throw("Could not create temporary window for font rendering");
+         THROW("Could not create temporary window for font rendering");
       }
       XFree(v);
       newwin = true;
@@ -174,7 +174,7 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
 
    fs = XQueryFont(dpy, font);
    if (!fs)
-      _throw("Couldn't get font structure information");
+      THROW("Couldn't get font structure information");
 
    if (fconfig.trace) {
       unsigned long name_value;
@@ -183,7 +183,7 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
          char *name = XGetAtomName(dpy, name_value);
 
          if (name) {
-            prargs(name);  XFree(name);
+            PRARGS(name);  XFree(name);
          }
       }
    }
@@ -196,7 +196,7 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
 
    bm = (GLubyte *) malloc((max_bm_width * max_bm_height) * sizeof(GLubyte));
    if (!bm)
-      _throw("Couldn't allocate bitmap in glXUseXFont()");
+      THROW("Couldn't allocate bitmap in glXUseXFont()");
 
    /* Save the current packing mode for bitmaps.  */
    _glGetIntegerv(GL_UNPACK_SWAP_BYTES, &swapbytes);
@@ -224,13 +224,13 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
 
    ci = (charinfo *) malloc(groupsize * sizeof(charinfo));
    if (!ci)
-      _throw("Couldn't allocate character info structure in glXUseXFont()");
+      THROW("Couldn't allocate character info structure in glXUseXFont()");
 
    for (j = 0; j < count; j += groupsize) {
       n = min(groupsize, count - j);
       pixmap = XCreatePixmap(dpy, win, 8 * max_bm_width * n, max_bm_height, 1);
       if (!pixmap)
-         _throw("Couldn't allocate pixmap in glXUseXFont()");
+         THROW("Couldn't allocate pixmap in glXUseXFont()");
       values.foreground = BlackPixel(dpy, DefaultScreen(dpy));
       values.background = WhitePixel(dpy, DefaultScreen(dpy));
       values.font = fs->fid;
@@ -288,7 +288,7 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
       }
 
       XFreeGC(dpy, gc);  gc = 0;
-      _errifnot(image = XGetImage(dpy, pixmap, 0, 0, 8 * max_bm_width * n,
+      ERRIFNOT(image = XGetImage(dpy, pixmap, 0, 0, 8 * max_bm_width * n,
                                   max_bm_height, 1, XYPixmap));
       XFreePixmap(dpy, pixmap);  pixmap = 0;
 

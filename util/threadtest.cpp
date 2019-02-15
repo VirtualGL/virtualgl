@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2014, 2017-2018 D. R. Commander
+// Copyright (C)2014, 2017-2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -71,7 +71,7 @@ class TestThread : public Runnable
 				printf("Error in %s (Thread %d):\n%s\n", e.getMethod(), myRank,
 					e.getMessage());
 			}
-			if(myRank == 5) _throw("Error test");
+			if(myRank == 5) THROW("Error test");
 		}
 
 	private:
@@ -86,7 +86,7 @@ int main(void)
 
 	try
 	{
-		printf("Number of CPU cores in this system:  %d\n", numprocs());
+		printf("Number of CPU cores in this system:  %d\n", NumProcs());
 		printf("Word size = %d-bit\n", (int)sizeof(long *) * 8);
 
 		event.wait();

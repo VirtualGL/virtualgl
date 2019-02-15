@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011-2012, 2015, 2018 D. R. Commander
+// Copyright (C)2009, 2011-2012, 2015, 2018-2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -34,14 +34,14 @@ static void doGLReadback(bool spoilLast, bool sync)
 
 	if(winhash.find(drawable, vw))
 	{
-		if(drawingToFront() || vw->dirty)
+		if(DrawingToFront() || vw->dirty)
 		{
-				opentrace(doGLReadback);  prargx(vw->getGLXDrawable());
-				prargi(sync);  prargi(spoilLast);  starttrace();
+				OPENTRACE(doGLReadback);  PRARGX(vw->getGLXDrawable());
+				PRARGI(sync);  PRARGI(spoilLast);  STARTTRACE();
 
 			vw->readback(GL_FRONT, spoilLast, sync);
 
-				stoptrace();  closetrace();
+				STOPTRACE();  CLOSETRACE();
 		}
 	}
 }
@@ -80,10 +80,10 @@ void glFlush(void)
 		if(fconfig.trace) vglout.print("[VGL] glFlush()\n");
 
 	_glFlush();
-	if(lastTime < 0.) lastTime = getTime();
+	if(lastTime < 0.) lastTime = GetTime();
 	else
 	{
-		thisTime = getTime() - lastTime;
+		thisTime = GetTime() - lastTime;
 		if(thisTime - lastTime < 0.01) fconfig.flushdelay = 0.01;
 		else fconfig.flushdelay = 0.;
 	}
@@ -124,7 +124,7 @@ void glDrawBuffer(GLenum mode)
 
 	TRY();
 
-		opentrace(glDrawBuffer);  prargx(mode);  starttrace();
+		OPENTRACE(glDrawBuffer);  PRARGX(mode);  STARTTRACE();
 
 	VirtualWin *vw = NULL;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
@@ -132,22 +132,22 @@ void glDrawBuffer(GLenum mode)
 
 	if(drawable && winhash.find(drawable, vw))
 	{
-		before = drawingToFront();
-		rbefore = drawingToRight();
+		before = DrawingToFront();
+		rbefore = DrawingToRight();
 		_glDrawBuffer(mode);
-		after = drawingToFront();
-		rafter = drawingToRight();
+		after = DrawingToFront();
+		rafter = DrawingToRight();
 		if(before && !after) vw->dirty = true;
 		if(rbefore && !rafter && vw->isStereo()) vw->rdirty = true;
 	}
 	else _glDrawBuffer(mode);
 
-		stoptrace();
+		STOPTRACE();
 		if(drawable && vw)
 		{
-			prargi(vw->dirty);  prargi(vw->rdirty);  prargx(vw->getGLXDrawable());
+			PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
 		}
-		closetrace();
+		CLOSETRACE();
 
 	CATCH();
 }
@@ -161,7 +161,7 @@ void glPopAttrib(void)
 
 	TRY();
 
-		opentrace(glPopAttrib);  starttrace();
+		OPENTRACE(glPopAttrib);  STARTTRACE();
 
 	VirtualWin *vw = NULL;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
@@ -169,22 +169,22 @@ void glPopAttrib(void)
 
 	if(drawable && winhash.find(drawable, vw))
 	{
-		before = drawingToFront();
-		rbefore = drawingToRight();
+		before = DrawingToFront();
+		rbefore = DrawingToRight();
 		_glPopAttrib();
-		after = drawingToFront();
-		rafter = drawingToRight();
+		after = DrawingToFront();
+		rafter = DrawingToRight();
 		if(before && !after) vw->dirty = true;
 		if(rbefore && !rafter && vw->isStereo()) vw->rdirty = true;
 	}
 	else _glPopAttrib();
 
-		stoptrace();
+		STOPTRACE();
 		if(drawable && vw)
 		{
-			prargi(vw->dirty);  prargi(vw->rdirty);  prargx(vw->getGLXDrawable());
+			PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
 		}
-		closetrace();
+		CLOSETRACE();
 
 	CATCH();
 }
@@ -203,8 +203,8 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 
 	TRY();
 
-		opentrace(glViewport);  prargi(x);  prargi(y);  prargi(width);
-		prargi(height);  starttrace();
+		OPENTRACE(glViewport);  PRARGI(x);  PRARGI(y);  PRARGI(width);
+		PRARGI(height);  STARTTRACE();
 
 	GLXContext ctx = _glXGetCurrentContext();
 	GLXDrawable draw = _glXGetCurrentDrawable();
@@ -231,10 +231,10 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 	}
 	_glViewport(x, y, width, height);
 
-		stoptrace();
-		if(draw != newDraw) { prargx(draw);  prargx(newDraw); }
-		if(read != newRead) { prargx(read);  prargx(newRead); }
-		closetrace();
+		STOPTRACE();
+		if(draw != newDraw) { PRARGX(draw);  PRARGX(newDraw); }
+		if(read != newRead) { PRARGX(read);  PRARGX(newRead); }
+		CLOSETRACE();
 
 	CATCH();
 }

@@ -17,12 +17,12 @@
 #include <GL/glx.h>
 
 
-#define _throw(m) \
+#define THROW(m) \
 { \
 	retval = -1;  fprintf(stderr, "ERROR: %s\n", m);  goto bailout; \
 }
 
-#define _try(f) \
+#define TRY(f) \
 { \
 	if((f) < 0) \
 	{ \

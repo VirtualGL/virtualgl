@@ -45,14 +45,14 @@ namespace vglserver
 			void add(Display *dpy, int screen, GLXFBConfig config, VisualID vid)
 			{
 				if(!dpy || screen < 0 || !config || !vid)
-					_throw("Invalid argument");
+					THROW("Invalid argument");
 				char *dpystring = strdup(DisplayString(dpy));
 				XVisualInfo *vis;
 				vis = (XVisualInfo *)calloc(1, sizeof(XVisualInfo));
 				vis->screen = screen;
 				vis->visualid = vid;
 				remove(dpy, config);
-				if(!HASH::add(dpystring, _FBCID(config), vis))
+				if(!HASH::add(dpystring, FBCID(config), vis))
 				{
 					free(dpystring);
 					XFree(vis);
@@ -61,8 +61,8 @@ namespace vglserver
 
 			VisualID getVisual(Display *dpy, GLXFBConfig config, int &screen)
 			{
-				if(!dpy || !config) _throw("Invalid argument");
-				XVisualInfo *vis = HASH::find(DisplayString(dpy), _FBCID(config));
+				if(!dpy || !config) THROW("Invalid argument");
+				XVisualInfo *vis = HASH::find(DisplayString(dpy), FBCID(config));
 				if(!vis) return 0;
 				screen = vis->screen;
 				return vis->visualid;
@@ -70,8 +70,8 @@ namespace vglserver
 
 			void remove(Display *dpy, GLXFBConfig config)
 			{
-				if(!dpy || !config) _throw("Invalid argument");
-				HASH::remove(DisplayString(dpy), _FBCID(config));
+				if(!dpy || !config) THROW("Invalid argument");
+				HASH::remove(DisplayString(dpy), FBCID(config));
 			}
 
 		private:

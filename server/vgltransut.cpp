@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2009-2011, 2014, 2017-2018 D. R. Commander
+// Copyright (C)2009-2011, 2014, 2017-2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 	Timer timer;  double elapsed;
 	unsigned char *buf = NULL, *buf2 = NULL, *buf3 = NULL;
 	Display *dpy = NULL;  Window win = 0;
-	int i, retval = 0;  int bgr = littleendian();
+	int i, retval = 0;  int bgr = LittleEndian();
 
 	try
 	{
@@ -114,25 +114,25 @@ int main(int argc, char **argv)
 
 		if(bmp_load(argv[1], &buf, &w, 1, &h, bgr ? PF_BGR : PF_RGB,
 			BMPORN_TOPDOWN) == -1)
-			_throw(bmp_geterr());
+			THROW(bmp_geterr());
 		if(bmp_load(argv[1], &buf2, &w, 1, &h, bgr ? PF_BGR : PF_RGB,
 			BMPORN_TOPDOWN) == -1)
-			_throw(bmp_geterr());
+			THROW(bmp_geterr());
 		if(bmp_load(argv[1], &buf3, &w, 1, &h, bgr ? PF_BGR : PF_RGB,
 			BMPORN_TOPDOWN) == -1)
-			_throw(bmp_geterr());
+			THROW(bmp_geterr());
 		printf("Source image: %d x %d x %d-bit\n", w, h, d * 8);
 
 		if(!localtest)
 		{
-			if(!XInitThreads()) _throw("Could not initialize X threads");
-			if((dpy = XOpenDisplay(0)) == NULL) _throw("Could not open display");
+			if(!XInitThreads()) THROW("Could not initialize X threads");
+			if((dpy = XOpenDisplay(0)) == NULL) THROW("Could not open display");
 			if((win = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0, w, h, 0,
 				WhitePixel(dpy, DefaultScreen(dpy)),
 				BlackPixel(dpy, DefaultScreen(dpy)))) == 0)
-				_throw("Could not create window");
+				THROW("Could not create window");
 			printf("Creating window %lu\n", (unsigned long)win);
-			_errifnot(XMapRaised(dpy, win));
+			ERRIFNOT(XMapRaised(dpy, win));
 			XSync(dpy, False);
 			if(strlen(fconfig.client) == 0)
 				strncpy(fconfig.client, DisplayString(dpy), MAXSTR - 1);
@@ -155,7 +155,7 @@ int main(int argc, char **argv)
 		do
 		{
 			vglconn.synchronize();
-			_errifnot(f = vglconn.getFrame(w, h, bgr ? PF_BGR : PF_RGB, 0, false));
+			ERRIFNOT(f = vglconn.getFrame(w, h, bgr ? PF_BGR : PF_RGB, 0, false));
 			if(fill) memcpy(f->bits, buf, w * h * d);
 			else memcpy(f->bits, buf2, w * h * d);
 			f->hdr.qual = fconfig.qual;  f->hdr.subsamp = fconfig.subsamp;
@@ -173,7 +173,7 @@ int main(int argc, char **argv)
 		fill = 0, frames = 0;  int clientframes = 0;  timer.start();
 		do
 		{
-			_errifnot(f = vglconn.getFrame(w, h, bgr ? PF_BGR : PF_RGB, 0, false));
+			ERRIFNOT(f = vglconn.getFrame(w, h, bgr ? PF_BGR : PF_RGB, 0, false));
 			if(fill) memcpy(f->bits, buf, w * h * d);
 			else memcpy(f->bits, buf2, w * h * d);
 			f->hdr.qual = fconfig.qual;  f->hdr.subsamp = fconfig.subsamp;
@@ -194,7 +194,7 @@ int main(int argc, char **argv)
 		do
 		{
 			vglconn.synchronize();
-			_errifnot(f = vglconn.getFrame(w, h, bgr ? PF_BGR : PF_RGB, 0, false));
+			ERRIFNOT(f = vglconn.getFrame(w, h, bgr ? PF_BGR : PF_RGB, 0, false));
 			if(fill) memcpy(f->bits, buf, w * h * d);
 			else memcpy(f->bits, buf3, w * h * d);
 			f->hdr.qual = fconfig.qual;  f->hdr.subsamp = fconfig.subsamp;
@@ -213,7 +213,7 @@ int main(int argc, char **argv)
 		do
 		{
 			vglconn.synchronize();
-			_errifnot(f = vglconn.getFrame(w, h, bgr ? PF_BGR : PF_RGB, 0, false));
+			ERRIFNOT(f = vglconn.getFrame(w, h, bgr ? PF_BGR : PF_RGB, 0, false));
 			memcpy(f->bits, buf, w * h * d);
 			f->hdr.qual = fconfig.qual;  f->hdr.subsamp = fconfig.subsamp;
 			f->hdr.winid = win;  f->hdr.compress = fconfig.compress;

@@ -1,5 +1,5 @@
 // Copyright (C)2007 Sun Microsystems, Inc.
-// Copyright (C)2014, 2018 D. R. Commander
+// Copyright (C)2014, 2018-2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -40,11 +40,11 @@ namespace vglserver
 
 			void popup(Display *dpy_, int shmid_)
 			{
-				if(!dpy_ || shmid_ == -1) _throw("Invalid argument");
+				if(!dpy_ || shmid_ == -1) THROW("Invalid argument");
 				vglutil::CriticalSection::SafeLock l(popupMutex);
 				if(thread) return;
 				dpy = dpy_;  shmid = shmid_;
-				_newcheck(thread = new vglutil::Thread(this));
+				NEWCHECK(thread = new vglutil::Thread(this));
 				thread->start();
 			}
 
@@ -58,7 +58,7 @@ namespace vglserver
 					unsetenv("LD_PRELOAD_64");
 					sprintf(commandLine, "%s -display %s -shmid %d -ppid %d",
 						fconfig.config, DisplayString(dpy), shmid, (int)getpid());
-					if(system(commandLine) == -1) _throwunix();
+					if(system(commandLine) == -1) THROW_UNIX();
 				}
 				catch(vglutil::Error &e)
 				{
@@ -106,7 +106,7 @@ namespace vglserver
 }
 
 
-#define vglpopup(dpy, shmid) \
+#define VGLPOPUP(dpy, shmid) \
 	((*(vglconfigLauncher::getInstance())).popup(dpy, shmid))
 
 #endif  // __VGLCONFIGLAUNCHER_H__

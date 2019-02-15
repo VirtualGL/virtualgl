@@ -61,13 +61,13 @@ class Blitter : public Runnable
 		{
 			for(int i = 0; i < NFRAMES; i++)
 			{
-				if(useGL) { _newcheck(frames[i] = new GLFrame(dpy, win)); }
+				if(useGL) { NEWCHECK(frames[i] = new GLFrame(dpy, win)); }
 				#ifdef USEXV
-				else if(useXV) { _newcheck(frames[i] = new XVFrame(dpy, win)); }
+				else if(useXV) { NEWCHECK(frames[i] = new XVFrame(dpy, win)); }
 				#endif
-				else { _newcheck(frames[i] = new FBXFrame(dpy, win)); }
+				else { NEWCHECK(frames[i] = new FBXFrame(dpy, win)); }
 			}
-			_newcheck(thread = new Thread(this));
+			NEWCHECK(thread = new Thread(this));
 			thread->start();
 		}
 
@@ -143,7 +143,7 @@ class Blitter : public Runnable
 					mpixels += (double)(frame->hdr.width * frame->hdr.height) / 1000000.;
 					totalTime += timer.elapsed();
 					if(check && !checkFrame(frame))
-						_throw("Pixel data is bogus");
+						THROW("Pixel data is bogus");
 					frame->signalComplete();
 				}
 				fprintf(stderr, "Average Blitter performance = %f Mpixels/sec%s\n",
@@ -215,7 +215,7 @@ class Decompressor : public Runnable
 			blitter(blitter_), findex(0), deadYet(false), dpy(dpy_), win(win_),
 			myID(myID_), thread(NULL)
 		{
-			_newcheck(thread = new Thread(this));
+			NEWCHECK(thread = new Thread(this));
 			thread->start();
 		}
 
@@ -300,7 +300,7 @@ class Compressor : public Runnable
 			deadYet(false), thread(NULL), decompressor(decompressor_),
 			blitter(blitter_)
 		{
-			_newcheck(thread = new Thread(this));
+			NEWCHECK(thread = new Thread(this));
 			thread->start();
 		}
 
@@ -403,16 +403,16 @@ class FrameTest
 			blitter(NULL), myID(myID_)
 		{
 			this->dpy = dpy;
-			_errifnot(win = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy),
+			ERRIFNOT(win = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy),
 				myID * (MINW + BORDER * 2), 0, MINW + BORDER, MINW + BORDER, 0,
 				WhitePixel(dpy, DefaultScreen(dpy)),
 				BlackPixel(dpy, DefaultScreen(dpy))));
-			_errifnot(XMapRaised(dpy, win));
+			ERRIFNOT(XMapRaised(dpy, win));
 
-			_newcheck(blitter = new Blitter(dpy, win, myID));
+			NEWCHECK(blitter = new Blitter(dpy, win, myID));
 			if(!useXV)
-				_newcheck(decompressor = new Decompressor(blitter, dpy, win, myID));
-			_newcheck(compressor = new Compressor(decompressor, blitter));
+				NEWCHECK(decompressor = new Decompressor(blitter, dpy, win, myID));
+			NEWCHECK(compressor = new Compressor(decompressor, blitter));
 		}
 
 		~FrameTest(void) { shutdown();  XDestroyWindow(dpy, win); }
@@ -551,7 +551,7 @@ void rgbBench(char *filename)
 		{
 			if(bmp_load(filename, &buf, &width, 1, &height, PF_RGB,
 				BMPORN_BOTTOMUP) == -1)
-				_throw(bmp_geterr());
+				THROW(bmp_geterr());
 			rrframeheader hdr;
 			memset(&hdr, 0, sizeof(hdr));
 			hdr.width = hdr.framew = width;
@@ -566,9 +566,9 @@ void rgbBench(char *filename)
 			double tStart, tTotal = 0.;  int iter = 0;
 			do
 			{
-				tStart = getTime();
+				tStart = GetTime();
 				dst.decompressRGB(src, width, height, false);
-				tTotal += getTime() - tStart;  iter++;
+				tTotal += GetTime() - tStart;  iter++;
 			} while(tTotal < 1.);
 			fprintf(stderr, "%f Mpixels/sec - ", (double)width * (double)height *
 				(double)iter / 1000000. / tTotal);
@@ -642,7 +642,7 @@ int main(int argc, char **argv)
 	{
 		if(doRgbBench) { rgbBench(fileName);  exit(0); }
 
-		_errifnot(XInitThreads());
+		ERRIFNOT(XInitThreads());
 		if(!(dpy = XOpenDisplay(0)))
 		{
 			fprintf(stderr, "Could not open display %s\n", XDisplayName(0));
@@ -661,7 +661,7 @@ int main(int argc, char **argv)
 
 			for(i = 0; i < NUMWIN; i++)
 			{
-				_newcheck(test[i] = new FrameTest(dpy, i));
+				NEWCHECK(test[i] = new FrameTest(dpy, i));
 			}
 
 			for(w = MINW; w <= MAXW; w += 33)

@@ -1,5 +1,5 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
- * Copyright (C)2011, 2013-2015, 2017-2018 D. R. Commander
+ * Copyright (C)2011, 2013-2015, 2017-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -28,14 +28,14 @@
 #include "vglutil.h"
 
 
-#define _throw(m) \
+#define THROW(m) \
 { \
 	fprintf(stderr, "ERROR in line %d:\n%s\n", __LINE__,  m); \
 	retval = -1; \
 	goto bailout; \
 }
 
-#define _catch(f) \
+#define CATCH(f) \
 { \
 	if((f) == -1) \
 	{ \
@@ -44,7 +44,7 @@
 	} \
 }
 
-#define np2(i)  ((i) > 0 ? (1 << (int)(log((double)(i)) / log(2.))) : 0)
+#define NP2(i)  ((i) > 0 ? (1 << (int)(log((double)(i)) / log(2.))) : 0)
 
 #define SPHERE_RED(f)  fabs(MAXI * (2. * f - 1.))
 #define SPHERE_GREEN(f)  fabs(MAXI * (2. * fmod(f + 2. / 3., 1.) - 1.))
@@ -92,8 +92,8 @@ int setColorScheme(Colormap cmap, int nColors, int bpc, int scheme)
 {
 	XColor xc[1024];  int i, maxColors = (1 << bpc), retval = 0;
 
-	if(!nColors || !cmap) _throw("Color map not allocated");
-	if(scheme < 0 || scheme > NSCHEMES - 1 || !cmap) _throw("Invalid argument");
+	if(!nColors || !cmap) THROW("Color map not allocated");
+	if(scheme < 0 || scheme > NSCHEMES - 1 || !cmap) THROW("Invalid argument");
 
 	for(i = 0; i < nColors; i++)
 	{
@@ -270,7 +270,7 @@ int renderOverlay(void)
 	if(w && h)
 	{
 		if((buf = (unsigned char *)malloc(w * h)) == NULL)
-			_throw("Could not allocate memory");
+			THROW("Could not allocate memory");
 		for(i = 0; i < h; i++)
 			for(j = 0; j < w; j++)
 			{
@@ -309,7 +309,7 @@ int display(int advance)
 
 		sphereList = glGenLists(1);
 		if(!(sphereQuad = gluNewQuadric()))
-			_throw("Could not allocate GLU quadric object");
+			THROW("Could not allocate GLU quadric object");
 		glNewList(sphereList, GL_COMPILE);
 		gluSphere(sphereQuad, 1.3, slices, stacks);
 		glEndList();
@@ -347,7 +347,7 @@ int display(int advance)
 			glXMakeCurrent(dpy, olWin, olCtx);
 		}
 		if(!(fontInfo = XLoadQueryFont(dpy, "fixed")))
-			_throw("Could not load X font");
+			THROW("Could not load X font");
 		minChar = fontInfo->min_char_or_byte2;
 		maxChar = fontInfo->max_char_or_byte2;
 		fontListBase = glGenLists(maxChar + 1);
@@ -366,9 +366,9 @@ int display(int advance)
 		if(z < -29.)
 		{
 			if(useDC || useOverlay) colorScheme = (colorScheme + 1) % NSCHEMES;
-			if(useDC) _catch(setColorScheme(colormap, nColors, bpc, colorScheme));
+			if(useDC) CATCH(setColorScheme(colormap, nColors, bpc, colorScheme));
 			if(useOverlay)
-				_catch(setColorScheme(olColormap, nOlColors, 8, colorScheme));
+				CATCH(setColorScheme(olColormap, nOlColors, 8, colorScheme));
 			z = -3.5;
 		}
 		outerAngle += 0.1;  if(outerAngle > 360.) outerAngle -= 360.;
@@ -388,7 +388,7 @@ int display(int advance)
 	if(useOverlay)
 	{
 		glXMakeCurrent(dpy, olWin, olCtx);
-		_catch(renderOverlay());
+		CATCH(renderOverlay());
 	}
 	else glPushAttrib(GL_CURRENT_BIT);
 	glPushAttrib(GL_LIST_BIT);
@@ -417,7 +417,7 @@ int display(int advance)
 
 	if(start > 0.)
 	{
-		elapsed += getTime() - start;  frames++;  totalFrames++;
+		elapsed += GetTime() - start;  frames++;  totalFrames++;
 		mpixels += (double)width * (double)height / 1000000.;
 		if(elapsed > benchTime || (maxFrames && totalFrames > maxFrames))
 		{
@@ -432,7 +432,7 @@ int display(int advance)
 		deadYet = 1;  goto bailout;
 	}
 
-	start = getTime();
+	start = GetTime();
 	return 0;
 
 	bailout:
@@ -495,10 +495,10 @@ int eventLoop(Display *dpy)
 				if(XPending(dpy) <= 0) break;
 			}
 		}
-		if(!interactive) { _catch(display(1)); }
+		if(!interactive) { CATCH(display(1)); }
 		else
 		{
-			if(doDisplay) { _catch(display(advance)); }
+			if(doDisplay) { CATCH(display(advance)); }
 		}
 	}
 
@@ -624,7 +624,7 @@ int main(int argc, char **argv)
 	fprintf(stderr, "Polygons in scene: %d (%d spheres * %d polys/spheres)\n",
 		(spheres * 3 + 1) * pps, spheres * 3 + 1, pps);
 
-	if((dpy = XOpenDisplay(0)) == NULL) _throw("Could not open display");
+	if((dpy = XOpenDisplay(0)) == NULL) THROW("Could not open display");
 	if(screen < 0) screen = DefaultScreen(dpy);
 
 	if(DefaultDepth(dpy, DefaultScreen(dpy)) == 30)
@@ -640,9 +640,9 @@ int main(int argc, char **argv)
 
 	c = glXChooseFBConfig(dpy, screen, rgbAttribs, &n);
 	if(!c || n < 1)
-		_throw("Could not obtain RGB visual with requested properties");
+		THROW("Could not obtain RGB visual with requested properties");
 	if((v = glXGetVisualFromFBConfig(dpy, c[0])) == NULL)
-		_throw("Could not obtain RGB visual with requested properties");
+		THROW("Could not obtain RGB visual with requested properties");
 	XFree(c);  c = NULL;
 	fprintf(stderr, "Visual ID of %s: 0x%.2x\n",
 		useOverlay ? "underlay" : "window", (int)v->visualid);
@@ -654,12 +654,12 @@ int main(int argc, char **argv)
 	if(useDC)
 	{
 		swa.colormap = colormap = XCreateColormap(dpy, root, v->visual, AllocAll);
-		nColors = np2(v->colormap_size);
-		if(nColors < 32) _throw("Color map is not large enough");
+		nColors = NP2(v->colormap_size);
+		if(nColors < 32) THROW("Color map is not large enough");
 		rshift = 0;  while((v->red_mask & (1 << rshift)) == 0) rshift++;
 		gshift = 0;  while((v->green_mask & (1 << gshift)) == 0) gshift++;
 		bshift = 0;  while((v->blue_mask & (1 << bshift)) == 0) bshift++;
-		_catch(setColorScheme(colormap, nColors, bpc, colorScheme));
+		CATCH(setColorScheme(colormap, nColors, bpc, colorScheme));
 	}
 	else swa.colormap = XCreateColormap(dpy, root, v->visual, AllocNone);
 
@@ -673,12 +673,12 @@ int main(int argc, char **argv)
 		height = DisplayHeight(dpy, screen);
 	}
 	if(!(protoAtom = XInternAtom(dpy, "WM_PROTOCOLS", False)))
-		_throw("Cannot obtain WM_PROTOCOLS atom");
+		THROW("Cannot obtain WM_PROTOCOLS atom");
 	if(!(deleteAtom = XInternAtom(dpy, "WM_DELETE_WINDOW", False)))
-		_throw("Cannot obtain WM_DELETE_WINDOW atom");
+		THROW("Cannot obtain WM_DELETE_WINDOW atom");
 	if((win = XCreateWindow(dpy, root, 0, 0, width, height, 0, v->depth,
 		InputOutput, v->visual, mask, &swa)) == 0)
-		_throw("Could not create window");
+		THROW("Could not create window");
 	XSetWMProtocols(dpy, win, &deleteAtom, 1);
 	XStoreName(dpy, win, "GLX Spheres");
 	XMapWindow(dpy, win);
@@ -690,7 +690,7 @@ int main(int argc, char **argv)
 	XSync(dpy, False);
 
 	if((ctx = glXCreateContext(dpy, v, NULL, directCtx)) == 0)
-		_throw("Could not create rendering context");
+		THROW("Could not create rendering context");
 	fprintf(stderr, "Context is %s\n",
 		glXIsDirect(dpy, ctx) ? "Direct" : "Indirect");
 	XFree(v);  v = NULL;
@@ -701,26 +701,26 @@ int main(int argc, char **argv)
 		{
 			olAttribs[6] = None;  olDB = 0;
 			if((v = glXChooseVisual(dpy, screen, olAttribs)) == NULL)
-				_throw("Could not obtain overlay visual");
+				THROW("Could not obtain overlay visual");
 		}
 		fprintf(stderr, "Visual ID of overlay: 0x%.2x\n", (int)v->visualid);
 
 		swa.colormap = olColormap =
 			XCreateColormap(dpy, root, v->visual, AllocAll);
-		nOlColors = np2(v->colormap_size);
-		if(nOlColors < 32) _throw("Color map is not large enough");
+		nOlColors = NP2(v->colormap_size);
+		if(nOlColors < 32) THROW("Color map is not large enough");
 
-		_catch(setColorScheme(olColormap, nOlColors, 256, colorScheme));
+		CATCH(setColorScheme(olColormap, nOlColors, 256, colorScheme));
 
 		if((olWin = XCreateWindow(dpy, win, 0, 0, width, height, 0, v->depth,
 			InputOutput, v->visual, CWBorderPixel | CWColormap | CWEventMask,
 			&swa)) == 0)
-			_throw("Could not create overlay window");
+			THROW("Could not create overlay window");
 		XMapWindow(dpy, olWin);
 		XSync(dpy, False);
 
 		if((olCtx = glXCreateContext(dpy, v, NULL, directCtx)) == 0)
-			_throw("Could not create overlay rendering context");
+			THROW("Could not create overlay rendering context");
 		fprintf(stderr, "Overlay context is %s\n",
 			glXIsDirect(dpy, olCtx) ? "Direct" : "Indirect");
 
@@ -728,11 +728,11 @@ int main(int argc, char **argv)
 	}
 
 	if(!glXMakeCurrent(dpy, win, ctx))
-		_throw("Could not bind rendering context");
+		THROW("Could not bind rendering context");
 
 	fprintf(stderr, "OpenGL Renderer: %s\n", glGetString(GL_RENDERER));
 
-	_catch(eventLoop(dpy));
+	CATCH(eventLoop(dpy));
 
 	bailout:
 	if(v) XFree(v);

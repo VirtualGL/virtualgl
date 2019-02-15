@@ -48,7 +48,7 @@ int XCloseDisplay(Display *dpy)
 	int retval = 0;
 	TRY();
 
-		opentrace(XCloseDisplay);  prargd(dpy);  starttrace();
+		OPENTRACE(XCloseDisplay);  PRARGD(dpy);  STARTTRACE();
 
 	#ifdef FAKEXCB
 	if(fconfig.fakeXCB)
@@ -72,7 +72,7 @@ int XCloseDisplay(Display *dpy)
 	dpyhash.remove(dpy);
 	retval = _XCloseDisplay(dpy);
 
-		stoptrace();  closetrace();
+		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
 	return retval;
@@ -86,7 +86,7 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 {
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _XCopyArea(dpy, src, dst, gc, src_x, src_y, width, height, dest_x,
 			dest_y);
 
@@ -97,9 +97,9 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 
 	if(src == 0 || dst == 0) return BadDrawable;
 
-		opentrace(XCopyArea);  prargd(dpy);  prargx(src);  prargx(dst);
-		prargx(gc);  prargi(src_x);  prargi(src_y);  prargi(width);
-		prargi(height);  prargi(dest_x);  prargi(dest_y);  starttrace();
+		OPENTRACE(XCopyArea);  PRARGD(dpy);  PRARGX(src);  PRARGX(dst);
+		PRARGX(gc);  PRARGI(src_x);  PRARGI(src_y);  PRARGI(width);
+		PRARGI(height);  PRARGI(dest_x);  PRARGI(dest_y);  STARTTRACE();
 
 	if(!(srcVW = (VirtualDrawable *)pmhash.find(dpy, src)))
 	{
@@ -173,8 +173,8 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 			((VirtualWin *)dstVW)->readback(GL_FRONT, false, fconfig.sync);
 	}
 
-		stoptrace();  if(copy3d) prargx(glxsrc);  if(copy3d) prargx(glxdst);
-		closetrace();
+		STOPTRACE();  if(copy3d) PRARGX(glxsrc);  if(copy3d) PRARGX(glxdst);
+		CLOSETRACE();
 
 	CATCH();
 	return 0;
@@ -202,18 +202,18 @@ Window XCreateSimpleWindow(Display *dpy, Window parent, int x, int y,
 	Window win = 0;
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _XCreateSimpleWindow(dpy, parent, x, y, width, height, border_width,
 			border, background);
 
-		opentrace(XCreateSimpleWindow);  prargd(dpy);  prargx(parent);  prargi(x);
-		prargi(y);  prargi(width);  prargi(height);  starttrace();
+		OPENTRACE(XCreateSimpleWindow);  PRARGD(dpy);  PRARGX(parent);  PRARGI(x);
+		PRARGI(y);  PRARGI(width);  PRARGI(height);  STARTTRACE();
 
 	win = _XCreateSimpleWindow(dpy, parent, x, y, width, height, border_width,
 		border, background);
 	if(win) winhash.add(dpy, win);
 
-		stoptrace();  prargx(win);  closetrace();
+		STOPTRACE();  PRARGX(win);  CLOSETRACE();
 
 	CATCH();
 	return win;
@@ -228,19 +228,19 @@ Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 	Window win = 0;
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _XCreateWindow(dpy, parent, x, y, width, height, border_width,
 			depth, c_class, visual, valuemask, attributes);
 
-		opentrace(XCreateWindow);  prargd(dpy);  prargx(parent);  prargi(x);
-		prargi(y);  prargi(width);  prargi(height);  prargi(depth);
-		prargi(c_class);  prargv(visual);  starttrace();
+		OPENTRACE(XCreateWindow);  PRARGD(dpy);  PRARGX(parent);  PRARGI(x);
+		PRARGI(y);  PRARGI(width);  PRARGI(height);  PRARGI(depth);
+		PRARGI(c_class);  PRARGV(visual);  STARTTRACE();
 
 	win = _XCreateWindow(dpy, parent, x, y, width, height, border_width, depth,
 		c_class, visual, valuemask, attributes);
 	if(win) winhash.add(dpy, win);
 
-		stoptrace();  prargx(win);  closetrace();
+		STOPTRACE();  PRARGX(win);  CLOSETRACE();
 
 	CATCH();
 	return win;
@@ -270,15 +270,15 @@ int XDestroySubwindows(Display *dpy, Window win)
 	int retval = 0;
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _XDestroySubwindows(dpy, win);
 
-		opentrace(XDestroySubwindows);  prargd(dpy);  prargx(win);  starttrace();
+		OPENTRACE(XDestroySubwindows);  PRARGD(dpy);  PRARGX(win);  STARTTRACE();
 
 	if(dpy && win) DeleteWindow(dpy, win, true);
 	retval = _XDestroySubwindows(dpy, win);
 
-		stoptrace();  closetrace();
+		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
 	return retval;
@@ -290,15 +290,15 @@ int XDestroyWindow(Display *dpy, Window win)
 	int retval = 0;
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _XDestroyWindow(dpy, win);
 
-		opentrace(XDestroyWindow);  prargd(dpy);  prargx(win);  starttrace();
+		OPENTRACE(XDestroyWindow);  PRARGD(dpy);  PRARGX(win);  STARTTRACE();
 
 	if(dpy && win) DeleteWindow(dpy, win);
 	retval = _XDestroyWindow(dpy, win);
 
-		stoptrace();  closetrace();
+		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
 	return retval;
@@ -333,11 +333,11 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 	unsigned int width = 0, height = 0;
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _XGetGeometry(dpy, drawable, root, x, y, width_return,
 			height_return, border_width, depth);
 
-		opentrace(XGetGeometry);  prargd(dpy);  prargx(drawable);  starttrace();
+		OPENTRACE(XGetGeometry);  PRARGD(dpy);  PRARGX(drawable);  STARTTRACE();
 
 	VirtualWin *vw = NULL;
 	if(winhash.find(drawable, vw))
@@ -353,9 +353,9 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 	if(winhash.find(dpy, drawable, vw) && width > 0 && height > 0)
 		vw->resize(width, height);
 
-		stoptrace();  if(root) prargx(*root);  if(x) prargi(*x);  if(y) prargi(*y);
-		prargi(width);  prargi(height);  if(border_width) prargi(*border_width);
-		if(depth) prargi(*depth);  closetrace();
+		STOPTRACE();  if(root) PRARGX(*root);  if(x) PRARGI(*x);  if(y) PRARGI(*y);
+		PRARGI(width);  PRARGI(height);  if(border_width) PRARGI(*border_width);
+		if(depth) PRARGI(*depth);  CLOSETRACE();
 
 	if(width_return) *width_return = width;
 	if(height_return) *height_return = height;
@@ -376,19 +376,19 @@ XImage *XGetImage(Display *dpy, Drawable drawable, int x, int y,
 	XImage *xi = NULL;
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _XGetImage(dpy, drawable, x, y, width, height, plane_mask, format);
 
-		opentrace(XGetImage);  prargd(dpy);  prargx(drawable);  prargi(x);
-		prargi(y);  prargi(width);  prargi(height);  prargx(plane_mask);
-		prargi(format);  starttrace();
+		OPENTRACE(XGetImage);  PRARGD(dpy);  PRARGX(drawable);  PRARGI(x);
+		PRARGI(y);  PRARGI(width);  PRARGI(height);  PRARGX(plane_mask);
+		PRARGI(format);  STARTTRACE();
 
 	VirtualPixmap *vpm = pmhash.find(dpy, drawable);
 	if(vpm) vpm->readback();
 
 	xi = _XGetImage(dpy, drawable, x, y, width, height, plane_mask, format);
 
-		stoptrace();  closetrace();
+		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
 	return xi;
@@ -404,10 +404,10 @@ char **XListExtensions(Display *dpy, int *next)
 
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _XListExtensions(dpy, next);
 
-		opentrace(XListExtensions);  prargd(dpy);  starttrace();
+		OPENTRACE(XListExtensions);  PRARGD(dpy);  STARTTRACE();
 
 	list = _XListExtensions(dpy, &n);
 	if(list && n > 0)
@@ -425,8 +425,8 @@ char **XListExtensions(Display *dpy, int *next)
 	{
 		char **newList = NULL;  int index = 0;
 		listLen += 4;  // "GLX" + terminating NULL
-		_errifnot(newList = (char **)malloc(sizeof(char *) * (n + 1)))
-		_errifnot(listStr = (char *)malloc(listLen + 1))
+		ERRIFNOT(newList = (char **)malloc(sizeof(char *) * (n + 1)))
+		ERRIFNOT(listStr = (char *)malloc(listLen + 1))
 		memset(listStr, 0, listLen + 1);
 		listStr = &listStr[1];  // For compatibility with X.org implementation
 		if(list && n > 0)
@@ -448,7 +448,7 @@ char **XListExtensions(Display *dpy, int *next)
 		list = newList;  n++;
 	}
 
-		stoptrace();  prargi(n);  closetrace();
+		STOPTRACE();  PRARGI(n);  CLOSETRACE();
 
 	CATCH();
 
@@ -469,7 +469,7 @@ Display *XOpenDisplay(_Xconst char *name)
 	if(vglfaker::deadYet || vglfaker::getFakerLevel() > 0)
 		return _XOpenDisplay(name);
 
-		opentrace(XOpenDisplay);  prargs(name);  starttrace();
+		OPENTRACE(XOpenDisplay);  PRARGS(name);  STARTTRACE();
 
 	vglfaker::init();
 	dpy = _XOpenDisplay(name);
@@ -488,7 +488,7 @@ Display *XOpenDisplay(_Xconst char *name)
 		}
 	}
 
-		stoptrace();  prargd(dpy);  closetrace();
+		STOPTRACE();  PRARGD(dpy);  CLOSETRACE();
 
 	CATCH();
 	return dpy;
@@ -502,17 +502,17 @@ Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
 {
 	Bool retval = True;
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _XQueryExtension(dpy, name, major_opcode, first_event, first_error);
 
-		opentrace(XQueryExtension);  prargd(dpy);  prargs(name);  starttrace();
+		OPENTRACE(XQueryExtension);  PRARGD(dpy);  PRARGS(name);  STARTTRACE();
 
 	retval = _XQueryExtension(dpy, name, major_opcode, first_event, first_error);
 	if(!strcmp(name, "GLX")) retval = True;
 
-		stoptrace();  if(major_opcode) prargi(*major_opcode);
-		if(first_event) prargi(*first_event);
-		if(first_error) prargi(*first_error);  closetrace();
+		STOPTRACE();  if(major_opcode) PRARGI(*major_opcode);
+		if(first_event) PRARGI(*first_event);
+		if(first_error) PRARGI(*first_error);  CLOSETRACE();
 
 	return retval;
 }
@@ -526,7 +526,7 @@ char *XServerVendor(Display *dpy)
 {
 	TRY();
 
-	if(isExcluded(dpy) || !strlen(fconfig.vendor))
+	if(IS_EXCLUDED(dpy) || !strlen(fconfig.vendor))
 		return _XServerVendor(dpy);
 	return fconfig.vendor;
 
@@ -544,20 +544,20 @@ static void handleEvent(Display *dpy, XEvent *xe)
 {
 	VirtualWin *vw = NULL;
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return;
 
 	if(xe && xe->type == ConfigureNotify)
 	{
 		if(winhash.find(dpy, xe->xconfigure.window, vw))
 		{
-				opentrace(handleEvent);  prargi(xe->xconfigure.width);
-				prargi(xe->xconfigure.height);  prargx(xe->xconfigure.window);
-				starttrace();
+				OPENTRACE(handleEvent);  PRARGI(xe->xconfigure.width);
+				PRARGI(xe->xconfigure.height);  PRARGX(xe->xconfigure.window);
+				STARTTRACE();
 
 			vw->resize(xe->xconfigure.width, xe->xconfigure.height);
 
-				stoptrace();  closetrace();
+				STOPTRACE();  CLOSETRACE();
 		}
 	}
 	else if(xe && xe->type == KeyPress)
@@ -572,7 +572,7 @@ static void handleEvent(Display *dpy, XEvent *xe)
 			&& KeycodeToKeysym(dpy, xe->xkey.keycode, 0) == fconfig.guikey
 			&& (state == fconfig.guimod || state == state2)
 			&& fconfig_getshmid() != -1)
-			vglpopup(dpy, fconfig_getshmid());
+			VGLPOPUP(dpy, fconfig_getshmid());
 	}
 	else if(xe && xe->type == ClientMessage)
 	{
@@ -646,13 +646,13 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 	int retval = 0;
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _XConfigureWindow(dpy, win, value_mask, values);
 
-		opentrace(XConfigureWindow);  prargd(dpy);  prargx(win);
-		if(values && (value_mask & CWWidth)) { prargi(values->width); }
-		if(values && (value_mask & CWHeight)) { prargi(values->height); }
-		starttrace();
+		OPENTRACE(XConfigureWindow);  PRARGD(dpy);  PRARGX(win);
+		if(values && (value_mask & CWWidth)) { PRARGI(values->width); }
+		if(values && (value_mask & CWHeight)) { PRARGI(values->height); }
+		STARTTRACE();
 
 	VirtualWin *vw = NULL;
 	if(winhash.find(dpy, win, vw) && values)
@@ -660,7 +660,7 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 			value_mask & CWHeight ? values->height : 0);
 	retval = _XConfigureWindow(dpy, win, value_mask, values);
 
-		stoptrace();  closetrace();
+		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
 	return retval;
@@ -686,17 +686,17 @@ int XMoveResizeWindow(Display *dpy, Window win, int x, int y,
 	int retval = 0;
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _XMoveResizeWindow(dpy, win, x, y, width, height);
 
-		opentrace(XMoveResizeWindow);  prargd(dpy);  prargx(win);  prargi(x);
-		prargi(y);  prargi(width);  prargi(height);  starttrace();
+		OPENTRACE(XMoveResizeWindow);  PRARGD(dpy);  PRARGX(win);  PRARGI(x);
+		PRARGI(y);  PRARGI(width);  PRARGI(height);  STARTTRACE();
 
 	VirtualWin *vw = NULL;
 	if(winhash.find(dpy, win, vw)) vw->resize(width, height);
 	retval = _XMoveResizeWindow(dpy, win, x, y, width, height);
 
-		stoptrace();  closetrace();
+		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
 	return retval;
@@ -722,17 +722,17 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width,
 	int retval = 0;
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _XResizeWindow(dpy, win, width, height);
 
-		opentrace(XResizeWindow);  prargd(dpy);  prargx(win);  prargi(width);
-		prargi(height);  starttrace();
+		OPENTRACE(XResizeWindow);  PRARGD(dpy);  PRARGX(win);  PRARGI(width);
+		PRARGI(height);  STARTTRACE();
 
 	VirtualWin *vw = NULL;
 	if(winhash.find(dpy, win, vw)) vw->resize(width, height);
 	retval = _XResizeWindow(dpy, win, width, height);
 
-		stoptrace();  closetrace();
+		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
 	return retval;

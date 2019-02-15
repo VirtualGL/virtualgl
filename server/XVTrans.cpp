@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009-2011, 2014 D. R. Commander
+// Copyright (C)2009-2011, 2014, 2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -26,7 +26,7 @@ using namespace vglserver;
 XVTrans::XVTrans(void) : thread(NULL), deadYet(false)
 {
 	for(int i = 0; i < NFRAMES; i++) frames[i] = NULL;
-	_newcheck(thread = new Thread(this));
+	NEWCHECK(thread = new Thread(this));
 	thread->start();
 	profXV.setName("XV        ");
 	profTotal.setName("Total     ");
@@ -102,9 +102,9 @@ XVFrame *XVTrans::getFrame(Display *dpy, Window win, int width, int height)
 		for(int i = 0; i < NFRAMES; i++)
 			if(!frames[i] || (frames[i] && frames[i]->isComplete()))
 				index = i;
-		if(index < 0) _throw("No free buffers in pool");
+		if(index < 0) THROW("No free buffers in pool");
 		if(!frames[index])
-			_newcheck(frames[index] = new XVFrame(dpy, win));
+			NEWCHECK(frames[index] = new XVFrame(dpy, win));
 		f = frames[index];  f->waitUntilComplete();
 	}
 

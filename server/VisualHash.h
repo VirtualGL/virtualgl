@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2011, 2014 D. R. Commander
+// Copyright (C)2011, 2014, 2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -44,7 +44,7 @@ namespace vglserver
 
 			void add(Display *dpy, XVisualInfo *vis, GLXFBConfig config)
 			{
-				if(!dpy || !vis || !config) _throw("Invalid argument");
+				if(!dpy || !vis || !config) THROW("Invalid argument");
 				char *dpystring = strdup(DisplayString(dpy));
 				if(!HASH::add(dpystring, vis, config))
 					free(dpystring);
@@ -52,19 +52,19 @@ namespace vglserver
 
 			GLXFBConfig getConfig(Display *dpy, XVisualInfo *vis)
 			{
-				if(!dpy || !vis) _throw("Invalid argument");
+				if(!dpy || !vis) THROW("Invalid argument");
 				return HASH::find(DisplayString(dpy), vis);
 			}
 
 			void remove(Display *dpy, XVisualInfo *vis)
 			{
-				if(!vis) _throw("Invalid argument");
+				if(!vis) THROW("Invalid argument");
 				HASH::remove(dpy ? DisplayString(dpy) : NULL, vis);
 			}
 
 			GLXFBConfig mostRecentConfig(Display *dpy, XVisualInfo *vis)
 			{
-				if(!dpy || !vis) _throw("Invalid argument");
+				if(!dpy || !vis) THROW("Invalid argument");
 				HashEntry *ptr = NULL;
 				vglutil::CriticalSection::SafeLock l(mutex);
 				ptr = end;

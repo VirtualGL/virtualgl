@@ -24,10 +24,10 @@ static int checkWindowColor(Display *dpy, Window win, unsigned int color)
 	_vgl_getAutotestColor =
 		(_vgl_getAutotestColorType)dlsym(RTLD_DEFAULT, "_vgl_getAutotestColor");
 	if(!_vgl_getAutotestColor)
-		_throw("Can't communicate w/ faker");
+		THROW("Can't communicate w/ faker");
 	fakerColor = _vgl_getAutotestColor(dpy, win, 0);
 	if(fakerColor < 0 || fakerColor > 0xffffff)
-		_throw("Bogus data read back");
+		THROW("Bogus data read back");
 	if((unsigned int)fakerColor != color)
 	{
 		fprintf(stderr, "Color is 0x%.6x, should be 0x%.6x", fakerColor, color);
@@ -49,10 +49,10 @@ static int checkFrame(Display *dpy, Window win, int desiredReadbacks,
 	_vgl_getAutotestFrame =
 		(_vgl_getAutotestFrameType)dlsym(RTLD_DEFAULT, "_vgl_getAutotestFrame");
 	if(!_vgl_getAutotestFrame)
-		_throw("Can't communicate w/ faker");
+		THROW("Can't communicate w/ faker");
 	frame = _vgl_getAutotestFrame(dpy, win);
 	if(frame < 1)
-		_throw("Can't communicate w/ faker");
+		THROW("Can't communicate w/ faker");
 	if(frame - (*lastFrame) != desiredReadbacks && desiredReadbacks >= 0)
 	{
 		fprintf(stderr, "Expected %d readback%s, not %d", desiredReadbacks,
@@ -77,12 +77,12 @@ int test(const char *testName)
 
 	fprintf(stderr, "%s:\n", testName);
 
-	if(!(dpy = XOpenDisplay(0))) _throw("Could not open display");
+	if(!(dpy = XOpenDisplay(0))) THROW("Could not open display");
 	dpyw = DisplayWidth(dpy, DefaultScreen(dpy));
 	dpyh = DisplayHeight(dpy, DefaultScreen(dpy));
 
 	if((v = _glXChooseVisual(dpy, DefaultScreen(dpy), glxattribs)) == NULL)
-		_throw("Could not find a suitable visual");
+		THROW("Could not find a suitable visual");
 
 	root = RootWindow(dpy, DefaultScreen(dpy));
 	swa.colormap = XCreateColormap(dpy, root, v->visual, AllocNone);
@@ -91,20 +91,20 @@ int test(const char *testName)
 	if((win = XCreateWindow(dpy, root, 0, 0, dpyw / 2, dpyh / 2, 0, v->depth,
 		InputOutput, v->visual, CWBorderPixel | CWColormap | CWEventMask,
 		&swa)) == 0)
-		_throw("Could not create window");
+		THROW("Could not create window");
 	XMapWindow(dpy, win);
 
 	if((ctx = _glXCreateContext(dpy, v, 0, True)) == NULL)
-		_throw("Could not establish GLX context");
+		THROW("Could not establish GLX context");
 	XFree(v);  v = NULL;
 	if(!_glXMakeCurrent(dpy, win, ctx))
-		_throw("Could not make context current");
+		THROW("Could not make context current");
 
 	_glClearColor(1., 0., 0., 0.);
 	_glClear(GL_COLOR_BUFFER_BIT);
 	_glXSwapBuffers(dpy, win);
-	_try(checkFrame(dpy, win, 1, &lastFrame));
-	_try(checkWindowColor(dpy, win, 0x0000ff));
+	TRY(checkFrame(dpy, win, 1, &lastFrame));
+	TRY(checkWindowColor(dpy, win, 0x0000ff));
 	printf("SUCCESS\n");
 
 	bailout:

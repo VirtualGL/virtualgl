@@ -28,7 +28,7 @@ using namespace vglutil;
 using namespace vglserver;
 
 
-#define CHECKGL(m)  if(glError()) _throw("Could not " m);
+#define CHECKGL(m)  if(glError()) THROW("Could not " m);
 
 // Generic OpenGL error checker (0 = no errors)
 static int glError(void)
@@ -73,14 +73,14 @@ VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_,
 	width(width_), height(height_), depth(0), config(config_), glFormat(0),
 	pm(0), win(0), isPixmap(false)
 {
-	if(!config_ || width_ < 1 || height_ < 1) _throw("Invalid argument");
+	if(!config_ || width_ < 1 || height_ < 1) THROW("Invalid argument");
 
 	int pbattribs[] = { GLX_PBUFFER_WIDTH, 0, GLX_PBUFFER_HEIGHT, 0,
 		GLX_PRESERVED_CONTENTS, True, None };
 
 	pbattribs[1] = width;  pbattribs[3] = height;
-	glxDraw = _glXCreatePbuffer(_dpy3D, config, pbattribs);
-	if(!glxDraw) _throw("Could not create Pbuffer");
+	glxDraw = _glXCreatePbuffer(DPY3D, config, pbattribs);
+	if(!glxDraw) THROW("Could not create Pbuffer");
 
 	setVisAttribs();
 }
@@ -94,18 +94,18 @@ VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_, int depth_,
 	glFormat(0), pm(0), win(0), isPixmap(true)
 {
 	if(!config_ || width_ < 1 || height_ < 1 || depth_ < 0)
-		_throw("Invalid argument");
+		THROW("Invalid argument");
 
 	XVisualInfo *vis = NULL;
-	if((vis = _glXGetVisualFromFBConfig(_dpy3D, config)) == NULL)
+	if((vis = _glXGetVisualFromFBConfig(DPY3D, config)) == NULL)
 		goto bailout;
-	win = create_window(_dpy3D, vis, 1, 1);
+	win = create_window(DPY3D, vis, 1, 1);
 	if(!win) goto bailout;
-	pm = XCreatePixmap(_dpy3D, win, width, height,
+	pm = XCreatePixmap(DPY3D, win, width, height,
 		depth > 0 ? depth : vis->depth);
 	if(!pm) goto bailout;
 	XFree(vis);
-	glxDraw = _glXCreatePixmap(_dpy3D, config, pm, attribs);
+	glxDraw = _glXCreatePixmap(DPY3D, config, pm, attribs);
 	if(!glxDraw) goto bailout;
 
 	setVisAttribs();
@@ -113,7 +113,7 @@ VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_, int depth_,
 
 	bailout:
 	if(vis) XFree(vis);
-	_throw("Could not create GLX pixmap");
+	THROW("Could not create GLX pixmap");
 }
 
 
@@ -128,12 +128,12 @@ void VirtualDrawable::OGLDrawable::setVisAttribs(void)
 
 	if(pixelsize == 32)
 	{
-		if(littleendian()) glFormat = GL_BGRA;
+		if(LittleEndian()) glFormat = GL_BGRA;
 		else glFormat = GL_RGBA;
 	}
 	else
 	{
-		if(littleendian()) glFormat = GL_BGR;
+		if(LittleEndian()) glFormat = GL_BGR;
 		else glFormat = GL_RGB;
 	}
 }
@@ -145,15 +145,15 @@ VirtualDrawable::OGLDrawable::~OGLDrawable(void)
 	{
 		if(glxDraw)
 		{
-			_glXDestroyPixmap(_dpy3D, glxDraw);
+			_glXDestroyPixmap(DPY3D, glxDraw);
 			glxDraw = 0;
 		}
-		if(pm) { XFreePixmap(_dpy3D, pm);  pm = 0; }
-		if(win) { _XDestroyWindow(_dpy3D, win);  win = 0; }
+		if(pm) { XFreePixmap(DPY3D, pm);  pm = 0; }
+		if(win) { _XDestroyWindow(DPY3D, win);  win = 0; }
 	}
 	else
 	{
-		_glXDestroyPbuffer(_dpy3D, glxDraw);
+		_glXDestroyPbuffer(DPY3D, glxDraw);
 		glxDraw = 0;
 	}
 }
@@ -161,7 +161,7 @@ VirtualDrawable::OGLDrawable::~OGLDrawable(void)
 
 XVisualInfo *VirtualDrawable::OGLDrawable::getVisual(void)
 {
-	return _glXGetVisualFromFBConfig(_dpy3D, config);
+	return _glXGetVisualFromFBConfig(DPY3D, config);
 }
 
 
@@ -179,7 +179,7 @@ void VirtualDrawable::OGLDrawable::clear(void)
 
 void VirtualDrawable::OGLDrawable::swap(void)
 {
-	_glXSwapBuffers(_dpy3D, glxDraw);
+	_glXSwapBuffers(DPY3D, glxDraw);
 }
 
 
@@ -188,7 +188,7 @@ void VirtualDrawable::OGLDrawable::swap(void)
 
 VirtualDrawable::VirtualDrawable(Display *dpy_, Drawable x11Draw_)
 {
-	if(!dpy_ || !x11Draw_) _throw("Invalid argument");
+	if(!dpy_ || !x11Draw_) THROW("Invalid argument");
 	dpy = dpy_;
 	x11Draw = x11Draw_;
 	oglDraw = NULL;
@@ -212,7 +212,7 @@ VirtualDrawable::~VirtualDrawable(void)
 {
 	mutex.lock(false);
 	if(oglDraw) { delete oglDraw;  oglDraw = NULL; }
-	if(ctx) { _glXDestroyContext(_dpy3D, ctx);  ctx = 0; }
+	if(ctx) { _glXDestroyContext(DPY3D, ctx);  ctx = 0; }
 	mutex.unlock(false);
 }
 
@@ -220,11 +220,11 @@ VirtualDrawable::~VirtualDrawable(void)
 int VirtualDrawable::init(int width, int height, GLXFBConfig config_)
 {
 	static bool alreadyPrintedDrawableType = false;
-	if(!config_ || width < 1 || height < 1) _throw("Invalid argument");
+	if(!config_ || width < 1 || height < 1) THROW("Invalid argument");
 
 	CriticalSection::SafeLock l(mutex);
 	if(oglDraw && oglDraw->getWidth() == width && oglDraw->getHeight() == height
-		&& _FBCID(oglDraw->getConfig()) == _FBCID(config_))
+		&& FBCID(oglDraw->getConfig()) == FBCID(config_))
 		return 0;
 	if(fconfig.drawable == RRDRAWABLE_PIXMAP)
 	{
@@ -233,7 +233,7 @@ int VirtualDrawable::init(int width, int height, GLXFBConfig config_)
 			vglout.println("[VGL] Using Pixmaps for rendering");
 			alreadyPrintedDrawableType = true;
 		}
-		_newcheck(oglDraw = new OGLDrawable(width, height, 0, config_, NULL));
+		NEWCHECK(oglDraw = new OGLDrawable(width, height, 0, config_, NULL));
 	}
 	else
 	{
@@ -242,11 +242,11 @@ int VirtualDrawable::init(int width, int height, GLXFBConfig config_)
 			vglout.println("[VGL] Using Pbuffers for rendering");
 			alreadyPrintedDrawableType = true;
 		}
-		_newcheck(oglDraw = new OGLDrawable(width, height, config_));
+		NEWCHECK(oglDraw = new OGLDrawable(width, height, config_));
 	}
-	if(config && _FBCID(config_) != _FBCID(config) && ctx)
+	if(config && FBCID(config_) != FBCID(config) && ctx)
 	{
-		_glXDestroyContext(_dpy3D, ctx);  ctx = 0;
+		_glXDestroyContext(DPY3D, ctx);  ctx = 0;
 	}
 	config = config_;
 	return 1;
@@ -258,7 +258,7 @@ void VirtualDrawable::setDirect(Bool direct_)
 	if(direct_ != True && direct_ != False) return;
 	if(direct_ != direct && ctx)
 	{
-		_glXDestroyContext(_dpy3D, ctx);  ctx = 0;
+		_glXDestroyContext(DPY3D, ctx);  ctx = 0;
 	}
 	direct = direct_;
 }
@@ -323,7 +323,7 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	{
 		glFormat = pf_glformat[pf->id];  type = pf_gldatatype[pf->id];
 	}
-	if(glFormat == GL_NONE) _throw("Unsupported pixel format");
+	if(glFormat == GL_NONE) THROW("Unsupported pixel format");
 
 	// Whenever the readback format changes (perhaps due to switching
 	// compression or transports), then reset the PBO synchronicity detector
@@ -371,12 +371,12 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	if(!ctx)
 	{
 		if(!isInit())
-			_throw("VirtualDrawable instance has not been fully initialized");
-		if((ctx = _glXCreateNewContext(_dpy3D, config, GLX_RGBA_TYPE, NULL,
+			THROW("VirtualDrawable instance has not been fully initialized");
+		if((ctx = _glXCreateNewContext(DPY3D, config, GLX_RGBA_TYPE, NULL,
 			direct)) == 0)
-			_throw("Could not create OpenGL context for readback");
+			THROW("Could not create OpenGL context for readback");
 	}
-	TempContext tc(_dpy3D, draw, read, ctx, config, GLX_RGBA_TYPE);
+	TempContext tc(DPY3D, draw, read, ctx, config, GLX_RGBA_TYPE);
 
 	_glReadBuffer(readBuf);
 
@@ -391,11 +391,11 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 		{
 			ext = (const char *)_glGetString(GL_EXTENSIONS);
 			if(!ext || !strstr(ext, "GL_ARB_pixel_buffer_object"))
-				_throw("GL_ARB_pixel_buffer_object extension not available");
+				THROW("GL_ARB_pixel_buffer_object extension not available");
 		}
 		#ifdef GL_VERSION_1_5
 		if(!pbo) _glGenBuffers(1, &pbo);
-		if(!pbo) _throw("Could not generate pixel buffer object");
+		if(!pbo) THROW("Could not generate pixel buffer object");
 		if(!alreadyPrinted && fconfig.verbose)
 		{
 			vglout.println("[VGL] Using pixel buffer objects for readback (%s --> %s)",
@@ -410,9 +410,9 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 				GL_STREAM_READ);
 		_glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_EXT, GL_BUFFER_SIZE, &size);
 		if(size != pitch * height)
-			_throw("Could not set PBO size");
+			THROW("Could not set PBO size");
 		#else
-		_throw("PBO support not compiled in.  Rebuild VGL on a system that has OpenGL 1.5 or later.");
+		THROW("PBO support not compiled in.  Rebuild VGL on a system that has OpenGL 1.5 or later.");
 		#endif
 	}
 	else
@@ -428,23 +428,23 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	int e = _glGetError();
 	while(e != GL_NO_ERROR) e = _glGetError();  // Clear previous error
 	profReadback.startFrame();
-	if(usePBO) t0 = getTime();
+	if(usePBO) t0 = GetTime();
 	_glReadPixels(x, y, width, height, glFormat, type, usePBO ? NULL : bits);
 
 	if(usePBO)
 	{
-		tRead = getTime() - t0;
+		tRead = GetTime() - t0;
 		#ifdef GL_VERSION_1_5
 		unsigned char *pboBits = NULL;
 		pboBits = (unsigned char *)_glMapBuffer(GL_PIXEL_PACK_BUFFER_EXT,
 			GL_READ_ONLY);
-		if(!pboBits) _throw("Could not map pixel buffer object");
+		if(!pboBits) THROW("Could not map pixel buffer object");
 		memcpy(bits, pboBits, pitch * height);
 		if(!_glUnmapBuffer(GL_PIXEL_PACK_BUFFER_EXT))
-			_throw("Could not unmap pixel buffer object");
+			THROW("Could not unmap pixel buffer object");
 		_glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, 0);
 		#endif
-		tTotal = getTime() - t0;
+		tTotal = GetTime() - t0;
 		numFrames++;
 		if(tRead / tTotal > 0.5 && numFrames <= 10)
 		{
@@ -517,12 +517,12 @@ void VirtualDrawable::copyPixels(GLint srcX, GLint srcY, GLint width,
 	if(!ctx)
 	{
 		if(!isInit())
-			_throw("VirtualDrawable instance has not been fully initialized");
-		if((ctx = _glXCreateNewContext(_dpy3D, config, GLX_RGBA_TYPE, NULL,
+			THROW("VirtualDrawable instance has not been fully initialized");
+		if((ctx = _glXCreateNewContext(DPY3D, config, GLX_RGBA_TYPE, NULL,
 			direct)) == 0)
-			_throw("Could not create OpenGL context for readback");
+			THROW("Could not create OpenGL context for readback");
 	}
-	TempContext tc(_dpy3D, draw, getGLXDrawable(), ctx, config, GLX_RGBA_TYPE);
+	TempContext tc(DPY3D, draw, getGLXDrawable(), ctx, config, GLX_RGBA_TYPE);
 
 	_glReadBuffer(GL_FRONT);
 	_glDrawBuffer(GL_FRONT_AND_BACK);

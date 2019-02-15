@@ -1,5 +1,5 @@
 // Copyright (C)2007 Sun Microsystems, Inc.
-// Copyright (C)2009, 2012, 2014, 2017-2018 D. R. Commander
+// Copyright (C)2009, 2012, 2014, 2017-2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -330,35 +330,35 @@ void init(int argc, char **argv)
 {
 	char temps[20];
 
-	_newcheck(win = new Fl_Double_Window(485, 340, "VirtualGL Configuration"));
+	NEWCHECK(win = new Fl_Double_Window(485, 340, "VirtualGL Configuration"));
 
 	if(strlen(fconfig.transport) > 0)
 	{
-		_newcheck(compChoice = new Fl_Choice(211, 10, 225, 25,
+		NEWCHECK(compChoice = new Fl_Choice(211, 10, 225, 25,
 			"Image Compression: "));
 		compChoice->menu(pluginCompMenu);
 	}
 	else
 	{
-		_newcheck(compChoice = new Fl_Choice(227, 10, 225, 25,
+		NEWCHECK(compChoice = new Fl_Choice(227, 10, 225, 25,
 			"Image Compression (Transport): "));
 		compChoice->menu(compMenu);
 	}
 	setComp();
 
-	_newcheck(sampChoice = new Fl_Choice(210, 45, 100, 25,
+	NEWCHECK(sampChoice = new Fl_Choice(210, 45, 100, 25,
 		"Chrominance Subsampling: "));
 	sampChoice->menu(sampMenu);
 	setSamp();
 
 	if(strlen(fconfig.transport) > 0)
 	{
-		_newcheck(qualSlider = new Fl_Value_Slider(30, 80, 335, 25,
+		NEWCHECK(qualSlider = new Fl_Value_Slider(30, 80, 335, 25,
 			"Image Quality"));
 	}
 	else
 	{
-		_newcheck(qualSlider = new Fl_Value_Slider(30, 80, 335, 25,
+		NEWCHECK(qualSlider = new Fl_Value_Slider(30, 80, 335, 25,
 			"JPEG Image Quality"));
 	}
 	qualSlider->callback(qualCB, 0);
@@ -369,34 +369,34 @@ void init(int argc, char **argv)
 	qualSlider->slider_size(0.01);
 	setQual();
 
-	_newcheck(profChoice = new Fl_Choice(157, 130, 280, 24,
+	NEWCHECK(profChoice = new Fl_Choice(157, 130, 280, 24,
 		"Connection Profile: "));
 	profChoice->menu(profMenu);
 	profChoice->mode(3, FL_MENU_INACTIVE);
 	setProf();
 
-	_newcheck(gammaInput = new Fl_Float_Input(315, 165, 85, 25,
+	NEWCHECK(gammaInput = new Fl_Float_Input(315, 165, 85, 25,
 		"Gamma Correction Factor (1.0=no correction): "));
 	gammaInput->callback(gammaCB, 0);
 	snprintf(temps, 19, "%.2f", fconfig.gamma);
 	gammaInput->value(temps);
 
-	_newcheck(spoilButton = new Fl_Light_Button(10, 200, 345, 25,
+	NEWCHECK(spoilButton = new Fl_Light_Button(10, 200, 345, 25,
 		"Frame Spoiling (Do Not Use When Benchmarking)"));
 	spoilButton->callback(spoilCB, 0);
 	spoilButton->value(fconfig.spoil);
 
-	_newcheck(ifButton = new Fl_Light_Button(10, 235, 185, 25,
+	NEWCHECK(ifButton = new Fl_Light_Button(10, 235, 185, 25,
 		"Inter-Frame Comparison"));
 	ifButton->callback(ifCB, 0);
 	setIF();
 
-	_newcheck(stereoChoice = new Fl_Choice(232, 270, 220, 25,
+	NEWCHECK(stereoChoice = new Fl_Choice(232, 270, 220, 25,
 		"Stereographic Rendering Method: "));
 	stereoChoice->menu(stereoMenu);
 	setStereo();
 
-	_newcheck(fpsInput = new Fl_Float_Input(240, 305, 85, 25,
+	NEWCHECK(fpsInput = new Fl_Float_Input(240, 305, 85, 25,
 		"Limit Frames/second (0.0=no limit): "));
 	fpsInput->callback(fpsCB, 0);
 	setFPS();
@@ -462,7 +462,7 @@ int main(int argc, char **argv)
 		if(test)
 		{
 			if(!(_fconfig = fconfig_getinstance()))
-				_throw("Could not allocate FakerConfig");
+				THROW("Could not allocate FakerConfig");
 			fl_open_display();
 			fconfig_setdefaultsfromdpy(fl_display);
 			fconfig_print(fconfig);
@@ -471,9 +471,9 @@ int main(int argc, char **argv)
 		{
 			if(shmid == -1) usage(argv);
 			if((_fconfig = (FakerConfig *)shmat(shmid, 0, 0)) == (FakerConfig *)-1)
-				_throwunix();
+				THROW_UNIX();
 			if(!_fconfig)
-				_throw("Could not attach to config structure in shared memory");
+				THROW("Could not attach to config structure in shared memory");
 		}
 
 		init(argc, argv);

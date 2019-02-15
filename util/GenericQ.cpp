@@ -1,5 +1,5 @@
 // Copyright (C)2004 Landmark Graphics Corporation
-// Copyright (C)2011, 2014 D. R. Commander
+// Copyright (C)2011, 2014, 2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -54,7 +54,7 @@ void GenericQ::release(void)
 void GenericQ::spoil(void *item, SpoilCallback spoilCallback)
 {
 	if(deadYet) return;
-	if(item == NULL) _throw("NULL argument in GenericQ::spoil()");
+	if(item == NULL) THROW("NULL argument in GenericQ::spoil()");
 	CriticalSection::SafeLock l(mutex);
 	if(deadYet) return;
 	void *dummy = NULL;
@@ -70,11 +70,11 @@ void GenericQ::spoil(void *item, SpoilCallback spoilCallback)
 void GenericQ::add(void *item)
 {
 	if(deadYet) return;
-	if(item == NULL) _throw("NULL argument in GenericQ::add()");
+	if(item == NULL) THROW("NULL argument in GenericQ::add()");
 	CriticalSection::SafeLock l(mutex);
 	if(deadYet) return;
 	Entry *temp = new Entry;
-	if(temp == NULL) _throw("Alloc error");
+	if(temp == NULL) THROW("Alloc error");
 	if(start == NULL) start = temp;
 	else end->next = temp;
 	temp->item = item;  temp->next = NULL;
@@ -87,7 +87,7 @@ void GenericQ::add(void *item)
 void GenericQ::get(void **item, bool nonBlocking)
 {
 	if(deadYet) return;
-	if(item == NULL) _throw("NULL argument in GenericQ::get()");
+	if(item == NULL) THROW("NULL argument in GenericQ::get()");
 	if(nonBlocking)
 	{
 		if(!hasItem.tryWait())
@@ -100,7 +100,7 @@ void GenericQ::get(void **item, bool nonBlocking)
 	{
 		CriticalSection::SafeLock l(mutex);
 		if(deadYet) return;
-		if(start == NULL) _throw("Nothing in the queue");
+		if(start == NULL) THROW("Nothing in the queue");
 		*item = start->item;
 		Entry *temp = start->next;
 		delete start;  start = temp;

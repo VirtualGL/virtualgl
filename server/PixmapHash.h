@@ -1,5 +1,5 @@
 // Copyright (C)2004 Landmark Graphics Corporation
-// Copyright (C)2011, 2014 D. R. Commander
+// Copyright (C)2011, 2014, 2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -43,7 +43,7 @@ namespace vglserver
 
 			void add(Display *dpy, Pixmap pm, VirtualPixmap *vpm)
 			{
-				if(!dpy || !pm) _throw("Invalid argument");
+				if(!dpy || !pm) THROW("Invalid argument");
 				char *dpystring = strdup(DisplayString(dpy));
 				if(!HASH::add(dpystring, pm, vpm))
 					free(dpystring);
@@ -67,7 +67,7 @@ namespace vglserver
 
 			void remove(Display *dpy, GLXPixmap glxpm)
 			{
-				if(!dpy || !glxpm) _throw("Invalid argument");
+				if(!dpy || !glxpm) THROW("Invalid argument");
 				HASH::remove(DisplayString(dpy), glxpm);
 			}
 

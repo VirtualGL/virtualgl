@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2006-2007 Sun Microsystems, Inc.
-// Copyright (C)2011, 2013-2014, 2016-2018 D. R. Commander
+// Copyright (C)2011, 2013-2014, 2016-2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -34,23 +34,23 @@
 using namespace vglutil;
 
 
-#define _throw(f, l, m) \
+#define THROW(f, l, m) \
 { \
 	fprintf(stderr, "%s (%d):\n%s\n", f, l, m);  fflush(stderr);  exit(1); \
 }
-#define _fbx(a) \
+#define TRY_FBX(a) \
 { \
-	if((a) == -1) _throw("fbx.c", fbx_geterrline(), fbx_geterrmsg()); \
+	if((a) == -1) THROW("fbx.c", fbx_geterrline(), fbx_geterrmsg()); \
 }
 
 #ifdef _WIN32
 char errMsg[256];
-#define _throww32(f) \
+#define THROW_W32(f) \
 { \
 	if(!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), \
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), errMsg, 255, NULL)) \
 		strncpy(errMsg, "Error in FormatMessage()", 256); \
-	_throw(f, __LINE__, errMsg); \
+	THROW(f, __LINE__, errMsg); \
 }
 #endif
 
@@ -87,7 +87,7 @@ char *program_name;
 		} \
 	} \
 	if(!SendInput(4, inputs, sizeof(INPUT))) \
-		_throww32("Could not inject mouse events"); \
+		THROW_W32("Could not inject mouse events"); \
 }
 
 #else
@@ -254,7 +254,7 @@ int main(int argc, char **argv)
 			Sleep(50);
 		} while(wh == GetForegroundWindow() && elapsed < 10.);
 		if((wh = GetForegroundWindow()) == 0)
-			_throww32("Could not get foreground window")
+			THROW_W32("Could not get foreground window")
 		FlashWindow(wh, TRUE);
 		printf("  \n");
 	}
@@ -298,11 +298,11 @@ int main(int argc, char **argv)
 
 	fbx_struct fb;
 	memset(&fb, 0, sizeof(fb));
-	_fbx(fbx_init(&fb, wh, 0, 0, 1));
+	TRY_FBX(fbx_init(&fb, wh, 0, 0, 1));
 	int width = fb.width, height = fb.height;
 	fbx_term(&fb);
 	memset(&fb, 0, sizeof(fb));
-	_fbx(fbx_init(&fb, wh, 32, 32, 1));
+	TRY_FBX(fbx_init(&fb, wh, 32, 32, 1));
 
 	int frames = 0, samples = 0;
 	if(x < 0) x = width / 2 - 16;
@@ -326,7 +326,7 @@ int main(int argc, char **argv)
 		#ifdef _WIN32
 		memset(inputs, 0, sizeof(INPUT) * 4);
 		if(!GetWindowRect(wh, &winRect))
-			_throww32("Could not get window rectangle");
+			THROW_W32("Could not get window rectangle");
 		currentX = winRect.left + x + (moveY > 0 ? 40 : 16);
 		currentY = winRect.top + y + (moveX > 0 ? 40 : 16);
 		#else
@@ -342,7 +342,7 @@ int main(int argc, char **argv)
 	timer.start();
 	do
 	{
-		_fbx(fbx_read(&fb, x, y));
+		TRY_FBX(fbx_read(&fb, x, y));
 		if(moveX > 0 || moveY > 0)
 			MOVE_MOUSE();
 		samples++;

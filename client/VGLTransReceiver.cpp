@@ -38,32 +38,32 @@ static unsigned short DisplayNumber(Display *dpy)
 
 #define ENDIANIZE(h) \
 { \
-	if(!littleendian()) \
+	if(!LittleEndian()) \
 	{ \
-		h.size = byteswap(h.size); \
-		h.winid = byteswap(h.winid); \
-		h.framew = byteswap16(h.framew); \
-		h.frameh = byteswap16(h.frameh); \
-		h.width = byteswap16(h.width); \
-		h.height = byteswap16(h.height); \
-		h.x = byteswap16(h.x); \
-		h.y = byteswap16(h.y); \
-		h.dpynum = byteswap16(h.dpynum); \
+		h.size = BYTESWAP(h.size); \
+		h.winid = BYTESWAP(h.winid); \
+		h.framew = BYTESWAP16(h.framew); \
+		h.frameh = BYTESWAP16(h.frameh); \
+		h.width = BYTESWAP16(h.width); \
+		h.height = BYTESWAP16(h.height); \
+		h.x = BYTESWAP16(h.x); \
+		h.y = BYTESWAP16(h.y); \
+		h.dpynum = BYTESWAP16(h.dpynum); \
 	} \
 }
 
 #define ENDIANIZE_V1(h) \
 { \
-	if(!littleendian()) \
+	if(!LittleEndian()) \
 	{ \
-		h.size = byteswap(h.size); \
-		h.winid = byteswap(h.winid); \
-		h.framew = byteswap16(h.framew); \
-		h.frameh = byteswap16(h.frameh); \
-		h.width = byteswap16(h.width); \
-		h.height = byteswap16(h.height); \
-		h.x = byteswap16(h.x); \
-		h.y = byteswap16(h.y); \
+		h.size = BYTESWAP(h.size); \
+		h.winid = BYTESWAP(h.winid); \
+		h.framew = BYTESWAP16(h.framew); \
+		h.frameh = BYTESWAP16(h.frameh); \
+		h.width = BYTESWAP16(h.width); \
+		h.height = BYTESWAP16(h.height); \
+		h.x = BYTESWAP16(h.x); \
+		h.y = BYTESWAP16(h.y); \
 	} \
 }
 
@@ -92,7 +92,7 @@ VGLTransReceiver::VGLTransReceiver(bool doSSL_, bool ipv6_, int drawMethod_) :
 
 	if((env = getenv("VGL_VERBOSE")) != NULL && strlen(env) > 0
 		&& !strncmp(env, "1", 1)) fbx_printwarnings(vglout.getFile());
-	_newcheck(thread = new Thread(this));
+	NEWCHECK(thread = new Thread(this));
 }
 
 
@@ -110,7 +110,7 @@ void VGLTransReceiver::listen(unsigned short port_)
 {
 	try
 	{
-		_newcheck(listenSocket = new Socket(doSSL, ipv6));
+		NEWCHECK(listenSocket = new Socket(doSSL, ipv6));
 		port = listenSocket->listen(port_);
 	}
 	catch(...)
@@ -134,7 +134,7 @@ void VGLTransReceiver::run(void)
 			socket = listenSocket->accept();  if(deadYet) break;
 			vglout.println("++ %sConnection from %s.", doSSL ? "SSL " : "",
 				socket->remoteName());
-			_newcheck(listener = new Listener(socket, drawMethod));
+			NEWCHECK(listener = new Listener(socket, drawMethod));
 			continue;
 		}
 		catch(Error &e)
@@ -178,7 +178,7 @@ void VGLTransReceiver::Listener::run(void)
 			send((char *)&v, sizeof_rrversion);
 			recv((char *)&v, sizeof_rrversion);
 			if(strncmp(v.id, "VGL", 3) || v.major < 1)
-				_throw("Error reading server version");
+				THROW("Error reading server version");
 		}
 
 		char *env = NULL;
@@ -210,7 +210,7 @@ void VGLTransReceiver::Listener::run(void)
 				unsigned short dpynum =
 					(v.major < 2 || (v.major == 2 && v.minor < 1)) ?
 					h.dpynum : DisplayNumber(maindpy);
-				_errifnot(w = addWindow(dpynum, h.winid, stereo));
+				ERRIFNOT(w = addWindow(dpynum, h.winid, stereo));
 
 				if(!stereo || h.flags == RR_LEFT || !f)
 				{
@@ -225,7 +225,7 @@ void VGLTransReceiver::Listener::run(void)
 				{
 					((XVFrame *)f)->init(h);
 					if(h.size != ((XVFrame *)f)->hdr.size && h.flags != RR_EOF)
-						_throw("YUV image size mismatch");
+						THROW("YUV image size mismatch");
 				}
 				else
 				#endif
@@ -294,11 +294,11 @@ ClientWin *VGLTransReceiver::Listener::addWindow(int dpynum, Window win,
 			if(windows[winid] && windows[winid]->match(dpynum, win))
 				return windows[winid];
 	}
-	if(nwin >= MAXWIN) _throw("No free window IDs");
-	if(dpynum < 0 || dpynum > 65535 || win == None) _throw("Invalid argument");
-	_newcheck(windows[winid] = new ClientWin(dpynum, win, drawMethod, stereo));
+	if(nwin >= MAXWIN) THROW("No free window IDs");
+	if(dpynum < 0 || dpynum > 65535 || win == None) THROW("Invalid argument");
+	NEWCHECK(windows[winid] = new ClientWin(dpynum, win, drawMethod, stereo));
 
-	if(!windows[winid]) _throw("Could not create window instance");
+	if(!windows[winid]) THROW("Could not create window instance");
 	nwin++;
 	return windows[winid];
 }

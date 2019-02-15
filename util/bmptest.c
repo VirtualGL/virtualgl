@@ -1,4 +1,4 @@
-/* Copyright (C)2014, 2017-2018 D. R. Commander
+/* Copyright (C)2014, 2017-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -20,12 +20,12 @@
 #include "md5.h"
 
 
-#define _throw(m) \
+#define THROW(m) \
 { \
 	printf("\n   ERROR: %s\n", m);  retval = -1;  goto bailout; \
 }
 
-#define _throwmd5(filename, md5sum, ref) \
+#define THROW_MD5(filename, md5sum, ref) \
 { \
 	printf("\n   %s has an MD5 sum of %s.\n   Should be %s.\n", filename, \
 		md5sum, ref); \
@@ -93,21 +93,21 @@ int doTest(const char *ext, int width, int align, int height, PF *pf,
 		"b03eec1eaaad38fed9cab5082bf37e52";
 
 	if((buf = (unsigned char *)malloc(pitch * height)) == NULL)
-		_throw("Could not allocate memory");
+		THROW("Could not allocate memory");
 	initBuf(buf, width, pitch, height, pf, orientation);
 
 	snprintf(filename, 80, "bmptest_%s_%d_%s.%s", pf->name, align,
 		orientation == BMPORN_TOPDOWN ? "td" : "bu", ext);
 	if(bmp_save(filename, buf, width, pitch, height, pf->id, orientation) == -1)
-		_throw(bmp_geterr());
+		THROW(bmp_geterr());
 	md5sum = MD5File(filename, md5buf);
 	if(stricmp(md5sum, md5ref))
-		_throwmd5(filename, md5sum, md5ref);
+		THROW_MD5(filename, md5sum, md5ref);
 
 	free(buf);  buf = NULL;
 	if(bmp_load(filename, &buf, &loadWidth, align, &loadHeight, pf->id,
 		orientation) == -1)
-		_throw(bmp_geterr());
+		THROW(bmp_geterr());
 	if(width != loadWidth || height != loadHeight)
 	{
 		printf("\n   Image dimensions of %s are bogus\n", filename);

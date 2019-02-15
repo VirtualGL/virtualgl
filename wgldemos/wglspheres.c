@@ -1,5 +1,5 @@
 /* Copyright (C)2008 Sun Microsystems, Inc.
- * Copyright (C)2013-2014 D. R. Commander
+ * Copyright (C)2013-2014, 2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -29,7 +29,7 @@
 
 
 static char __lasterror[1024] = "No error";
-#define _throww32(m) \
+#define THROW_W32(m) \
 { \
 	if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), \
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), __lasterror, 1024, NULL)) \
@@ -37,14 +37,12 @@ static char __lasterror[1024] = "No error";
 			__lasterror); \
 	goto bailout; \
 }
-#define _throw(m) \
+#define THROW(m) \
 { \
 	fprintf(stderr, "ERROR in line %d:\n%s\n", __LINE__,  m); \
 	goto bailout; \
 }
-#define _catch(f)  { if((f) == -1) goto bailout; }
-
-#define np2(i)  ((i) > 0 ? (1 << (int)(log((double)(i)) / log(2.))) : 0)
+#define CATCH(f)  { if((f) == -1) goto bailout; }
 
 #define SPHERE_RED(f) \
 	(GLfloat)fabs(MAXI * (2. * f - 1.))
@@ -210,7 +208,7 @@ int display(int advance)
 
 		sphereList = glGenLists(1);
 		if(!(sphereQuad = gluNewQuadric()))
-			_throw("Could not allocate GLU quadric object");
+			THROW("Could not allocate GLU quadric object");
 		glNewList(sphereList, GL_COMPILE);
 		gluSphere(sphereQuad, 1.3, slices, stacks);
 		glEndList();
@@ -286,7 +284,7 @@ int display(int advance)
 
 	if(start > 0.)
 	{
-		elapsed += getTime() - start;  frames++;  totalFrames++;
+		elapsed += GetTime() - start;  frames++;  totalFrames++;
 		mpixels += (double)width * (double)height / 1000000.;
 		if(elapsed > benchTime || (maxFrames && totalFrames > maxFrames))
 		{
@@ -298,7 +296,7 @@ int display(int advance)
 	}
 	if(maxFrames && totalFrames > maxFrames) goto bailout;
 
-	start = getTime();
+	start = GetTime();
 	return 0;
 
 	bailout:
@@ -460,7 +458,7 @@ int main(int argc, char **argv)
 	wndclass.lpszMenuName = NULL;
 	wndclass.lpszClassName = "WGLspheres";
 	wndclass.hIconSm = LoadIcon(NULL, IDI_WINLOGO);
-	if(!RegisterClassEx(&wndclass)) _throww32("Cannot create window class");
+	if(!RegisterClassEx(&wndclass)) THROW_W32("Cannot create window class");
 
 	if(fullScreen)
 	{
@@ -469,24 +467,24 @@ int main(int argc, char **argv)
 	}
 	if(!(win = CreateWindowEx(0, "WGLspheres", "WGLspheres", winStyle, 0,  0,
 		width + bw, height + bh, NULL, NULL, GetModuleHandle(NULL), NULL)))
-		_throww32("Cannot create window");
+		THROW_W32("Cannot create window");
 
 	GetClientRect(win, &rect);
 	fprintf(stderr, "Client area of window: %ld x %ld pixels\n",
 		rect.right - rect.left, rect.bottom - rect.top);
 
-	if(!(hdc = GetDC(win))) _throww32("Cannot create device context");
+	if(!(hdc = GetDC(win))) THROW_W32("Cannot create device context");
 
 	if(!(pixelFormat = ChoosePixelFormat(hdc, &pfd)))
-		_throww32("Cannot create pixel format");
+		THROW_W32("Cannot create pixel format");
 	fprintf(stderr, "Pixel Format of window: %d\n", pixelFormat);
 	if(!SetPixelFormat(hdc, pixelFormat, &pfd))
-		_throww32("Cannot set pixel format");
+		THROW_W32("Cannot set pixel format");
 
-	if(!(ctx = wglCreateContext(hdc))) _throww32("Cannot create OpenGL context");
+	if(!(ctx = wglCreateContext(hdc))) THROW_W32("Cannot create OpenGL context");
 
 	if(!wglMakeCurrent(hdc, ctx))
-		_throww32("Cannot make OpenGL context current");
+		THROW_W32("Cannot make OpenGL context current");
 
 	fprintf(stderr, "OpenGL Renderer: %s\n", glGetString(GL_RENDERER));
 
@@ -496,12 +494,12 @@ int main(int argc, char **argv)
 		advance = 0;  doDisplay = 0;
 
 		if((ret = GetMessage(&msg, NULL, 0, 0)) == -1)
-			{ _throww32("GetMessage() failed"); }
+			{ THROW_W32("GetMessage() failed"); }
 		else if(ret == 0) break;
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
-		if(!interactive) { _catch(display(1)); }
-		else if(doDisplay) { _catch(display(advance)); }
+		if(!interactive) { CATCH(display(1)); }
+		else if(doDisplay) { CATCH(display(advance)); }
 	}
 
 	if(ctx) { wglDeleteContext(ctx);  ctx = 0; }

@@ -50,6 +50,6 @@ namespace glxvisual
 }
 
 
-#define _FBCID(c)  glxvisual::visAttrib3D(c, GLX_FBCONFIG_ID)
+#define FBCID(c)  glxvisual::visAttrib3D(c, GLX_FBCONFIG_ID)
 
 #endif  // __GLXVISUAL_H__

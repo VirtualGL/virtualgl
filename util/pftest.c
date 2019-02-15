@@ -1,4 +1,4 @@
-/* Copyright (C)2014, 2017-2018 D. R. Commander
+/* Copyright (C)2014, 2017-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -24,7 +24,7 @@
 
 #define BMPPAD(pitch)  ((pitch + (sizeof(int) - 1)) & (~(sizeof(int) - 1)))
 
-#define _throw(m) \
+#define THROW(m) \
 { \
 	printf("\n   ERROR: %s\n", m);  retval = -1;  goto bailout; \
 }
@@ -90,16 +90,16 @@ int doTest(int width, int height, PF *srcpf, PF *dstpf)
 	double tStart, elapsed;
 
 	if((srcBuf = (unsigned char *)malloc(srcPitch * height)) == NULL)
-		_throw("Could not allocate memory");
+		THROW("Could not allocate memory");
 	initBuf(srcBuf, width, srcPitch, height, srcpf, dstpf);
 	if((dstBuf = (unsigned char *)malloc(dstPitch * height)) == NULL)
-		_throw("Could not allocate memory");
+		THROW("Could not allocate memory");
 	memset(dstBuf, 0, dstPitch * height);
 
 	if(getSetRGB)
 	{
 		printf("%-8s --> %-8s (getRGB/setRGB):  ", srcpf->name, dstpf->name);
-		tStart = getTime();
+		tStart = GetTime();
 		iter = 0;
 		do
 		{
@@ -156,17 +156,17 @@ int doTest(int width, int height, PF *srcpf, PF *dstpf)
 				}
 			}
 			iter++;
-		} while((elapsed = getTime() - tStart) < testTime);
+		} while((elapsed = GetTime() - tStart) < testTime);
 	}
 	else
 	{
 		printf("%-8s --> %-8s (convert):     ", srcpf->name, dstpf->name);
-		tStart = getTime();
+		tStart = GetTime();
 		do
 		{
 			srcpf->convert(srcBuf, width, srcPitch, height, dstBuf, dstPitch, dstpf);
 			iter++;
-		} while((elapsed = getTime() - tStart) < testTime);
+		} while((elapsed = GetTime() - tStart) < testTime);
 	}
 
 	if(!cmpBuf(dstBuf, width, width * dstpf->size, height, srcpf, dstpf))

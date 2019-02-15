@@ -59,10 +59,10 @@ static void buildVisAttribTable(Display *dpy, int screen)
 		vtemp.screen = screen;
 		if(!(visuals = XGetVisualInfo(dpy, VisualScreenMask, &vtemp, &nVisuals))
 			|| nVisuals == 0)
-			_throw("No visuals found on display");
+			THROW("No visuals found on display");
 
 		if(va) { delete [] va;  va = NULL; }
-		_newcheck(va = new VisAttrib[nVisuals]);
+		NEWCHECK(va = new VisAttrib[nVisuals]);
 		vaEntries = nVisuals;
 		memset(va, 0, sizeof(VisAttrib) * nVisuals);
 
@@ -281,9 +281,9 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[], int &level,
 	}
 	glxattribs[j] = None;
 
-	if(fconfig.trace) prargal13(glxattribs);
+	if(fconfig.trace) PRARGAL13(glxattribs);
 
-	return _glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), glxattribs,
+	return _glXChooseFBConfig(DPY3D, DefaultScreen(DPY3D), glxattribs,
 		&nElements);
 }
 
@@ -330,7 +330,7 @@ int visAttrib2D(Display *dpy, int screen, VisualID vid, int attribute)
 int visAttrib3D(GLXFBConfig config, int attribute)
 {
 	int value = 0;
-	_glXGetFBConfigAttrib(_dpy3D, config, attribute, &value);
+	_glXGetFBConfigAttrib(DPY3D, config, attribute, &value);
 	return value;
 }
 

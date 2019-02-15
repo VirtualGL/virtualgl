@@ -33,9 +33,6 @@ using namespace vglutil;
 using namespace vglserver;
 
 
-#define dpy3DIsCurrent()  (_glXGetCurrentDisplay() == _dpy3D)
-
-
 // This emulates the behavior of the nVidia drivers
 #define VGL_MAX_SWAP_INTERVAL  8
 
@@ -47,7 +44,7 @@ using namespace vglserver;
 // for, so if no 3D X server FB config is already hashed to the visual, we have
 // to create one using default attributes.
 
-#define testattrib(attrib, index, min, max) \
+#define TEST_ATTRIB(attrib, index, min, max) \
 { \
 	if(!strcmp(argv[i], #attrib) && i < argc - 1) \
 	{ \
@@ -107,7 +104,7 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 		if(strlen(fconfig.defaultfbconfig) > 0)
 		{
 			char *str = strdup(fconfig.defaultfbconfig);
-			if(!str) _throwunix();
+			if(!str) THROW_UNIX();
 			char *argv[512];  int argc = 0;
 			char *arg = strtok(str, ", \t");
 			while(arg && argc < 512)
@@ -119,46 +116,46 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 			{
 				int index;
 				index = 2;
-				testattrib(GLX_RED_SIZE, index, 0, INT_MAX);
+				TEST_ATTRIB(GLX_RED_SIZE, index, 0, INT_MAX);
 				index = 4;
-				testattrib(GLX_GREEN_SIZE, index, 0, INT_MAX);
+				TEST_ATTRIB(GLX_GREEN_SIZE, index, 0, INT_MAX);
 				index = 6;
-				testattrib(GLX_BLUE_SIZE, index, 0, INT_MAX);
+				TEST_ATTRIB(GLX_BLUE_SIZE, index, 0, INT_MAX);
 				index = 16;
-				testattrib(GLX_DEPTH_SIZE, index, 0, INT_MAX);
+				TEST_ATTRIB(GLX_DEPTH_SIZE, index, 0, INT_MAX);
 				index = 18;
-				testattrib(GLX_STENCIL_SIZE, index, 0, INT_MAX);
-				testattrib(GLX_ALPHA_SIZE, j, 0, INT_MAX);
-				testattrib(GLX_AUX_BUFFERS, j, 0, INT_MAX);
-				testattrib(GLX_ACCUM_RED_SIZE, j, 0, INT_MAX);
-				testattrib(GLX_ACCUM_GREEN_SIZE, j, 0, INT_MAX);
-				testattrib(GLX_ACCUM_BLUE_SIZE, j, 0, INT_MAX);
-				testattrib(GLX_ACCUM_ALPHA_SIZE, j, 0, INT_MAX);
-				testattrib(GLX_SAMPLE_BUFFERS, j, 0, INT_MAX);
-				testattrib(GLX_SAMPLES, j, 0, INT_MAX);
+				TEST_ATTRIB(GLX_STENCIL_SIZE, index, 0, INT_MAX);
+				TEST_ATTRIB(GLX_ALPHA_SIZE, j, 0, INT_MAX);
+				TEST_ATTRIB(GLX_AUX_BUFFERS, j, 0, INT_MAX);
+				TEST_ATTRIB(GLX_ACCUM_RED_SIZE, j, 0, INT_MAX);
+				TEST_ATTRIB(GLX_ACCUM_GREEN_SIZE, j, 0, INT_MAX);
+				TEST_ATTRIB(GLX_ACCUM_BLUE_SIZE, j, 0, INT_MAX);
+				TEST_ATTRIB(GLX_ACCUM_ALPHA_SIZE, j, 0, INT_MAX);
+				TEST_ATTRIB(GLX_SAMPLE_BUFFERS, j, 0, INT_MAX);
+				TEST_ATTRIB(GLX_SAMPLES, j, 0, INT_MAX);
 			}
 			free(str);
 		}
 
-			opentrace(Choosing FB config for visual with unknown OpenGL attributes);
+			OPENTRACE(Choosing FB config for visual with unknown OpenGL attributes);
 			if(fconfig.trace) vglout.print("VGL_DEFAULTFBCONFIG ");
-			prargal13(attribs);  starttrace();
+			PRARGAL13(attribs);  STARTTRACE();
 
-		configs = _glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), attribs, &n);
+		configs = _glXChooseFBConfig(DPY3D, DefaultScreen(DPY3D), attribs, &n);
 		if((!configs || n < 1) && attribs[11])
 		{
 			attribs[11] = 0;
 			if(fconfig.trace) vglout.print("[failed, trying mono] ");
-			configs = _glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), attribs, &n);
+			configs = _glXChooseFBConfig(DPY3D, DefaultScreen(DPY3D), attribs, &n);
 		}
 		if((!configs || n < 1) && attribs[1])
 		{
 			attribs[1] = 0;
 			if(fconfig.trace) vglout.print("[failed, trying single-buffered] ");
-			configs = _glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), attribs, &n);
+			configs = _glXChooseFBConfig(DPY3D, DefaultScreen(DPY3D), attribs, &n);
 		}
 
-			stoptrace();  if(configs) prargc(configs[0]);  closetrace();
+			STOPTRACE();  if(configs) PRARGC(configs[0]);  CLOSETRACE();
 
 		if(!configs || n < 1) return 0;
 		config = configs[0];
@@ -190,7 +187,7 @@ static VisualID matchVisual(Display *dpy, GLXFBConfig config, int &screen)
 		// obtained through glXChooseFBConfig(), so we have no idea what attributes
 		// it is looking for.  We first try to match the FB config with a 2D X
 		// Server visual that has the same class, depth, and stereo properties.
-		XVisualInfo *vis = _glXGetVisualFromFBConfig(_dpy3D, config);
+		XVisualInfo *vis = _glXGetVisualFromFBConfig(DPY3D, config);
 		if(vis)
 		{
 			if(vis->depth >= 24
@@ -286,7 +283,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 
 	// If this is called internally from within another GLX function, then use
 	// the real function.
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXChooseFBConfig(dpy, screen, attrib_list, nelements);
 
 	// If 'attrib_list' specifies properties for transparent overlay rendering,
@@ -316,8 +313,8 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 		}
 	}
 
-		opentrace(glXChooseFBConfig);  prargd(dpy);  prargi(screen);
-		prargal13(attrib_list);  starttrace();
+		OPENTRACE(glXChooseFBConfig);  PRARGD(dpy);  PRARGI(screen);
+		PRARGAL13(attrib_list);  STARTTRACE();
 
 	int level = 0, stereo = 0, trans = 0, temp;
 	if(!nelements) nelements = &temp;
@@ -327,7 +324,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 	// is specified, ignore all other attributes.
 	if(!attrib_list || fbcidreq)
 	{
-		configs = _glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), attrib_list,
+		configs = _glXChooseFBConfig(DPY3D, DefaultScreen(DPY3D), attrib_list,
 			nelements);
 		goto done;
 	}
@@ -346,7 +343,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 		for(int i = 0; i < *nelements; i++)
 		{
 			int depth = 24, c_class = TrueColor;
-			XVisualInfo *vis = _glXGetVisualFromFBConfig(_dpy3D, configs[i]);
+			XVisualInfo *vis = _glXGetVisualFromFBConfig(DPY3D, configs[i]);
 			if(vis)
 			{
 				if(vis->depth > 24) depth = vis->depth;
@@ -370,16 +367,16 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 	}
 
 	done:
-		stoptrace();
+		STOPTRACE();
 		if(configs && nelements)
 		{
 			if(*nelements)
 				for(int i = 0; i < *nelements; i++)
 					vglout.print("configs[%d]=0x%.8lx(0x%.2x) ", i,
-						(unsigned long)configs[i], configs[i] ? _FBCID(configs[i]) : 0);
-			prargi(*nelements);
+						(unsigned long)configs[i], configs[i] ? FBCID(configs[i]) : 0);
+			PRARGI(*nelements);
 		}
-		closetrace();
+		CLOSETRACE();
 
 	CATCH();
 	return configs;
@@ -403,7 +400,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXChooseVisual(dpy, screen, attrib_list);
 
 	// If 'attrib_list' specifies properties for transparent overlay rendering,
@@ -432,8 +429,8 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 		}
 	}
 
-		opentrace(glXChooseVisual);  prargd(dpy);  prargi(screen);
-		prargal11(attrib_list);  starttrace();
+		OPENTRACE(glXChooseVisual);  PRARGD(dpy);  PRARGI(screen);
+		PRARGAL11(attrib_list);  STARTTRACE();
 
 	// Use the specified set of GLX attributes to obtain an FB config on the 3D X
 	// server suitable for off-screen rendering
@@ -460,7 +457,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	}
 	config = configs[0];
 	XFree(configs);
-	vtemp = _glXGetVisualFromFBConfig(_dpy3D, config);
+	vtemp = _glXGetVisualFromFBConfig(DPY3D, config);
 	if(vtemp)
 	{
 		if(vtemp->depth > 24) depth = vtemp->depth;
@@ -481,9 +478,9 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	if(!vis) goto done;
 
 	if((prevConfig = vishash.getConfig(dpy, vis))
-		&& _FBCID(config) != _FBCID(prevConfig) && fconfig.trace)
+		&& FBCID(config) != FBCID(prevConfig) && fconfig.trace)
 		vglout.println("[VGL] WARNING: Visual 0x%.2x was previously mapped to FB config 0x%.2x and is now mapped to 0x%.2x\n",
-			vis->visualid, _FBCID(prevConfig), _FBCID(config));
+			vis->visualid, FBCID(prevConfig), FBCID(config));
 
 	// Hash the FB config and the visual so that we can look up the FB config
 	// whenever the appplication subsequently passes the visual to
@@ -491,7 +488,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	vishash.add(dpy, vis, config);
 
 	done:
-		stoptrace();  prargv(vis);  prargc(config);  closetrace();
+		STOPTRACE();  PRARGV(vis);  PRARGC(config);  CLOSETRACE();
 
 	CATCH();
 	return vis;
@@ -506,7 +503,7 @@ void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst,
 {
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXCopyContext(dpy, src, dst, mask);
 
 	bool srcOverlay = false, dstOverlay = false;
@@ -517,8 +514,8 @@ void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst,
 		_glXCopyContext(dpy, src, dst, mask);  return;
 	}
 	else if(srcOverlay != dstOverlay)
-		_throw("glXCopyContext() cannot copy between overlay and non-overlay contexts");
-	_glXCopyContext(_dpy3D, src, dst, mask);
+		THROW("glXCopyContext() cannot copy between overlay and non-overlay contexts");
+	_glXCopyContext(DPY3D, src, dst, mask);
 
 	CATCH();
 }
@@ -533,7 +530,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXCreateContext(dpy, vis, share_list, direct);
 
 	if(!fconfig.allowindirect) direct = True;
@@ -556,23 +553,23 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 		}
 	}
 
-		opentrace(glXCreateContext);  prargd(dpy);  prargv(vis);
-		prargx(share_list);  prargi(direct);  starttrace();
+		OPENTRACE(glXCreateContext);  PRARGD(dpy);  PRARGV(vis);
+		PRARGX(share_list);  PRARGI(direct);  STARTTRACE();
 
 	if(!(config = matchConfig(dpy, vis)))
-		_throw("Could not obtain RGB visual on the server suitable for off-screen rendering.");
-	ctx = _glXCreateNewContext(_dpy3D, config, GLX_RGBA_TYPE, share_list,
+		THROW("Could not obtain RGB visual on the server suitable for off-screen rendering.");
+	ctx = _glXCreateNewContext(DPY3D, config, GLX_RGBA_TYPE, share_list,
 		direct);
 	if(ctx)
 	{
-		int newctxIsDirect = _glXIsDirect(_dpy3D, ctx);
+		int newctxIsDirect = _glXIsDirect(DPY3D, ctx);
 		if(!newctxIsDirect && direct)
 		{
 			vglout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
 			vglout.println("[VGL]    %s is indirect, which may cause performance to suffer.",
-				DisplayString(_dpy3D));
+				DisplayString(DPY3D));
 			vglout.println("[VGL]    If %s is a local X display, then the framebuffer device",
-				DisplayString(_dpy3D));
+				DisplayString(DPY3D));
 			vglout.println("[VGL]    permissions may be set incorrectly.");
 		}
 		// Hash the FB config to the context so we can use it in subsequent calls
@@ -580,7 +577,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 		ctxhash.add(ctx, config, newctxIsDirect);
 	}
 
-		stoptrace();  prargc(config);  prargx(ctx);  closetrace();
+		STOPTRACE();  PRARGC(config);  PRARGX(ctx);  CLOSETRACE();
 
 	CATCH();
 	return ctx;
@@ -594,7 +591,7 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXCreateContextAttribsARB(dpy, config, share_context, direct,
 			attribs);
 
@@ -609,33 +606,33 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 		return ctx;
 	}
 
-		opentrace(glXCreateContextAttribsARB);  prargd(dpy);  prargc(config);
-		prargx(share_context);  prargi(direct);  prargal13(attribs);
-		starttrace();
+		OPENTRACE(glXCreateContextAttribsARB);  PRARGD(dpy);  PRARGC(config);
+		PRARGX(share_context);  PRARGI(direct);  PRARGAL13(attribs);
+		STARTTRACE();
 
 	CHECKSYM_NONFATAL(glXCreateContextAttribsARB)
 	if((!attribs || attribs[0] == None) && !__glXCreateContextAttribsARB)
-		ctx = _glXCreateNewContext(_dpy3D, config, GLX_RGBA_TYPE, share_context,
+		ctx = _glXCreateNewContext(DPY3D, config, GLX_RGBA_TYPE, share_context,
 			direct);
 	else
-		ctx = _glXCreateContextAttribsARB(_dpy3D, config, share_context, direct,
+		ctx = _glXCreateContextAttribsARB(DPY3D, config, share_context, direct,
 			attribs);
 	if(ctx)
 	{
-		int newctxIsDirect = _glXIsDirect(_dpy3D, ctx);
+		int newctxIsDirect = _glXIsDirect(DPY3D, ctx);
 		if(!newctxIsDirect && direct)
 		{
 			vglout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
 			vglout.println("[VGL]    %s is indirect, which may cause performance to suffer.",
-				DisplayString(_dpy3D));
+				DisplayString(DPY3D));
 			vglout.println("[VGL]    If %s is a local X display, then the framebuffer device",
-				DisplayString(_dpy3D));
+				DisplayString(DPY3D));
 			vglout.println("[VGL]    permissions may be set incorrectly.");
 		}
 		ctxhash.add(ctx, config, newctxIsDirect);
 	}
 
-		stoptrace();  prargx(ctx);  closetrace();
+		STOPTRACE();  PRARGX(ctx);  CLOSETRACE();
 
 	CATCH();
 	return ctx;
@@ -649,7 +646,7 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXCreateNewContext(dpy, config, render_type, share_list, direct);
 
 	if(!fconfig.allowindirect) direct = True;
@@ -662,27 +659,27 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 		return ctx;
 	}
 
-		opentrace(glXCreateNewContext);  prargd(dpy);  prargc(config);
-		prargi(render_type);  prargx(share_list);  prargi(direct);  starttrace();
+		OPENTRACE(glXCreateNewContext);  PRARGD(dpy);  PRARGC(config);
+		PRARGI(render_type);  PRARGX(share_list);  PRARGI(direct);  STARTTRACE();
 
-	ctx = _glXCreateNewContext(_dpy3D, config, GLX_RGBA_TYPE, share_list,
+	ctx = _glXCreateNewContext(DPY3D, config, GLX_RGBA_TYPE, share_list,
 		direct);
 	if(ctx)
 	{
-		int newctxIsDirect = _glXIsDirect(_dpy3D, ctx);
+		int newctxIsDirect = _glXIsDirect(DPY3D, ctx);
 		if(!newctxIsDirect && direct)
 		{
 			vglout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
 			vglout.println("[VGL]    %s is indirect, which may cause performance to suffer.",
-				DisplayString(_dpy3D));
+				DisplayString(DPY3D));
 			vglout.println("[VGL]    If %s is a local X display, then the framebuffer device",
-				DisplayString(_dpy3D));
+				DisplayString(DPY3D));
 			vglout.println("[VGL]    permissions may be set incorrectly.");
 		}
 		ctxhash.add(ctx, config, newctxIsDirect);
 	}
 
-		stoptrace();  prargx(ctx);  closetrace();
+		STOPTRACE();  PRARGX(ctx);  CLOSETRACE();
 
 	CATCH();
 	return ctx;
@@ -711,16 +708,16 @@ GLXPbuffer glXCreatePbuffer(Display *dpy, GLXFBConfig config,
 
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXCreatePbuffer(dpy, config, attrib_list);
 
-		opentrace(glXCreatePbuffer);  prargd(dpy);  prargc(config);
-		prargal13(attrib_list);  starttrace();
+		OPENTRACE(glXCreatePbuffer);  PRARGD(dpy);  PRARGC(config);
+		PRARGAL13(attrib_list);  STARTTRACE();
 
-	pb = _glXCreatePbuffer(_dpy3D, config, attrib_list);
+	pb = _glXCreatePbuffer(DPY3D, config, attrib_list);
 	if(dpy && pb) glxdhash.add(pb, dpy);
 
-		stoptrace();  prargx(pb);  closetrace();
+		STOPTRACE();  PRARGX(pb);  CLOSETRACE();
 
 	CATCH();
 	return pb;
@@ -755,7 +752,7 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXCreateGLXPixmap(dpy, vis, pm);
 
 	// Not sure whether a transparent pixmap has any meaning, but in any case,
@@ -776,13 +773,13 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 		}
 	}
 
-		opentrace(glXCreateGLXPixmap);  prargd(dpy);  prargv(vis);  prargx(pm);
-		starttrace();
+		OPENTRACE(glXCreateGLXPixmap);  PRARGD(dpy);  PRARGV(vis);  PRARGX(pm);
+		STARTTRACE();
 
 	Window root;  unsigned int bw;
 	_XGetGeometry(dpy, pm, &root, &x, &y, &width, &height, &bw, &depth);
 	if(!(config = matchConfig(dpy, vis, true, true)))
-		_throw("Could not obtain pixmap-capable RGB visual on the server");
+		THROW("Could not obtain pixmap-capable RGB visual on the server");
 	VirtualPixmap *vpm = new VirtualPixmap(dpy, vis->visual, pm);
 	if(vpm)
 	{
@@ -794,8 +791,8 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 		drawable = vpm->getGLXDrawable();
 	}
 
-		stoptrace();  prargi(x);  prargi(y);  prargi(width);  prargi(height);
-		prargi(depth);  prargc(config);  prargx(drawable);  closetrace();
+		STOPTRACE();  PRARGI(x);  PRARGI(y);  PRARGI(width);  PRARGI(height);
+		PRARGI(depth);  PRARGC(config);  PRARGX(drawable);  CLOSETRACE();
 
 	CATCH();
 	return drawable;
@@ -809,11 +806,11 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm,
 
 	TRY();
 
-	if(isExcluded(dpy) || rcfghash.isOverlay(dpy, config))
+	if(IS_EXCLUDED(dpy) || rcfghash.isOverlay(dpy, config))
 		return _glXCreatePixmap(dpy, config, pm, attribs);
 
-		opentrace(glXCreatePixmap);  prargd(dpy);  prargc(config);  prargx(pm);
-		starttrace();
+		OPENTRACE(glXCreatePixmap);  PRARGD(dpy);  PRARGC(config);  PRARGX(pm);
+		STARTTRACE();
 
 	Window root;  int x, y, screen;  unsigned int w, h, bw, d;
 	_XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
@@ -837,8 +834,8 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm,
 		drawable = vpm->getGLXDrawable();
 	}
 
-		stoptrace();  prargi(x);  prargi(y);  prargi(w);  prargi(h);
-		prargi(d);  prargx(drawable);  closetrace();
+		STOPTRACE();  PRARGI(x);  PRARGI(y);  PRARGI(w);  PRARGI(h);
+		PRARGI(d);  PRARGX(drawable);  CLOSETRACE();
 
 	CATCH();
 	return drawable;
@@ -861,7 +858,7 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
 
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXCreateWindow(dpy, config, win, attrib_list);
 
 	// Overlay config.  Hand off to 2D X server.
@@ -872,8 +869,8 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
 		return glxw;
 	}
 
-		opentrace(glXCreateWindow);  prargd(dpy);  prargc(config);  prargx(win);
-		starttrace();
+		OPENTRACE(glXCreateWindow);  PRARGD(dpy);  PRARGC(config);  PRARGX(win);
+		STARTTRACE();
 
 	XSync(dpy, False);
 	vw = winhash.initVW(dpy, win, config);
@@ -884,10 +881,10 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
 		vw = winhash.initVW(dpy, win, config);
 	}
 	if(!vw)
-		_throw("Cannot create virtual window for specified X window");
+		THROW("Cannot create virtual window for specified X window");
 
-		stoptrace();  if(vw) { prargx(vw->getGLXDrawable()); }
-		closetrace();
+		STOPTRACE();  if(vw) { PRARGX(vw->getGLXDrawable()); }
+		CLOSETRACE();
 
 	CATCH();
 	return win;  // Make the client store the original window handle, which we
@@ -901,17 +898,17 @@ void glXDestroyContext(Display *dpy, GLXContext ctx)
 {
 	TRY();
 
-	if(isExcluded(dpy) || ctxhash.isOverlay(ctx))
+	if(IS_EXCLUDED(dpy) || ctxhash.isOverlay(ctx))
 	{
 		_glXDestroyContext(dpy, ctx);  return;
 	}
 
-		opentrace(glXDestroyContext);  prargd(dpy);  prargx(ctx);  starttrace();
+		OPENTRACE(glXDestroyContext);  PRARGD(dpy);  PRARGX(ctx);  STARTTRACE();
 
 	ctxhash.remove(ctx);
-	_glXDestroyContext(_dpy3D, ctx);
+	_glXDestroyContext(DPY3D, ctx);
 
-		stoptrace();  closetrace();
+		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
 }
@@ -924,14 +921,14 @@ void glXDestroyPbuffer(Display *dpy, GLXPbuffer pbuf)
 {
 	TRY();
 
-	if(isExcluded(dpy)) { _glXDestroyPbuffer(dpy, pbuf);  return; }
+	if(IS_EXCLUDED(dpy)) { _glXDestroyPbuffer(dpy, pbuf);  return; }
 
-		opentrace(glXDestroyPbuffer);  prargd(dpy);  prargx(pbuf);  starttrace();
+		OPENTRACE(glXDestroyPbuffer);  PRARGD(dpy);  PRARGX(pbuf);  STARTTRACE();
 
-	_glXDestroyPbuffer(_dpy3D, pbuf);
+	_glXDestroyPbuffer(DPY3D, pbuf);
 	if(pbuf) glxdhash.remove(pbuf);
 
-		stoptrace();  closetrace();
+		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
 }
@@ -950,12 +947,12 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 {
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 	{
 		_glXDestroyGLXPixmap(dpy, pix);  return;
 	}
 
-		opentrace(glXDestroyGLXPixmap);  prargd(dpy);  prargx(pix);  starttrace();
+		OPENTRACE(glXDestroyGLXPixmap);  PRARGD(dpy);  PRARGX(pix);  STARTTRACE();
 
 	VirtualPixmap *vpm = pmhash.find(dpy, pix);
 	if(vpm && vpm->isInit()) vpm->readback();
@@ -963,7 +960,7 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 	if(pix) glxdhash.remove(pix);
 	if(dpy && pix) pmhash.remove(dpy, pix);
 
-		stoptrace();  closetrace();
+		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
 }
@@ -973,12 +970,12 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 {
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 	{
 		_glXDestroyPixmap(dpy, pix);  return;
 	}
 
-		opentrace(glXDestroyPixmap);  prargd(dpy);  prargx(pix);  starttrace();
+		OPENTRACE(glXDestroyPixmap);  PRARGD(dpy);  PRARGX(pix);  STARTTRACE();
 
 	VirtualPixmap *vpm = pmhash.find(dpy, pix);
 	if(vpm && vpm->isInit()) vpm->readback();
@@ -986,7 +983,7 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 	if(pix) glxdhash.remove(pix);
 	if(dpy && pix) pmhash.remove(dpy, pix);
 
-		stoptrace();  closetrace();
+		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
 }
@@ -999,16 +996,16 @@ void glXDestroyWindow(Display *dpy, GLXWindow win)
 {
 	TRY();
 
-	if(isExcluded(dpy) || winhash.isOverlay(dpy, win))
+	if(IS_EXCLUDED(dpy) || winhash.isOverlay(dpy, win))
 	{
 		_glXDestroyWindow(dpy, win);  return;
 	}
 
-		opentrace(glXDestroyWindow);  prargd(dpy);  prargx(win);  starttrace();
+		OPENTRACE(glXDestroyWindow);  PRARGD(dpy);  PRARGX(win);  STARTTRACE();
 
 	winhash.remove(dpy, win);
 
-		stoptrace();  closetrace();
+		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
 }
@@ -1021,11 +1018,11 @@ void glXFreeContextEXT(Display *dpy, GLXContext ctx)
 {
 	TRY();
 
-	if(isExcluded(dpy) || ctxhash.isOverlay(ctx))
+	if(IS_EXCLUDED(dpy) || ctxhash.isOverlay(ctx))
 	{
 		_glXFreeContextEXT(dpy, ctx);  return;
 	}
-	_glXFreeContextEXT(_dpy3D, ctx);
+	_glXFreeContextEXT(DPY3D, ctx);
 
 	CATCH();
 }
@@ -1108,7 +1105,7 @@ const char *glXGetClientString(Display *dpy, int name)
 {
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXGetClientString(dpy, name);
 
 	if(name == GLX_EXTENSIONS) return getGLXExtensions();
@@ -1133,7 +1130,7 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXGetConfig(dpy, vis, attrib, value);
 
 	if(!dpy || !vis || !value)
@@ -1153,8 +1150,8 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 		return retval;
 	}
 
-		opentrace(glXGetConfig);  prargd(dpy);  prargv(vis);  prargix(attrib);
-		starttrace();
+		OPENTRACE(glXGetConfig);  PRARGD(dpy);  PRARGV(vis);  PRARGIX(attrib);
+		STARTTRACE();
 
 	if((config = matchConfig(dpy, vis)) != 0)
 	{
@@ -1179,7 +1176,7 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 				*value = 1;
 			else *value = 0;
 		}
-		else retval = _glXGetFBConfigAttrib(_dpy3D, config, attrib, value);
+		else retval = _glXGetFBConfigAttrib(DPY3D, config, attrib, value);
 	}
 	else
 	{
@@ -1187,8 +1184,8 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 		if(attrib != GLX_USE_GL) retval = GLX_BAD_VISUAL;
 	}
 
-		stoptrace();  if(value) { prargix(*value); }  else { prargx(value); }
-		closetrace();
+		STOPTRACE();  if(value) { PRARGIX(*value); }  else { PRARGX(value); }
+		CLOSETRACE();
 
 	CATCH();
 	return retval;
@@ -1208,7 +1205,7 @@ Display *glXGetCurrentDisplay(void)
 
 	TRY();
 
-		opentrace(glXGetCurrentDisplay);  starttrace();
+		OPENTRACE(glXGetCurrentDisplay);  STARTTRACE();
 
 	GLXDrawable curdraw = _glXGetCurrentDrawable();
 	if(winhash.find(curdraw, vw)) dpy = vw->getX11Display();
@@ -1217,7 +1214,7 @@ Display *glXGetCurrentDisplay(void)
 		if(curdraw) dpy = glxdhash.getCurrentDisplay(curdraw);
 	}
 
-		stoptrace();  prargd(dpy);  closetrace();
+		STOPTRACE();  PRARGD(dpy);  CLOSETRACE();
 
 	CATCH();
 	return dpy;
@@ -1236,11 +1233,11 @@ GLXDrawable glXGetCurrentDrawable(void)
 
 	TRY();
 
-		opentrace(glXGetCurrentDrawable);  starttrace();
+		OPENTRACE(glXGetCurrentDrawable);  STARTTRACE();
 
 	if(winhash.find(draw, vw)) draw = vw->getX11Drawable();
 
-		stoptrace();  prargx(draw);  closetrace();
+		STOPTRACE();  PRARGX(draw);  CLOSETRACE();
 
 	CATCH();
 	return draw;
@@ -1254,11 +1251,11 @@ GLXDrawable glXGetCurrentReadDrawable(void)
 
 	TRY();
 
-		opentrace(glXGetCurrentReadDrawable);  starttrace();
+		OPENTRACE(glXGetCurrentReadDrawable);  STARTTRACE();
 
 	if(winhash.find(read, vw)) read = vw->getX11Drawable();
 
-		stoptrace();  prargx(read);  closetrace();
+		STOPTRACE();  PRARGX(read);  CLOSETRACE();
 
 	CATCH();
 	return read;
@@ -1279,11 +1276,11 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 
 	TRY();
 
-	if(isExcluded(dpy) || rcfghash.isOverlay(dpy, config))
+	if(IS_EXCLUDED(dpy) || rcfghash.isOverlay(dpy, config))
 		return _glXGetFBConfigAttrib(dpy, config, attribute, value);
 
-		opentrace(glXGetFBConfigAttrib);  prargd(dpy);  prargc(config);
-		prargix(attribute);  starttrace();
+		OPENTRACE(glXGetFBConfigAttrib);  PRARGD(dpy);  PRARGC(config);
+		PRARGIX(attribute);  STARTTRACE();
 
 	if(!dpy || !config || !value)
 	{
@@ -1291,7 +1288,7 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 		goto done;
 	}
 
-	retval = _glXGetFBConfigAttrib(_dpy3D, config, attribute, value);
+	retval = _glXGetFBConfigAttrib(DPY3D, config, attribute, value);
 
 	if(attribute == GLX_DRAWABLE_TYPE && retval == Success)
 	{
@@ -1330,8 +1327,8 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 	}
 
 	done:
-		stoptrace();  if(value) { prargix(*value); }  else { prargx(value); }
-		closetrace();
+		STOPTRACE();  if(value) { PRARGIX(*value); }  else { PRARGX(value); }
+		CLOSETRACE();
 
 	CATCH();
 	return retval;
@@ -1350,7 +1347,7 @@ GLXFBConfigSGIX glXGetFBConfigFromVisualSGIX(Display *dpy, XVisualInfo *vis)
 {
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXGetFBConfigFromVisualSGIX(dpy, vis);
 	else return matchConfig(dpy, vis);
 
@@ -1367,16 +1364,16 @@ GLXFBConfig *glXGetFBConfigs(Display *dpy, int screen, int *nelements)
 
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXGetFBConfigs(dpy, screen, nelements);
 
-		opentrace(glXGetFBConfigs);  prargd(dpy);  prargi(screen);
-		starttrace();
+		OPENTRACE(glXGetFBConfigs);  PRARGD(dpy);  PRARGI(screen);
+		STARTTRACE();
 
-	configs = _glXGetFBConfigs(_dpy3D, DefaultScreen(_dpy3D), nelements);
+	configs = _glXGetFBConfigs(DPY3D, DefaultScreen(DPY3D), nelements);
 
-		stoptrace();  if(configs && nelements) prargi(*nelements);
-		closetrace();
+		STOPTRACE();  if(configs && nelements) PRARGI(*nelements);
+		CLOSETRACE();
 
 	CATCH();
 	return configs;
@@ -1395,11 +1392,11 @@ void glXBindTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer,
 {
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXBindTexImageEXT(dpy, drawable, buffer, attrib_list);
 
-		opentrace(glXBindTexImageEXT);  prargd(dpy);  prargx(drawable);
-		prargi(buffer);  prargal13(attrib_list);  starttrace();
+		OPENTRACE(glXBindTexImageEXT);  PRARGD(dpy);  PRARGX(drawable);
+		PRARGI(buffer);  PRARGAL13(attrib_list);  STARTTRACE();
 
 	VirtualPixmap *vpm = NULL;
 	if((vpm = pmhash.find(dpy, drawable)) == NULL)
@@ -1413,20 +1410,20 @@ void glXBindTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer,
 		// 3D Pixmap (stored on the 3D X server.)
 		XImage *image = _XGetImage(dpy, vpm->getX11Drawable(), 0, 0,
 			vpm->getWidth(), vpm->getHeight(), AllPlanes, ZPixmap);
-		GC gc = XCreateGC(_dpy3D, vpm->get3DX11Pixmap(), 0, NULL);
+		GC gc = XCreateGC(DPY3D, vpm->get3DX11Pixmap(), 0, NULL);
 		if(gc && image)
-			XPutImage(_dpy3D, vpm->get3DX11Pixmap(), gc, image, 0, 0, 0, 0,
+			XPutImage(DPY3D, vpm->get3DX11Pixmap(), gc, image, 0, 0, 0, 0,
 				vpm->getWidth(), vpm->getHeight());
 		else
 			// Also trigger GLXBadPixmap error
 			drawable = 0;
-		if(gc) XFreeGC(_dpy3D, gc);
+		if(gc) XFreeGC(DPY3D, gc);
 		if(image) XDestroyImage(image);
 	}
 
-	_glXBindTexImageEXT(_dpy3D, drawable, buffer, attrib_list);
+	_glXBindTexImageEXT(DPY3D, drawable, buffer, attrib_list);
 
-		stoptrace();  closetrace();
+		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
 }
@@ -1436,15 +1433,15 @@ void glXReleaseTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer)
 {
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXReleaseTexImageEXT(dpy, drawable, buffer);
 
-		opentrace(glXReleaseTexImageEXT);  prargd(dpy);  prargx(drawable);
-		prargi(buffer);  starttrace();
+		OPENTRACE(glXReleaseTexImageEXT);  PRARGD(dpy);  PRARGX(drawable);
+		PRARGI(buffer);  STARTTRACE();
 
-	_glXReleaseTexImageEXT(_dpy3D, drawable, buffer);
+	_glXReleaseTexImageEXT(DPY3D, drawable, buffer);
 
-		stoptrace();  closetrace();
+		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
 }
@@ -1454,7 +1451,7 @@ void glXReleaseTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer)
 // function that we're interposing, we need to return the address of the
 // interposed function.
 
-#define checkfaked(f) \
+#define CHECK_FAKED(f) \
 	if(!strcmp((char *)procName, #f)) \
 	{ \
 		retval = (void (*)(void))f; \
@@ -1464,7 +1461,7 @@ void glXReleaseTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer)
 // For optional libGL symbols, check that the underlying function
 // actually exists in libGL before returning the interposed version of it.
 
-#define checkoptfaked(f) \
+#define CHECK_OPT_FAKED(f) \
 	if(!strcmp((char *)procName, #f)) \
 	{ \
 		CHECKSYM_NONFATAL(f) \
@@ -1481,114 +1478,114 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 
 	vglfaker::init();
 
-		opentrace(glXGetProcAddressARB);  prargs((char *)procName);  starttrace();
+		OPENTRACE(glXGetProcAddressARB);  PRARGS((char *)procName);  STARTTRACE();
 
 	if(procName)
 	{
 		// GLX 1.0
-		checkfaked(glXChooseVisual)
-		checkfaked(glXCopyContext)
-		checkfaked(glXCreateContext)
-		checkfaked(glXCreateGLXPixmap)
-		checkfaked(glXDestroyContext)
-		checkfaked(glXDestroyGLXPixmap)
-		checkfaked(glXGetConfig)
-		checkfaked(glXGetCurrentDrawable)
-		checkfaked(glXIsDirect)
-		checkfaked(glXMakeCurrent)
-		checkfaked(glXQueryExtension)
-		checkfaked(glXQueryVersion)
-		checkfaked(glXSwapBuffers)
-		checkfaked(glXUseXFont)
-		checkfaked(glXWaitGL)
+		CHECK_FAKED(glXChooseVisual)
+		CHECK_FAKED(glXCopyContext)
+		CHECK_FAKED(glXCreateContext)
+		CHECK_FAKED(glXCreateGLXPixmap)
+		CHECK_FAKED(glXDestroyContext)
+		CHECK_FAKED(glXDestroyGLXPixmap)
+		CHECK_FAKED(glXGetConfig)
+		CHECK_FAKED(glXGetCurrentDrawable)
+		CHECK_FAKED(glXIsDirect)
+		CHECK_FAKED(glXMakeCurrent)
+		CHECK_FAKED(glXQueryExtension)
+		CHECK_FAKED(glXQueryVersion)
+		CHECK_FAKED(glXSwapBuffers)
+		CHECK_FAKED(glXUseXFont)
+		CHECK_FAKED(glXWaitGL)
 
 		// GLX 1.1
-		checkfaked(glXGetClientString)
-		checkfaked(glXQueryServerString)
-		checkfaked(glXQueryExtensionsString)
+		CHECK_FAKED(glXGetClientString)
+		CHECK_FAKED(glXQueryServerString)
+		CHECK_FAKED(glXQueryExtensionsString)
 
 		// GLX 1.2
-		checkfaked(glXGetCurrentDisplay)
+		CHECK_FAKED(glXGetCurrentDisplay)
 
 		// GLX 1.3
-		checkfaked(glXChooseFBConfig)
-		checkfaked(glXCreateNewContext)
-		checkfaked(glXCreatePbuffer)
-		checkfaked(glXCreatePixmap)
-		checkfaked(glXCreateWindow)
-		checkfaked(glXDestroyPbuffer)
-		checkfaked(glXDestroyPixmap)
-		checkfaked(glXDestroyWindow)
-		checkfaked(glXGetCurrentReadDrawable)
-		checkfaked(glXGetFBConfigAttrib)
-		checkfaked(glXGetFBConfigs)
-		checkfaked(glXGetSelectedEvent)
-		checkfaked(glXGetVisualFromFBConfig)
-		checkfaked(glXMakeContextCurrent)
-		checkfaked(glXQueryContext)
-		checkfaked(glXQueryDrawable)
-		checkfaked(glXSelectEvent)
+		CHECK_FAKED(glXChooseFBConfig)
+		CHECK_FAKED(glXCreateNewContext)
+		CHECK_FAKED(glXCreatePbuffer)
+		CHECK_FAKED(glXCreatePixmap)
+		CHECK_FAKED(glXCreateWindow)
+		CHECK_FAKED(glXDestroyPbuffer)
+		CHECK_FAKED(glXDestroyPixmap)
+		CHECK_FAKED(glXDestroyWindow)
+		CHECK_FAKED(glXGetCurrentReadDrawable)
+		CHECK_FAKED(glXGetFBConfigAttrib)
+		CHECK_FAKED(glXGetFBConfigs)
+		CHECK_FAKED(glXGetSelectedEvent)
+		CHECK_FAKED(glXGetVisualFromFBConfig)
+		CHECK_FAKED(glXMakeContextCurrent)
+		CHECK_FAKED(glXQueryContext)
+		CHECK_FAKED(glXQueryDrawable)
+		CHECK_FAKED(glXSelectEvent)
 
 		// GLX 1.4
-		checkfaked(glXGetProcAddress)
+		CHECK_FAKED(glXGetProcAddress)
 
 		// GLX_ARB_create_context
-		checkoptfaked(glXCreateContextAttribsARB)
+		CHECK_OPT_FAKED(glXCreateContextAttribsARB)
 
 		// GLX_ARB_get_proc_address
-		checkfaked(glXGetProcAddressARB)
+		CHECK_FAKED(glXGetProcAddressARB)
 
 		// GLX_EXT_import_context
-		checkoptfaked(glXFreeContextEXT)
-		checkoptfaked(glXImportContextEXT)
-		checkoptfaked(glXQueryContextInfoEXT)
+		CHECK_OPT_FAKED(glXFreeContextEXT)
+		CHECK_OPT_FAKED(glXImportContextEXT)
+		CHECK_OPT_FAKED(glXQueryContextInfoEXT)
 
 		// GLX_EXT_swap_control
-		checkoptfaked(glXSwapIntervalEXT)
+		CHECK_OPT_FAKED(glXSwapIntervalEXT)
 
 		// GLX_EXT_texture_from_pixmap
-		checkoptfaked(glXBindTexImageEXT)
-		checkoptfaked(glXReleaseTexImageEXT)
+		CHECK_OPT_FAKED(glXBindTexImageEXT)
+		CHECK_OPT_FAKED(glXReleaseTexImageEXT)
 
 		// GLX_NV_swap_group
-		checkoptfaked(glXBindSwapBarrierNV)
-		checkoptfaked(glXJoinSwapGroupNV)
-		checkoptfaked(glXQueryFrameCountNV)
-		checkoptfaked(glXQueryMaxSwapGroupsNV)
-		checkoptfaked(glXQuerySwapGroupNV)
-		checkoptfaked(glXResetFrameCountNV)
+		CHECK_OPT_FAKED(glXBindSwapBarrierNV)
+		CHECK_OPT_FAKED(glXJoinSwapGroupNV)
+		CHECK_OPT_FAKED(glXQueryFrameCountNV)
+		CHECK_OPT_FAKED(glXQueryMaxSwapGroupsNV)
+		CHECK_OPT_FAKED(glXQuerySwapGroupNV)
+		CHECK_OPT_FAKED(glXResetFrameCountNV)
 
 		// GLX_SGI_make_current_read
-		checkfaked(glXGetCurrentReadDrawableSGI)
-		checkfaked(glXMakeCurrentReadSGI)
+		CHECK_FAKED(glXGetCurrentReadDrawableSGI)
+		CHECK_FAKED(glXMakeCurrentReadSGI)
 
 		// GLX_SGI_swap_control
-		checkoptfaked(glXSwapIntervalSGI)
+		CHECK_OPT_FAKED(glXSwapIntervalSGI)
 
 		// GLX_SGIX_fbconfig
-		checkfaked(glXChooseFBConfigSGIX)
-		checkfaked(glXCreateContextWithConfigSGIX)
-		checkfaked(glXCreateGLXPixmapWithConfigSGIX)
-		checkfaked(glXGetFBConfigAttribSGIX)
-		checkfaked(glXGetFBConfigFromVisualSGIX)
-		checkfaked(glXGetVisualFromFBConfigSGIX)
+		CHECK_FAKED(glXChooseFBConfigSGIX)
+		CHECK_FAKED(glXCreateContextWithConfigSGIX)
+		CHECK_FAKED(glXCreateGLXPixmapWithConfigSGIX)
+		CHECK_FAKED(glXGetFBConfigAttribSGIX)
+		CHECK_FAKED(glXGetFBConfigFromVisualSGIX)
+		CHECK_FAKED(glXGetVisualFromFBConfigSGIX)
 
 		// GLX_SGIX_pbuffer
-		checkfaked(glXCreateGLXPbufferSGIX)
-		checkfaked(glXDestroyGLXPbufferSGIX)
-		checkfaked(glXGetSelectedEventSGIX)
-		checkfaked(glXQueryGLXPbufferSGIX)
-		checkfaked(glXSelectEventSGIX)
+		CHECK_FAKED(glXCreateGLXPbufferSGIX)
+		CHECK_FAKED(glXDestroyGLXPbufferSGIX)
+		CHECK_FAKED(glXGetSelectedEventSGIX)
+		CHECK_FAKED(glXQueryGLXPbufferSGIX)
+		CHECK_FAKED(glXSelectEventSGIX)
 
 		// GLX_SUN_get_transparent_index
-		checkfaked(glXGetTransparentIndexSUN)
+		CHECK_FAKED(glXGetTransparentIndexSUN)
 
 		// OpenGL
-		checkfaked(glFinish)
-		checkfaked(glFlush)
-		checkfaked(glViewport)
-		checkfaked(glDrawBuffer)
-		checkfaked(glPopAttrib)
+		CHECK_FAKED(glFinish)
+		CHECK_FAKED(glFlush)
+		CHECK_FAKED(glViewport)
+		CHECK_FAKED(glDrawBuffer)
+		CHECK_FAKED(glPopAttrib)
 	}
 	if(!retval)
 	{
@@ -1596,7 +1593,7 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		retval = _glXGetProcAddress(procName);
 	}
 
-		stoptrace();  closetrace();
+		STOPTRACE();  CLOSETRACE();
 
 	return retval;
 }
@@ -1616,10 +1613,10 @@ void glXGetSelectedEvent(Display *dpy, GLXDrawable draw,
 {
 	TRY();
 
-	if(isExcluded(dpy) || winhash.isOverlay(dpy, draw))
+	if(IS_EXCLUDED(dpy) || winhash.isOverlay(dpy, draw))
 		return _glXGetSelectedEvent(dpy, draw, event_mask);
 
-	_glXGetSelectedEvent(_dpy3D, ServerDrawable(dpy, draw), event_mask);
+	_glXGetSelectedEvent(DPY3D, ServerDrawable(dpy, draw), event_mask);
 
 	CATCH();
 }
@@ -1641,11 +1638,11 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 
 	TRY();
 
-	if(isExcluded(dpy) || rcfghash.isOverlay(dpy, config))
+	if(IS_EXCLUDED(dpy) || rcfghash.isOverlay(dpy, config))
 		return _glXGetVisualFromFBConfig(dpy, config);
 
-		opentrace(glXGetVisualFromFBConfig);  prargd(dpy);  prargc(config);
-		starttrace();
+		OPENTRACE(glXGetVisualFromFBConfig);  PRARGD(dpy);  PRARGC(config);
+		STARTTRACE();
 
 	VisualID vid = 0;  int screen;
 	if(!dpy || !config) goto done;
@@ -1656,7 +1653,7 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 	vishash.add(dpy, vis, config);
 
 	done:
-		stoptrace();  prargv(vis);  closetrace();
+		STOPTRACE();  PRARGV(vis);  CLOSETRACE();
 
 	CATCH();
 	return vis;
@@ -1676,10 +1673,10 @@ GLXContext glXImportContextEXT(Display *dpy, GLXContextID contextID)
 {
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXImportContextEXT(dpy, contextID);
 
-	return _glXImportContextEXT(_dpy3D, contextID);
+	return _glXImportContextEXT(DPY3D, contextID);
 
 	CATCH();
 	return 0;
@@ -1695,15 +1692,15 @@ Bool glXIsDirect(Display *dpy, GLXContext ctx)
 
 	TRY();
 
-	if(isExcluded(dpy) || ctxhash.isOverlay(ctx))
+	if(IS_EXCLUDED(dpy) || ctxhash.isOverlay(ctx))
 		return _glXIsDirect(dpy, ctx);
 
-		opentrace(glXIsDirect);  prargd(dpy);  prargx(ctx);
-		starttrace();
+		OPENTRACE(glXIsDirect);  PRARGD(dpy);  PRARGX(ctx);
+		STARTTRACE();
 
-	direct = _glXIsDirect(_dpy3D, ctx);
+	direct = _glXIsDirect(DPY3D, ctx);
 
-		stoptrace();  prargi(direct);  closetrace();
+		STOPTRACE();  PRARGI(direct);  CLOSETRACE();
 
 	CATCH();
 	return direct;
@@ -1740,20 +1737,20 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	}
 	vglfaker::setExcludeCurrent(false);
 
-		opentrace(glXMakeCurrent);  prargd(dpy);  prargx(drawable);  prargx(ctx);
-		starttrace();
+		OPENTRACE(glXMakeCurrent);  PRARGD(dpy);  PRARGX(drawable);  PRARGX(ctx);
+		STARTTRACE();
 
 	// glXMakeCurrent() implies a glFinish() on the previous context, which is
 	// why we read back the front buffer here if it is dirty.
 	GLXDrawable curdraw = _glXGetCurrentDrawable();
-	if(_glXGetCurrentContext() && dpy3DIsCurrent()
+	if(_glXGetCurrentContext() && _glXGetCurrentDisplay() == DPY3D
 		&& curdraw && winhash.find(curdraw, vw))
 	{
 		VirtualWin *newvw;
 		if(drawable == 0 || !winhash.find(dpy, drawable, newvw)
 			|| newvw->getGLXDrawable() != curdraw)
 		{
-			if(drawingToFront() || vw->dirty)
+			if(DrawingToFront() || vw->dirty)
 				vw->readback(GL_FRONT, false, fconfig.sync);
 		}
 	}
@@ -1789,7 +1786,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		}
 	}
 
-	retval = _glXMakeContextCurrent(_dpy3D, drawable, drawable, ctx);
+	retval = _glXMakeContextCurrent(DPY3D, drawable, drawable, ctx);
 	if(fconfig.trace && retval)
 		renderer = (const char *)_glGetString(GL_RENDERER);
 	// The pixels in a new off-screen drawable are undefined, so we have to clear
@@ -1803,8 +1800,8 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	}
 
 	done:
-		stoptrace();  prargc(config);  prargx(drawable);  prargs(renderer);
-		closetrace();
+		STOPTRACE();  PRARGC(config);  PRARGX(drawable);  PRARGS(renderer);
+		CLOSETRACE();
 
 	CATCH();
 	return retval;
@@ -1839,20 +1836,20 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	}
 	vglfaker::setExcludeCurrent(false);
 
-		opentrace(glXMakeContextCurrent);  prargd(dpy);  prargx(draw);
-		prargx(read);  prargx(ctx);  starttrace();
+		OPENTRACE(glXMakeContextCurrent);  PRARGD(dpy);  PRARGX(draw);
+		PRARGX(read);  PRARGX(ctx);  STARTTRACE();
 
 	// glXMakeContextCurrent() implies a glFinish() on the previous context,
 	// which is why we read back the front buffer here if it is dirty.
 	GLXDrawable curdraw = _glXGetCurrentDrawable();
-	if(_glXGetCurrentContext() && dpy3DIsCurrent() && curdraw
+	if(_glXGetCurrentContext() && _glXGetCurrentDisplay() == DPY3D && curdraw
 		&& winhash.find(curdraw, vw))
 	{
 		VirtualWin *newvw;
 		if(draw == 0 || !winhash.find(dpy, draw, newvw)
 			|| newvw->getGLXDrawable() != curdraw)
 		{
-			if(drawingToFront() || vw->dirty)
+			if(DrawingToFront() || vw->dirty)
 				vw->readback(GL_FRONT, false, fconfig.sync);
 		}
 	}
@@ -1909,7 +1906,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 			}
 		}
 	}
-	retval = _glXMakeContextCurrent(_dpy3D, draw, read, ctx);
+	retval = _glXMakeContextCurrent(DPY3D, draw, read, ctx);
 	if(fconfig.trace && retval)
 		renderer = (const char *)_glGetString(GL_RENDERER);
 	if(winhash.find(draw, drawVW)) { drawVW->clear();  drawVW->cleanup(); }
@@ -1922,8 +1919,8 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	}
 
 	done:
-		stoptrace();  prargc(config);  prargx(draw);  prargx(read);
-		prargs(renderer);  closetrace();
+		STOPTRACE();  PRARGC(config);  PRARGX(draw);  PRARGX(read);
+		PRARGS(renderer);  CLOSETRACE();
 
 	CATCH();
 	return retval;
@@ -1946,15 +1943,15 @@ int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 
 	TRY();
 
-	if(isExcluded(dpy) || ctxhash.isOverlay(ctx))
+	if(IS_EXCLUDED(dpy) || ctxhash.isOverlay(ctx))
 		return _glXQueryContext(dpy, ctx, attribute, value);
 
-		opentrace(glXQueryContext);  prargd(dpy);  prargx(ctx);
-		prargix(attribute);  starttrace();
+		OPENTRACE(glXQueryContext);  PRARGD(dpy);  PRARGX(ctx);
+		PRARGIX(attribute);  STARTTRACE();
 
-	retval = _glXQueryContext(_dpy3D, ctx, attribute, value);
+	retval = _glXQueryContext(DPY3D, ctx, attribute, value);
 
-		stoptrace();  if(value) prargix(*value);  closetrace();
+		STOPTRACE();  if(value) PRARGIX(*value);  CLOSETRACE();
 
 	CATCH();
 	return retval;
@@ -1968,15 +1965,15 @@ int glXQueryContextInfoEXT(Display *dpy, GLXContext ctx, int attribute,
 
 	TRY();
 
-	if(isExcluded(dpy) || ctxhash.isOverlay(ctx))
+	if(IS_EXCLUDED(dpy) || ctxhash.isOverlay(ctx))
 		return _glXQueryContextInfoEXT(dpy, ctx, attribute, value);
 
-		opentrace(glXQueryContextInfoEXT);  prargd(dpy);  prargx(ctx);
-		prargix(attribute);  starttrace();
+		OPENTRACE(glXQueryContextInfoEXT);  PRARGD(dpy);  PRARGX(ctx);
+		PRARGIX(attribute);  STARTTRACE();
 
-	retval = _glXQueryContextInfoEXT(_dpy3D, ctx, attribute, value);
+	retval = _glXQueryContextInfoEXT(DPY3D, ctx, attribute, value);
 
-		stoptrace();  if(value) prargix(*value);  closetrace();
+		STOPTRACE();  if(value) PRARGIX(*value);  CLOSETRACE();
 
 	CATCH();
 	return retval;
@@ -1992,14 +1989,14 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 {
 	TRY();
 
-	if(isExcluded(dpy) || winhash.isOverlay(dpy, draw))
+	if(IS_EXCLUDED(dpy) || winhash.isOverlay(dpy, draw))
 	{
 		_glXQueryDrawable(dpy, draw, attribute, value);
 		return;
 	}
 
-		opentrace(glXQueryDrawable);  prargd(dpy);  prargx(draw);
-		prargix(attribute);  starttrace();
+		OPENTRACE(glXQueryDrawable);  PRARGD(dpy);  PRARGX(draw);
+		PRARGIX(attribute);  STARTTRACE();
 
 	// GLX_EXT_swap_control attributes
 	if(attribute == GLX_SWAP_INTERVAL_EXT && value)
@@ -2017,12 +2014,12 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 		goto done;
 	}
 
-	_glXQueryDrawable(_dpy3D, ServerDrawable(dpy, draw), attribute, value);
+	_glXQueryDrawable(DPY3D, ServerDrawable(dpy, draw), attribute, value);
 
 	done:
-		stoptrace();  prargx(ServerDrawable(dpy, draw));
-		if(value) { prargix(*value); }  else { prargx(value); }
-		closetrace();
+		STOPTRACE();  PRARGX(ServerDrawable(dpy, draw));
+		if(value) { PRARGIX(*value); }  else { PRARGX(value); }
+		CLOSETRACE();
 
 	CATCH();
 }
@@ -2041,10 +2038,10 @@ Bool glXQueryExtension(Display *dpy, int *error_base, int *event_base)
 {
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXQueryExtension(dpy, error_base, event_base);
 
-	return _glXQueryExtension(_dpy3D, error_base, event_base);
+	return _glXQueryExtension(DPY3D, error_base, event_base);
 
 	CATCH();
 	return False;
@@ -2057,7 +2054,7 @@ const char *glXQueryExtensionsString(Display *dpy, int screen)
 {
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXQueryExtensionsString(dpy, screen);
 
 	return getGLXExtensions();
@@ -2073,7 +2070,7 @@ const char *glXQueryServerString(Display *dpy, int screen, int name)
 {
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXQueryServerString(dpy, screen, name);
 
 	if(name == GLX_EXTENSIONS) return getGLXExtensions();
@@ -2095,10 +2092,10 @@ Bool glXQueryVersion(Display *dpy, int *major, int *minor)
 {
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXQueryVersion(dpy, major, minor);
 
-	return _glXQueryVersion(_dpy3D, major, minor);
+	return _glXQueryVersion(DPY3D, major, minor);
 
 	CATCH();
 	return False;
@@ -2112,10 +2109,10 @@ void glXSelectEvent(Display *dpy, GLXDrawable draw, unsigned long event_mask)
 {
 	TRY();
 
-	if(isExcluded(dpy) || winhash.isOverlay(dpy, draw))
+	if(IS_EXCLUDED(dpy) || winhash.isOverlay(dpy, draw))
 		return _glXSelectEvent(dpy, draw, event_mask);
 
-	_glXSelectEvent(_dpy3D, ServerDrawable(dpy, draw), event_mask);
+	_glXSelectEvent(DPY3D, ServerDrawable(dpy, draw), event_mask);
 
 	CATCH();
 }
@@ -2138,13 +2135,13 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
 
 	TRY();
 
-	if(isExcluded(dpy) || winhash.isOverlay(dpy, drawable))
+	if(IS_EXCLUDED(dpy) || winhash.isOverlay(dpy, drawable))
 	{
 		_glXSwapBuffers(dpy, drawable);
 		return;
 	}
 
-		opentrace(glXSwapBuffers);  prargd(dpy);  prargx(drawable);  starttrace();
+		OPENTRACE(glXSwapBuffers);  PRARGD(dpy);  PRARGX(drawable);  STARTTRACE();
 
 	fconfig.flushdelay = 0.;
 	if(winhash.find(dpy, drawable, vw))
@@ -2171,10 +2168,10 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
 			timer.start();
 		}
 	}
-	else _glXSwapBuffers(_dpy3D, drawable);
+	else _glXSwapBuffers(DPY3D, drawable);
 
-		stoptrace();  if(vw) { prargx(vw->getGLXDrawable()); }
-		closetrace();
+		STOPTRACE();  if(vw) { PRARGX(vw->getGLXDrawable()); }
+		CLOSETRACE();
 
 	CATCH();
 }
@@ -2191,12 +2188,12 @@ int glXGetTransparentIndexSUN(Display *dpy, Window overlay, Window underlay,
 
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXGetTransparentIndexSUN(dpy, overlay, underlay,
 			transparentIndex);
 
-		opentrace(glXGetTransparentIndexSUN);  prargd(dpy);  prargx(overlay);
-		prargx(underlay);  starttrace();
+		OPENTRACE(glXGetTransparentIndexSUN);  PRARGD(dpy);  PRARGX(overlay);
+		PRARGX(underlay);  STARTTRACE();
 
 	if(fconfig.transpixel >= 0)
 		*transparentIndex = fconfig.transpixel;
@@ -2210,10 +2207,10 @@ int glXGetTransparentIndexSUN(Display *dpy, Window overlay, Window underlay,
 	retval = True;
 
 	done:
-		stoptrace();
-		if(transparentIndex) { prargi(*transparentIndex); }
-		else { prargx(transparentIndex); }
-		closetrace();
+		STOPTRACE();
+		if(transparentIndex) { PRARGI(*transparentIndex); }
+		else { PRARGX(transparentIndex); }
+		CLOSETRACE();
 
 	CATCH();
 	return retval;
@@ -2227,10 +2224,10 @@ Bool glXJoinSwapGroupNV(Display *dpy, GLXDrawable drawable, GLuint group)
 {
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXJoinSwapGroupNV(dpy, drawable, group);
 
-	return _glXJoinSwapGroupNV(_dpy3D, ServerDrawable(dpy, drawable), group);
+	return _glXJoinSwapGroupNV(DPY3D, ServerDrawable(dpy, drawable), group);
 
 	CATCH();
 	return False;
@@ -2243,10 +2240,10 @@ Bool glXBindSwapBarrierNV(Display *dpy, GLuint group, GLuint barrier)
 {
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXBindSwapBarrierNV(dpy, group, barrier);
 
-	return _glXBindSwapBarrierNV(_dpy3D, group, barrier);
+	return _glXBindSwapBarrierNV(DPY3D, group, barrier);
 
 	CATCH();
 	return False;
@@ -2261,10 +2258,10 @@ Bool glXQuerySwapGroupNV(Display *dpy, GLXDrawable drawable, GLuint *group,
 {
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXQuerySwapGroupNV(dpy, drawable, group, barrier);
 
-	return _glXQuerySwapGroupNV(_dpy3D, ServerDrawable(dpy, drawable), group,
+	return _glXQuerySwapGroupNV(DPY3D, ServerDrawable(dpy, drawable), group,
 		barrier);
 
 	CATCH();
@@ -2279,10 +2276,10 @@ Bool glXQueryMaxSwapGroupsNV(Display *dpy, int screen, GLuint *maxGroups,
 {
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXQueryMaxSwapGroupsNV(dpy, screen, maxGroups, maxBarriers);
 
-	return _glXQueryMaxSwapGroupsNV(_dpy3D, DefaultScreen(_dpy3D), maxGroups,
+	return _glXQueryMaxSwapGroupsNV(DPY3D, DefaultScreen(DPY3D), maxGroups,
 		maxBarriers);
 
 	CATCH();
@@ -2296,10 +2293,10 @@ Bool glXQueryFrameCountNV(Display *dpy, int screen, GLuint *count)
 {
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXQueryFrameCountNV(dpy, screen, count);
 
-	return _glXQueryFrameCountNV(_dpy3D, DefaultScreen(_dpy3D), count);
+	return _glXQueryFrameCountNV(DPY3D, DefaultScreen(DPY3D), count);
 
 	CATCH();
 	return False;
@@ -2312,10 +2309,10 @@ Bool glXResetFrameCountNV(Display *dpy, int screen)
 {
 	TRY();
 
-	if(isExcluded(dpy))
+	if(IS_EXCLUDED(dpy))
 		return _glXResetFrameCountNV(dpy, screen);
 
-	return _glXResetFrameCountNV(_dpy3D, DefaultScreen(_dpy3D));
+	return _glXResetFrameCountNV(DPY3D, DefaultScreen(DPY3D));
 
 	CATCH();
 	return False;
@@ -2332,14 +2329,14 @@ void glXSwapIntervalEXT(Display *dpy, GLXDrawable drawable, int interval)
 	TRY();
 
 	// If drawable is an overlay, hand off to the 2D X Server
-	if(isExcluded(dpy) || winhash.isOverlay(dpy, drawable))
+	if(IS_EXCLUDED(dpy) || winhash.isOverlay(dpy, drawable))
 	{
 		_glXSwapIntervalEXT(dpy, drawable, interval);
 		return;
 	}
 
-		opentrace(glXSwapIntervalEXT);  prargd(dpy);  prargx(drawable);
-		prargi(interval);  starttrace();
+		OPENTRACE(glXSwapIntervalEXT);  PRARGD(dpy);  PRARGX(drawable);
+		PRARGI(interval);  STARTTRACE();
 
 	if(interval > VGL_MAX_SWAP_INTERVAL) interval = VGL_MAX_SWAP_INTERVAL;
 	if(interval < 0)
@@ -2354,7 +2351,7 @@ void glXSwapIntervalEXT(Display *dpy, GLXDrawable drawable, int interval)
 	// isn't a GLX window, but nVidia's implementation doesn't, so we emulate
 	// their behavior.
 
-		stoptrace();  closetrace();
+		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
 }
@@ -2369,7 +2366,7 @@ int glXSwapIntervalSGI(int interval)
 
 	if(vglfaker::getExcludeCurrent()) return _glXSwapIntervalSGI(interval);
 
-		opentrace(glXSwapIntervalSGI);  prargi(interval);  starttrace();
+		OPENTRACE(glXSwapIntervalSGI);  PRARGI(interval);  STARTTRACE();
 
 	TRY();
 
@@ -2381,7 +2378,7 @@ int glXSwapIntervalSGI(int interval)
 
 	CATCH();
 
-		stoptrace();  closetrace();
+		STOPTRACE();  CLOSETRACE();
 
 	return retval;
 }
@@ -2400,12 +2397,12 @@ void glXUseXFont(Font font, int first, int count, int list_base)
 
 	TRY();
 
-		opentrace(glXUseXFont);  prargx(font);  prargi(first);  prargi(count);
-		prargi(list_base);  starttrace();
+		OPENTRACE(glXUseXFont);  PRARGX(font);  PRARGI(first);  PRARGI(count);
+		PRARGI(list_base);  STARTTRACE();
 
 	Fake_glXUseXFont(font, first, count, list_base);
 
-		stoptrace();  closetrace();
+		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
 }

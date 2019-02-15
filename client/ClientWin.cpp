@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011, 2014 D. R. Commander
+// Copyright (C)2009, 2011, 2014, 2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -42,7 +42,7 @@ ClientWin::ClientWin(int dpynum_, Window window_, int drawMethod_,
 	initGL();
 	initX11();
 
-	_newcheck(thread = new Thread(this));
+	NEWCHECK(thread = new Thread(this));
 	thread->start();
 }
 
@@ -78,7 +78,7 @@ void ClientWin::initGL(void)
 	{
 		try
 		{
-			_newcheck(newfb = new GLFrame(dpystr, window));
+			NEWCHECK(newfb = new GLFrame(dpystr, window));
 			if(!newfb) throw("Could not allocate class instance");
 		}
 		catch(Error &e)
@@ -115,7 +115,7 @@ void ClientWin::initX11(void)
 	{
 		try
 		{
-			_newcheck(newfb = new FBXFrame(dpystr, window));
+			NEWCHECK(newfb = new FBXFrame(dpystr, window));
 			if(!newfb) throw("Could not allocate class instance");
 		}
 		catch(...)
@@ -155,8 +155,8 @@ Frame *ClientWin::getFrame(bool useXV)
 		{
 			char dpystr[80];
 			sprintf(dpystr, ":%d.0", dpynum);
-			_newcheck(xvframes[cfindex] = new XVFrame(dpystr, window));
-			if(!xvframes[cfindex]) _throw("Could not allocate class instance");
+			NEWCHECK(xvframes[cfindex] = new XVFrame(dpystr, window));
+			if(!xvframes[cfindex]) THROW("Could not allocate class instance");
 		}
 		f = (Frame *)xvframes[cfindex];
 	}

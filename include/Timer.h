@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2014, 2018 D. R. Commander
+// Copyright (C)2014, 2018-2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -91,7 +91,7 @@ namespace vglutil
 
 #ifdef _WIN32
 
-INLINE double getTime(void)
+INLINE double GetTime(void)
 {
 	LARGE_INTEGER frequency, time;
 	if(QueryPerformanceFrequency(&frequency) != 0)
@@ -104,7 +104,7 @@ INLINE double getTime(void)
 
 #else
 
-static INLINE double getTime(void)
+static INLINE double GetTime(void)
 {
 	struct timeval tv;
 	gettimeofday(&tv, (struct timezone *)NULL);

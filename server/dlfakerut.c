@@ -21,12 +21,12 @@
 #include <ctype.h>
 
 
-#define _throw(m) \
+#define THROW(m) \
 { \
 	retval = -1;  fprintf(stderr, "ERROR: %s\n", m);  goto bailout; \
 }
 
-#define _try(f) \
+#define TRY(f) \
 { \
 	if((f) < 0) \
 	{ \
@@ -66,8 +66,8 @@ void *gldllhnd = NULL;
 	dlerror(); \
 	_##s = (_##s##Type)dlsym(gldllhnd, #s); \
 	err = dlerror(); \
-	if(err) _throw(err) \
-	else if(!_##s) _throw("Could not load symbol " #s)
+	if(err) THROW(err) \
+	else if(!_##s) THROW("Could not load symbol " #s)
 
 int loadSymbols1(char *prefix)
 {
@@ -82,8 +82,8 @@ int loadSymbols1(char *prefix)
 	}
 	else gldllhnd = dlopen("libGL.so", RTLD_NOW);
 	err = dlerror();
-	if(err) _throw(err)
-	else if(!gldllhnd) _throw("Could not open libGL")
+	if(err) THROW(err)
+	else if(!gldllhnd) THROW("Could not open libGL")
 
 	LSYM(glXChooseVisual);
 	LSYM(glXCreateContext);
@@ -105,7 +105,7 @@ void unloadSymbols1(void)
 
 #define LSYM2(s) \
 	_##s = (_##s##Type)_glXGetProcAddressARB((const GLubyte *)#s); \
-	if(!_##s) _throw("Could not load symbol " #s)
+	if(!_##s) THROW("Could not load symbol " #s)
 
 int loadSymbols2(void)
 {
@@ -140,8 +140,8 @@ int nameMatchTest(void)
 	fprintf(stderr, "dlopen() name matching test:\n");
 	gldllhnd = dlopen("libGLdlfakerut.so", RTLD_NOW);
 	err = dlerror();
-	if(err) _throw(err)
-	else if(!gldllhnd) _throw("Could not open libGLdlfakerut")
+	if(err) THROW(err)
+	else if(!gldllhnd) THROW("Could not open libGLdlfakerut")
 
 	LSYM(myTestFunction);
 	_myTestFunction();
@@ -169,8 +169,8 @@ int deepBindTest(void)
 
 	gldllhnd = dlopen("libdeepbindtest.so", RTLD_NOW | RTLD_DEEPBIND);
 	err = dlerror();
-	if(err) _throw(err)
-	else if(!gldllhnd) _throw("Could not open libdlfakerut")
+	if(err) THROW(err)
+	else if(!gldllhnd) THROW("Could not open libdlfakerut")
 
 	LSYM(test);
 	_test("RTLD_DEEPBIND test");
@@ -196,7 +196,7 @@ int main(int argc, char **argv)
 
 	if(putenv((char *)"VGL_AUTOTEST=1") == -1
 		|| putenv((char *)"VGL_SPOIL=0") == -1)
-		_throw("putenv() failed!\n");
+		THROW("putenv() failed!\n");
 
 	env = getenv("LD_PRELOAD");
 	fprintf(stderr, "LD_PRELOAD = %s\n", env ? env : "(NULL)");
@@ -208,18 +208,18 @@ int main(int argc, char **argv)
 	#endif
 
 	fprintf(stderr, "\n");
-	_try(nameMatchTest());
+	TRY(nameMatchTest());
 
-	_try(loadSymbols1(prefix));
-	_try(test("dlopen() test"));
+	TRY(loadSymbols1(prefix));
+	TRY(test("dlopen() test"));
 
-	_try(loadSymbols2());
-	_try(test("glXGetProcAddressARB() test"));
+	TRY(loadSymbols2());
+	TRY(test("glXGetProcAddressARB() test"));
 
 	unloadSymbols1();
 
 	#ifdef RTLD_DEEPBIND
-	_try(deepBindTest());
+	TRY(deepBindTest());
 	#endif
 
 	bailout:

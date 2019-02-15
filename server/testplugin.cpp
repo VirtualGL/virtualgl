@@ -55,7 +55,7 @@ void *RRTransInit(Display *dpy, Window win_, FakerConfig *fconfig_)
 	{
 		fconfig = fconfig_;
 		win = win_;
-		_newcheck(handle = (void *)(new VGLTrans()));
+		NEWCHECK(handle = (void *)(new VGLTrans()));
 	}
 	catch(Error &e)
 	{
@@ -71,7 +71,7 @@ int RRTransConnect(void *handle, char *receiverName, int port)
 	try
 	{
 		VGLTrans *vglconn = (VGLTrans *)handle;
-		if(!vglconn) _throw("Invalid handle");
+		if(!vglconn) THROW("Invalid handle");
 		vglconn->connect(receiverName, port);
 	}
 	catch(Error &e)
@@ -88,9 +88,9 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 	try
 	{
 		VGLTrans *vglconn = (VGLTrans *)handle;
-		if(!vglconn) _throw("Invalid handle");
+		if(!vglconn) THROW("Invalid handle");
 		RRFrame *frame;
-		_newcheck(frame = new RRFrame);
+		NEWCHECK(frame = new RRFrame);
 		memset(frame, 0, sizeof(RRFrame));
 		int compress = fconfig->compress;
 		if(compress == RRCOMP_PROXY || compress == RRCOMP_RGB)
@@ -123,7 +123,7 @@ int RRTransReady(void *handle)
 	try
 	{
 		VGLTrans *vglconn = (VGLTrans *)handle;
-		if(!vglconn) _throw("Invalid handle");
+		if(!vglconn) THROW("Invalid handle");
 		ret = (int)vglconn->isReady();
 	}
 	catch(Error &e)
@@ -140,7 +140,7 @@ int RRTransSynchronize(void *handle)
 	try
 	{
 		VGLTrans *vglconn = (VGLTrans *)handle;
-		if(!vglconn) _throw("Invalid handle");
+		if(!vglconn) THROW("Invalid handle");
 		vglconn->synchronize();
 	}
 	catch(Error &e)
@@ -157,10 +157,10 @@ int RRTransSendFrame(void *handle, RRFrame *frame, int sync)
 	try
 	{
 		VGLTrans *vglconn = (VGLTrans *)handle;
-		if(!vglconn) _throw("Invalid handle");
+		if(!vglconn) THROW("Invalid handle");
 		Frame *f;
 		if(!frame || (f = (Frame *)frame->opaque) == NULL)
-			_throw("Invalid frame handle");
+			THROW("Invalid frame handle");
 		f->hdr.qual = fconfig->qual;
 		f->hdr.subsamp = fconfig->subsamp;
 		f->hdr.winid = win;
@@ -181,7 +181,7 @@ int RRTransDestroy(void *handle)
 	try
 	{
 		VGLTrans *vglconn = (VGLTrans *)handle;
-		if(!vglconn) _throw("Invalid handle");
+		if(!vglconn) THROW("Invalid handle");
 		delete vglconn;
 	}
 	catch(Error &e)
