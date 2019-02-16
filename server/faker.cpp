@@ -180,6 +180,17 @@ bool isDisplayStringExcluded(char *name)
 	return false;
 }
 
+
+extern "C" {
+
+int deletePrivate(XExtData *extData)
+{
+	if(extData && extData->private_data) delete extData->private_data;
+	return 0;
+}
+
+}
+
 }  // namespace
 
 

@@ -488,6 +488,19 @@ Display *XOpenDisplay(_Xconst char *name)
 		extData->number = codes->extension;
 		XAddToExtensionList(XEHeadOfExtensionList(obj), extData);
 
+		// Extension code 2 stores the mutex for a Display.
+		if(!(codes = XAddExtension(dpy))
+			|| !(extData = (XExtData *)calloc(1, sizeof(XExtData))))
+			THROW("Memory allocation error");
+		extData->private_data = (XPointer)(new vglutil::CriticalSection());
+		extData->number = codes->extension;
+		extData->free_private = vglfaker::deletePrivate;
+		XAddToExtensionList(XEHeadOfExtensionList(obj), extData);
+
+		// Extension code 3 stores the visual attribute table for a Screen.
+		if(!(codes = XAddExtension(dpy)))
+			THROW("Memory allocation error");
+
 		if(!excludeDisplay && strlen(fconfig.vendor) > 0)
 			ServerVendor(dpy) = strdup(fconfig.vendor);
 	}

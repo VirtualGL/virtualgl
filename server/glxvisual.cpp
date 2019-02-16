@@ -29,15 +29,23 @@ using namespace vglutil;
 typedef struct
 {
 	VisualID visualID;
-	int depth, c_class;
+	int depth, c_class, nVisuals;
 	int level, isStereo, isDB, isGL, isTrans;
 	int transIndex, transRed, transGreen, transBlue, transAlpha;
 } VisAttrib;
 
-static Display *vaDisplay = NULL;
-static int vaScreen = -1, vaEntries = 0;
-static CriticalSection vaMutex;
-static VisAttrib *va;
+
+#define GET_VA_TABLE() \
+	VisAttrib *va;  int vaEntries; \
+	XEDataObject obj; \
+	XExtData *extData; \
+	\
+	obj.screen = XScreenOfDisplay(dpy, screen); \
+	extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 3); \
+	if(!extData) \
+		THROW("Could not retrieve visual attribute table for screen"); \
+	va = (VisAttrib *)extData->private_data; \
+	vaEntries = va[0].nVisuals;
 
 
 static void buildVisAttribTable(Display *dpy, int screen)
@@ -47,12 +55,21 @@ static void buildVisAttribTable(Display *dpy, int screen)
 	XVisualInfo *visuals = NULL, vtemp;
 	Atom atom = 0;
 	int len = 10000;
+	VisAttrib *va = NULL;
+	XEDataObject obj;
+	XExtData *extData;
+	obj.screen = XScreenOfDisplay(dpy, screen);
+
+	if(dpy == vglfaker::dpy3D)
+		THROW("glxvisual::buildVisAttribTable() called with 3D X server handle (this should never happen)");
 
 	try
 	{
-		CriticalSection::SafeLock l(vaMutex);
+		CriticalSection::SafeLock l(vglfaker::getDisplayCS(dpy));
 
-		if(dpy == vaDisplay && screen == vaScreen) return;
+		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 3);
+		if(extData && extData->private_data) return;
+
 		if(fconfig.probeglx
 			&& _XQueryExtension(dpy, "GLX", &majorOpcode, &firstEvent, &firstError)
 			&& majorOpcode >= 0 && firstEvent >= 0 && firstError >= 0)
@@ -62,16 +79,15 @@ static void buildVisAttribTable(Display *dpy, int screen)
 			|| nVisuals == 0)
 			THROW("No visuals found on display");
 
-		if(va) { delete [] va;  va = NULL; }
-		va = new VisAttrib[nVisuals];
-		vaEntries = nVisuals;
-		memset(va, 0, sizeof(VisAttrib) * nVisuals);
+		if(!(va = (VisAttrib *)calloc(nVisuals, sizeof(VisAttrib))))
+			THROW("Memory allocation error");
 
 		for(int i = 0; i < nVisuals; i++)
 		{
 			va[i].visualID = visuals[i].visualid;
 			va[i].depth = visuals[i].depth;
 			va[i].c_class = visuals[i].c_class;
+			va[i].nVisuals = nVisuals;
 		}
 
 		if((atom = XInternAtom(dpy, "SERVER_OVERLAY_VISUALS", True)) != None)
@@ -136,13 +152,17 @@ static void buildVisAttribTable(Display *dpy, int screen)
 		}
 
 		XFree(visuals);
-		vaDisplay = dpy;  vaScreen = screen;
+
+		if(!(extData = (XExtData *)calloc(1, sizeof(XExtData))))
+			THROW("Memory allocation error");
+		extData->private_data = (XPointer)va;
+		extData->number = 3;
+		XAddToExtensionList(XEHeadOfExtensionList(obj), extData);
 	}
 	catch(...)
 	{
 		if(visuals) XFree(visuals);
-		if(va) { delete [] va;  va = NULL; }
-		vaDisplay = NULL;  vaScreen = -1;  vaEntries = 0;
+		if(va) free(va);
 		throw;
 	}
 }
@@ -286,6 +306,7 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[], int &c_class,
 int visAttrib2D(Display *dpy, int screen, VisualID vid, int attribute)
 {
 	buildVisAttribTable(dpy, screen);
+	GET_VA_TABLE()
 
 	for(int i = 0; i < vaEntries; i++)
 	{
@@ -337,6 +358,7 @@ VisualID matchVisual2D(Display *dpy, int screen, int depth, int c_class,
 	if(!dpy) return 0;
 
 	buildVisAttribTable(dpy, screen);
+	GET_VA_TABLE()
 
 	// Try to find an exact match
 	for(tryStereo = 1; tryStereo >= 0; tryStereo--)

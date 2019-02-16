@@ -66,6 +66,23 @@ namespace vglfaker
 
 		return *(bool *)extData->private_data;
 	}
+
+	extern "C" int deletePrivate(XExtData *extData);
+
+	INLINE vglutil::CriticalSection &getDisplayCS(Display *dpy)
+	{
+		XEDataObject obj = { dpy };
+		XExtData *extData;
+
+		// The 3D X server may have its own extensions that conflict with ours.
+		if(dpy == dpy3D)
+			THROW("vglfaker::getDisplayCS() called with 3D X server handle (this should never happen)");
+		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 2);
+		ERRIFNOT(extData);
+		ERRIFNOT(extData->private_data);
+
+		return *(vglutil::CriticalSection *)extData->private_data;
+	}
 }
 
 #define DPY3D  vglfaker::init3D()
