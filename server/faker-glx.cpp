@@ -25,7 +25,6 @@
 #include "ReverseConfigHash.h"
 #include "VisualHash.h"
 #include "WindowHash.h"
-#include "DisplayHash.h"
 #include "rr.h"
 #include "faker.h"
 #include "glxvisual.h"
@@ -1699,7 +1698,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		vglfaker::setExcludeCurrent(true);
 		return retval;
 	}
-	if(dpyhash.find(dpy))
+	if(vglfaker::isDisplayExcluded(dpy))
 	{
 		vglfaker::setExcludeCurrent(true);
 		return _glXMakeCurrent(dpy, drawable, ctx);
@@ -1798,7 +1797,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		vglfaker::setExcludeCurrent(true);
 		return retval;
 	}
-	if(dpyhash.find(dpy))
+	if(vglfaker::isDisplayExcluded(dpy))
 	{
 		vglfaker::setExcludeCurrent(true);
 		return _glXMakeContextCurrent(dpy, draw, read, ctx);

@@ -50,13 +50,29 @@ namespace vglfaker
 	extern long getAutotestDrawable();
 	extern void setAutotestDrawable(long d);
 
-	extern bool excludeDisplay(char *name);
+	extern bool isDisplayStringExcluded(char *name);
+
+	INLINE bool isDisplayExcluded(Display *dpy)
+	{
+		XEDataObject obj = { dpy };
+		XExtData *extData;
+
+		// The 3D X server may have its own extensions that conflict with ours.
+		if(dpy == dpy3D)
+			THROW("vglfaker::isDisplayExcluded() called with 3D X server handle (this should never happen)");
+		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 1);
+		ERRIFNOT(extData);
+		ERRIFNOT(extData->private_data);
+
+		return *(bool *)extData->private_data;
+	}
 }
 
 #define DPY3D  vglfaker::init3D()
 
 #define IS_EXCLUDED(dpy) \
-	(vglfaker::deadYet || vglfaker::getFakerLevel() > 0 || dpyhash.find(dpy))
+	(vglfaker::deadYet || vglfaker::getFakerLevel() > 0 \
+		|| vglfaker::isDisplayExcluded(dpy))
 
 #define IS_FRONT(drawbuf) \
 	(drawbuf == GL_FRONT || drawbuf == GL_FRONT_AND_BACK \

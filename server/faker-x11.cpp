@@ -13,7 +13,6 @@
  * wxWindows Library License for more details.
  */
 
-#include "DisplayHash.h"
 #include "PixmapHash.h"
 #include "VisualHash.h"
 #include "WindowHash.h"
@@ -70,7 +69,6 @@ int XCloseDisplay(Display *dpy)
 	#endif
 
 	winhash.remove(dpy);
-	dpyhash.remove(dpy);
 	retval = _XCloseDisplay(dpy);
 
 		STOPTRACE();  CLOSETRACE();
@@ -475,9 +473,22 @@ Display *XOpenDisplay(_Xconst char *name)
 	dpy = _XOpenDisplay(name);
 	if(dpy)
 	{
-		if(vglfaker::excludeDisplay(DisplayString(dpy)))
-			dpyhash.add(dpy);
-		else if(strlen(fconfig.vendor) > 0)
+		XExtCodes *codes;
+		XEDataObject obj = { dpy };
+		XExtData *extData;
+		bool excludeDisplay =
+			vglfaker::isDisplayStringExcluded(DisplayString(dpy));
+
+		// Extension code 1 stores the excluded status for a Display.
+		if(!(codes = XAddExtension(dpy))
+			|| !(extData = (XExtData *)calloc(1, sizeof(XExtData)))
+			|| !(extData->private_data = (XPointer)malloc(sizeof(bool))))
+			THROW("Memory allocation error");
+		*(bool *)extData->private_data = excludeDisplay;
+		extData->number = codes->extension;
+		XAddToExtensionList(XEHeadOfExtensionList(obj), extData);
+
+		if(!excludeDisplay && strlen(fconfig.vendor) > 0)
 			ServerVendor(dpy) = strdup(fconfig.vendor);
 	}
 

@@ -15,7 +15,6 @@
 
 #include "WindowHash.h"
 #include "XCBConnHash.h"
-#include "DisplayHash.h"
 #include "faker.h"
 #include "vglconfigLauncher.h"
 
@@ -42,7 +41,7 @@ const xcb_query_extension_reply_t *
 
 	if(!vglfaker::deadYet && ext && !strcmp(ext->name, "GLX") && fconfig.fakeXCB
 		&& vglfaker::getFakerLevel() == 0
-		&& !dpyhash.find(xcbconnhash.getX11Display(conn)))
+		&& !vglfaker::isDisplayExcluded(xcbconnhash.getX11Display(conn)))
 	{
 			OPENTRACE(xcb_get_extension_data);  PRARGX(conn);  PRARGS(ext->name);
 			PRARGI(ext->global_id);  STARTTRACE();
@@ -81,7 +80,7 @@ xcb_glx_query_version_cookie_t
 	// turn call XCB functions) from one of its shared library destructors,
 	// which is executed after the VirtualGL Faker has shut down.
 	if(vglfaker::deadYet || !fconfig.fakeXCB || vglfaker::getFakerLevel() > 0
-		|| dpyhash.find(xcbconnhash.getX11Display(conn)))
+		|| vglfaker::isDisplayExcluded(xcbconnhash.getX11Display(conn)))
 		return _xcb_glx_query_version(conn, major_version, minor_version);
 
 		OPENTRACE(xcb_glx_query_version);  PRARGX(conn);  PRARGI(major_version);
@@ -108,7 +107,7 @@ xcb_glx_query_version_reply_t *
 	TRY();
 
 	if(vglfaker::deadYet || !fconfig.fakeXCB || vglfaker::getFakerLevel() > 0
-		|| dpyhash.find(xcbconnhash.getX11Display(conn)))
+		|| vglfaker::isDisplayExcluded(xcbconnhash.getX11Display(conn)))
 		return _xcb_glx_query_version_reply(conn, cookie, error);
 
 		OPENTRACE(xcb_glx_query_version_reply);  PRARGX(conn);
@@ -156,7 +155,7 @@ static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *e)
 			xcb_configure_notify_event_t *cne = (xcb_configure_notify_event_t *)e;
 			Display *dpy = xcbconnhash.getX11Display(conn);
 
-			if(!dpy || dpyhash.find(dpy)) break;
+			if(!dpy || vglfaker::isDisplayExcluded(dpy)) break;
 
 			vw = winhash.find(dpy, cne->window);
 			if(!vw) break;
@@ -175,7 +174,7 @@ static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *e)
 			xcb_key_press_event_t *kpe = (xcb_key_press_event_t *)e;
 			Display *dpy = xcbconnhash.getX11Display(conn);
 
-			if(!dpy || !fconfig.gui || dpyhash.find(dpy)) break;
+			if(!dpy || !fconfig.gui || vglfaker::isDisplayExcluded(dpy)) break;
 
 			xcb_key_symbols_t *keysyms = _xcb_key_symbols_alloc(conn);
 			if(!keysyms) break;
@@ -208,7 +207,7 @@ static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *e)
 
 			if(!dpy || !protoAtom || !deleteAtom
 				|| cme->type != protoAtom || cme->data.data32[0] != deleteAtom
-				|| dpyhash.find(dpy))
+				|| vglfaker::isDisplayExcluded(dpy))
 				break;
 
 			vw = winhash.find(dpy, cme->window);
@@ -272,7 +271,7 @@ void XSetEventQueueOwner(Display *dpy, enum XEventQueueOwner owner)
 
 	TRY();
 
-	if(vglfaker::deadYet || dpyhash.find(dpy))
+	if(vglfaker::deadYet || vglfaker::isDisplayExcluded(dpy))
 		return _XSetEventQueueOwner(dpy, owner);
 
 		OPENTRACE(XSetEventQueueOwner);  PRARGD(dpy);  PRARGI(owner);

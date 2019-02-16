@@ -17,7 +17,6 @@
 #include "Mutex.h"
 #include "ConfigHash.h"
 #include "ContextHash.h"
-#include "DisplayHash.h"
 #include "GLXDrawableHash.h"
 #include "GlobalCriticalSection.h"
 #include "PixmapHash.h"
@@ -56,7 +55,6 @@ static void cleanup(void)
 	if(ContextHash::isAlloc()) ctxhash.kill();
 	if(GLXDrawableHash::isAlloc()) glxdhash.kill();
 	if(WindowHash::isAlloc()) winhash.kill();
-	if(DisplayHash::isAlloc()) dpyhash.kill();
 	unloadSymbols();
 }
 
@@ -164,7 +162,7 @@ Display *init3D(void)
 }
 
 
-bool excludeDisplay(char *name)
+bool isDisplayStringExcluded(char *name)
 {
 	fconfig_reloadenv();
 

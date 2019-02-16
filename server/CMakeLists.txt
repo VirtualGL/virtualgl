@@ -52,7 +52,6 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile
 set(FAKER_SOURCES
 	ConfigHash.cpp
 	ContextHash.cpp
-	DisplayHash.cpp
 	faker.cpp
 	faker-gl.cpp
 	faker-glx.cpp
