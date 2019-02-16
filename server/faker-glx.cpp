@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011-2018 D. R. Commander
+ * Copyright (C)2009, 2011-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -136,17 +136,26 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 			free(str);
 		}
 
-		configs = glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), attribs, &n);
+			opentrace(Choosing FB config for visual with unknown OpenGL attributes);
+			if(fconfig.trace) vglout.print("VGL_DEFAULTFBCONFIG ");
+			prargal13(attribs);  starttrace();
+
+		configs = _glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), attribs, &n);
 		if((!configs || n < 1) && attribs[11])
 		{
 			attribs[11] = 0;
-			configs = glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), attribs, &n);
+			if(fconfig.trace) vglout.print("[failed, trying mono] ");
+			configs = _glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), attribs, &n);
 		}
 		if((!configs || n < 1) && attribs[1])
 		{
 			attribs[1] = 0;
-			configs = glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), attribs, &n);
+			if(fconfig.trace) vglout.print("[failed, trying single-buffered] ");
+			configs = _glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), attribs, &n);
 		}
+
+			stoptrace();  prargc(configs[0]);  closetrace();
+
 		if(!configs || n < 1) return 0;
 		config = configs[0];
 		XFree(configs);
