@@ -14,7 +14,6 @@
  */
 
 #include "PixmapHash.h"
-#include "VisualHash.h"
 #include "WindowHash.h"
 #include "faker.h"
 #include "vglconfigLauncher.h"
@@ -303,20 +302,6 @@ int XDestroyWindow(Display *dpy, Window win)
 }
 
 
-// If we're freeing a visual that is hashed to an FB config, then remove the
-// corresponding hash entry.
-
-int XFree(void *data)
-{
-	int ret = 0;
-	TRY();
-	ret = _XFree(data);
-	if(data && !vglfaker::deadYet) vishash.remove(NULL, (XVisualInfo *)data);
-	CATCH();
-	return ret;
-}
-
-
 // Chromium is mainly to blame for this one.  Since it is using separate
 // processes to do 3D and X11 rendering, the 3D process will call
 // XGetGeometry() repeatedly to obtain the window size, and since the 3D
@@ -498,6 +483,11 @@ Display *XOpenDisplay(_Xconst char *name)
 		XAddToExtensionList(XEHeadOfExtensionList(obj), extData);
 
 		// Extension code 3 stores the visual attribute table for a Screen.
+		if(!(codes = XAddExtension(dpy)))
+			THROW("Memory allocation error");
+
+		// Extension code 4 stores the most recent matching GLXFBConfig for a
+		// Visual.
 		if(!(codes = XAddExtension(dpy)))
 			THROW("Memory allocation error");
 

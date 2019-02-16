@@ -117,7 +117,6 @@
 		XCreateSimpleWindow;
 		XDestroySubwindows;
 		XDestroyWindow;
-		XFree;
 		XGetGeometry;
 		XGetImage;
 		XListExtensions;

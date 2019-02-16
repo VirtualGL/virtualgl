@@ -21,11 +21,11 @@
 #include "GlobalCriticalSection.h"
 #include "PixmapHash.h"
 #include "ReverseConfigHash.h"
-#include "VisualHash.h"
 #include "WindowHash.h"
 #include "fakerconfig.h"
 #include "threadlocal.h"
 #include <dlfcn.h>
+#include "faker.h"
 
 
 using namespace vglutil;
@@ -49,7 +49,6 @@ VGL_THREAD_LOCAL(AutotestDrawable, long, 0)
 static void cleanup(void)
 {
 	if(PixmapHash::isAlloc()) pmhash.kill();
-	if(VisualHash::isAlloc()) vishash.kill();
 	if(ConfigHash::isAlloc()) cfghash.kill();
 	if(ReverseConfigHash::isAlloc()) rcfghash.kill();
 	if(ContextHash::isAlloc()) ctxhash.kill();
@@ -189,6 +188,32 @@ int deletePrivate(XExtData *extData)
 	return 0;
 }
 
+}
+
+
+void setConfigForVisual(Display *dpy, XVisualInfo *vis, GLXFBConfig config)
+{
+	XEDataObject obj;
+	obj.visual = vis ? vis->visual : NULL;
+	XExtData *extData;
+
+	// The 3D X server may have its own extensions that conflict with ours.
+	if(dpy == dpy3D)
+		THROW("vglfaker::setConfigForVisual() called with 3D X server handle (this should never happen)");
+	vglutil::CriticalSection::SafeLock l(getDisplayCS(dpy));
+
+	extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 4);
+	if(!extData || !extData->private_data)
+	{
+		if(!(extData = (XExtData *)calloc(1, sizeof(XExtData)))
+			|| !(extData->private_data = (XPointer)malloc(sizeof(GLXFBConfig))))
+			THROW("Memory allocation error");
+		*(GLXFBConfig *)extData->private_data = config;
+		extData->number = 4;
+		XAddToExtensionList(XEHeadOfExtensionList(obj), extData);
+	}
+	else
+		*(GLXFBConfig *)extData->private_data = config;
 }
 
 }  // namespace

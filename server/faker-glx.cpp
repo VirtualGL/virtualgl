@@ -23,7 +23,6 @@
 #include "GLXDrawableHash.h"
 #include "PixmapHash.h"
 #include "ReverseConfigHash.h"
-#include "VisualHash.h"
 #include "WindowHash.h"
 #include "rr.h"
 #include "faker.h"
@@ -63,8 +62,7 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 	GLXFBConfig config = 0, *configs = NULL;  int n = 0;
 
 	if(!dpy || !vis) return 0;
-	if(!(config = vishash.getConfig(dpy, vis))
-		&& !(config = vishash.mostRecentConfig(dpy, vis)))
+	if(!(config = vglfaker::getConfigForVisual(dpy, vis)))
 	{
 		// Punt.  We can't figure out where the visual came from
 		int defaultAttribs[] = { GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8,
@@ -157,7 +155,7 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 		XFree(configs);
 		if(config)
 		{
-			vishash.add(dpy, vis, config);
+			vglfaker::setConfigForVisual(dpy, vis, config);
 			cfghash.add(dpy, config, vis->visualid);
 		}
 	}
@@ -463,7 +461,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	vis = glxvisual::visualFromID(dpy, screen, vid);
 	if(!vis) goto done;
 
-	if((prevConfig = vishash.getConfig(dpy, vis))
+	if((prevConfig = vglfaker::getConfigForVisual(dpy, vis))
 		&& FBCID(config) != FBCID(prevConfig) && fconfig.trace)
 		vglout.println("[VGL] WARNING: Visual 0x%.2x was previously mapped to FB config 0x%.2x and is now mapped to 0x%.2x\n",
 			vis->visualid, FBCID(prevConfig), FBCID(config));
@@ -471,7 +469,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	// Hash the FB config and the visual so that we can look up the FB config
 	// whenever the appplication subsequently passes the visual to
   // glXCreateContext() or other functions.
-	vishash.add(dpy, vis, config);
+	vglfaker::setConfigForVisual(dpy, vis, config);
 
 	done:
 		STOPTRACE();  PRARGV(vis);  PRARGC(config);  CLOSETRACE();
@@ -1618,7 +1616,7 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 	if(!vid) goto done;
 	vis = glxvisual::visualFromID(dpy, DefaultScreen(dpy), vid);
 	if(!vis) goto done;
-	vishash.add(dpy, vis, config);
+	vglfaker::setConfigForVisual(dpy, vis, config);
 
 	done:
 		STOPTRACE();  PRARGV(vis);  CLOSETRACE();
