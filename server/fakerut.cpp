@@ -1073,16 +1073,34 @@ int visTest(void)
 			if(!configs[i]) continue;
 			try
 			{
-				int renderType, visualType;
+				int drawableType, renderType, transparentType, visualID, visualType,
+					xRenderable;
 				fbcid = cfgid(dpy, configs[i]);
-				GET_CFG_ATTRIB(configs[i], GLX_RENDER_TYPE, renderType);
-				GET_CFG_ATTRIB(configs[i], GLX_X_VISUAL_TYPE, visualType);
-				if((renderType & GLX_RGBA_BIT) == 0 || visualType == GLX_NONE)
+				// The old fglrx driver unfortunately assigns the same FB config ID to
+				// multiple FB configs with different attributes, some of which support
+				// X rendering and some of which don't.  Thus, we skip the validation
+				// of visual matching for duplicate FB config IDs, since VirtualGL is
+				// likely to hash those incorrectly.
+				if(i > 0 && cfgid(dpy, configs[i]) == cfgid(dpy, configs[i - 1]))
 					continue;
-				if(!(visuals[i] = glXGetVisualFromFBConfig(dpy, configs[i])))
+				GET_CFG_ATTRIB(configs[i], GLX_DRAWABLE_TYPE, drawableType);
+				GET_CFG_ATTRIB(configs[i], GLX_RENDER_TYPE, renderType);
+				GET_CFG_ATTRIB(configs[i], GLX_TRANSPARENT_TYPE, transparentType);
+				GET_CFG_ATTRIB(configs[i], GLX_VISUAL_ID, visualID);
+				GET_CFG_ATTRIB(configs[i], GLX_X_VISUAL_TYPE, visualType);
+				GET_CFG_ATTRIB(configs[i], GLX_X_RENDERABLE, xRenderable);
+				visuals[i] = glXGetVisualFromFBConfig(dpy, configs[i]);
+				// VirtualGL should return a visual only for opaque GLXFBConfigs that
+				// support X rendering.
+				bool hasVis = (visuals[i] != NULL);
+				bool shouldHaveVis = (drawableType & GLX_WINDOW_BIT) != 0
+					&& (renderType & GLX_RGBA_BIT) != 0 && transparentType == GLX_NONE
+					&& visualID != 0 && visualType != GLX_NONE && xRenderable != 0;
+				if(hasVis != shouldHaveVis)
 				{
 					printf("CFG 0x%.2x:  ", fbcid);
-					_error("No matching X visual for CFG");
+					_error(hasVis ? "CFG shouldn't have matching X visual but does"
+						: "No matching X visual for CFG");
 				}
 			}
 			catch(Error &e)
@@ -1101,8 +1119,7 @@ int visTest(void)
 				fbcid = cfgid(dpy, configs[i]);
 				GET_CFG_ATTRIB(configs[i], GLX_RENDER_TYPE, renderType);
 				GET_CFG_ATTRIB(configs[i], GLX_X_VISUAL_TYPE, visualType);
-				if((renderType & GLX_RGBA_BIT) == 0 || visualType == GLX_NONE)
-					continue;
+				if(!visuals[i]) continue;
 				printf("CFG 0x%.2x:  ", fbcid);
 				if(!(vis1 = glXGetVisualFromFBConfig(dpy, configs[i])))
 					_error("No matching X visual for CFG");

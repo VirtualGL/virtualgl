@@ -202,8 +202,8 @@ static VisualID matchVisual(Display *dpy, GLXFBConfig config)
 				vid = glxvisual::matchVisual2D(dpy, screen, DefaultDepth(dpy, screen),
 					TrueColor, 0, 0, 0);
 		}
+		if(vid) cfghash.add(dpy, config, vid);
 	}
-	if(vid) cfghash.add(dpy, config, vid);
 	return vid;
 }
 
@@ -1267,7 +1267,9 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 	{
 		int temp = *value;
 		*value = 0;
-		if((fconfig.drawable == RRDRAWABLE_PBUFFER && temp & GLX_PBUFFER_BIT)
+		if((fconfig.drawable == RRDRAWABLE_PBUFFER
+			&& glxvisual::visAttrib3D(config, GLX_VISUAL_ID) != 0
+			&& temp & GLX_PBUFFER_BIT)
 			|| (fconfig.drawable == RRDRAWABLE_PIXMAP && temp & GLX_WINDOW_BIT
 				&& temp & GLX_PIXMAP_BIT))
 			*value |= GLX_WINDOW_BIT;
