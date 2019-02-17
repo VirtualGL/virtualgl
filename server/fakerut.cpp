@@ -1448,7 +1448,6 @@ int offScreenTest(void)
 			_throw("Could not load X font");
 		minChar = fontInfo->min_char_or_byte2;
 		maxChar = fontInfo->max_char_or_byte2;
-		fontListBase = glGenLists(maxChar + 1);
 
 		if((configs = glXChooseFBConfigSGIX(dpy, DefaultScreen(dpy), glxattrib,
 			&n)) == NULL || n == 0)
@@ -1560,6 +1559,7 @@ int offScreenTest(void)
 			printf("Window->Pbuffer:                ");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				_error("Could not make context current");
+			fontListBase = glGenLists(maxChar + 1);
 			glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
 				fontListBase + minChar);
 			checkCurrent(dpy, glxwin, glxwin, ctx);
@@ -1568,6 +1568,7 @@ int offScreenTest(void)
 			VERIFY_BUF_COLOR(GL_BACK, clr.bits(-2), "Win");
 			if(!(glXMakeContextCurrent(dpy, pb, glxwin, ctx)))
 				_error("Could not make context current");
+			fontListBase = glGenLists(maxChar + 1);
 			glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
 				fontListBase + minChar);
 			checkCurrent(dpy, pb, glxwin, ctx);
@@ -1634,6 +1635,7 @@ int offScreenTest(void)
 			printf("GLX Pixmap->Window:             ");
 			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
 				_error("Could not make context current");
+			fontListBase = glGenLists(maxChar + 1);
 			glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
 				fontListBase + minChar);
 			checkCurrent(dpy, glxpm0, glxpm0, ctx);
@@ -1660,6 +1662,7 @@ int offScreenTest(void)
 			printf("Window->GLX Pixmap:             ");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				_error("Could not make context current");
+			fontListBase = glGenLists(maxChar + 1);
 			glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
 				fontListBase + minChar);
 			checkCurrent(dpy, glxwin, glxwin, ctx);
@@ -1692,8 +1695,10 @@ int offScreenTest(void)
 			printf("GLX Pixmap->GLX Pixmap:         ");
 			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
 				_error("Could not make context current");
+			fontListBase = glGenLists(maxChar + 1);
 			glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
 				fontListBase + minChar);
+			XFreeFont(dpy, fontInfo);  fontInfo = NULL;
 			checkCurrent(dpy, glxpm0, glxpm0, ctx);
 			clr.clear(GL_FRONT);
 			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "PM0");
@@ -1797,6 +1802,7 @@ int offScreenTest(void)
 		glXMakeContextCurrent(dpy, 0, 0, 0);
 		glXDestroyContext(dpy, ctx);  ctx = 0;
 	}
+	if(fontInfo && dpy) { XFreeFont(dpy, fontInfo);  fontInfo = NULL; }
 	if(pb && dpy) { glXDestroyPbuffer(dpy, pb);  pb = 0; }
 	if(glxpm1 && dpy) { glXDestroyGLXPixmap(dpy, glxpm1);  glxpm1 = 0; }
 	if(glxpm0 && dpy) { glXDestroyGLXPixmap(dpy, glxpm0);  glxpm0 = 0; }
