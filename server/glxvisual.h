@@ -27,7 +27,7 @@ namespace glxvisual
 	// same attribute list, so those parameters can be used to match an
 	// appropriate visual on the 2D X server.
 	GLXFBConfig *configsFromVisAttribs(const int attribs[], int &c_class,
-		int &level, int &stereo, int &trans, int &nElements, bool glx13 = false);
+		int &stereo, int &nElements, bool glx13 = false);
 
 	// These functions return attributes for visuals on the 2D X server (those
 	// attributes are read from the 2D X server and cached on first access, so
@@ -40,7 +40,7 @@ namespace glxvisual
 	// attributes from the 2D X server, or it caches them if they have not
 	// already been read.
 	VisualID matchVisual2D(Display *dpy, int screen, int depth, int c_class,
-		int level, int stereo, int trans);
+		int stereo);
 
 	// Simple helper function that obtains an attribute for a GLXFBConfig on the
 	// 3D X server.

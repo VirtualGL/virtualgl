@@ -67,12 +67,6 @@ namespace vglserver
 				return 0;
 			}
 
-			bool isOverlay(GLXContext ctx)
-			{
-				if(ctx && findConfig(ctx) == (GLXFBConfig)-1) return true;
-				return false;
-			}
-
 			Bool isDirect(GLXContext ctx)
 			{
 				if(ctx)

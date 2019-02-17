@@ -1,3 +1,23 @@
+3.0 pre-beta
+============
+
+### Significant changes relative to 2.6.2:
+
+1. Support for transparent overlay visuals has been retired in this version of
+VirtualGL.  That feature will continue to be maintained in the 2.6.x branch on
+a break/fix basis only.  Most applications that once used transparent overlay
+visuals used them with color index rendering, which was removed in OpenGL 3.1
+in 2009.  As such, almost all applications that render overlays now do so using
+other mechanisms.  Furthermore, the need for VirtualGL to hand off the
+rendering of transparent overlay visuals to the 2D X server has always limited
+the usefulness of the feature, and the discontinuation of the VirtualGL Client
+for Exceed relegated the feature to Un*x clients (with workstation-class GPUs)
+and the VGL Transport only.  Given that nVidia's implementation of transparent
+overlay visuals requires disabling the X Composite extension, which cannot be
+done in many modern Linux distributions, that further limited the feature to
+the point of uselessness.
+
+
 2.6.2
 =====
 

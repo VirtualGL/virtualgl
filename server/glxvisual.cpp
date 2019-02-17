@@ -30,8 +30,7 @@ typedef struct
 {
 	VisualID visualID;
 	int depth, c_class, nVisuals;
-	int level, isStereo, isDB, isGL, isTrans;
-	int transIndex, transRed, transGreen, transBlue, transAlpha;
+	int isStereo, isDB, isGL;
 } VisAttrib;
 
 
@@ -53,8 +52,6 @@ static void buildVisAttribTable(Display *dpy, int screen)
 	int clientGLX = 0, majorOpcode = -1, firstEvent = -1, firstError = -1,
 		nVisuals = 0;
 	XVisualInfo *visuals = NULL, vtemp;
-	Atom atom = 0;
-	int len = 10000;
 	VisAttrib *va = NULL;
 	XEDataObject obj;
 	XExtData *extData;
@@ -88,61 +85,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 			va[i].depth = visuals[i].depth;
 			va[i].c_class = visuals[i].c_class;
 			va[i].nVisuals = nVisuals;
-		}
 
-		if((atom = XInternAtom(dpy, "SERVER_OVERLAY_VISUALS", True)) != None)
-		{
-			struct overlay_info
-			{
-				unsigned long visualID;
-				long transType, transPixel, level;
-			} *olprop = NULL;
-			unsigned long nop = 0, bytesLeft = 0;
-			int actualFormat = 0;
-			Atom actualType = 0;
-
-			do
-			{
-				nop = 0;  actualFormat = 0;  actualType = 0;
-				unsigned char *olproptemp = NULL;
-				if(XGetWindowProperty(dpy, RootWindow(dpy, screen), atom, 0, len,
-					False, atom, &actualType, &actualFormat, &nop, &bytesLeft,
-					&olproptemp) != Success || nop < 4 || actualFormat != 32
-					|| actualType != atom)
-					goto done;
-				olprop = (struct overlay_info *)olproptemp;
-				len += (bytesLeft + 3) / 4;
-				if(bytesLeft && olprop) { XFree(olprop);  olprop = NULL; }
-			} while(bytesLeft);
-
-			for(unsigned long i = 0; i < nop / 4; i++)
-			{
-				for(int j = 0; j < nVisuals; j++)
-				{
-					if(olprop[i].visualID == va[j].visualID)
-					{
-						va[j].isTrans = 1;
-						if(olprop[i].transType == 1)  // Transparent pixel
-							va[j].transIndex = olprop[i].transPixel;
-						else if(olprop[i].transType == 2)  // Transparent mask
-						{
-							// Is this right??
-							va[j].transRed = olprop[i].transPixel & 0xFF;
-							va[j].transGreen = olprop[i].transPixel & 0x00FF;
-							va[j].transBlue = olprop[i].transPixel & 0x0000FF;
-							va[j].transAlpha = olprop[i].transPixel & 0x000000FF;
-						}
-						va[j].level = olprop[i].level;
-					}
-				}
-			}
-
-			done:
-			if(olprop) { XFree(olprop);  olprop = NULL; }
-		}
-
-		for(int i = 0; i < nVisuals; i++)
-		{
 			if(clientGLX)
 			{
 				_glXGetConfig(dpy, &visuals[i], GLX_DOUBLEBUFFER, &va[i].isDB);
@@ -171,7 +114,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 namespace glxvisual {
 
 GLXFBConfig *configsFromVisAttribs(const int attribs[], int &c_class,
-	int &level, int &stereo, int &trans, int &nElements, bool glx13)
+	int &stereo, int &nElements, bool glx13)
 {
 	int glxattribs[257], j = 0;
 	int doubleBuffer = 0, redSize = -1, greenSize = -1, blueSize = -1,
@@ -193,10 +136,7 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[], int &c_class,
 		{
 			renderType = attribs[i + 1];  i++;
 		}
-		else if(attribs[i] == GLX_LEVEL)
-		{
-			level = attribs[i + 1];  i++;
-		}
+		else if(attribs[i] == GLX_LEVEL) i++;
 		else if(attribs[i] == GLX_STEREO)
 		{
 			if(glx13) { stereo = attribs[i + 1];  i++; }
@@ -218,13 +158,7 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[], int &c_class,
 		{
 			alphaSize = attribs[i + 1];  i++;
 		}
-		else if(attribs[i] == GLX_TRANSPARENT_TYPE)
-		{
-			if(attribs[i + 1] == GLX_TRANSPARENT_INDEX
-				|| attribs[i + 1] == GLX_TRANSPARENT_RGB)
-				trans = 1;
-			i++;
-		}
+		else if(attribs[i] == GLX_TRANSPARENT_TYPE) i++;
 		else if(attribs[i] == GLX_SAMPLES)
 		{
 			samples = attribs[i + 1];  i++;
@@ -312,26 +246,6 @@ int visAttrib2D(Display *dpy, int screen, VisualID vid, int attribute)
 	{
 		if(va[i].visualID == vid)
 		{
-			if(attribute == GLX_LEVEL) return va[i].level;
-			if(attribute == GLX_TRANSPARENT_TYPE)
-			{
-				if(va[i].isTrans)
-				{
-					if(va[i].c_class == TrueColor || va[i].c_class == DirectColor)
-						return GLX_TRANSPARENT_RGB;
-					else return GLX_TRANSPARENT_INDEX;
-				}
-				else return GLX_NONE;
-			}
-			if(attribute == GLX_TRANSPARENT_INDEX_VALUE)
-			{
-				if(fconfig.transpixel >= 0) return fconfig.transpixel;
-				else return va[i].transIndex;
-			}
-			if(attribute == GLX_TRANSPARENT_RED_VALUE) return va[i].transRed;
-			if(attribute == GLX_TRANSPARENT_GREEN_VALUE) return va[i].transGreen;
-			if(attribute == GLX_TRANSPARENT_BLUE_VALUE) return va[i].transBlue;
-			if(attribute == GLX_TRANSPARENT_ALPHA_VALUE) return va[i].transAlpha;
 			if(attribute == GLX_STEREO)
 			{
 				return va[i].isStereo && va[i].isGL && va[i].isDB;
@@ -352,7 +266,7 @@ int visAttrib3D(GLXFBConfig config, int attribute)
 
 
 VisualID matchVisual2D(Display *dpy, int screen, int depth, int c_class,
-	int level, int stereo, int trans)
+	int stereo)
 {
 	int i, tryStereo;
 	if(!dpy) return 0;
@@ -377,8 +291,6 @@ VisualID matchVisual2D(Display *dpy, int screen, int depth, int c_class,
 					&& va[i].c_class != DirectColor)
 					match = 0;
 			}
-			if(level != va[i].level) match = 0;
-			if(trans && !va[i].isTrans) match = 0;
 			if(match) return va[i].visualID;
 		}
 	}

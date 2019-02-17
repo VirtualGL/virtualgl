@@ -61,17 +61,8 @@ namespace vglserver
 				VirtualWin *vw;
 				if(!dpy || !glxd) return false;
 				vw = HASH::find(DisplayString(dpy), glxd);
-				if(vw == NULL || vw == (VirtualWin *)-1) return false;
+				if(vw == NULL) return false;
 				else { vwin = vw;  return true; }
-			}
-
-			bool isOverlay(Display *dpy, GLXDrawable glxd)
-			{
-				VirtualWin *vw;
-				if(!dpy || !glxd) return false;
-				vw = HASH::find(DisplayString(dpy), glxd);
-				if(vw == (VirtualWin *)-1) return true;
-				return false;
 			}
 
 			bool find(GLXDrawable glxd, VirtualWin* &vwin)
@@ -79,7 +70,7 @@ namespace vglserver
 				VirtualWin *vw;
 				if(!glxd) return false;
 				vw = HASH::find(NULL, glxd);
-				if(vw == NULL || vw == (VirtualWin *)-1) return false;
+				if(vw == NULL) return false;
 				else { vwin = vw;  return true; }
 			}
 
@@ -106,17 +97,6 @@ namespace vglserver
 				return NULL;
 			}
 
-			void setOverlay(Display *dpy, Window win)
-			{
-				if(!dpy || !win) return;
-				HashEntry *ptr = NULL;
-				vglutil::CriticalSection::SafeLock l(mutex);
-				if((ptr = HASH::findEntry(DisplayString(dpy), win)) != NULL)
-				{
-					if(!ptr->value) ptr->value = (VirtualWin *)-1;
-				}
-			}
-
 			void remove(Display *dpy, GLXDrawable glxd)
 			{
 				if(!dpy || !glxd) return;
@@ -133,7 +113,7 @@ namespace vglserver
 				{
 					VirtualWin *vw = ptr->value;
 					next = ptr->next;
-					if(vw && vw != (VirtualWin *)-1 && dpy == vw->getX11Display())
+					if(vw && dpy == vw->getX11Display())
 						HASH::killEntry(ptr);
 					ptr = next;
 				}
@@ -150,7 +130,7 @@ namespace vglserver
 			{
 				VirtualWin *vw = entry->value;
 				if(entry && entry->key1) free(entry->key1);
-				if(entry && vw && vw != (VirtualWin *)-1) delete vw;
+				if(entry && vw) delete vw;
 			}
 
 			bool compare(char *key1, Window key2, HashEntry *entry)
@@ -159,14 +139,12 @@ namespace vglserver
 				return (
 					// Match 2D X Server display string and Window ID stored in
 					// VirtualDrawable instance
-					(vw && vw != (VirtualWin *)-1 && key1
-						&& !strcasecmp(DisplayString(vw->getX11Display()), key1)
+					(vw && key1 && !strcasecmp(DisplayString(vw->getX11Display()), key1)
 						&& key2 == vw->getX11Drawable())
 					||
 					// If key1 is NULL, match off-screen drawable ID instead of X Window
 					// ID
-					(vw && vw != (VirtualWin *)-1 && key1 == NULL
-						&& key2 == vw->getGLXDrawable())
+					(vw && key1 == NULL && key2 == vw->getGLXDrawable())
 					||
 					// Direct match
 					(key1 && !strcasecmp(key1, entry->key1) && key2 == entry->key2)

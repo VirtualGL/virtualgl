@@ -95,9 +95,6 @@
 		glXQueryGLXPbufferSGIX;
 		glXSelectEventSGIX;
 
-		/* GLX_SUN_get_transparent_index */
-		glXGetTransparentIndexSUN;
-
 		/* OpenGL */
 		glFinish;
 		glFlush;

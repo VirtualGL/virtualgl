@@ -115,45 +115,11 @@ A particular stereo mode can be selected by setting the ''VGL_STEREO''
 environment variable or by using the ''-st'' argument to ''vglrun''.  See
 {ref prefix="Section ": VGL_STEREO} for more details.
 
-** Transparent Overlays
-{anchor: overlays}
-
-In the case of transparent overlays, VirtualGL completely bypasses its own GLX
-faker and uses indirect OpenGL rendering to draw to the transparent overlay
-using the 2D X server.  The underlay is still rendered on the 3D X server, read
-back, and transported, as always.  Using indirect rendering to render the
-overlay is unfortunately necessary, because there is no reliable way to draw to
-an overlay using 2D (X11) functions, there are severe performance issues (on
-some GPUs) with using ''glDrawPixels()'' to draw to the overlay, and there is
-no reasonable way to composite the overlay and underlay in a Pbuffer on the
-VirtualGL server.
-
-The use of overlays is becoming more and more infrequent, and when they are
-used, it is generally only for drawing small, simple, static shapes and text.
-We have found that it is often faster to ship the overlay geometry over to the
-2D X server rather than to render it as an image and send the image.  Thus,
-even if it were possible to implement overlays without using indirect
-rendering, it is likely that indirect rendering of overlays would still be the
-fastest approach for most applications.
-
-As with quad-buffered stereo, overlays must be explicitly enabled in the
-graphics driver and X server configurations.  In the case of overlays, however,
-they need only be supported and enabled on the client and in the 2D X server.
-Some graphics drivers are known to disallow using both quad-buffered stereo and
-overlays at the same time.  Transparent overlays are not currently supported in
-Cygwin/X.
-
-Indexed color (8-bit) overlays have been tested and are known to work with
-VirtualGL.  True color (24-bit) overlays work, in theory, but have not been
-tested.  Use ''glxinfo'' (see [[#Troubleshooting]] below) to verify whether
-the 2D X server supports overlays and whether they are enabled.
-
 ** Troubleshooting
 {anchor: Troubleshooting}
 
 VirtualGL includes a modified version of ''glxinfo'' that can be used to
-determine whether or not the 2D and 3D X servers have stereo or overlay visuals
-enabled.
+determine whether or not the 2D and 3D X servers have stereo visuals enabled.
 
 Run the following command sequence on the VirtualGL server to determine
 whether the 3D X server has a suitable visual for stereographic rendering:
@@ -168,14 +134,10 @@ visuals should say ''stereo=1'' and should list ''Pbuffer'' as one of the
 ''Drawable Types''.
 
 Run the following command sequence on the VirtualGL server to determine
-whether the 2D X server has a suitable visual for stereographic rendering or
-transparent overlays.
+whether the 2D X server has a suitable visual for stereographic rendering.
 
 #Verb: <<---
 /opt/VirtualGL/bin/glxinfo -v
 ---
 
 In order to use stereo, one or more of the visuals should say ''stereo=1''.
-In order to use transparent overlays, one or more of the visuals should say
-''level=1'', should list a ''Transparent Index'' (non-transparent visuals will
-say ''Opaque'' instead), and should have a class of ''PseudoColor''.

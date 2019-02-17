@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2019-02-14T12:16:16">
+<meta name="date" content="2019-02-17T18:58:07">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.6.80</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -71,10 +71,6 @@ systems, OpenGL and GLX, and X windows.</p>
             <li class="Itemize-3 hd">
                 <a href="#hd004004" class="hd">4.4 Additional Requirements for 
                 Stereographic Rendering</a>
-            </li>
-            <li class="Itemize-3 hd">
-                <a href="#hd004005" class="hd">4.5 Additional Requirements for 
-                Transparent Overlays</a>
             </li>
         </ul>
     </li>
@@ -227,10 +223,7 @@ systems, OpenGL and GLX, and X windows.</p>
                 </ul>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd0016002" class="hd">16.2 Transparent Overlays</a>
-            </li>
-            <li class="Itemize-3 hd">
-                <a href="#hd0016003" class="hd">16.3 Troubleshooting</a>
+                <a href="#hd0016002" class="hd">16.2 Troubleshooting</a>
             </li>
         </ul>
     </li>
@@ -691,35 +684,6 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
     <td class="high standard">Windows</td>
     <td class="standard">N/A</td>
     <td class="standard">This version of VirtualGL does not support quad-buffered stereo with Windows clients.</td>
-  </tr>
-</table>
-</div>
-
-
-
-
-<h2 id="hd004005">4.5&nbsp;Additional Requirements for Transparent Overlays</h2>
-
-<p><a name="Overlay_Requirements"></a></p>
-
-<div class="table">
-<table class="standard">
-  <thead class="standard">
-  <tr class="head ">
-    <th class="head standard"></th>
-    <th class="head standard">Client</th>
-  </tr>
-  </thead>
-  <tr class="standard">
-    <td class="high standard">Linux/Unix</td>
-    <td class="standard" rowspan="2">GPU that supports transparent overlays.  The 2D X server should be configured to export overlay visuals.</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Mac/x86</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Windows</td>
-    <td class="standard">This version of VirtualGL does not support transparent overlays with Windows clients.</td>
   </tr>
 </table>
 </div>
@@ -2095,7 +2059,7 @@ procedures:</p>
     <td class="standard">v6</td>
     <td class="standard">Linux</td>
     <td class="standard">It is necessary to add <br /><br /> <code>import&nbsp;os</code><br /> <code>os.environ['ABAQUS_EMULATE_OVERLAYS']&nbsp;=&nbsp;&quot;1&quot;</code> <br /><br /> to <strong class="filename"><em>abaqus-install-dir</em>/<em>abaqus-version</em>/site/abaqus_v6.env</strong> to make Abaqus v6 work properly with VirtualGL if the 2D X server does not support transparent overlays.  If this is not done, then the application may fail to launch, it may fail to display any OpenGL-rendered pixels, or those pixels may become corrupted whenever other windows obscure them.</td>
-    <td class="standard">VirtualGL does not redirect the rendering of transparent overlays, since those cannot be rendered in a Pbuffer.  Thus, in order to use transparent overlays, the 2D X server must be able to render them, which is rarely the case for X proxies (see Section <a href="#overlays" class="ref">16.2</a> for more details.)  Setting <code>ABAQUS_EMULATE_OVERLAYS</code> to <code>1</code> causes the application to emulate overlay rendering instead of using actual transparent overlays.  This workaround is known to be necessary when running Abaqus 6.9 and 6.10 in VNC.</td>
+    <td class="standard">VirtualGL does not support transparent overlays, since those cannot be rendered in a Pbuffer.  Setting <code>ABAQUS_EMULATE_OVERLAYS</code> to <code>1</code> causes the application to emulate overlay rendering instead of using actual transparent overlays.  This workaround is known to be necessary when running Abaqus 6.9 and 6.10.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Abaqus</td>
@@ -2372,53 +2336,13 @@ drawing area must be full-screen.</p>
 
 
 
-<h2 id="hd0016002">16.2&nbsp;Transparent Overlays</h2>
-
-<p><a name="overlays"></a></p>
-
-<p>In the case of transparent overlays, VirtualGL completely bypasses its 
-own GLX faker and uses indirect OpenGL rendering to draw to the 
-transparent overlay using the 2D X server.  The underlay is still 
-rendered on the 3D X server, read back, and transported, as always.  
-Using indirect rendering to render the overlay is unfortunately 
-necessary, because there is no reliable way to draw to an overlay using 
-2D (X11) functions, there are severe performance issues (on some GPUs) 
-with using <code>glDrawPixels()</code> to draw to the overlay, and there 
-is no reasonable way to composite the overlay and underlay in a Pbuffer 
-on the VirtualGL server.</p>
-
-<p>The use of overlays is becoming more and more infrequent, and when they 
-are used, it is generally only for drawing small, simple, static shapes 
-and text. We have found that it is often faster to ship the overlay 
-geometry over to the 2D X server rather than to render it as an image 
-and send the image.  Thus, even if it were possible to implement 
-overlays without using indirect rendering, it is likely that indirect 
-rendering of overlays would still be the fastest approach for most 
-applications.</p>
-
-<p>As with quad-buffered stereo, overlays must be explicitly enabled in the 
-graphics driver and X server configurations.  In the case of overlays, 
-however, they need only be supported and enabled on the client and in 
-the 2D X server. Some graphics drivers are known to disallow using both 
-quad-buffered stereo and overlays at the same time.  Transparent 
-overlays are not currently supported in Cygwin/X.</p>
-
-<p>Indexed color (8-bit) overlays have been tested and are known to work 
-with VirtualGL.  True color (24-bit) overlays work, in theory, but have 
-not been tested.  Use <code>glxinfo</code> (see 
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0039"></a> 
-below) to verify whether the 2D X server supports overlays and whether 
-they are enabled.</p>
-
-
-
-<h2 id="hd0016003">16.3&nbsp;Troubleshooting</h2>
+<h2 id="hd0016002">16.2&nbsp;Troubleshooting</h2>
 
 <p><a name="Troubleshooting"></a></p>
 
 <p>VirtualGL includes a modified version of <code>glxinfo</code> that can 
 be used to determine whether or not the 2D and 3D X servers have stereo 
-or overlay visuals enabled.</p>
+visuals enabled.</p>
 
 <p>Run the following command sequence on the VirtualGL server to determine 
 whether the 3D X server has a suitable visual for stereographic 
@@ -2433,18 +2357,14 @@ and should list <code>Pbuffer</code> as one of the
 
 <p>Run the following command sequence on the VirtualGL server to determine 
 whether the 2D X server has a suitable visual for stereographic 
-rendering or transparent overlays.</p>
+rendering.</p>
 
 <pre class="verbatim">
 /opt/VirtualGL/bin/glxinfo&nbsp;-v
 </pre>
 
 <p>In order to use stereo, one or more of the visuals should say 
-<code>stereo=1</code>. In order to use transparent overlays, one or more 
-of the visuals should say <code>level=1</code>, should list a 
-<code>Transparent&nbsp;Index</code> (non-transparent visuals will say 
-<code>Opaque</code> instead), and should have a class of 
-<code>PseudoColor</code>.</p>
+<code>stereo=1</code>.</p>
 
 <p><br /></p>
 
@@ -2719,12 +2639,6 @@ VirtualGL features:</p>
     <dt class="Description-1 Description">Stereographic rendering (<code>glxspheres&nbsp;-s</code>)</dt>
     <dd class="Description-1 Description">
     </dd>
-    <dt class="Description-1 Description">Overlay rendering (<code>glxspheres&nbsp;-o</code>)</dt>
-    <dd class="Description-1 Description">
-        This renders text, a moving crosshair cursor, and a block of pixels to 
-        an 8-bit transparent overlay while animating the spheres on the 
-        underlay.  The color map of the overlay is changed periodically.
-    </dd>
     <dt class="Description-1 Description">Immediate mode rendering (<code>glxspheres&nbsp;-m</code>)</dt>
     <dd class="Description-1 Description">
         Want to really see the benefit of VirtualGL?  Run 
@@ -2981,7 +2895,7 @@ Image transport plugins are free to handle or ignore any configuration option as
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
-    <td class="standard"><code>0</code> (all OpenGL contexts use direct rendering, unless rendering to a <a href="#overlays">transparent overlay</a><a name="idx0040"></a>)</td>
+    <td class="standard"><code>0</code> (all OpenGL contexts use direct rendering)</td>
   </tr>
 </table>
 </div>
@@ -3183,7 +3097,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         attribute list for <code>glXChooseFBConfig()</code>.  Example: 
         <code>VGL_DEFAULTFBCONFIG=GLX_ALPHA_SIZE,8,GLX_STENCIL_SIZE,8</code>.  
         See <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0041"></a> for a list of 3D applications that are 
+        Recipes</a><a name="idx0039"></a> for a list of 3D applications that are 
         known to require the use of this configuration option.
     </dd>
 </dl>
@@ -3353,10 +3267,10 @@ Image transport plugins are free to handle or ignore any configuration option as
         <code>VGL_FORCEALPHA</code> might be necessary in order to use PBO 
         readback mode with the aforementioned GPUs (as of this writing, nVidia 
         GeForce adapters are known to require this.)  See the 
-        <a href="#VGL_READBACK"><code>VGL_READBACK</code></a><a name="idx0042"></a> 
+        <a href="#VGL_READBACK"><code>VGL_READBACK</code></a><a name="idx0040"></a> 
         option for further information.
         <div class="important"><p class="important">
-        <code>VGL_FORCEALPHA</code> overrides the 3D application&rsquo;s choice of visuals.  It has no effect if the application is not explicitly choosing a visual.  In that case, use <a href="#VGL_DEFAULTFBCONFIG"><code>VGL_DEFAULTFBCONFIG</code></a><a name="idx0043"></a> instead.
+        <code>VGL_FORCEALPHA</code> overrides the 3D application&rsquo;s choice of visuals.  It has no effect if the application is not explicitly choosing a visual.  In that case, use <a href="#VGL_DEFAULTFBCONFIG"><code>VGL_DEFAULTFBCONFIG</code></a><a name="idx0041"></a> instead.
         </p></div>
     </dd>
 </dl>
@@ -3503,7 +3417,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         <code>glFlush()</code> so often that VirtualGL cannot get away with 
         reading back/transporting a frame every time <code>glFlush()</code> is 
         called, either (see 
-        <a href="#VGL_SPOILLAST"><code>VGL_SPOILLAST</code></a><a name="idx0044"></a> 
+        <a href="#VGL_SPOILLAST"><code>VGL_SPOILLAST</code></a><a name="idx0042"></a> 
         for more information on how VirtualGL tries to handle this, under normal 
         circumstances.) <br /><br /> Some 3D applications use 
         <code>glFlush()</code> very liberally and intend for it to be an 
@@ -3518,7 +3432,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         applications, setting <code>VGL_GLFLUSHTRIGGER</code> to <code>0</code> 
         should make them display properly with VirtualGL.  See 
         <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0045"></a> for a list of 3D applications that are 
+        Recipes</a><a name="idx0043"></a> for a list of 3D applications that are 
         known to require this.
     </dd>
 </dl>
@@ -3638,7 +3552,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         for that issue was introduced in VirtualGL 2.1.1, this option 
         isn&rsquo;t really useful anymore.
         <div class="important"><p class="important">
-        When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0046"></a> option
+        When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0044"></a> option
         </p></div>
     </dd>
 </dl>
@@ -3746,7 +3660,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         used for compression, nor will it allow you to set this parameter to a 
         value greater than the number of CPU cores in the system.
         <div class="important"><p class="important">
-        When using the VGL Transport, multithreaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0047"></a> option
+        When using the VGL Transport, multithreaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0045"></a> option
         </p></div>
     </dd>
 </dl>
@@ -3878,7 +3792,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         level at which JPEG compression becomes perceptually lossless is 
         different for each image, but experiments with various visual difference 
         benchmarks (such as 
-        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0048"></a>) 
+        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0046"></a>) 
         suggest that	a JPEG quality of 95 is sufficient to guarantee perceptual 
         losslessness for the types of 3D applications (volume visualization 
         applications, in particular) in which image quality is critical.  As 
@@ -3930,7 +3844,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         frames, so setting <code>VGL_READBACK=none</code> disables 
         VirtualGL&rsquo;s readback mechanism and prevents duplication of effort. 
         <br /><br /> This option was developed initially to support running 
-        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0049"></a> 
+        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0047"></a> 
         in parallel using MPI.  ParaView/MPI normally uses MPI Processes 1 
         through N as rendering servers, each rendering a portion of the geometry 
         into a separate window on a separate X display. ParaView reads back 
@@ -3966,7 +3880,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         proxy&rsquo;s virtual framebuffer is BGRA but, unless the 3D application 
         has requested an alpha channel, its Pbuffer is likely BGR.  In this 
         specific case, setting the 
-        <a href="#VGL_FORCEALPHA"><code>VGL_FORCEALPHA</code></a><a name="idx0050"></a> 
+        <a href="#VGL_FORCEALPHA"><code>VGL_FORCEALPHA</code></a><a name="idx0048"></a> 
         option to <code>1</code> could alleviate the issue. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -4063,7 +3977,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         <code>0</code>, then VirtualGL forces multisampling to be disabled, even 
         if the 3D application explicitly tries to enable it.
         <div class="important"><p class="important">
-        <code>VGL_SAMPLES</code> overrides the 3D application&rsquo;s choice of visuals.  It has no effect if the application is not explicitly choosing a visual.  In that case, use <a href="#VGL_DEFAULTFBCONFIG"><code>VGL_DEFAULTFBCONFIG</code></a><a name="idx0051"></a> instead.
+        <code>VGL_SAMPLES</code> overrides the 3D application&rsquo;s choice of visuals.  It has no effect if the application is not explicitly choosing a visual.  In that case, use <a href="#VGL_DEFAULTFBCONFIG"><code>VGL_DEFAULTFBCONFIG</code></a><a name="idx0049"></a> instead.
         </p></div>
         <div class="important"><p class="important">
         Multisampling cannot be used with Pixmap rendering.  Any application that uses Pixmap rendering will fail if <code>VGL_SAMPLES</code> is set to a value other than 0.
@@ -4184,7 +4098,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         at the expense of increased load on the GPU (because VirtualGL is now 
         reading back the rendered frame every time <code>glFlush()</code> is 
         called.)  See <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0052"></a> for a list of 3D applications that are 
+        Recipes</a><a name="idx0050"></a> for a list of 3D applications that are 
         known to require this.
     </dd>
 </dl>
@@ -4415,7 +4329,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         (<code>conformx</code>, specifically), but at least one commercial 
         application is known to require it as well (see 
         <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0053"></a>.) <br /><br /> When 
+        Recipes</a><a name="idx0051"></a>.) <br /><br /> When 
         <code>VGL_SYNC</code> is enabled, every call to a frame trigger function 
         will cause VirtualGL to read back the rendered frame and 
         <em>synchronously</em> draw it into the 3D application&rsquo;s window 
@@ -4464,11 +4378,11 @@ Image transport plugins are free to handle or ignore any configuration option as
         square tiles, compares each tile against the same tile in the previous 
         frame, and compresses/sends only the tiles that have changed (assuming 
         <a href="#VGL_INTERFRAME">interframe 
-        comparison</a><a name="idx0054"></a> is enabled.)  The VGL Transport 
+        comparison</a><a name="idx0052"></a> is enabled.)  The VGL Transport 
         also divides the task of compressing or encoding these tiles among the 
         available CPUs in a round robin fashion, if multithreaded compression is 
         enabled (see 
-        <a href="#VGL_NPROCS"><code>VGL_NPROCS</code></a><a name="idx0055"></a>.) 
+        <a href="#VGL_NPROCS"><code>VGL_NPROCS</code></a><a name="idx0053"></a>.) 
         <br /><br /> There are several tradeoffs that must be considered when 
         choosing a tile size: <br /><br /> <em>Parallel scalability:</em> 
         <ul class="Itemize"><li class="Itemize-0">

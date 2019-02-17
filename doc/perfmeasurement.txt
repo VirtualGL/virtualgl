@@ -238,11 +238,6 @@ features:
 
 	Stereographic rendering (''glxspheres -s'') :: {:}
 
-	Overlay rendering (''glxspheres -o'') :: This renders text, a moving
-	crosshair cursor, and a block of pixels to an 8-bit transparent overlay while
-	animating the spheres on the underlay.  The color map of the overlay is
-	changed periodically.
-
 	Immediate mode rendering (''glxspheres -m'') :: Want to really see the
 	benefit of VirtualGL?  Run ''glxspheres -m'' over a remote X connection, then
 	run ''vglrun -sp glxspheres -m'' over the same connection and compare.

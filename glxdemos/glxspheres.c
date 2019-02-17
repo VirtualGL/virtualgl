@@ -67,15 +67,14 @@ enum { GRAY = 0, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN };
 
 #define DEFBENCHTIME  2.0
 
-Display *dpy = NULL;  Window win = 0, olWin = 0;
-GLXContext ctx = 0, olCtx = 0;
-int useStereo = 0, useOverlay = 0, useDC = 0, useImm = 0, interactive = 0,
-	olDB = 1, loColor = 0, maxFrames = 0, totalFrames = 0, directCtx = True,
-	bpc = 8, deadYet = 0;
+Display *dpy = NULL;  Window win = 0;
+GLXContext ctx = 0;
+int useStereo = 0, useDC = 0, useImm = 0, interactive = 0, loColor = 0,
+	maxFrames = 0, totalFrames = 0, directCtx = True, bpc = 8, deadYet = 0;
 int rshift = 0, gshift = 0, bshift = 0;
 double benchTime = DEFBENCHTIME;
-int nColors = 0, nOlColors, colorScheme = GRAY;
-Colormap colormap = 0, olColormap = 0;
+int nColors = 0, colorScheme = GRAY;
+Colormap colormap = 0;
 
 int sphereList = 0, fontListBase = 0;
 GLUquadricObj *sphereQuad = NULL;
@@ -98,8 +97,7 @@ int setColorScheme(Colormap cmap, int nColors, int bpc, int scheme)
 	for(i = 0; i < nColors; i++)
 	{
 		xc[i].flags = DoRed | DoGreen | DoBlue;
-		xc[i].pixel =
-			(cmap == olColormap) ? i : (i << rshift) | (i << gshift) | (i << bshift);
+		xc[i].pixel = (i << rshift) | (i << gshift) | (i << bshift);
 		xc[i].red = xc[i].green = xc[i].blue = 0;
 		if(scheme == GRAY || scheme == RED || scheme == YELLOW
 			|| scheme == MAGENTA)
@@ -123,14 +121,6 @@ void reshape(int newWidth, int newHeight)
 	if(newWidth <= 0) newWidth = 1;
 	if(newHeight <= 0) newHeight = 1;
 	width = newWidth;  height = newHeight;
-
-	if(useOverlay && olWin)
-	{
-		XWindowChanges changes;
-		changes.width = width;
-		changes.height = height;
-		XConfigureWindow(dpy, olWin, CWWidth | CWHeight, &changes);
-	}
 }
 
 
@@ -244,52 +234,6 @@ void renderSpheres(int buf)
 }
 
 
-int renderOverlay(void)
-{
-	int i, j, w = width / 8, h = height / 8;  unsigned char *buf = NULL;
-	int index = (int)(loneSphereColor * (GLfloat)(nOlColors - 1));
-	int retval = 0;
-
-	glShadeModel(GL_FLAT);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
-	glViewport(0, 0, width, height);
-	glRasterPos3f(-0.5, 0.5, 0.0);
-	glClearIndex((GLfloat)transPixel);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glIndexf(loneSphereColor * (GLfloat)(nOlColors - 1));
-	glBegin(GL_LINES);
-	glVertex2f(-1. + loneSphereColor * 2., -1.);
-	glVertex2f(-1. + loneSphereColor * 2., 1.);
-	glVertex2f(-1., -1. + loneSphereColor * 2.);
-	glVertex2f(1., -1. + loneSphereColor * 2.);
-	glEnd();
-	if(w && h)
-	{
-		if((buf = (unsigned char *)malloc(w * h)) == NULL)
-			THROW("Could not allocate memory");
-		for(i = 0; i < h; i++)
-			for(j = 0; j < w; j++)
-			{
-				if(((i / 4) % 2) != ((j / 4) % 2)) buf[i * w + j] = 0;
-				else buf[i * w + j] = index;
-			}
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glDrawPixels(w, h, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buf);
-	}
-	glRasterPos3f(0., 0., 0.);
-	glListBase(fontListBase);
-	glCallLists(24, GL_UNSIGNED_BYTE, "GLX Spheres Overlay Test");
-
-	bailout:
-	if(buf) free(buf);
-	return retval;
-}
-
-
 int display(int advance)
 {
 	static int first = 1;
@@ -342,10 +286,6 @@ int display(int advance)
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
 
-		if(useOverlay)
-		{
-			glXMakeCurrent(dpy, olWin, olCtx);
-		}
 		if(!(fontInfo = XLoadQueryFont(dpy, "fixed")))
 			THROW("Could not load X font");
 		minChar = fontInfo->min_char_or_byte2;
@@ -355,7 +295,6 @@ int display(int advance)
 			fontListBase + minChar);
 		XFreeFont(dpy, fontInfo);  fontInfo = NULL;
 		snprintf(temps, 255, "Measuring performance ...");
-		if(useOverlay) glXMakeCurrent(dpy, win, ctx);
 
 		first = 0;
 	}
@@ -365,10 +304,11 @@ int display(int advance)
 		z -= 0.5;
 		if(z < -29.)
 		{
-			if(useDC || useOverlay) colorScheme = (colorScheme + 1) % NSCHEMES;
-			if(useDC) CATCH(setColorScheme(colormap, nColors, bpc, colorScheme));
-			if(useOverlay)
-				CATCH(setColorScheme(olColormap, nOlColors, 8, colorScheme));
+			if(useDC)
+			{
+				colorScheme = (colorScheme + 1) % NSCHEMES;
+				CATCH(setColorScheme(colormap, nColors, bpc, colorScheme));
+			}
 			z = -3.5;
 		}
 		outerAngle += 0.1;  if(outerAngle > 360.) outerAngle -= 360.;
@@ -385,34 +325,20 @@ int display(int advance)
 	else renderSpheres(GL_BACK);
 
 	glDrawBuffer(GL_BACK);
-	if(useOverlay)
-	{
-		glXMakeCurrent(dpy, olWin, olCtx);
-		CATCH(renderOverlay());
-	}
-	else glPushAttrib(GL_CURRENT_BIT);
+	glPushAttrib(GL_CURRENT_BIT);
 	glPushAttrib(GL_LIST_BIT);
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
-	if(useOverlay || useDC) glColor3f(254., 254., 254.);
+	if(useDC) glColor3f(254., 254., 254.);
 	else glColor3f(1., 1., 1.);
-	if(useOverlay) glRasterPos3f(-0.95, -0.95, 0.);
-	else
-	{
-		xAspect = (GLfloat)width / (GLfloat)(min(width, height));
-		yAspect = (GLfloat)height / (GLfloat)(min(width, height));
-		glRasterPos3f(-0.95 * xAspect, -0.95 * yAspect, -1.5);
-	}
+	xAspect = (GLfloat)width / (GLfloat)(min(width, height));
+	yAspect = (GLfloat)height / (GLfloat)(min(width, height));
+	glRasterPos3f(-0.95 * xAspect, -0.95 * yAspect, -1.5);
 	glListBase(fontListBase);
 	glCallLists(strlen(temps), GL_UNSIGNED_BYTE, temps);
 	glPopAttrib();
 	glPopAttrib();
 	glPopAttrib();
-	if(useOverlay)
-	{
-		if(olDB) glXSwapBuffers(dpy, olWin);
-		glXMakeCurrent(dpy, win, ctx);
-	}
 	glXSwapBuffers(dpy, win);
 
 	if(start > 0.)
@@ -516,7 +442,6 @@ void usage(char **argv)
 	printf("-i = Interactive mode.  Frames advance in response to mouse movement\n");
 	printf("-l = Use fewer than 24 colors (to force non-JPEG encoding in TurboVNC)\n");
 	printf("-m = Use immediate mode rendering (default is display list)\n");
-	printf("-o = Test 8-bit transparent overlays\n");
 	printf("-p <p> = Use (approximately) <p> polygons to render scene\n");
 	printf("         (max. is 57600 per sphere due to limitations of GLU.)\n");
 	printf("-n <n> = Render (approximately) <n> spheres (default: %d)\n",
@@ -544,8 +469,6 @@ int main(int argc, char **argv)
 		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, GLX_DEPTH_SIZE, 1,
 		GLX_DOUBLEBUFFER, 1, GLX_STEREO, 0, GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR,
 		None, None, None };
-	int olAttribs[] = { GLX_BUFFER_SIZE, 8, GLX_LEVEL, 1,
-		GLX_TRANSPARENT_TYPE, GLX_TRANSPARENT_INDEX, GLX_DOUBLEBUFFER, None };
 	XSetWindowAttributes swa;  Window root;
 	int fullScreen = 0;  unsigned long mask = 0;
 	int screen = -1, pps;
@@ -561,7 +484,6 @@ int main(int argc, char **argv)
 		else if(!stricmp(argv[i], "-i")) interactive = 1;
 		else if(!stricmp(argv[i], "-l")) loColor = 1;
 		else if(!stricmp(argv[i], "-m")) useImm = 1;
-		else if(!stricmp(argv[i], "-o")) useOverlay = 1;
 		else if(!stricmp(argv[i], "-w") && i < argc - 1)
 		{
 			if(sscanf(argv[++i], "%dx%d", &width, &height) < 2 || width < 1
@@ -644,8 +566,7 @@ int main(int argc, char **argv)
 	if((v = glXGetVisualFromFBConfig(dpy, c[0])) == NULL)
 		THROW("Could not obtain RGB visual with requested properties");
 	XFree(c);  c = NULL;
-	fprintf(stderr, "Visual ID of %s: 0x%.2x\n",
-		useOverlay ? "underlay" : "window", (int)v->visualid);
+	fprintf(stderr, "Visual ID of window: 0x%.2x\n", (int)v->visualid);
 
 	root = RootWindow(dpy, screen);
 	swa.border_pixel = 0;
@@ -695,38 +616,6 @@ int main(int argc, char **argv)
 		glXIsDirect(dpy, ctx) ? "Direct" : "Indirect");
 	XFree(v);  v = NULL;
 
-	if(useOverlay)
-	{
-		if((v = glXChooseVisual(dpy, screen, olAttribs)) == NULL)
-		{
-			olAttribs[6] = None;  olDB = 0;
-			if((v = glXChooseVisual(dpy, screen, olAttribs)) == NULL)
-				THROW("Could not obtain overlay visual");
-		}
-		fprintf(stderr, "Visual ID of overlay: 0x%.2x\n", (int)v->visualid);
-
-		swa.colormap = olColormap =
-			XCreateColormap(dpy, root, v->visual, AllocAll);
-		nOlColors = NP2(v->colormap_size);
-		if(nOlColors < 32) THROW("Color map is not large enough");
-
-		CATCH(setColorScheme(olColormap, nOlColors, 256, colorScheme));
-
-		if((olWin = XCreateWindow(dpy, win, 0, 0, width, height, 0, v->depth,
-			InputOutput, v->visual, CWBorderPixel | CWColormap | CWEventMask,
-			&swa)) == 0)
-			THROW("Could not create overlay window");
-		XMapWindow(dpy, olWin);
-		XSync(dpy, False);
-
-		if((olCtx = glXCreateContext(dpy, v, NULL, directCtx)) == 0)
-			THROW("Could not create overlay rendering context");
-		fprintf(stderr, "Overlay context is %s\n",
-			glXIsDirect(dpy, olCtx) ? "Direct" : "Indirect");
-
-		XFree(v);  v = NULL;
-	}
-
 	if(!glXMakeCurrent(dpy, win, ctx))
 		THROW("Could not bind rendering context");
 
@@ -737,8 +626,6 @@ int main(int argc, char **argv)
 	bailout:
 	if(v) XFree(v);
 	if(c) XFree(c);
-	if(dpy && olCtx) glXDestroyContext(dpy, olCtx);
-	if(dpy && olWin) XDestroyWindow(dpy, olWin);
 	if(dpy && ctx) glXDestroyContext(dpy, ctx);
 	if(dpy && win) XDestroyWindow(dpy, win);
 	if(dpy) XCloseDisplay(dpy);

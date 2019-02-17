@@ -18,14 +18,11 @@
 		application may fail to launch, it may fail to display any \
 		OpenGL-rendered pixels, or those pixels may become corrupted whenever \
 		other windows obscure them. \
-	| VirtualGL does not redirect the rendering of transparent overlays, since \
-		those cannot be rendered in a Pbuffer.  Thus, in order to use transparent \
-		overlays, the 2D X server must be able to render them, which is rarely \
-		the case for X proxies (see {ref prefix="Section ": overlays} for more \
-		details.)  Setting ''ABAQUS_EMULATE_OVERLAYS'' to ''1'' causes \
-		the application to emulate overlay rendering instead of using actual \
-		transparent overlays.  This workaround is known to be necessary when \
-		running Abaqus 6.9 and 6.10 in VNC. \
+	| VirtualGL does not support transparent overlays, since those cannot be \
+		rendered in a Pbuffer.  Setting ''ABAQUS_EMULATE_OVERLAYS'' to ''1'' \
+		causes the application to emulate overlay rendering instead of using \
+		actual transparent overlays.  This workaround is known to be necessary \
+		when running Abaqus 6.9 and 6.10. \
 	|
 | Abaqus | v6 | Linux \
 	| {pcode: vglrun -nodl __abaqus-path__/abaqus} \

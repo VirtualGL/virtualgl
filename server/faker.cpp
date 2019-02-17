@@ -20,7 +20,6 @@
 #include "GLXDrawableHash.h"
 #include "GlobalCriticalSection.h"
 #include "PixmapHash.h"
-#include "ReverseConfigHash.h"
 #include "WindowHash.h"
 #include "fakerconfig.h"
 #include "threadlocal.h"
@@ -50,7 +49,6 @@ static void cleanup(void)
 {
 	if(PixmapHash::isAlloc()) pmhash.kill();
 	if(ConfigHash::isAlloc()) cfghash.kill();
-	if(ReverseConfigHash::isAlloc()) rcfghash.kill();
 	if(ContextHash::isAlloc()) ctxhash.kill();
 	if(GLXDrawableHash::isAlloc()) glxdhash.kill();
 	if(WindowHash::isAlloc()) winhash.kill();

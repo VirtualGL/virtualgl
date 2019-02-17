@@ -63,7 +63,6 @@ set(FAKER_SOURCES
 	GLXDrawableHash.cpp
 	glxvisual.cpp
 	PixmapHash.cpp
-	ReverseConfigHash.cpp
 	TransPlugin.cpp
 	VirtualDrawable.cpp
 	VirtualPixmap.cpp

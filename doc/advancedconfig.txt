@@ -27,8 +27,7 @@ previous method:
 | Environment Variable | {pcode: VGL_ALLOWINDIRECT = __0 \| 1__ } |
 | Summary | Allow 3D applications to request an indirect OpenGL context |
 | Image Transports | All |
-| Default Value | ''0'' (all OpenGL contexts use direct rendering, unless \
-	rendering to a [[#overlays][transparent overlay]]) |
+| Default Value | ''0'' (all OpenGL contexts use direct rendering) |
 #OPT: hiCol=first
 
 	Description :: Normally, when VirtualGL maps a Pbuffer to a window and
