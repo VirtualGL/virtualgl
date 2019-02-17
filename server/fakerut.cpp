@@ -1419,7 +1419,7 @@ void checkDrawable(Display *dpy, GLXDrawable draw, int width, int height,
 }
 
 // Test off-screen rendering
-int offScreenTest(void)
+int offScreenTest(bool dbPixmap)
 {
 	Display *dpy = NULL;  Window win = 0;  Pixmap pm0 = 0, pm1 = 0, pm2 = 0;
 	GLXPixmap glxpm0 = 0, glxpm1 = 0;  GLXPbuffer pb = 0;  GLXWindow glxwin = 0;
@@ -1632,6 +1632,8 @@ int offScreenTest(void)
 
 		try
 		{
+			GLenum expectedBuf = dbPixmap ? GL_BACK : GL_FRONT;
+
 			printf("GLX Pixmap->Window:             ");
 			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
 				_error("Could not make context current");
@@ -1644,9 +1646,9 @@ int offScreenTest(void)
 			glDrawBuffer(GL_BACK);  glReadBuffer(GL_BACK);
 			XCopyArea(dpy, pm0, win, DefaultGC(dpy, DefaultScreen(dpy)), 0, 0,
 				dpyw / 2, dpyh / 2, 0, 0);
-			checkReadbackState(GL_BACK, dpy, glxpm0, glxpm0, ctx);
+			checkReadbackState(expectedBuf, dpy, glxpm0, glxpm0, ctx);
 			int temp = -1;  glGetIntegerv(GL_DRAW_BUFFER, &temp);
-			if(temp != GL_BACK) _error("Draw buffer changed");
+			if(temp != (int)expectedBuf) _error("Draw buffer changed");
 			checkFrame(dpy, win, 1, lastFrame);
 			checkWindowColor(dpy, win, clr.bits(-1), false);
 			printf("SUCCESS\n");
@@ -1659,6 +1661,8 @@ int offScreenTest(void)
 
 		try
 		{
+			GLenum expectedBuf = dbPixmap ? GL_BACK : GL_FRONT;
+
 			printf("Window->GLX Pixmap:             ");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				_error("Could not make context current");
@@ -1667,8 +1671,8 @@ int offScreenTest(void)
 				fontListBase + minChar);
 			checkCurrent(dpy, glxwin, glxwin, ctx);
 			clr.clear(GL_FRONT);
-			clr.clear(GL_BACK);
-			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-2), "Win");
+			if(dbPixmap) clr.clear(GL_BACK);
+			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(dbPixmap ? -2 : -1), "Win");
 			if(!(glXMakeContextCurrent(dpy, glxpm1, glxpm1, ctx)))
 				_error("Could not make context current");
 			checkCurrent(dpy, glxpm1, glxpm1, ctx);
@@ -1676,12 +1680,12 @@ int offScreenTest(void)
 			glDrawBuffer(GL_BACK);  glReadBuffer(GL_BACK);
 			XCopyArea(dpy, win, pm1, DefaultGC(dpy, DefaultScreen(dpy)), 0, 0,
 				dpyw / 2, dpyh / 2, 0, 0);
-			checkReadbackState(GL_BACK, dpy, glxpm1, glxpm1, ctx);
+			checkReadbackState(expectedBuf, dpy, glxpm1, glxpm1, ctx);
 			int temp = -1;  glGetIntegerv(GL_DRAW_BUFFER, &temp);
-			if(temp != GL_BACK) _error("Draw buffer changed");
+			if(temp != (int)expectedBuf) _error("Draw buffer changed");
 			checkFrame(dpy, win, 0, lastFrame);
-			VERIFY_BUF_COLOR(GL_BACK, clr.bits(-2), "PM1");
-			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-2), "PM1");
+			VERIFY_BUF_COLOR(GL_BACK, clr.bits(dbPixmap ? -2 : -1), "PM1");
+			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(dbPixmap ? -2 : -1), "PM1");
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)
@@ -1692,6 +1696,8 @@ int offScreenTest(void)
 
 		try
 		{
+			GLenum expectedBuf = dbPixmap ? GL_BACK : GL_FRONT;
+
 			printf("GLX Pixmap->GLX Pixmap:         ");
 			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
 				_error("Could not make context current");
@@ -1708,9 +1714,9 @@ int offScreenTest(void)
 			glDrawBuffer(GL_BACK);  glReadBuffer(GL_BACK);
 			XCopyArea(dpy, pm0, pm1, DefaultGC(dpy, DefaultScreen(dpy)), 0, 0,
 				dpyw / 2, dpyh / 2, 0, 0);
-			checkReadbackState(GL_BACK, dpy, glxpm1, glxpm1, ctx);
+			checkReadbackState(expectedBuf, dpy, glxpm1, glxpm1, ctx);
 			int temp = -1;  glGetIntegerv(GL_DRAW_BUFFER, &temp);
-			if(temp != GL_BACK) _error("Draw buffer changed");
+			if(temp != (int)expectedBuf) _error("Draw buffer changed");
 			VERIFY_BUF_COLOR(GL_BACK, clr.bits(-1), "PM1");
 			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "PM1");
 			printf("SUCCESS\n");
@@ -1723,6 +1729,8 @@ int offScreenTest(void)
 
 		try
 		{
+			GLenum expectedBuf = dbPixmap ? GL_BACK : GL_FRONT;
+
 			printf("GLX Pixmap->2D Pixmap:          ");
 			lastFrame = 0;
 			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
@@ -1734,24 +1742,24 @@ int offScreenTest(void)
 			glDrawBuffer(GL_BACK);  glReadBuffer(GL_BACK);
 			XCopyArea(dpy, pm0, pm2, DefaultGC(dpy, DefaultScreen(dpy)), 0, 0,
 				dpyw / 2, dpyh / 2, 0, 0);
-			checkReadbackState(GL_BACK, dpy, glxpm0, glxpm0, ctx);
+			checkReadbackState(expectedBuf, dpy, glxpm0, glxpm0, ctx);
 			int temp = -1;  glGetIntegerv(GL_DRAW_BUFFER, &temp);
-			if(temp != GL_BACK) _error("Draw buffer changed");
+			if(temp != (int)expectedBuf) _error("Draw buffer changed");
 			checkFrame(dpy, pm0, 1, lastFrame);
 			checkWindowColor(dpy, pm0, clr.bits(-1), false);
 
 			clr.clear(GL_FRONT);
-			clr.clear(GL_BACK);
-			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-2), "PM0");
+			if(dbPixmap) clr.clear(GL_BACK);
+			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(dbPixmap ? -2 : -1), "PM0");
 			glDrawBuffer(GL_BACK);  glReadBuffer(GL_BACK);
 			XImage *xi = XGetImage(dpy, pm0, 0, 0, dpyw / 2, dpyh / 2, AllPlanes,
 				ZPixmap);
 			if(xi) XDestroyImage(xi);
-			checkReadbackState(GL_BACK, dpy, glxpm0, glxpm0, ctx);
+			checkReadbackState(expectedBuf, dpy, glxpm0, glxpm0, ctx);
 			temp = -1;  glGetIntegerv(GL_DRAW_BUFFER, &temp);
-			if(temp != GL_BACK) _error("Draw buffer changed");
+			if(temp != (int)expectedBuf) _error("Draw buffer changed");
 			checkFrame(dpy, pm0, 1, lastFrame);
-			checkWindowColor(dpy, pm0, clr.bits(-2), false);
+			checkWindowColor(dpy, pm0, clr.bits(dbPixmap ? -2 : -1), false);
 
 			printf("SUCCESS\n");
 		}
@@ -2109,7 +2117,8 @@ void usage(char **argv)
 
 int main(int argc, char **argv)
 {
-	int ret = 0;  int nThreads = DEFTHREADS;  bool doStereo = true;
+	int ret = 0, nThreads = DEFTHREADS;
+	bool doStereo = true, doDBPixmap = true;
 
 	if(putenv((char *)"VGL_AUTOTEST=1") == -1
 		|| putenv((char *)"VGL_SPOIL=0") == -1
@@ -2127,6 +2136,7 @@ int main(int argc, char **argv)
 			if(nThreads < 0 || nThreads > MAXTHREADS) usage(argv);
 		}
 		else if(!strcasecmp(argv[i], "-nostereo")) doStereo = false;
+		else if(!strcasecmp(argv[i], "-nodbpixmap")) doDBPixmap = false;
 		else usage(argv);
 	}
 
@@ -2155,7 +2165,7 @@ int main(int argc, char **argv)
 	printf("\n");
 	if(!multiThreadTest(nThreads)) ret = -1;
 	printf("\n");
-	if(!offScreenTest()) ret = -1;
+	if(!offScreenTest(doDBPixmap)) ret = -1;
 	printf("\n");
 	if(!subWinTest()) ret = -1;
 	printf("\n");

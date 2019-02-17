@@ -30,6 +30,7 @@ SSL=@VGL_USESSL@
 
 NODL=
 NOSTEREO=
+NODBPIXMAP=
 DEPTH=24
 IPV6=1
 while [ $# -gt 0 ]; do
@@ -40,6 +41,9 @@ while [ $# -gt 0 ]; do
 		;;
 	-nostereo)
 		NOSTEREO=-nostereo
+		;;
+	-nodbpixmap)
+		NODBPIXMAP=-nodbpixmap
 		;;
 	-noipv6)
 		IPV6=0
@@ -70,32 +74,41 @@ DISPLAY=:42 $BIN/frameut -check -logo
 # VGL Transport
 if [ $DEPTH = 24 ]; then
 	DISPLAY=:42 $BIN/vglclient >vglclient.log 2>&1 & VGLCLIENTPID=$!
-	DISPLAY=:42 VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -c jpeg $BIN/fakerut $NOSTEREO
+	DISPLAY=:42 VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
+		$BIN/vglrun $NODL -c jpeg $BIN/fakerut $NOSTEREO $NODBPIXMAP
 	if [ "$SSL" = "1" ]; then
-		DISPLAY=:42 VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -c jpeg +s $BIN/fakerut $NOSTEREO
+		DISPLAY=:42 VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
+			$BIN/vglrun $NODL -c jpeg +s $BIN/fakerut $NOSTEREO $NODBPIXMAP
 	fi
-	DISPLAY=:42 VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB VGL_READBACK=sync $BIN/vglrun $NODL -np 2 -c rgb $BIN/fakerut $NOSTEREO
+	DISPLAY=:42 VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB VGL_READBACK=sync \
+		$BIN/vglrun $NODL -np 2 -c rgb $BIN/fakerut $NOSTEREO $NODBPIXMAP
 	# (we can't test stereo here, because the transport plugin assumes
 	# quad-buffered, which isn't available with an X proxy.)
-	DISPLAY=:42 VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -trans test $BIN/fakerut -nostereo
+	DISPLAY=:42 VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
+		$BIN/vglrun $NODL -trans test $BIN/fakerut -nostereo $NODBPIXMAP
 	kill $VGLCLIENTPID
 	VGLCLIENTPID=-1
 	if [ "$IPV6" = "1" ]; then
 		DISPLAY=:42 $BIN/vglclient -ipv6 >vglclient.log 2>&1 & VGLCLIENTPID=$!
-		DISPLAY=:42 VGL_CLIENT=::1 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -c jpeg $BIN/fakerut $NOSTEREO
+		DISPLAY=:42 VGL_CLIENT=::1 LD_LIBRARY_PATH=$LIB \
+			$BIN/vglrun $NODL -c jpeg $BIN/fakerut $NOSTEREO $NODBPIXMAP
 		if [ "$SSL" = "1" ]; then
-			DISPLAY=:42 VGL_CLIENT=::1 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -c jpeg +s $BIN/fakerut $NOSTEREO
+			DISPLAY=:42 VGL_CLIENT=::1 LD_LIBRARY_PATH=$LIB \
+				$BIN/vglrun $NODL -c jpeg +s $BIN/fakerut $NOSTEREO $NODBPIXMAP
 		fi
-		DISPLAY=:42 VGL_CLIENT=[::1]:0 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -trans test $BIN/fakerut -nostereo
+		DISPLAY=:42 VGL_CLIENT=[::1]:0 LD_LIBRARY_PATH=$LIB \
+			$BIN/vglrun $NODL -trans test $BIN/fakerut -nostereo $NODBPIXMAP
 		kill $VGLCLIENTPID
 		VGLCLIENTPID=-1
 	fi
 fi
 
 # X11 Transport
-DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -c proxy $BIN/fakerut $NOSTEREO
+DISPLAY=:42 LD_LIBRARY_PATH=$LIB \
+	$BIN/vglrun $NODL -c proxy $BIN/fakerut $NOSTEREO $NODBPIXMAP
 if [ $DEPTH = 24 ]; then
-	DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -trans test2 $BIN/fakerut $NOSTEREO
+	DISPLAY=:42 LD_LIBRARY_PATH=$LIB \
+		$BIN/vglrun $NODL -trans test2 $BIN/fakerut $NOSTEREO $NODBPIXMAP
 fi
 
 kill $PID
