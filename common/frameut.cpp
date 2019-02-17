@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2011, 2014, 2017-2018 D. R. Commander
+ * Copyright (C)2011, 2014, 2017-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -94,7 +94,7 @@ class Blitter : public Runnable
 			Frame *frame = frames[findex];
 			findex = (findex + 1) % NFRAMES;
 			if(thread) thread->checkError();
-			frame->waitUntilComplete();
+			if(!deadYet) frame->waitUntilComplete();
 			if(thread) thread->checkError();
 			return frame;
 		}
@@ -228,7 +228,7 @@ class Decompressor : public Runnable
 			findex = (findex + 1) % NFRAMES;
 			if(deadYet) return cframe;
 			if(thread) thread->checkError();
-			cframe.waitUntilComplete();
+			if(!deadYet) cframe.waitUntilComplete();
 			if(thread) thread->checkError();
 			return cframe;
 		}
@@ -315,7 +315,7 @@ class Compressor : public Runnable
 			Frame &frame = frames[findex];
 			findex = (findex + 1) % NFRAMES;
 			if(thread) thread->checkError();
-			frame.waitUntilComplete();
+			if(!deadYet) frame.waitUntilComplete();
 			if(thread) thread->checkError();
 			rrframeheader hdr;
 			memset(&hdr, 0, sizeof(rrframeheader));
