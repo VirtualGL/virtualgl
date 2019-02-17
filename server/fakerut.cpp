@@ -427,6 +427,8 @@ int readbackTest(bool stereo)
 			}
 			// Swapping buffers while the render mode != GL_RENDER will cause
 			// VirtualGL < 2.5.2 to throw a GLXBadContextState error
+			GLfloat fbBuffer[2];
+			glFeedbackBuffer(1, GL_2D, fbBuffer);
 			glRenderMode(GL_FEEDBACK);
 			glXSwapBuffers(dpy, win1);
 			glRenderMode(GL_RENDER);
@@ -451,7 +453,11 @@ int readbackTest(bool stereo)
 			glFlush();  glFlush();
 			checkFrame(dpy, win1, 1, lastFrame1);
 			glDrawBuffer(GL_FRONT);
+			GLuint selectBuffer[2];
+			glSelectBuffer(1, selectBuffer);
 			glRenderMode(GL_SELECT);  glFlush();
+			GLfloat fbBuffer[2];
+			glFeedbackBuffer(1, GL_2D, fbBuffer);
 			glRenderMode(GL_FEEDBACK);  glFlush();
 			glRenderMode(GL_RENDER);  glFlush();
 			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);
