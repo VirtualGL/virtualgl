@@ -1,6 +1,8 @@
 2.6.2
 =====
 
+### Significant changes relative to 2.6.1:
+
 1. Fixed a regression introduced by 2.6 beta1[4] that prevented VirtualGL from
 building on 64-bit ARM (AArch64) platforms.
 
