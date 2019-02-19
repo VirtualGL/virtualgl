@@ -1094,8 +1094,8 @@ int visTest(void)
 				if(hasVis != shouldHaveVis)
 				{
 					printf("CFG 0x%.2x:  ", fbcid);
-					_error(hasVis ? "CFG shouldn't have matching X visual but does"
-						: "No matching X visual for CFG");
+					_error(hasVis ? "CFG shouldn't have matching X visual but does" :
+						"No matching X visual for CFG");
 				}
 			}
 			catch(Error &e)
