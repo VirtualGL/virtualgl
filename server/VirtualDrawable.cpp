@@ -104,6 +104,7 @@ VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_, int depth_,
 	pm = XCreatePixmap(_dpy3D, win, width, height,
 		depth > 0 ? depth : vis->depth);
 	if(!pm) goto bailout;
+	XFree(vis);
 	glxDraw = _glXCreatePixmap(_dpy3D, config, pm, attribs);
 	if(!glxDraw) goto bailout;
 

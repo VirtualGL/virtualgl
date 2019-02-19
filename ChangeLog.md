@@ -14,6 +14,8 @@ will disable the ability to log in locally with a Wayland session.
 use `glXUseXFont()` while rendering to a Pbuffer and displaying to a 2D X
 server screen other than 0.
 
+4. Fixed several minor memory leaks in the VirtualGL Faker.
+
 
 2.6.1
 =====

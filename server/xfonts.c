@@ -164,8 +164,11 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
       if ((win = _XCreateWindow(dpy, root, 0, 0, 1, 1, 0, v->depth,
                                 InputOutput, v->visual,
                                 CWBorderPixel | CWColormap | CWEventMask,
-                                &swa)) == 0)
+                                &swa)) == 0) {
+         XFree(v);
          _throw("Could not create temporary window for font rendering");
+      }
+      XFree(v);
       newwin = true;
    }
 

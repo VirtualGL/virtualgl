@@ -260,6 +260,7 @@ static void DeleteWindow(Display *dpy, Window win, bool subOnly = false)
 		&& children && n > 0)
 	{
 		for(unsigned int i = 0; i < n; i++) DeleteWindow(dpy, children[i]);
+		XFree(children);
 	}
 }
 
@@ -477,7 +478,14 @@ Display *XOpenDisplay(_Xconst char *name)
 		if(vglfaker::excludeDisplay(DisplayString(dpy)))
 			dpyhash.add(dpy);
 		else if(strlen(fconfig.vendor) > 0)
+		{
+			// Danger, Will Robinson!  We do this to prevent a small memory leak, but
+			// we can only can get away with it because we know that Xlib dynamically
+			// allocates the vendor string.  Xlib has done so for as long as
+			// VirtualGL has been around, so it seems like a safe assumption.
+			XFree(ServerVendor(dpy));
 			ServerVendor(dpy) = strdup(fconfig.vendor);
+		}
 	}
 
 		stoptrace();  prargd(dpy);  closetrace();

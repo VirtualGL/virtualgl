@@ -33,6 +33,7 @@ NOSTEREO=
 NODBPIXMAP=
 DEPTH=24
 IPV6=1
+WRAP=
 while [ $# -gt 0 ]; do
 	case "$1" in
 	-nodl)
@@ -52,6 +53,9 @@ while [ $# -gt 0 ]; do
 		DEPTH=30
 		NOSTEREO=-nostereo
 		;;
+	-wrap)
+		WRAP=$2;  shift
+		;;
 	esac
 	shift
 done
@@ -69,11 +73,11 @@ for SCREEN in 0 1; do
 	export DISPLAY=:42.$SCREEN
 
 	# Frame unit tests
-	$BIN/frameut -check
+	$WRAP $BIN/frameut -check
 	if [ $DEPTH = 24 ]; then
-		$BIN/frameut -check -anaglyph
+		$WRAP $BIN/frameut -check -anaglyph
 	fi
-	$BIN/frameut -check -logo
+	$WRAP $BIN/frameut -check -logo
 
 	# VGL Transport
 	if [ $DEPTH = 24 ]; then
@@ -81,17 +85,17 @@ for SCREEN in 0 1; do
 		echo
 		$BIN/vglclient >vglclient.log 2>&1 & VGLCLIENTPID=$!
 		VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
-			$BIN/vglrun $NODL -c jpeg $BIN/fakerut $NOSTEREO $NODBPIXMAP
+			$BIN/vglrun $NODL -c jpeg $WRAP $BIN/fakerut $NOSTEREO $NODBPIXMAP
 		if [ "$SSL" = "1" ]; then
 			VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
-				$BIN/vglrun $NODL -c jpeg +s $BIN/fakerut $NOSTEREO $NODBPIXMAP
+				$BIN/vglrun $NODL -c jpeg +s $WRAP $BIN/fakerut $NOSTEREO $NODBPIXMAP
 		fi
 		VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB VGL_READBACK=sync \
-			$BIN/vglrun $NODL -np 2 -c rgb $BIN/fakerut $NOSTEREO $NODBPIXMAP
+			$BIN/vglrun $NODL -np 2 -c rgb $WRAP $BIN/fakerut $NOSTEREO $NODBPIXMAP
 		# (we can't test stereo here, because the transport plugin assumes
 		# quad-buffered, which isn't available with an X proxy.)
 		VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
-			$BIN/vglrun $NODL -trans test $BIN/fakerut -nostereo $NODBPIXMAP
+			$BIN/vglrun $NODL -trans test $WRAP $BIN/fakerut -nostereo $NODBPIXMAP
 		kill $VGLCLIENTPID
 		VGLCLIENTPID=-1
 
@@ -100,13 +104,13 @@ for SCREEN in 0 1; do
 			echo
 			$BIN/vglclient -ipv6 >vglclient.log 2>&1 & VGLCLIENTPID=$!
 			VGL_CLIENT=::1 LD_LIBRARY_PATH=$LIB \
-				$BIN/vglrun $NODL -c jpeg $BIN/fakerut $NOSTEREO $NODBPIXMAP
+				$BIN/vglrun $NODL -c jpeg $WRAP $BIN/fakerut $NOSTEREO $NODBPIXMAP
 			if [ "$SSL" = "1" ]; then
 				VGL_CLIENT=::1 LD_LIBRARY_PATH=$LIB \
-					$BIN/vglrun $NODL -c jpeg +s $BIN/fakerut $NOSTEREO $NODBPIXMAP
+					$BIN/vglrun $NODL -c jpeg +s $WRAP $BIN/fakerut $NOSTEREO $NODBPIXMAP
 			fi
 			VGL_CLIENT=[::1]:0 LD_LIBRARY_PATH=$LIB \
-				$BIN/vglrun $NODL -trans test $BIN/fakerut -nostereo $NODBPIXMAP
+				$BIN/vglrun $NODL -trans test $WRAP $BIN/fakerut -nostereo $NODBPIXMAP
 			kill $VGLCLIENTPID
 			VGLCLIENTPID=-1
 		fi
@@ -116,10 +120,10 @@ for SCREEN in 0 1; do
 	echo \*\*\*\*\* Testing X11 Transport, Screen $SCREEN \*\*\*\*\*
 	echo
 	LD_LIBRARY_PATH=$LIB \
-		$BIN/vglrun $NODL -c proxy $BIN/fakerut $NOSTEREO $NODBPIXMAP
+		$BIN/vglrun $NODL -c proxy $WRAP $BIN/fakerut $NOSTEREO $NODBPIXMAP
 	if [ $DEPTH = 24 ]; then
 		LD_LIBRARY_PATH=$LIB \
-			$BIN/vglrun $NODL -trans test2 $BIN/fakerut $NOSTEREO $NODBPIXMAP
+			$BIN/vglrun $NODL -trans test2 $WRAP $BIN/fakerut $NOSTEREO $NODBPIXMAP
 	fi
 
 done

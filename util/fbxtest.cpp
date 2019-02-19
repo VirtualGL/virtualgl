@@ -360,6 +360,7 @@ class WriteThread : public Runnable
 					(unsigned char *)fb.bits, 0);
 				for(i = 0; i < iter; i++)
 					_fbx(fbx_write(&fb, 0, 0, myX, myY, fb.width, fb.height));
+				fbx_term(&fb);
 			}
 			catch(...)
 			{
@@ -404,6 +405,7 @@ class ReadThread : public Runnable
 				if(!cmpBuf(myX, myY, fb.width, fb.pitch, fb.height, fb.pf,
 					(unsigned char *)fb.bits, 0))
 					_throw("ERROR: Bogus data read back.");
+				fbx_term(&fb);
 			}
 			catch(...)
 			{

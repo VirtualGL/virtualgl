@@ -710,7 +710,9 @@ int main(int argc, char **argv)
 	catch(Error &e)
 	{
 		fprintf(stderr, "%s\n%s\n", e.getMethod(), e.getMessage());
+		if(dpy) XCloseDisplay(dpy);
 		exit(1);
 	}
+	if(dpy) XCloseDisplay(dpy);
 	return 0;
 }

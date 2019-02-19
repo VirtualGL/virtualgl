@@ -1,4 +1,4 @@
-// Copyright (C)2011, 2013-2014 D. R. Commander
+// Copyright (C)2011, 2013-2014, 2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -22,17 +22,12 @@ namespace vglserver
 	{
 		public:
 
-			VirtualPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm);
+			VirtualPixmap(Display *dpy, Visual *visual, Pixmap pm);
 			~VirtualPixmap();
 			int init(int width, int height, int depth, GLXFBConfig config,
 				const int *attribs);
 			void readback(void);
 			Pixmap get3DX11Pixmap(void);
-
-			XVisualInfo *getVisual(void)
-			{
-				return oglDraw ? oglDraw->getVisual() : NULL;
-			}
 
 		private:
 

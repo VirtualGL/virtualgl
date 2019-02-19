@@ -772,7 +772,7 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 	_XGetGeometry(dpy, pm, &root, &x, &y, &width, &height, &bw, &depth);
 	if(!(config = matchConfig(dpy, vis, true, true)))
 		_throw("Could not obtain pixmap-capable RGB visual on the server");
-	VirtualPixmap *vpm = new VirtualPixmap(dpy, vis, pm);
+	VirtualPixmap *vpm = new VirtualPixmap(dpy, vis->visual, pm);
 	if(vpm)
 	{
 		// Hash the VirtualPixmap instance to the 2D pixmap and also hash the 2D X
@@ -812,7 +812,11 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm,
 	if(vid)
 	{
 		XVisualInfo *vis = glxvisual::visualFromID(dpy, DefaultScreen(dpy), vid);
-		if(vis) vpm = new VirtualPixmap(dpy, vis, pm);
+		if(vis)
+		{
+			vpm = new VirtualPixmap(dpy, vis->visual, pm);
+			XFree(vis);
+		}
 	}
 	if(vpm)
 	{
