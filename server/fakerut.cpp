@@ -1145,7 +1145,8 @@ int visTest(void)
 		free(visuals);  visuals = NULL;  n = 0;
 		fflush(stdout);
 
-		if(!(vis0 = XGetVisualInfo(dpy, VisualNoMask, &vtemp, &n)) || n == 0)
+		vtemp.screen = DefaultScreen(dpy);
+		if(!(vis0 = XGetVisualInfo(dpy, VisualScreenMask, &vtemp, &n)) || n == 0)
 			_throw("No X Visuals found");
 		printf("\n");
 

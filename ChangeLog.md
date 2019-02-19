@@ -10,6 +10,10 @@ building on 64-bit ARM (AArch64) platforms.
 running GDM, with the caveat that configuring such systems as VirtualGL servers
 will disable the ability to log in locally with a Wayland session.
 
+3. Fixed a BadMatch X11 error that occurred when an application attempted to
+use `glXUseXFont()` while rendering to a Pbuffer and displaying to a 2D X
+server screen other than 0.
+
 
 2.6.1
 =====

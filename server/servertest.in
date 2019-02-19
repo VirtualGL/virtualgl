@@ -60,56 +60,69 @@ which Xvfb >/dev/null 2>&1 || (
 	echo Xvfb not found!
 	exit 1
 )
-Xvfb :42 -screen 0 1920x1200x$DEPTH >/dev/null 2>&1 & PID=$!
+Xvfb :42 -screen 0 1920x1200x$DEPTH -screen 1 1920x1200x$DEPTH >/dev/null 2>&1 & PID=$!
 echo Xvfb started as process $PID
 sleep 2
 
-# Frame unit tests
-DISPLAY=:42 $BIN/frameut -check
-if [ $DEPTH = 24 ]; then
-	DISPLAY=:42 $BIN/frameut -check -anaglyph
-fi
-DISPLAY=:42 $BIN/frameut -check -logo
+for SCREEN in 0 1; do
 
-# VGL Transport
-if [ $DEPTH = 24 ]; then
-	DISPLAY=:42 $BIN/vglclient >vglclient.log 2>&1 & VGLCLIENTPID=$!
-	DISPLAY=:42 VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
-		$BIN/vglrun $NODL -c jpeg $BIN/fakerut $NOSTEREO $NODBPIXMAP
-	if [ "$SSL" = "1" ]; then
-		DISPLAY=:42 VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
-			$BIN/vglrun $NODL -c jpeg +s $BIN/fakerut $NOSTEREO $NODBPIXMAP
+	export DISPLAY=:42.$SCREEN
+
+	# Frame unit tests
+	$BIN/frameut -check
+	if [ $DEPTH = 24 ]; then
+		$BIN/frameut -check -anaglyph
 	fi
-	DISPLAY=:42 VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB VGL_READBACK=sync \
-		$BIN/vglrun $NODL -np 2 -c rgb $BIN/fakerut $NOSTEREO $NODBPIXMAP
-	# (we can't test stereo here, because the transport plugin assumes
-	# quad-buffered, which isn't available with an X proxy.)
-	DISPLAY=:42 VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
-		$BIN/vglrun $NODL -trans test $BIN/fakerut -nostereo $NODBPIXMAP
-	kill $VGLCLIENTPID
-	VGLCLIENTPID=-1
-	if [ "$IPV6" = "1" ]; then
-		DISPLAY=:42 $BIN/vglclient -ipv6 >vglclient.log 2>&1 & VGLCLIENTPID=$!
-		DISPLAY=:42 VGL_CLIENT=::1 LD_LIBRARY_PATH=$LIB \
+	$BIN/frameut -check -logo
+
+	# VGL Transport
+	if [ $DEPTH = 24 ]; then
+		echo \*\*\*\*\* Testing VGL Transport/IPv4, Screen $SCREEN \*\*\*\*\*
+		echo
+		$BIN/vglclient >vglclient.log 2>&1 & VGLCLIENTPID=$!
+		VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
 			$BIN/vglrun $NODL -c jpeg $BIN/fakerut $NOSTEREO $NODBPIXMAP
 		if [ "$SSL" = "1" ]; then
-			DISPLAY=:42 VGL_CLIENT=::1 LD_LIBRARY_PATH=$LIB \
+			VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
 				$BIN/vglrun $NODL -c jpeg +s $BIN/fakerut $NOSTEREO $NODBPIXMAP
 		fi
-		DISPLAY=:42 VGL_CLIENT=[::1]:0 LD_LIBRARY_PATH=$LIB \
+		VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB VGL_READBACK=sync \
+			$BIN/vglrun $NODL -np 2 -c rgb $BIN/fakerut $NOSTEREO $NODBPIXMAP
+		# (we can't test stereo here, because the transport plugin assumes
+		# quad-buffered, which isn't available with an X proxy.)
+		VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
 			$BIN/vglrun $NODL -trans test $BIN/fakerut -nostereo $NODBPIXMAP
 		kill $VGLCLIENTPID
 		VGLCLIENTPID=-1
-	fi
-fi
 
-# X11 Transport
-DISPLAY=:42 LD_LIBRARY_PATH=$LIB \
-	$BIN/vglrun $NODL -c proxy $BIN/fakerut $NOSTEREO $NODBPIXMAP
-if [ $DEPTH = 24 ]; then
-	DISPLAY=:42 LD_LIBRARY_PATH=$LIB \
-		$BIN/vglrun $NODL -trans test2 $BIN/fakerut $NOSTEREO $NODBPIXMAP
-fi
+		if [ "$IPV6" = "1" ]; then
+			echo \*\*\*\*\* Testing VGL Transport/IPv6, Screen $SCREEN \*\*\*\*\*
+			echo
+			$BIN/vglclient -ipv6 >vglclient.log 2>&1 & VGLCLIENTPID=$!
+			VGL_CLIENT=::1 LD_LIBRARY_PATH=$LIB \
+				$BIN/vglrun $NODL -c jpeg $BIN/fakerut $NOSTEREO $NODBPIXMAP
+			if [ "$SSL" = "1" ]; then
+				VGL_CLIENT=::1 LD_LIBRARY_PATH=$LIB \
+					$BIN/vglrun $NODL -c jpeg +s $BIN/fakerut $NOSTEREO $NODBPIXMAP
+			fi
+			VGL_CLIENT=[::1]:0 LD_LIBRARY_PATH=$LIB \
+				$BIN/vglrun $NODL -trans test $BIN/fakerut -nostereo $NODBPIXMAP
+			kill $VGLCLIENTPID
+			VGLCLIENTPID=-1
+		fi
+	fi
+
+	# X11 Transport
+	echo \*\*\*\*\* Testing X11 Transport, Screen $SCREEN \*\*\*\*\*
+	echo
+	LD_LIBRARY_PATH=$LIB \
+		$BIN/vglrun $NODL -c proxy $BIN/fakerut $NOSTEREO $NODBPIXMAP
+	if [ $DEPTH = 24 ]; then
+		LD_LIBRARY_PATH=$LIB \
+			$BIN/vglrun $NODL -trans test2 $BIN/fakerut $NOSTEREO $NODBPIXMAP
+	fi
+
+done
 
 kill $PID
 PID=-1
