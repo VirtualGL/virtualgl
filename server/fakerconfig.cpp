@@ -1,15 +1,14 @@
-/* Copyright (C)2009-2018 D. R. Commander
- *
- * This library is free software and may be redistributed and/or modified under
- * the terms of the wxWindows Library License, Version 3.1 or (at your option)
- * any later version.  The full license is in the LICENSE.txt file included
- * with this distribution.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * wxWindows Library License for more details.
- */
+// Copyright (C)2009-2018 D. R. Commander
+//
+// This library is free software and may be redistributed and/or modified under
+// the terms of the wxWindows Library License, Version 3.1 or (at your option)
+// any later version.  The full license is in the LICENSE.txt file included
+// with this distribution.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// wxWindows Library License for more details.
 
 #include <ctype.h>
 #include <string.h>
@@ -48,8 +47,8 @@ int fconfig_getshmid(void) { return fconfig_shmid; }
 static FakerConfig *fconfig_instance = NULL;
 
 
-/* This is a hack necessary to defer the initialization of the recursive mutex
-   so MainWin will not interfere with it */
+// This is a hack necessary to defer the initialization of the recursive mutex
+// so MainWin will not interfere with it
 
 class DeferredCS : CriticalSection
 {

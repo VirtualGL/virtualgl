@@ -1,17 +1,16 @@
-/* Copyright (C)2004 Landmark Graphics Corporation
- * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011-2019 D. R. Commander
- *
- * This library is free software and may be redistributed and/or modified under
- * the terms of the wxWindows Library License, Version 3.1 or (at your option)
- * any later version.  The full license is in the LICENSE.txt file included
- * with this distribution.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * wxWindows Library License for more details.
- */
+// Copyright (C)2004 Landmark Graphics Corporation
+// Copyright (C)2005, 2006 Sun Microsystems, Inc.
+// Copyright (C)2009, 2011-2019 D. R. Commander
+//
+// This library is free software and may be redistributed and/or modified under
+// the terms of the wxWindows Library License, Version 3.1 or (at your option)
+// any later version.  The full license is in the LICENSE.txt file included
+// with this distribution.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// wxWindows Library License for more details.
 
 #include <string.h>
 #include <limits.h>
@@ -180,9 +179,9 @@ static VisualID matchVisual(Display *dpy, GLXFBConfig config)
 	if(!(vid = cfghash.getVisual(dpy, config)))
 	{
 		// If we get here, then the application is using an FB config that was not
-    // obtained through glXChooseFBConfig(), so we have no idea what attributes
-    // it is looking for.  We first try to match the FB config with a 2D X
-    // Server visual that has the same class, depth, and stereo properties.
+		// obtained through glXChooseFBConfig(), so we have no idea what attributes
+		// it is looking for.  We first try to match the FB config with a 2D X
+		// Server visual that has the same class, depth, and stereo properties.
 		XVisualInfo *vis = _glXGetVisualFromFBConfig(_dpy3D, config);
 		if(vis)
 		{
@@ -474,7 +473,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 
 	// Hash the FB config and the visual so that we can look up the FB config
 	// whenever the appplication subsequently passes the visual to
-  // glXCreateContext() or other functions.
+	// glXCreateContext() or other functions.
 	vishash.add(dpy, vis, config);
 
 	done:
@@ -1022,7 +1021,7 @@ void glXFreeContextEXT(Display *dpy, GLXContext ctx)
 
 #define VGL_GLX_EXTENSIONS \
 	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index"
-/* Allow enough space here for all of the extensions */
+// Allow enough space here for all of the extensions
 static char glxextensions[1024] = VGL_GLX_EXTENSIONS;
 
 static const char *getGLXExtensions(void)
