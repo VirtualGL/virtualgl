@@ -17,7 +17,6 @@
 #include "Error.h"
 #include "vglutil.h"
 #define GLX_GLXEXT_PROTOTYPES
-#include "ConfigHash.h"
 #include "ContextHash.h"
 #include "GLXDrawableHash.h"
 #include "PixmapHash.h"
@@ -154,49 +153,10 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 		if(config)
 		{
 			vglfaker::setConfigForVisual(dpy, vis, config);
-			cfghash.add(dpy, config, vis->visualid);
+			glxvisual::attachVisualID(dpy, vis->screen, config, vis->visualid);
 		}
 	}
 	return config;
-}
-
-
-// Return the 2D X server visual that was previously hashed to 'config', or
-// find and return an appropriate 2D X server visual otherwise.
-
-static VisualID matchVisual(Display *dpy, int screen, GLXFBConfig config,
-	int stereo)
-{
-	VisualID vid = 0;
-	if(!dpy || !config) return 0;
-	if(!(vid = cfghash.getVisual(dpy, config)))
-	{
-		// If we get here, then the application is using an FB config that was not
-		// obtained through glXChooseFBConfig(), so we have no idea what attributes
-		// it is looking for.  We first try to match the FB config with a 2D X
-		// Server visual that has the same class, depth, and stereo properties.
-		XVisualInfo *vis = _glXGetVisualFromFBConfig(DPY3D, config);
-		if(vis)
-		{
-			if(vis->depth >= 24
-				&& (vis->c_class == TrueColor || vis->c_class == DirectColor))
-				vid = glxvisual::matchVisual2D(dpy, screen, vis->depth, vis->c_class,
-					stereo);
-			XFree(vis);
-
-			// Failing that, we try to find a TrueColor visual with the same stereo
-			// properties, using the default depth of the 2D X server.
-			if(!vid)
-				vid = glxvisual::matchVisual2D(dpy, screen, DefaultDepth(dpy, screen),
-					TrueColor, stereo);
-			// Failing that, we try to find a TrueColor mono visual.
-			if(!vid)
-				vid = glxvisual::matchVisual2D(dpy, screen, DefaultDepth(dpy, screen),
-					TrueColor, 0);
-		}
-		if(vid) cfghash.add(dpy, config, vid);
-	}
-	return vid;
 }
 
 
@@ -284,7 +244,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 		OPENTRACE(glXChooseFBConfig);  PRARGD(dpy);  PRARGI(screen);
 		PRARGAL13(attrib_list);  STARTTRACE();
 
-	int c_class = TrueColor, stereo = 0, temp;
+	int temp;
 	if(!nelements) nelements = &temp;
 	*nelements = 0;
 
@@ -299,24 +259,14 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 
 	// Modify the attributes so that only FB configs appropriate for off-screen
 	// rendering are considered.
-	else configs = glxvisual::configsFromVisAttribs(attrib_list, c_class, stereo,
-		*nelements, true);
+	else configs = glxvisual::configsFromVisAttribs(attrib_list, *nelements,
+		true);
 
 	if(configs && *nelements)
 	{
-		int nv = 0;
-
-		// Get a matching visual from the 2D X server and hash it to every FB
-		// config we just obtained.  We have to do this here, because we won't
-		// have access to the screen information later.
-		for(int i = 0; i < *nelements; i++)
-		{
-			VisualID vid = matchVisual(dpy, screen, configs[i], stereo);
-			if(!vid) continue;
-			nv++;
-			cfghash.add(dpy, configs[i], vid);
-		}
-		if(!nv) { *nelements = 0;  XFree(configs);  configs = NULL; }
+		// Create the FB config table, if it isn't already created.  We do this
+		// here because we may not have access to the screen information later.
+		glxvisual::getAttachedVisualID(dpy, screen, configs[0]);
 	}
 
 	done:
@@ -344,7 +294,7 @@ GLXFBConfigSGIX *glXChooseFBConfigSGIX(Display *dpy, int screen,
 
 // Obtain a 3D X server FB config that supports off-screen rendering and has
 // the desired set of attributes, match it to an appropriate 2D X server
-// visual, hash the two, and return the visual.
+// visual, attach the two, and return the visual.
 
 XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 {
@@ -362,11 +312,9 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	// Use the specified set of GLX attributes to obtain an FB config on the 3D X
 	// server suitable for off-screen rendering
 	GLXFBConfig *configs = NULL, prevConfig;  int n = 0;
-	int depth = 24, c_class = TrueColor, stereo = 0;
-	VisualID vid = 0;  XVisualInfo *vtemp = NULL;
+	VisualID vid = 0;
 	if(!dpy || !attrib_list) goto done;
-	if(!(configs = glxvisual::configsFromVisAttribs(attrib_list, c_class, stereo,
-		n)) || n < 1)
+	if(!(configs = glxvisual::configsFromVisAttribs(attrib_list, n)) || n < 1)
 	{
 		if(!alreadyWarned && fconfig.verbose)
 		{
@@ -383,21 +331,10 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	}
 	config = configs[0];
 	XFree(configs);
-	vtemp = _glXGetVisualFromFBConfig(DPY3D, config);
-	if(vtemp)
-	{
-		if(vtemp->depth > 24) depth = vtemp->depth;
-		XFree(vtemp);
-	}
 
 	// Find an appropriate matching visual on the 2D X server.
-	vid = glxvisual::matchVisual2D(dpy, screen, depth, c_class, stereo);
-	if(!vid)
-	{
-		if(depth == 32) vid = glxvisual::matchVisual2D(dpy, screen, 24, c_class,
-			stereo);
-		if(!vid) goto done;
-	}
+	vid = glxvisual::getAttachedVisualID(dpy, screen, config);
+	if(!vid) goto done;
 	vis = glxvisual::visualFromID(dpy, screen, vid);
 	if(!vis) goto done;
 
@@ -406,7 +343,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 		vglout.println("[VGL] WARNING: Visual 0x%.2x was previously mapped to FB config 0x%.2x and is now mapped to 0x%.2x\n",
 			vis->visualid, FBCID(prevConfig), FBCID(config));
 
-	// Hash the FB config and the visual so that we can look up the FB config
+	// Attach the FB config and the visual so that we can look up the FB config
 	// whenever the appplication subsequently passes the visual to
 	// glXCreateContext() or other functions.
 	vglfaker::setConfigForVisual(dpy, vis, config);
@@ -453,8 +390,8 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 		PRARGX(share_list);  PRARGI(direct);  STARTTRACE();
 
 	// If 'vis' was obtained through a previous call to glXChooseVisual(), find
-	// the corresponding FB config in the hash.  Otherwise, we have to fall back
-	// to using a default FB config returned from matchConfig().
+	// the corresponding FB config.  Otherwise, we have to fall back to using a
+	// default FB config returned from matchConfig().
 	if(!(config = matchConfig(dpy, vis)))
 		THROW("Could not obtain RGB visual on the server suitable for off-screen rendering.");
 	ctx = _glXCreateNewContext(DPY3D, config, GLX_RGBA_TYPE, share_list,
@@ -679,8 +616,8 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm,
 	Window root;  int x, y;  unsigned int w, h, bw, d;
 	_XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
 
-	VisualID vid = matchVisual(dpy, DefaultScreen(dpy), config,
-		glxvisual::visAttrib3D(config, GLX_STEREO));
+	VisualID vid = glxvisual::getAttachedVisualID(dpy, DefaultScreen(dpy),
+		config);
 	VirtualPixmap *vpm = NULL;
 	if(vid)
 	{
@@ -1119,11 +1056,12 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 		if(temp & GLX_PBUFFER_BIT) *value |= GLX_PBUFFER_BIT;
 	}
 
-	// If there is a corresponding 2D X server visual hashed to this FB config,
+	// If there is a corresponding 2D X server visual attached to this FB config,
 	// then that means it was obtained via glXChooseFBConfig(), and we can
 	// return attributes that take into account the interaction between visuals
 	// on the 2D X Server and FB Configs on the 3D X Server.
-	if((vid = cfghash.getVisual(dpy, config)) != 0 && attribute == GLX_VISUAL_ID)
+	if((vid = glxvisual::getAttachedVisualID(dpy, DefaultScreen(dpy),
+		config)) != 0 && attribute == GLX_VISUAL_ID)
 		*value = vid;
 
 	done:
@@ -1424,7 +1362,7 @@ void glXGetSelectedEventSGIX(Display *dpy, GLXDrawable drawable,
 }
 
 
-// Return the 2D X server visual that was hashed to the 3D X server FB config
+// Return the 2D X server visual that was attached to the 3D X server FB config
 // during a previous call to glXChooseFBConfig(), or pick out an appropriate
 // visual and return it.
 
@@ -1442,8 +1380,7 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 
 	VisualID vid = 0;
 	if(!dpy || !config) goto done;
-	vid = matchVisual(dpy, DefaultScreen(dpy), config,
-		glxvisual::visAttrib3D(config, GLX_STEREO));
+	vid = glxvisual::getAttachedVisualID(dpy, DefaultScreen(dpy), config);
 	if(!vid) goto done;
 	vis = glxvisual::visualFromID(dpy, DefaultScreen(dpy), vid);
 	if(!vis) goto done;

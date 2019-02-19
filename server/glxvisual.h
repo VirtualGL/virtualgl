@@ -25,8 +25,8 @@ namespace glxvisual
 	// attribute list.  It also returns the visual parameters derived from that
 	// same attribute list, so those parameters can be used to match an
 	// appropriate visual on the 2D X server.
-	GLXFBConfig *configsFromVisAttribs(const int attribs[], int &c_class,
-		int &stereo, int &nElements, bool glx13 = false);
+	GLXFBConfig *configsFromVisAttribs(const int attribs[], int &nElements,
+		bool glx13 = false);
 
 	// These functions return attributes for visuals on the 2D X server (those
 	// attributes are read from the 2D X server and cached on first access, so
@@ -34,19 +34,21 @@ namespace glxvisual
 	// 2D X server.)
 	int visAttrib2D(Display *dpy, int screen, VisualID vid, int attribute);
 
-	// This function finds a 2D X server visual that matches the given
-	// visual parameters.  As with the above functions, it uses the cached
-	// attributes from the 2D X server, or it caches them if they have not
-	// already been read.
-	VisualID matchVisual2D(Display *dpy, int screen, int depth, int c_class,
-		int stereo);
-
 	// Simple helper function that obtains an attribute for a GLXFBConfig on the
 	// 3D X server.
 	int visAttrib3D(GLXFBConfig config, int attribute);
 
 	// This is just a convenience wrapper for XGetVisualInfo()
 	XVisualInfo *visualFromID(Display *dpy, int screen, VisualID vid);
+
+	// This function returns the visual ID attached to a given FB config in the
+	// FB config table.
+	VisualID getAttachedVisualID(Display *dpy, int screen, GLXFBConfig config);
+
+	// This function attaches a visual ID to a given FB config in the FB config
+	// table.
+	void attachVisualID(Display *dpy, int screen, GLXFBConfig config,
+		VisualID vid);
 }
 
 

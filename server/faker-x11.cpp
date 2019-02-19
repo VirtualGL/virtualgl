@@ -491,6 +491,10 @@ Display *XOpenDisplay(_Xconst char *name)
 		if(!(codes = XAddExtension(dpy)))
 			THROW("Memory allocation error");
 
+		// Extension code 5 stores the FB config attribute table for a Screen.
+		if(!(codes = XAddExtension(dpy)))
+			THROW("Memory allocation error");
+
 		if(!excludeDisplay && strlen(fconfig.vendor) > 0)
 		{
 			// Danger, Will Robinson!  We do this to prevent a small memory leak, but

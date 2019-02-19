@@ -14,7 +14,6 @@
 
 #include <unistd.h>
 #include "Mutex.h"
-#include "ConfigHash.h"
 #include "ContextHash.h"
 #include "GLXDrawableHash.h"
 #include "GlobalCriticalSection.h"
@@ -47,7 +46,6 @@ VGL_THREAD_LOCAL(AutotestDrawable, long, 0)
 static void cleanup(void)
 {
 	if(PixmapHash::isAlloc()) pmhash.kill();
-	if(ConfigHash::isAlloc()) cfghash.kill();
 	if(ContextHash::isAlloc()) ctxhash.kill();
 	if(GLXDrawableHash::isAlloc()) glxdhash.kill();
 	if(WindowHash::isAlloc()) winhash.kill();

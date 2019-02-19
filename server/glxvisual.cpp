@@ -25,6 +25,8 @@
 using namespace vglutil;
 
 
+namespace glxvisual {
+
 typedef struct
 {
 	VisualID visualID;
@@ -110,18 +112,158 @@ static void buildVisAttribTable(Display *dpy, int screen)
 }
 
 
-namespace glxvisual {
+// This function finds a 2D X server visual that matches the given
+// visual parameters.  As with the above functions, it uses the cached
+// attributes from the 2D X server, or it caches them if they have not
+// already been read.
 
-GLXFBConfig *configsFromVisAttribs(const int attribs[], int &c_class,
-	int &stereo, int &nElements, bool glx13)
+static VisualID matchVisual2D(Display *dpy, int screen, int depth, int c_class,
+	int stereo)
+{
+	int i, tryStereo;
+	if(!dpy) return 0;
+
+	buildVisAttribTable(dpy, screen);
+	GET_VA_TABLE()
+
+	// Try to find an exact match
+	for(tryStereo = 1; tryStereo >= 0; tryStereo--)
+	{
+		for(i = 0; i < vaEntries; i++)
+		{
+			int match = 1;
+			if(va[i].c_class != c_class) match = 0;
+			if(va[i].depth != depth) match = 0;
+			if(fconfig.stereo == RRSTEREO_QUADBUF && tryStereo)
+			{
+				if(stereo != va[i].isStereo) match = 0;
+				if(stereo && !va[i].isDB) match = 0;
+				if(stereo && !va[i].isGL) match = 0;
+				if(stereo && va[i].c_class != TrueColor
+					&& va[i].c_class != DirectColor)
+					match = 0;
+			}
+			if(match) return va[i].visualID;
+		}
+	}
+
+	return 0;
+}
+
+
+// This function finds a 2D X server visual that is suitable for use with a
+// particular 3D X server FB config.
+
+static VisualID matchVisual2D(Display *dpy, int screen, GLXFBConfig config,
+	bool stereo)
+{
+	VisualID vid = 0;
+
+	if(!dpy || screen < 0 || !config) return 0;
+
+	XVisualInfo *vis = _glXGetVisualFromFBConfig(DPY3D, config);
+	if(vis)
+	{
+		// We first try to match the FB config with a 2D X Server visual that has
+		// the same class, depth, and stereo properties.
+		if(vis->depth >= 24
+			&& (vis->c_class == TrueColor || vis->c_class == DirectColor))
+			vid = matchVisual2D(dpy, screen, vis->depth, vis->c_class, stereo);
+		XFree(vis);
+
+		// Failing that, we try to find a TrueColor visual with the same stereo
+		// properties, using the default depth of the 2D X server.
+		if(!vid)
+			vid = matchVisual2D(dpy, screen, DefaultDepth(dpy, screen), TrueColor,
+				stereo);
+		// Failing that, we try to find a TrueColor mono visual.
+		if(!vid)
+			vid = matchVisual2D(dpy, screen, DefaultDepth(dpy, screen), TrueColor,
+				0);
+	}
+
+	return vid;
+}
+
+
+typedef struct
+{
+	int configID, nConfigs;
+	VisualID visualID;
+} CfgAttrib;
+
+
+#define GET_CA_TABLE() \
+	CfgAttrib *ca;  int caEntries; \
+	XEDataObject obj; \
+	XExtData *extData; \
+	\
+	obj.screen = XScreenOfDisplay(dpy, screen); \
+	extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 5); \
+	if(!extData) \
+		THROW("Could not retrieve FB config attribute table for screen"); \
+	ca = (CfgAttrib *)extData->private_data; \
+	caEntries = ca[0].nConfigs;
+
+
+static void buildCfgAttribTable(Display *dpy, int screen)
+{
+	int nConfigs = 0;
+	GLXFBConfig *configs = NULL;
+	CfgAttrib *ca = NULL;
+	XEDataObject obj;
+	XExtData *extData;
+	obj.screen = XScreenOfDisplay(dpy, screen);
+
+	if(dpy == vglfaker::dpy3D)
+		THROW("glxvisual::buildCfgAttribTable() called with 3D X server handle (this should never happen)");
+
+	try
+	{
+		CriticalSection::SafeLock l(vglfaker::getDisplayCS(dpy));
+
+		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 5);
+		if(extData && extData->private_data) return;
+
+		if(!(configs = _glXGetFBConfigs(DPY3D, DefaultScreen(DPY3D), &nConfigs)))
+			THROW("No FB configs found");
+
+		if(!(ca = (CfgAttrib *)calloc(nConfigs, sizeof(CfgAttrib))))
+			THROW("Memory allocation error");
+
+		for(int i = 0; i < nConfigs; i++)
+		{
+			ca[i].configID = FBCID(configs[i]);
+			ca[i].visualID = matchVisual2D(dpy, screen, configs[i],
+				visAttrib3D(configs[i], GLX_STEREO));
+			ca[i].nConfigs = nConfigs;
+		}
+
+		XFree(configs);
+
+		if(!(extData = (XExtData *)calloc(1, sizeof(XExtData))))
+			THROW("Memory allocation error");
+		extData->private_data = (XPointer)ca;
+		extData->number = 5;
+		XAddToExtensionList(XEHeadOfExtensionList(obj), extData);
+	}
+	catch(...)
+	{
+		if(configs) XFree(configs);
+		if(ca) free(ca);
+		throw;
+	}
+}
+
+
+GLXFBConfig *configsFromVisAttribs(const int attribs[], int &nElements,
+	bool glx13)
 {
 	int glxattribs[257], j = 0;
 	int doubleBuffer = 0, redSize = -1, greenSize = -1, blueSize = -1,
-		alphaSize = -1, samples = -1,
+		alphaSize = -1, samples = -1, stereo = 0, c_class = TrueColor,
 		renderType = glx13 ? GLX_RGBA_BIT : GLX_COLOR_INDEX_BIT,
 		visualType = GLX_TRUE_COLOR;
-
-	c_class = TrueColor;
 
 	for(int i = 0; attribs[i] != None && i <= 254; i++)
 	{
@@ -264,46 +406,49 @@ int visAttrib3D(GLXFBConfig config, int attribute)
 }
 
 
-VisualID matchVisual2D(Display *dpy, int screen, int depth, int c_class,
-	int stereo)
-{
-	int i, tryStereo;
-	if(!dpy) return 0;
-
-	buildVisAttribTable(dpy, screen);
-	GET_VA_TABLE()
-
-	// Try to find an exact match
-	for(tryStereo = 1; tryStereo >= 0; tryStereo--)
-	{
-		for(i = 0; i < vaEntries; i++)
-		{
-			int match = 1;
-			if(va[i].c_class != c_class) match = 0;
-			if(va[i].depth != depth) match = 0;
-			if(fconfig.stereo == RRSTEREO_QUADBUF && tryStereo)
-			{
-				if(stereo != va[i].isStereo) match = 0;
-				if(stereo && !va[i].isDB) match = 0;
-				if(stereo && !va[i].isGL) match = 0;
-				if(stereo && va[i].c_class != TrueColor
-					&& va[i].c_class != DirectColor)
-					match = 0;
-			}
-			if(match) return va[i].visualID;
-		}
-	}
-
-	return 0;
-}
-
-
 XVisualInfo *visualFromID(Display *dpy, int screen, VisualID vid)
 {
 	XVisualInfo vtemp;  int n = 0;
 	vtemp.visualid = vid;
 	vtemp.screen = screen;
 	return XGetVisualInfo(dpy, VisualIDMask | VisualScreenMask, &vtemp, &n);
+}
+
+
+VisualID getAttachedVisualID(Display *dpy, int screen, GLXFBConfig config)
+{
+	if(!dpy || screen < 0 || !config) return 0;
+
+	buildCfgAttribTable(dpy, screen);
+	GET_CA_TABLE()
+
+	int fbcid = FBCID(config);
+	for(int i = 0; i < caEntries; i++)
+	{
+		if(fbcid == ca[i].configID)
+			return ca[i].visualID;
+	}
+
+	return 0;
+}
+
+
+void attachVisualID(Display *dpy, int screen, GLXFBConfig config, VisualID vid)
+{
+	if(!dpy || screen < 0 || !config || !vid) return;
+
+	buildCfgAttribTable(dpy, screen);
+	GET_CA_TABLE()
+
+	int fbcid = FBCID(config);
+	for(int i = 0; i < caEntries; i++)
+	{
+		if(fbcid == ca[i].configID)
+		{
+			ca[i].visualID = vid;
+			return;
+		}
+	}
 }
 
 }  // namespace

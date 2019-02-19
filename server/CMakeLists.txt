@@ -50,7 +50,6 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile
 	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/faker-mapfile.c)
 
 set(FAKER_SOURCES
-	ConfigHash.cpp
 	ContextHash.cpp
 	faker.cpp
 	faker-gl.cpp
