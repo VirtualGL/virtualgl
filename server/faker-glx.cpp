@@ -38,7 +38,7 @@ using namespace vglserver;
 // server visuals, then pass one of those visuals to glXCreateContext(),
 // glXGetConfig(), etc.  Since the visual didn't come from glXChooseVisual(),
 // VGL has no idea what properties the application is looking for, so if no 3D
-// X server FB config is already hashed to the visual, we have to create one
+// X server FB config is already attached to the visual, we have to create one
 // using default attributes.
 
 #define TEST_ATTRIB(attrib, index, min, max) \
@@ -308,7 +308,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 
 		// Get a matching visual from the 2D X server and hash it to every FB
 		// config we just obtained.  We have to do this here, because we won't
-		// have access to the transparency and screen information later.
+		// have access to the screen information later.
 		for(int i = 0; i < *nelements; i++)
 		{
 			VisualID vid = matchVisual(dpy, screen, configs[i], stereo);
