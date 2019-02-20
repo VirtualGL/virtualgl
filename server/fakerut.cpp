@@ -1,17 +1,16 @@
-/* Copyright (C)2004 Landmark Graphics Corporation
- * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010-2015, 2017-2019 D. R. Commander
- *
- * This library is free software and may be redistributed and/or modified under
- * the terms of the wxWindows Library License, Version 3.1 or (at your option)
- * any later version.  The full license is in the LICENSE.txt file included
- * with this distribution.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * wxWindows Library License for more details.
- */
+// Copyright (C)2004 Landmark Graphics Corporation
+// Copyright (C)2005, 2006 Sun Microsystems, Inc.
+// Copyright (C)2010-2015, 2017-2019 D. R. Commander
+//
+// This library is free software and may be redistributed and/or modified under
+// the terms of the wxWindows Library License, Version 3.1 or (at your option)
+// any later version.  The full license is in the LICENSE.txt file included
+// with this distribution.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// wxWindows Library License for more details.
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1094,8 +1093,8 @@ int visTest(void)
 				if(hasVis != shouldHaveVis)
 				{
 					printf("CFG 0x%.2x:  ", fbcid);
-					THROWNL(hasVis ? "CFG shouldn't have matching X visual but does"
-						: "No matching X visual for CFG");
+					THROWNL(hasVis ? "CFG shouldn't have matching X visual but does" :
+						"No matching X visual for CFG");
 				}
 			}
 			catch(std::exception &e)
@@ -1145,7 +1144,8 @@ int visTest(void)
 		free(visuals);  visuals = NULL;  n = 0;
 		fflush(stdout);
 
-		if(!(vis0 = XGetVisualInfo(dpy, VisualNoMask, &vtemp, &n)) || n == 0)
+		vtemp.screen = DefaultScreen(dpy);
+		if(!(vis0 = XGetVisualInfo(dpy, VisualScreenMask, &vtemp, &n)) || n == 0)
 			THROW("No X Visuals found");
 		printf("\n");
 

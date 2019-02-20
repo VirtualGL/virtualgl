@@ -152,9 +152,11 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
       ERRIFNOT(dpy = glxdhash.getCurrentDisplay(draw));
       vtemp.c_class = TrueColor;
       vtemp.depth = DefaultDepth(dpy, DefaultScreen(dpy));
+      vtemp.screen = DefaultScreen(dpy);
       Window root = DefaultRootWindow(dpy);
-      if((v = XGetVisualInfo(dpy, VisualDepthMask | VisualClassMask, &vtemp,
-                             &nv)) == NULL || nv < 1)
+      if((v = XGetVisualInfo(dpy, VisualDepthMask | VisualClassMask |
+                                  VisualScreenMask, &vtemp, &nv)) == NULL ||
+         nv < 1)
          THROW("Could not create temporary window for font rendering");
       swa.colormap = XCreateColormap(dpy, root, v->visual, AllocNone);
       swa.border_pixel = 0;
@@ -162,8 +164,11 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
       if ((win = _XCreateWindow(dpy, root, 0, 0, 1, 1, 0, v->depth,
                                 InputOutput, v->visual,
                                 CWBorderPixel | CWColormap | CWEventMask,
-                                &swa)) == 0)
+                                &swa)) == 0) {
+         XFree(v);
          THROW("Could not create temporary window for font rendering");
+      }
+      XFree(v);
       newwin = true;
    }
 

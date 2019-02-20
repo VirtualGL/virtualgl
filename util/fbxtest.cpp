@@ -1,17 +1,16 @@
-/* Copyright (C)2004 Landmark Graphics Corporation
- * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011, 2013-2014, 2017-2019 D. R. Commander
- *
- * This library is free software and may be redistributed and/or modified under
- * the terms of the wxWindows Library License, Version 3.1 or (at your option)
- * any later version.  The full license is in the LICENSE.txt file included
- * with this distribution.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * wxWindows Library License for more details.
- */
+// Copyright (C)2004 Landmark Graphics Corporation
+// Copyright (C)2005, 2006 Sun Microsystems, Inc.
+// Copyright (C)2011, 2013-2014, 2017-2019 D. R. Commander
+//
+// This library is free software and may be redistributed and/or modified under
+// the terms of the wxWindows Library License, Version 3.1 or (at your option)
+// any later version.  The full license is in the LICENSE.txt file included
+// with this distribution.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// wxWindows Library License for more details.
 
 #include <math.h>
 #include <stdlib.h>
@@ -361,6 +360,7 @@ class WriteThread : public Runnable
 					(unsigned char *)fb.bits, 0);
 				for(i = 0; i < iter; i++)
 					FBX(fbx_write(&fb, 0, 0, myX, myY, fb.width, fb.height));
+				fbx_term(&fb);
 			}
 			catch(...)
 			{
@@ -405,6 +405,7 @@ class ReadThread : public Runnable
 				if(!cmpBuf(myX, myY, fb.width, fb.pitch, fb.height, fb.pf,
 					(unsigned char *)fb.bits, 0))
 					THROW("ERROR: Bogus data read back.");
+				fbx_term(&fb);
 			}
 			catch(...)
 			{
@@ -845,7 +846,9 @@ int main(int argc, char **argv)
 		vtemp.depth = DefaultDepth(wh.dpy, DefaultScreen(wh.dpy));
 		if(vtemp.depth == 30) depth = 30;
 		vtemp.c_class = TrueColor;
-		v = XGetVisualInfo(wh.dpy, VisualDepthMask | VisualClassMask, &vtemp, &n);
+		vtemp.screen = DefaultScreen(wh.dpy);
+		v = XGetVisualInfo(wh.dpy,
+			VisualDepthMask | VisualClassMask | VisualScreenMask, &vtemp, &n);
 		if(!v || !n) THROW("No RGB visuals available");
 		int mask = CWBorderPixel | CWColormap | CWEventMask;
 		swa.colormap = XCreateColormap(wh.dpy, root, v->visual, AllocNone);

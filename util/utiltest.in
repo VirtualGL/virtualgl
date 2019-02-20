@@ -24,6 +24,7 @@ BIN=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
 SSL=@VGL_USESSL@
 DEPTHS="24 30"
 IPV6=1
+WRAP=
 
 while [ $# -gt 0 ]; do
 	case "$1" in
@@ -33,13 +34,16 @@ while [ $# -gt 0 ]; do
 	-noipv6)
 		IPV6=0
 		;;
+	-wrap)
+		WRAP=$2;  shift
+		;;
 	esac
 	shift
 done
 
-$BIN/bmptest
-$BIN/pftest -time 0.01
-$BIN/pftest -time 0.01 -getsetrgb
+$WRAP $BIN/bmptest
+$WRAP $BIN/pftest -time 0.01
+$WRAP $BIN/pftest -time 0.01 -getsetrgb
 echo
 
 NOSHM=
@@ -54,51 +58,59 @@ which Xvfb >/dev/null 2>&1 || (
 )
 
 for depth in $DEPTHS; do
-	Xvfb :42 -screen 0 1920x1200x$depth >/dev/null 2>&1 & PID=$!
+	Xvfb :42 -screen 0 1920x1200x$depth -screen 1 1920x1200x$depth >/dev/null 2>&1 & PID=$!
 	echo Xvfb started as process $PID
+	echo
 	sleep 2
-	DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2
-	DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -mt
-	DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -pm
-	DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -pm -mt
+	for SCREEN in 0 1; do
+		echo \*\*\*\*\* Testing 1920x1200x$depth, Screen $SCREEN \*\*\*\*\*
+		DISPLAY=:42.$SCREEN $WRAP $BIN/fbxtest $NOSHM -time 0.2
+		DISPLAY=:42.$SCREEN $WRAP $BIN/fbxtest $NOSHM -time 0.2 -mt
+		DISPLAY=:42.$SCREEN $WRAP $BIN/fbxtest $NOSHM -time 0.2 -pm
+		DISPLAY=:42.$SCREEN $WRAP $BIN/fbxtest $NOSHM -time 0.2 -pm -mt
+	done
 	kill $PID
 	PID=-1
 	sleep 2
 done
 
 for depth in $DEPTHS; do
-	Xvfb :42 -screen 0 1024x768x$depth >/dev/null 2>&1 & PID=$!
+	Xvfb :42 -screen 0 1024x768x$depth -screen 1 1024x768x$depth >/dev/null 2>&1 & PID=$!
 	echo Xvfb started as process $PID
+	echo
 	sleep 2
-	DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2
-	DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -mt
-	DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -pm
+	for SCREEN in 0 1; do
+		echo \*\*\*\*\* Testing 1024x768x$depth, Screen $SCREEN \*\*\*\*\*
+		DISPLAY=:42.$SCREEN $WRAP $BIN/fbxtest $NOSHM -time 0.2
+		DISPLAY=:42.$SCREEN $WRAP $BIN/fbxtest $NOSHM -time 0.2 -mt
+		DISPLAY=:42.$SCREEN $WRAP $BIN/fbxtest $NOSHM -time 0.2 -pm
+	done
 	kill $PID
 	PID=-1
 	sleep 2
 done
 
-$BIN/nettest -server &
+$WRAP $BIN/nettest -server &
 echo
 sleep 2
-$BIN/nettest -client 127.0.0.1 -time 0.2
+$WRAP $BIN/nettest -client 127.0.0.1 -time 0.2
 if [ "$IPV6" = "1" ]; then
-	$BIN/nettest -server -ipv6 &
+	$WRAP $BIN/nettest -server -ipv6 &
 	echo
 	sleep 2
-	$BIN/nettest -client ::1 -time 0.2
+	$WRAP $BIN/nettest -client ::1 -time 0.2
 fi
 
 if [ "$SSL" = "1" ]; then
 	echo
-	$BIN/nettest -server -ssl &
+	$WRAP $BIN/nettest -server -ssl &
 	sleep 2
-	$BIN/nettest -client 127.0.0.1 -ssl -time 0.2
+	$WRAP $BIN/nettest -client 127.0.0.1 -ssl -time 0.2
 	if [ "$IPV6" = "1" ]; then
 		echo
-		$BIN/nettest -server -ipv6 -ssl &
+		$WRAP $BIN/nettest -server -ipv6 -ssl &
 		sleep 2
-		$BIN/nettest -client ::1 -ssl -time 0.2
+		$WRAP $BIN/nettest -client ::1 -ssl -time 0.2
 	fi
 fi
 

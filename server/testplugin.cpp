@@ -1,15 +1,14 @@
-/* Copyright (C)2009-2011, 2014, 2017-2019 D. R. Commander
- *
- * This library is free software and may be redistributed and/or modified under
- * the terms of the wxWindows Library License, Version 3.1 or (at your option)
- * any later version.  The full license is in the LICENSE.txt file included
- * with this distribution.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * wxWindows Library License for more details.
- */
+// Copyright (C)2009-2011, 2014, 2017-2019 D. R. Commander
+//
+// This library is free software and may be redistributed and/or modified under
+// the terms of the wxWindows Library License, Version 3.1 or (at your option)
+// any later version.  The full license is in the LICENSE.txt file included
+// with this distribution.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// wxWindows Library License for more details.
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,9 +42,9 @@ static const int pf2trans[PIXELFORMATS] =
 FakerConfig *fconfig_getinstance(void) { return fconfig; }
 
 
-/* This just wraps the VGLTrans class in order to demonstrate how to build a
-   custom transport plugin for VGL and also to serve as a sanity check for the
-   plugin API */
+// This just wraps the VGLTrans class in order to demonstrate how to build a
+// custom transport plugin for VGL and also to serve as a sanity check for the
+// plugin API
 
 extern "C" {
 

@@ -1,17 +1,16 @@
-/* Copyright (C)2004 Landmark Graphics Corporation
- * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011-2016, 2018-2019 D. R. Commander
- *
- * This library is free software and may be redistributed and/or modified under
- * the terms of the wxWindows Library License, Version 3.1 or (at your option)
- * any later version.  The full license is in the LICENSE.txt file included
- * with this distribution.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * wxWindows Library License for more details.
- */
+// Copyright (C)2004 Landmark Graphics Corporation
+// Copyright (C)2005, 2006 Sun Microsystems, Inc.
+// Copyright (C)2009, 2011-2016, 2018-2019 D. R. Commander
+//
+// This library is free software and may be redistributed and/or modified under
+// the terms of the wxWindows Library License, Version 3.1 or (at your option)
+// any later version.  The full license is in the LICENSE.txt file included
+// with this distribution.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// wxWindows Library License for more details.
 
 #include "PixmapHash.h"
 #include "WindowHash.h"
@@ -38,9 +37,9 @@ int XCloseDisplay(Display *dpy)
 {
 	// MainWin calls various X11 functions from the destructor of one of its
 	// shared libraries, which is executed after the VirtualGL Faker has shut
-  // down, so we cannot access fconfig or vglout or winh without causing
-  // deadlocks or other issues.  At this point, all we can safely do is hand
-  // off to libX11.
+	// down, so we cannot access fconfig or vglout or winh without causing
+	// deadlocks or other issues.  At this point, all we can safely do is hand
+	// off to libX11.
 	if(vglfaker::deadYet || vglfaker::getFakerLevel() > 0)
 		return _XCloseDisplay(dpy);
 
@@ -153,7 +152,7 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 	// GLX (3D) Pixmap --> GLX (3D) Window
 	// Copy rendered frame to the window's corresponding off-screen drawable,
 	// then trigger a readback to transport the frame from the off-screen
-  // drawable to the window.
+	// drawable to the window.
 	if(srcVW && !srcWin && dstVW && dstWin)
 	{
 		copy2d = false;  copy3d = true;  triggerRB = true;
@@ -258,6 +257,7 @@ static void DeleteWindow(Display *dpy, Window win, bool subOnly = false)
 		&& children && n > 0)
 	{
 		for(unsigned int i = 0; i < n; i++) DeleteWindow(dpy, children[i]);
+		XFree(children);
 	}
 }
 
@@ -492,7 +492,14 @@ Display *XOpenDisplay(_Xconst char *name)
 			THROW("Memory allocation error");
 
 		if(!excludeDisplay && strlen(fconfig.vendor) > 0)
+		{
+			// Danger, Will Robinson!  We do this to prevent a small memory leak, but
+			// we can only can get away with it because we know that Xlib dynamically
+			// allocates the vendor string.  Xlib has done so for as long as
+			// VirtualGL has been around, so it seems like a safe assumption.
+			XFree(ServerVendor(dpy));
 			ServerVendor(dpy) = strdup(fconfig.vendor);
+		}
 	}
 
 		STOPTRACE();  PRARGD(dpy);  CLOSETRACE();
