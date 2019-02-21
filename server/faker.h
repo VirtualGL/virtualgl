@@ -57,8 +57,7 @@ namespace vglfaker
 		XExtData *extData;
 
 		// The 3D X server may have its own extensions that conflict with ours.
-		if(dpy == dpy3D)
-			THROW("vglfaker::isDisplayExcluded() called with 3D X server handle (this should never happen)");
+		if(dpy == dpy3D) return true;
 		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 1);
 		ERRIFNOT(extData);
 		ERRIFNOT(extData->private_data);
