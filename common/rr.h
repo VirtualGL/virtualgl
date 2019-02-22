@@ -93,12 +93,17 @@ enum
 
 /* Transport types */
 #define RR_TRANSPORTOPT  3
-enum rrtrans { RRTRANS_X11 = 0, RRTRANS_VGL, RRTRANS_XV };
+enum rrtrans
+{
+  RRTRANS_X11 = 0, RRTRANS_VGL, RRTRANS_XV
+};
 
 /* Compression types */
 #define RR_COMPRESSOPT  5
-enum rrcomp { RRCOMP_PROXY = 0, RRCOMP_JPEG, RRCOMP_RGB, RRCOMP_XV,
-              RRCOMP_YUV };
+enum rrcomp
+{
+  RRCOMP_PROXY = 0, RRCOMP_JPEG, RRCOMP_RGB, RRCOMP_XV, RRCOMP_YUV
+};
 
 /* Readback types */
 #define RR_READBACKOPT  3
@@ -126,10 +131,12 @@ static const int _Maxsubsamp[RR_COMPRESSOPT] =
 
 /* Stereo options */
 #define RR_STEREOOPT  9
-enum rrstereo { RRSTEREO_LEYE = 0, RRSTEREO_REYE, RRSTEREO_QUADBUF,
-                RRSTEREO_REDCYAN, RRSTEREO_GREENMAGENTA, RRSTEREO_BLUEYELLOW,
-                RRSTEREO_INTERLEAVED, RRSTEREO_TOPBOTTOM,
-                RRSTEREO_SIDEBYSIDE };
+enum rrstereo
+{
+  RRSTEREO_LEYE = 0, RRSTEREO_REYE, RRSTEREO_QUADBUF, RRSTEREO_REDCYAN,
+  RRSTEREO_GREENMAGENTA, RRSTEREO_BLUEYELLOW, RRSTEREO_INTERLEAVED,
+  RRSTEREO_TOPBOTTOM, RRSTEREO_SIDEBYSIDE
+};
 
 /* 3D drawable options */
 #define RR_DRAWABLEOPT  2

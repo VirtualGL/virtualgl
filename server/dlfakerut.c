@@ -21,7 +21,18 @@
 #include <ctype.h>
 
 
-#define THROW(m)  { fprintf(stderr, "ERROR: %s\n", m);  goto bailout; }
+#define THROW(m) \
+{ \
+	retval = -1;  fprintf(stderr, "ERROR: %s\n", m);  goto bailout; \
+}
+
+#define TRY(f) \
+{ \
+	if((f) < 0) \
+	{ \
+		retval = -1;  goto bailout; \
+	} \
+}
 
 
 typedef XVisualInfo *(*_glXChooseVisualType)(Display *, int, int *);
@@ -58,9 +69,11 @@ void *gldllhnd = NULL;
 	if(err) THROW(err) \
 	else if(!_##s) THROW("Could not load symbol " #s)
 
-void loadSymbols1(char *prefix)
+int loadSymbols1(char *prefix)
 {
 	const char *err = NULL;
+	int retval = 0;
+
 	if(prefix)
 	{
 		char temps[256];
@@ -79,10 +92,9 @@ void loadSymbols1(char *prefix)
 	LSYM(glXSwapBuffers);
 	LSYM(glClear);
 	LSYM(glClearColor);
-	return;
 
 	bailout:
-	exit(1);
+	return retval;
 }
 
 void unloadSymbols1(void)
@@ -95,9 +107,10 @@ void unloadSymbols1(void)
 	_##s = (_##s##Type)_glXGetProcAddressARB((const GLubyte *)#s); \
 	if(!_##s) THROW("Could not load symbol " #s)
 
-void loadSymbols2(void)
+int loadSymbols2(void)
 {
 	const char *err = NULL;
+	int retval = 0;
 
 	LSYM(glXGetProcAddressARB);
 	LSYM2(glXChooseVisual);
@@ -107,10 +120,9 @@ void loadSymbols2(void)
 	LSYM2(glXSwapBuffers);
 	LSYM2(glClear);
 	LSYM2(glClearColor);
-	return;
 
 	bailout:
-	exit(1);
+	return retval;
 }
 
 
@@ -120,9 +132,10 @@ void loadSymbols2(void)
 typedef void (*_myTestFunctionType)(void);
 _myTestFunctionType _myTestFunction = NULL;
 
-void nameMatchTest(void)
+int nameMatchTest(void)
 {
 	const char *err = NULL;
+	int retval = 0;
 
 	fprintf(stderr, "dlopen() name matching test:\n");
 	gldllhnd = dlopen("libGLdlfakerut.so", RTLD_NOW);
@@ -134,10 +147,9 @@ void nameMatchTest(void)
 	_myTestFunction();
 	dlclose(gldllhnd);
 	gldllhnd = NULL;
-	return;
 
 	bailout:
-	exit(1);
+	return retval;
 }
 
 
@@ -150,9 +162,10 @@ void nameMatchTest(void)
 typedef void (*_testType)(const char *);
 _testType _test = NULL;
 
-void deepBindTest(void)
+int deepBindTest(void)
 {
 	const char *err = NULL;
+	int retval = 0;
 
 	gldllhnd = dlopen("libdeepbindtest.so", RTLD_NOW | RTLD_DEEPBIND);
 	err = dlerror();
@@ -163,10 +176,9 @@ void deepBindTest(void)
 	_test("RTLD_DEEPBIND test");
 	dlclose(gldllhnd);
 	gldllhnd = NULL;
-	return;
 
 	bailout:
-	exit(1);
+	return retval;
 }
 #endif
 
@@ -174,6 +186,7 @@ void deepBindTest(void)
 int main(int argc, char **argv)
 {
 	char *env, *prefix = NULL;
+	int retval = 0;
 
 	if(argc > 2 && !strcasecmp(argv[1], "--prefix"))
 	{
@@ -195,20 +208,20 @@ int main(int argc, char **argv)
 	#endif
 
 	fprintf(stderr, "\n");
-	nameMatchTest();
+	TRY(nameMatchTest());
 
-	loadSymbols1(prefix);
-	test("dlopen() test");
+	TRY(loadSymbols1(prefix));
+	TRY(test("dlopen() test"));
 
-	loadSymbols2();
-	test("glXGetProcAddressARB() test");
+	TRY(loadSymbols2());
+	TRY(test("glXGetProcAddressARB() test"));
 
 	unloadSymbols1();
 
 	#ifdef RTLD_DEEPBIND
-	deepBindTest();
+	TRY(deepBindTest());
 	#endif
 
 	bailout:
-	return 0;
+	return retval;
 }

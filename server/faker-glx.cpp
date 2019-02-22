@@ -96,11 +96,11 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 			char *str = strdup(fconfig.defaultfbconfig);
 			if(!str) THROW_UNIX();
 			char *argv[512];  int argc = 0;
-			char *arg = strtok(str, " \t,");
+			char *arg = strtok(str, ", \t");
 			while(arg && argc < 512)
 			{
 				argv[argc] = arg;  argc++;
-				arg = strtok(NULL, " \t,");
+				arg = strtok(NULL, ", \t");
 			}
 			for(int i = 0, j = 20; i < argc && j < 256; i++)
 			{

@@ -17,7 +17,18 @@
 #include <GL/glx.h>
 
 
-#define THROW(m)  { fprintf(stderr, "ERROR: %s\n", m);  goto bailout; }
+#define THROW(m) \
+{ \
+	retval = -1;  fprintf(stderr, "ERROR: %s\n", m);  goto bailout; \
+}
+
+#define TRY(f) \
+{ \
+	if((f) < 0) \
+	{ \
+		retval = -1;  goto bailout; \
+	} \
+}
 
 
 #define _glXChooseVisual  glXChooseVisual

@@ -16,8 +16,11 @@
 
 /* Pixel formats */
 #define PIXELFORMATS  11
-enum { PF_RGB, PF_RGBX, PF_RGB10_X2, PF_BGR, PF_BGRX, PF_BGR10_X2,
-	PF_XBGR, PF_X2_BGR10, PF_XRGB, PF_X2_RGB10, PF_COMP };
+enum
+{
+	PF_RGB, PF_RGBX, PF_RGB10_X2, PF_BGR, PF_BGRX, PF_BGR10_X2, PF_XBGR,
+	PF_X2_BGR10, PF_XRGB, PF_X2_RGB10, PF_COMP
+};
 
 
 typedef const struct _PF

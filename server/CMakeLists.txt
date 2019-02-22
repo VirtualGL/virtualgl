@@ -166,7 +166,8 @@ add_library(GLdlfakerut SHARED libGLdlfakerut.c)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	add_library(deepbindtest SHARED libdeepbindtest.c)
-	target_link_libraries(deepbindtest ${X11_X11_LIB} ${OPENGL_gl_LIBRARY})
+	target_link_libraries(deepbindtest ${X11_X11_LIB} ${OPENGL_gl_LIBRARY}
+		${LIBDL})
 	set_target_properties(deepbindtest PROPERTIES LINK_FLAGS "${MINUSZ}defs")
 endif()
 
