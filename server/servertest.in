@@ -68,6 +68,9 @@ Xvfb :42 -screen 0 1920x1200x$DEPTH -screen 1 1920x1200x$DEPTH >/dev/null 2>&1 &
 echo Xvfb started as process $PID
 sleep 2
 
+DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut
+echo
+
 for SCREEN in 0 1; do
 
 	export DISPLAY=:42.$SCREEN

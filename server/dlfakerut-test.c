@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2014, 2017 D. R. Commander
+ * Copyright (C)2014, 2017, 2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -12,53 +12,64 @@
  * wxWindows Library License for more details.
  */
 
+#include <dlfcn.h>
 
-static int checkWindowColor(Window win, unsigned int color)
+
+static int checkWindowColor(Display *dpy, Window win, unsigned int color)
 {
-	char *e = NULL, temps[80];  int fakerclr;
+	int fakerColor, retval = 0;
+	typedef unsigned int (*_vgl_getAutotestColorType)(Display *, Window, int);
+	_vgl_getAutotestColorType _vgl_getAutotestColor;
 
-	snprintf(temps, 79, "__VGL_AUTOTESTCLR%x", (unsigned int)win);
-	if((e = getenv(temps)) == NULL)
+	_vgl_getAutotestColor =
+		(_vgl_getAutotestColorType)dlsym(RTLD_DEFAULT, "_vgl_getAutotestColor");
+	if(!_vgl_getAutotestColor)
 		_throw("Can't communicate w/ faker");
-	if((fakerclr = atoi(e)) < 0 || fakerclr > 0xffffff)
+	fakerColor = _vgl_getAutotestColor(dpy, win, 0);
+	if(fakerColor < 0 || fakerColor > 0xffffff)
 		_throw("Bogus data read back");
-	if((unsigned int)fakerclr != color)
+	if((unsigned int)fakerColor != color)
 	{
-		fprintf(stderr, "Color is 0x%.6x, should be 0x%.6x", fakerclr, color);
-		return 0;
+		fprintf(stderr, "Color is 0x%.6x, should be 0x%.6x", fakerColor, color);
+		retval = -1;
 	}
-	return 1;
 
 	bailout:
-	return 0;
+	return retval;
 }
 
 
-static int checkFrame(Window win, int desiredReadbacks, int *lastFrame)
+static int checkFrame(Display *dpy, Window win, int desiredReadbacks,
+	int *lastFrame)
 {
-	char *e = NULL, temps[80];  int frame;
+	int frame, retval = 0;
+	typedef unsigned int (*_vgl_getAutotestFrameType)(Display *, Window);
+	_vgl_getAutotestFrameType _vgl_getAutotestFrame;
 
-	snprintf(temps, 79, "__VGL_AUTOTESTFRAME%x", (unsigned int)win);
-	if((e = getenv(temps)) == NULL || (frame = atoi(e)) < 1)
+	_vgl_getAutotestFrame =
+		(_vgl_getAutotestFrameType)dlsym(RTLD_DEFAULT, "_vgl_getAutotestFrame");
+	if(!_vgl_getAutotestFrame)
+		_throw("Can't communicate w/ faker");
+	frame = _vgl_getAutotestFrame(dpy, win);
+	if(frame < 1)
 		_throw("Can't communicate w/ faker");
 	if(frame - (*lastFrame) != desiredReadbacks && desiredReadbacks >= 0)
 	{
 		fprintf(stderr, "Expected %d readback%s, not %d", desiredReadbacks,
 			desiredReadbacks == 1 ? "" : "s", frame - (*lastFrame));
-		return 0;
+		retval = -1;
 	}
 	*lastFrame = frame;
-	return 1;
 
 	bailout:
-	return 0;
+	return retval;
 }
 
 
-void test(const char *testName)
+int test(const char *testName)
 {
 	Display *dpy = NULL;  Window win = 0, root;
-	int dpyw, dpyh, lastFrame = 0;
+	int dpyw, dpyh, lastFrame = 0, retval = 0;
 	int glxattrib[] = { GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8,
 		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None, None };
 	XVisualInfo *v = NULL;  GLXContext ctx = 0;
@@ -92,8 +103,8 @@ void test(const char *testName)
 	_glClearColor(1., 0., 0., 0.);
 	_glClear(GL_COLOR_BUFFER_BIT);
 	_glXSwapBuffers(dpy, win);
-	if(!checkFrame(win, 1, &lastFrame)) goto bailout;
-	if(!checkWindowColor(win, 0x0000ff)) goto bailout;
+	_try(checkFrame(dpy, win, 1, &lastFrame));
+	_try(checkWindowColor(dpy, win, 0x0000ff));
 	printf("SUCCESS\n");
 
 	bailout:
@@ -104,4 +115,5 @@ void test(const char *testName)
 	if(win && dpy) { XDestroyWindow(dpy, win);  win = 0; }
 	if(v) { XFree(v);  v = NULL; }
 	if(dpy) { XCloseDisplay(dpy);  dpy = NULL; }
+	return retval;
 }
