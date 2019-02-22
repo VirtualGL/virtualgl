@@ -261,7 +261,7 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[], int &nElements,
 {
 	int glxattribs[257], j = 0;
 	int doubleBuffer = 0, redSize = -1, greenSize = -1, blueSize = -1,
-		alphaSize = -1, samples = -1, stereo = 0, c_class = TrueColor,
+		alphaSize = -1, samples = -1, stereo = 0,
 		renderType = glx13 ? GLX_RGBA_BIT : GLX_COLOR_INDEX_BIT,
 		visualType = GLX_TRUE_COLOR;
 
@@ -310,7 +310,7 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[], int &nElements,
 			int temp = attribs[i + 1];  i++;
 			if(temp == GLX_DIRECT_COLOR)
 			{
-				visualType = temp;  c_class = DirectColor;
+				visualType = temp;
 			}
 		}
 		else if(attribs[i] == GLX_VISUAL_ID) i++;
