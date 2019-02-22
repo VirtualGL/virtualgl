@@ -168,14 +168,14 @@ bool excludeDisplay(char *name)
 	fconfig_reloadenv();
 
 	char *dpyList = strdup(fconfig.excludeddpys);
-	char *excluded = strtok(dpyList, " \t,");
+	char *excluded = strtok(dpyList, ", \t");
 	while(excluded)
 	{
 		if(!strcasecmp(name, excluded))
 		{
 			free(dpyList);  return true;
 		}
-		excluded = strtok(NULL, " \t,");
+		excluded = strtok(NULL, ", \t");
 	}
 	free(dpyList);
 	return false;

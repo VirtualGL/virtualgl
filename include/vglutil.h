@@ -71,20 +71,20 @@ static INLINE int numprocs(void)
 	#endif
 }
 
-#define byteswap(i) ( \
-	(((i) & 0xff000000) >> 24) | \
-	(((i) & 0x00ff0000) >>  8) | \
-	(((i) & 0x0000ff00) <<  8) | \
-	(((i) & 0x000000ff) << 24))
+#define byteswap(i) \
+	( (((i) & 0xff000000) >> 24) | \
+	  (((i) & 0x00ff0000) >>  8) | \
+	  (((i) & 0x0000ff00) <<  8) | \
+	  (((i) & 0x000000ff) << 24) )
 
-#define byteswap24(i) ( \
-	(((i) & 0xff0000) >> 16) | \
-	 ((i) & 0x00ff00)        | \
-	(((i) & 0x0000ff) << 16) )
+#define byteswap24(i) \
+	( (((i) & 0xff0000) >> 16) | \
+	   ((i) & 0x00ff00)        | \
+	  (((i) & 0x0000ff) << 16) )
 
-#define byteswap16(i) ( \
-	(((i) & 0xff00) >> 8) | \
-	(((i) & 0x00ff) << 8))
+#define byteswap16(i) \
+	( (((i) & 0xff00) >> 8) | \
+	  (((i) & 0x00ff) << 8) )
 
 static INLINE int littleendian(void)
 {

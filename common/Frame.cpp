@@ -210,7 +210,8 @@ void Frame::makeAnaglyph(Frame &r, Frame &g, Frame &b)
 		srcbptr += b.pitch, dstptr += pitch)
 	{
 		for(i = 0, dstrptr = &dstptr[pf->rindex], dstgptr = &dstptr[pf->gindex],
-			dstbptr = &dstptr[pf->bindex]; i < hdr.framew;
+			dstbptr = &dstptr[pf->bindex];
+			i < hdr.framew;
 			i++, dstrptr += pf->size, dstgptr += pf->size, dstbptr += pf->size)
 		{
 			*dstrptr = srcrptr[i];  *dstgptr = srcgptr[i];  *dstbptr = srcbptr[i];
@@ -307,45 +308,45 @@ void Frame::decompressRGB(Frame &f, int width, int height, bool rightEye)
 
 
 #define DRAWLOGO() \
-switch(pf->size) \
-{ \
-	case 3: \
+	switch(pf->size) \
 	{ \
-		for(int j = 0; j < height; j++, rowptr += stride) \
+		case 3: \
 		{ \
-			unsigned char *pixel = rowptr; \
-			logoptr2 = logoptr; \
-			for(int i = 0; i < width; i++, pixel += pf->size) \
+			for(int j = 0; j < height; j++, rowptr += stride) \
 			{ \
-				if(*(logoptr2++)) \
+				unsigned char *pixel = rowptr; \
+				logoptr2 = logoptr; \
+				for(int i = 0; i < width; i++, pixel += pf->size) \
 				{ \
-					pixel[pf->rindex] ^= 113;  pixel[pf->gindex] ^= 162; \
-					pixel[pf->bindex] ^= 117; \
+					if(*(logoptr2++)) \
+					{ \
+						pixel[pf->rindex] ^= 113;  pixel[pf->gindex] ^= 162; \
+						pixel[pf->bindex] ^= 117; \
+					} \
 				} \
+				logoptr += VGLLOGO_WIDTH; \
 			} \
-			logoptr += VGLLOGO_WIDTH; \
+			break; \
 		} \
-		break; \
-	} \
-	case 4: \
-	{ \
-		unsigned int mask; \
-		pf->setRGB((unsigned char *)&mask, 113, 162, 117); \
-		for(int j = 0; j < height; j++, rowptr += stride) \
+		case 4: \
 		{ \
-			unsigned int *pixel = (unsigned int *)rowptr; \
-			logoptr2 = logoptr; \
-			for(int i = 0; i < width; i++, pixel++) \
+			unsigned int mask; \
+			pf->setRGB((unsigned char *)&mask, 113, 162, 117); \
+			for(int j = 0; j < height; j++, rowptr += stride) \
 			{ \
-				if(*(logoptr2++)) *pixel ^= mask; \
+				unsigned int *pixel = (unsigned int *)rowptr; \
+				logoptr2 = logoptr; \
+				for(int i = 0; i < width; i++, pixel++) \
+				{ \
+					if(*(logoptr2++)) *pixel ^= mask; \
+				} \
+				logoptr += VGLLOGO_WIDTH; \
 			} \
-			logoptr += VGLLOGO_WIDTH; \
+			break; \
 		} \
-		break; \
-	} \
-	default: \
-		_throw("Invalid pixel format"); \
-}
+		default: \
+			_throw("Invalid pixel format"); \
+	}
 
 
 void Frame::addLogo(void)
