@@ -149,16 +149,14 @@ static void buildVisAttribTable(Display *dpy, int screen)
 
 namespace glxvisual {
 
-GLXFBConfig *configsFromVisAttribs(const int attribs[], int &c_class,
-	int &level, int &stereo, int &trans, int &nElements, bool glx13)
+GLXFBConfig *configsFromVisAttribs(const int attribs[], int &level,
+	int &stereo, int &trans, int &nElements, bool glx13)
 {
 	int glxattribs[257], j = 0;
 	int doubleBuffer = 0, redSize = -1, greenSize = -1, blueSize = -1,
 		alphaSize = -1, samples = -1,
 		renderType = glx13 ? GLX_RGBA_BIT : GLX_COLOR_INDEX_BIT,
-		visualType = GLX_TRUE_COLOR;
-
-	c_class = TrueColor;
+		visualType = -1;
 
 	for(int i = 0; attribs[i] != None && i <= 254; i++)
 	{
@@ -211,11 +209,7 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[], int &c_class,
 		else if(attribs[i] == GLX_DRAWABLE_TYPE) i++;
 		else if(attribs[i] == GLX_X_VISUAL_TYPE)
 		{
-			int temp = attribs[i + 1];  i++;
-			if(temp == GLX_DIRECT_COLOR)
-			{
-				visualType = temp;  c_class = DirectColor;
-			}
+			visualType = attribs[i + 1];  i++;
 		}
 		else if(attribs[i] == GLX_VISUAL_ID) i++;
 		else if(attribs[i] == GLX_X_RENDERABLE) i++;
@@ -272,7 +266,11 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[], int &c_class,
 		else
 			glxattribs[j++] = GLX_PIXMAP_BIT | GLX_PBUFFER_BIT;
 	}
-	glxattribs[j++] = GLX_X_VISUAL_TYPE;  glxattribs[j++] = visualType;
+	if(visualType >= 0)
+	{
+		glxattribs[j - 1] |= GLX_WINDOW_BIT;
+		glxattribs[j++] = GLX_X_VISUAL_TYPE;  glxattribs[j++] = visualType;
+	}
 	glxattribs[j] = None;
 
 	if(fconfig.trace) prargal13(glxattribs);

@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2014 D. R. Commander
+// Copyright (C)2014, 2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -25,8 +25,8 @@ namespace glxvisual
 	// attribute list.  It also returns the visual parameters derived from that
 	// same attribute list, so those parameters can be used to match an
 	// appropriate visual on the 2D X server.
-	GLXFBConfig *configsFromVisAttribs(const int attribs[], int &c_class,
-		int &level, int &stereo, int &trans, int &nElements, bool glx13 = false);
+	GLXFBConfig *configsFromVisAttribs(const int attribs[], int &level,
+		int &stereo, int &trans, int &nElements, bool glx13 = false);
 
 	// These functions return attributes for visuals on the 2D X server (those
 	// attributes are read from the 2D X server and cached on first access, so

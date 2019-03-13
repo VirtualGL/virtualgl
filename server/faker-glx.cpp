@@ -72,8 +72,9 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 		// Punt.  We can't figure out where the visual came from
 		int defaultAttribs[] = { GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8,
 			GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT,
-			GLX_STEREO, 0, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, GLX_X_VISUAL_TYPE,
-			GLX_TRUE_COLOR, GLX_DEPTH_SIZE, 1, GLX_STENCIL_SIZE, 8, None };
+			GLX_STEREO, 0, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT | GLX_WINDOW_BIT,
+			GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR, GLX_DEPTH_SIZE, 1,
+			GLX_STENCIL_SIZE, 8, None };
 		int attribs[256];
 
 		if(pixmap || fconfig.drawable == RRDRAWABLE_PIXMAP)
@@ -308,7 +309,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 		opentrace(glXChooseFBConfig);  prargd(dpy);  prargi(screen);
 		prargal13(attrib_list);  starttrace();
 
-	int depth = 24, c_class = TrueColor, level = 0, stereo = 0, trans = 0, temp;
+	int level = 0, stereo = 0, trans = 0, temp;
 	if(!nelements) nelements = &temp;
 	*nelements = 0;
 
@@ -323,8 +324,8 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 
 	// Modify the attributes so that only FB configs appropriate for off-screen
 	// rendering are considered.
-	else configs = glxvisual::configsFromVisAttribs(attrib_list, c_class, level,
-		stereo, trans, *nelements, true);
+	else configs = glxvisual::configsFromVisAttribs(attrib_list, level, stereo,
+		trans, *nelements, true);
 
 	if(configs && *nelements)
 	{
@@ -334,17 +335,18 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 		// config we just obtained.
 		for(int i = 0; i < *nelements; i++)
 		{
-			int d = depth;
+			int depth = 24, c_class = TrueColor;
 			XVisualInfo *vis = _glXGetVisualFromFBConfig(_dpy3D, configs[i]);
 			if(vis)
 			{
-				if(vis->depth > 24) d = vis->depth;
+				if(vis->depth > 24) depth = vis->depth;
+				c_class = vis->c_class;
 				XFree(vis);
 			}
 
 			// Find an appropriate matching visual on the 2D X server.
-			VisualID vid = glxvisual::matchVisual2D(dpy, screen, d, c_class, level,
-				stereo, trans);
+			VisualID vid = glxvisual::matchVisual2D(dpy, screen, depth, c_class,
+				level, stereo, trans);
 			if(!vid)
 			{
 				if(depth == 32) vid = glxvisual::matchVisual2D(dpy, screen, 24,
@@ -428,9 +430,10 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	GLXFBConfig *configs = NULL, prevConfig;  int n = 0;
 	int depth = 24, c_class = TrueColor, level = 0, stereo = 0, trans = 0;
 	VisualID vid = 0;  XVisualInfo *vtemp = NULL;
+
 	if(!dpy || !attrib_list) goto done;
-	if(!(configs = glxvisual::configsFromVisAttribs(attrib_list, c_class, level,
-		stereo, trans, n)) || n < 1)
+	if(!(configs = glxvisual::configsFromVisAttribs(attrib_list, level, stereo,
+		trans, n)) || n < 1)
 	{
 		if(!alreadyWarned && fconfig.verbose)
 		{
@@ -451,6 +454,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	if(vtemp)
 	{
 		if(vtemp->depth > 24) depth = vtemp->depth;
+		c_class = vtemp->c_class;
 		XFree(vtemp);
 	}
 
