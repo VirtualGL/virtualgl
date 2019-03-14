@@ -273,6 +273,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 {
 	GLXFBConfig *configs = NULL;
 	bool fbcidreq = false;
+	int drawableType = GLX_WINDOW_BIT;
 
 	TRY();
 
@@ -291,6 +292,8 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 			if(attrib_list[i] == GLX_LEVEL && attrib_list[i + 1] == 1)
 				overlayreq = true;
 			if(attrib_list[i] == GLX_FBCONFIG_ID) fbcidreq = true;
+			if(attrib_list[i] == GLX_DRAWABLE_TYPE)
+				drawableType = attrib_list[i + 1];
 		}
 		if(overlayreq)
 		{
@@ -327,7 +330,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 	else configs = glxvisual::configsFromVisAttribs(attrib_list, level, stereo,
 		trans, *nelements, true);
 
-	if(configs && *nelements)
+	if(configs && *nelements && drawableType & (GLX_WINDOW_BIT | GLX_PIXMAP_BIT))
 	{
 		int nv = 0;
 
@@ -1041,6 +1044,18 @@ static const char *getGLXExtensions(void)
 			" GLX_ARB_create_context GLX_ARB_create_context_profile",
 			1023 - strlen(glxextensions));
 
+	if(!strstr(glxextensions, "GLX_ARB_fbconfig_float"))
+		strncat(glxextensions, " GLX_ARB_fbconfig_float",
+			1023 - strlen(glxextensions));
+
+	if(!strstr(glxextensions, "GLX_EXT_fbconfig_packed_float"))
+		strncat(glxextensions, " GLX_EXT_fbconfig_packed_float",
+			1023 - strlen(glxextensions));
+
+	if(!strstr(glxextensions, "GLX_EXT_framebuffer_sRGB"))
+		strncat(glxextensions, " GLX_EXT_framebuffer_sRGB",
+			1023 - strlen(glxextensions));
+
 	CHECKSYM_NONFATAL(glXFreeContextEXT)
 	CHECKSYM_NONFATAL(glXImportContextEXT)
 	CHECKSYM_NONFATAL(glXQueryContextInfoEXT)
@@ -1059,6 +1074,10 @@ static const char *getGLXExtensions(void)
 	if(__glXBindTexImageEXT && __glXReleaseTexImageEXT
 		&& !strstr(glxextensions, "GLX_EXT_texture_from_pixmap"))
 		strncat(glxextensions, " GLX_EXT_texture_from_pixmap",
+			1023 - strlen(glxextensions));
+
+	if(!strstr(glxextensions, "GLX_NV_float_buffer"))
+		strncat(glxextensions, " GLX_NV_float_buffer",
 			1023 - strlen(glxextensions));
 
 	CHECKSYM_NONFATAL(glXBindSwapBarrierNV)

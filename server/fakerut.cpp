@@ -59,6 +59,10 @@ using namespace vglutil;
 }
 
 
+#define GLX_EXTENSION_EXISTS(ext) \
+	strstr(glXQueryExtensionsString(dpy, DefaultScreen(dpy)), #ext)
+
+
 #if 0
 void clickToContinue(Display *dpy)
 {
@@ -1092,6 +1096,13 @@ int visTest(void)
 			_throw("Memory allocation error");
 		memset(visuals, 0, sizeof(XVisualInfo *) * n);
 
+#ifdef GLX_ARB_fbconfig_float
+		int numFloatCfgs = 0;
+#endif
+#ifdef GLX_NV_float_buffer
+		int numNVFloatCfgs = 0;
+#endif
+
 		for(i = 0; i < n; i++)
 		{
 			if(!configs[i]) continue;
@@ -1099,6 +1110,9 @@ int visTest(void)
 			{
 				int drawableType, renderType, transparentType, visualID, visualType,
 					xRenderable;
+#ifdef GLX_NV_float_buffer
+				int floatComponents = -1;
+#endif
 				fbcid = cfgid(dpy, configs[i]);
 				// The old fglrx driver unfortunately assigns the same FB config ID to
 				// multiple FB configs with different attributes, some of which support
@@ -1109,10 +1123,34 @@ int visTest(void)
 					continue;
 				GET_CFG_ATTRIB(configs[i], GLX_DRAWABLE_TYPE, drawableType);
 				GET_CFG_ATTRIB(configs[i], GLX_RENDER_TYPE, renderType);
+#ifdef GLX_ARB_fbconfig_float
+				if(renderType & GLX_RGBA_FLOAT_BIT_ARB)
+				{
+					if(!GLX_EXTENSION_EXISTS(GLX_ARB_fbconfig_float))
+					{
+						printf("CFG 0x%.2x:  ", fbcid);
+						_error("GLX_ARB_fbconfig_float not advertised");
+					}
+					numFloatCfgs++;
+				}
+#endif
 				GET_CFG_ATTRIB(configs[i], GLX_TRANSPARENT_TYPE, transparentType);
 				GET_CFG_ATTRIB(configs[i], GLX_VISUAL_ID, visualID);
 				GET_CFG_ATTRIB(configs[i], GLX_X_VISUAL_TYPE, visualType);
 				GET_CFG_ATTRIB(configs[i], GLX_X_RENDERABLE, xRenderable);
+#ifdef GLX_NV_float_buffer
+				glXGetFBConfigAttrib(dpy, configs[i], GLX_FLOAT_COMPONENTS_NV,
+					&floatComponents);
+				if(floatComponents > 0)
+				{
+					if(!GLX_EXTENSION_EXISTS(GLX_NV_float_buffer))
+					{
+						printf("CFG 0x%.2x:  ", fbcid);
+						_error("GLX_NV_float_buffer not advertised");
+					}
+					numNVFloatCfgs++;
+				}
+#endif
 				visuals[i] = glXGetVisualFromFBConfig(dpy, configs[i]);
 				// VirtualGL should return a visual only for opaque GLXFBConfigs that
 				// support X rendering.
@@ -1132,6 +1170,32 @@ int visTest(void)
 				printf("Failed! (%s)\n", e.getMessage());  retval = 0;
 			}
 		}
+
+#ifdef GLX_ARB_fbconfig_float
+		if(numFloatCfgs)
+		{
+			int nc = 0, glxattribs[] = { GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT,
+				GLX_RENDER_TYPE, GLX_RGBA_FLOAT_BIT_ARB, None };
+			GLXFBConfig *fbconfigs =
+				glXChooseFBConfig(dpy, DefaultScreen(dpy), glxattribs, &nc);
+			if(fbconfigs) XFree(fbconfigs);
+			if(nc != numFloatCfgs)
+				_error("Wrong number of FB configs with GLX_RGBA_FLOAT_BIT");
+		}
+#endif
+
+#ifdef GLX_NV_float_buffer
+		if(numNVFloatCfgs)
+		{
+			int nc = 0, glxattribs[] = { GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT,
+				GLX_FLOAT_COMPONENTS_NV, 1, None };
+			GLXFBConfig *fbconfigs =
+				glXChooseFBConfig(dpy, DefaultScreen(dpy), glxattribs, &nc);
+			if(fbconfigs) XFree(fbconfigs);
+			if(nc != numNVFloatCfgs)
+				_error("Wrong number of FB configs with GLX_FLOAT_COMPONENTS_NV");
+		}
+#endif
 
 		for(i = 0; i < n; i++)
 		{

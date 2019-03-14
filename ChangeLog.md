@@ -16,6 +16,11 @@ server screen other than 0.
 
 4. Fixed several minor memory leaks in the VirtualGL Faker.
 
+5. VirtualGL now enables the `GLX_ARB_fbconfig_float`,
+`GLX_EXT_fbconfig_packed_float`, `GLX_EXT_framebuffer_sRGB`, and
+`GLX_NV_float_buffer` extensions if the underlying OpenGL library supports
+them.
+
 
 2.6.1
 =====
