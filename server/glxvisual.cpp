@@ -165,8 +165,8 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[], int &level,
 			if(glx13) { doubleBuffer = attribs[i + 1];  i++; }
 			else doubleBuffer = 1;
 		}
-		else if(attribs[i] == GLX_RGBA) renderType = GLX_RGBA_BIT;
-		else if(attribs[i] == GLX_RENDER_TYPE)
+		else if(attribs[i] == GLX_RGBA && !glx13) renderType = GLX_RGBA_BIT;
+		else if(attribs[i] == GLX_RENDER_TYPE && glx13)
 		{
 			renderType = attribs[i + 1];  i++;
 		}
