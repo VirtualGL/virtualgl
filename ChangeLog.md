@@ -17,6 +17,16 @@ overlay visuals requires disabling the X Composite extension, which cannot be
 done in many modern Linux distributions, that further limited the feature to
 the point of uselessness.
 
+2. The VirtualGL Faker now assigns various permutations of common OpenGL
+rendering attributes to the available 2D X server visuals.  This maximizes the
+chances that "visual hunting" 3D applications (applications that use X11
+functions to obtain a list of 2D X server visuals, then iterate through the
+list with `glXGetConfig()` until they find a visual with a desired set of
+OpenGL rendering attributes) will find an suitable visual.
+`VGL_DEFAULTFBCONFIG` can still be used to assign a specified set of OpenGL
+rendering attributes to all 2D X server visuals, although the usefulness of
+that feature is now very limited.
+
 
 2.6.2
 =====

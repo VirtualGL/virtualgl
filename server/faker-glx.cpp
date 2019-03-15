@@ -34,27 +34,9 @@ using namespace vglserver;
 #define VGL_MAX_SWAP_INTERVAL  8
 
 
-// Applications will sometimes use X11 functions to obtain a list of 2D X
-// server visuals, then pass one of those visuals to glXCreateContext(),
-// glXGetConfig(), etc.  Since the visual didn't come from glXChooseVisual(),
-// VGL has no idea which OpenGL rendering attributes the application is looking
-// for, so if no 3D X server FB config is already hashed to the visual, we have
-// to create one using default attributes.
-
-#define TEST_ATTRIB(attrib, index, min, max) \
-{ \
-	if(!strcmp(argv[i], #attrib) && i < argc - 1) \
-	{ \
-		int temp = atoi(argv[++i]); \
-		if(temp >= min && temp <= max) \
-			attribs[index] = temp; \
-	} \
-}
-
-static VGLFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
-	bool preferSingleBuffer = false, bool pixmap = false)
+static INLINE VGLFBConfig matchConfig(Display *dpy, XVisualInfo *vis)
 {
-	VGLFBConfig config = 0, *configs = NULL;  int n = 0;
+	VGLFBConfig config = 0;
 
 	if(!dpy || !vis) return 0;
 
@@ -63,96 +45,10 @@ static VGLFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 	// in the visual hash.
 	if(!(config = vishash.getConfig(dpy, vis)))
 	{
-		// Punt.  We can't figure out where the visual came from, so fall back to
-		// using a default FB config.
-		int attribs[] = { GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
-			GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_STEREO, 0,
-			GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT | GLX_WINDOW_BIT,
-			GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR, GLX_DEPTH_SIZE, 1,
-			GLX_STENCIL_SIZE, 8, GLX_ALPHA_SIZE, GLX_DONT_CARE, GLX_SAMPLES, 0,
-			GLX_AUX_BUFFERS, 0, GLX_ACCUM_RED_SIZE, 0, GLX_ACCUM_GREEN_SIZE, 0,
-			GLX_ACCUM_BLUE_SIZE, 0, GLX_ACCUM_ALPHA_SIZE, 0, None };
-
-		if(pixmap || fconfig.drawable == RRDRAWABLE_PIXMAP)
-			attribs[13] = GLX_PIXMAP_BIT | GLX_WINDOW_BIT;
-		if(vis->depth == 30)
-		{
-			attribs[3] = attribs[5] = attribs[7] = 10;
-		}
-		if(glxvisual::visAttrib2D(dpy, vis->screen, vis->visualid, GLX_STEREO))
-			attribs[11] = 1;
-
-		if(vis->c_class == DirectColor) attribs[15] = GLX_DIRECT_COLOR;
-
-		// If we're creating a GLX pixmap and we can't determine an exact FB config
-		// to map to the visual, then we will make the pixmap single-buffered.
-		if(preferSingleBuffer) attribs[1] = 0;
-
-		// Allow the default FB config attribs to be manually specified.  This is
-		// necessary to support apps that implement their own visual selection
-		// mechanisms.  Since those apps don't use glXChooseVisual(), VirtualGL has
-		// no idea what 3D visual attributes they need, and thus it is necessary
-		// to give it a hint using this environment variable.
-		if(strlen(fconfig.defaultfbconfig) > 0)
-		{
-			char *str = strdup(fconfig.defaultfbconfig);
-			if(!str) THROW_UNIX();
-			char *argv[512];  int argc = 0;
-			char *arg = strtok(str, ", \t");
-			while(arg && argc < 512)
-			{
-				argv[argc] = arg;  argc++;
-				arg = strtok(NULL, ", \t");
-			}
-			for(int i = 0; i < argc; i++)
-			{
-				TEST_ATTRIB(GLX_DOUBLEBUFFER, 1, 0, 1);
-				TEST_ATTRIB(GLX_RED_SIZE, 3, 0, INT_MAX);
-				TEST_ATTRIB(GLX_GREEN_SIZE, 5, 0, INT_MAX);
-				TEST_ATTRIB(GLX_BLUE_SIZE, 7, 0, INT_MAX);
-				TEST_ATTRIB(GLX_DEPTH_SIZE, 17, 0, INT_MAX);
-				TEST_ATTRIB(GLX_STENCIL_SIZE, 19, 0, INT_MAX);
-				TEST_ATTRIB(GLX_ALPHA_SIZE, 21, 0, INT_MAX);
-				TEST_ATTRIB(GLX_SAMPLES, 23, 0, INT_MAX);
-				TEST_ATTRIB(GLX_AUX_BUFFERS, 25, 0, INT_MAX);
-				TEST_ATTRIB(GLX_ACCUM_RED_SIZE, 27, 0, INT_MAX);
-				TEST_ATTRIB(GLX_ACCUM_GREEN_SIZE, 29, 0, INT_MAX);
-				TEST_ATTRIB(GLX_ACCUM_BLUE_SIZE, 31, 0, INT_MAX);
-				TEST_ATTRIB(GLX_ACCUM_ALPHA_SIZE, 33, 0, INT_MAX);
-			}
-			free(str);
-		}
-		if(fconfig.forcealpha) attribs[21] = vis->depth == 30 ? 2 : 8;
-		if(fconfig.samples >= 0) attribs[23] = fconfig.samples;
-
-			OPENTRACE(Choosing FB config for visual with unknown OpenGL attributes);
-			if(fconfig.trace) vglout.print("VGL_DEFAULTFBCONFIG ");
-			PRARGAL13(attribs);  STARTTRACE();
-
-		configs = glxvisual::chooseFBConfig(dpy, vis->screen, attribs, n);
-		if((!configs || n < 1) && attribs[11])
-		{
-			attribs[11] = 0;
-			if(fconfig.trace) vglout.print("[failed, trying mono] ");
-			configs = glxvisual::chooseFBConfig(dpy, vis->screen, attribs, n);
-		}
-		if((!configs || n < 1) && attribs[1])
-		{
-			attribs[1] = 0;
-			if(fconfig.trace) vglout.print("[failed, trying single-buffered] ");
-			configs = glxvisual::chooseFBConfig(dpy, vis->screen, attribs, n);
-		}
-
-			STOPTRACE();  if(configs) PRARGC(configs[0]);  CLOSETRACE();
-
-		if(!configs || n < 1) return 0;
-		config = configs[0];
-		XFree(configs);
-		if(config)
-		{
-			vishash.add(dpy, vis, config);
-			config->visualID = vis->visualid;
-		}
+		// Punt.  We can't figure out where the visual came from, so return the
+		// default FB config from the visual attribute table.
+		config = glxvisual::getDefaultFBConfig(dpy, vis->screen, vis->visualid);
+		if(config) config->visualID = vis->visualid;
 	}
 	return config;
 }
@@ -571,7 +467,7 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 
 	Window root;  unsigned int bw;
 	_XGetGeometry(dpy, pm, &root, &x, &y, &width, &height, &bw, &depth);
-	if(!(config = matchConfig(dpy, vis, true, true)))
+	if(!(config = matchConfig(dpy, vis)))
 		THROW("Could not obtain pixmap-capable RGB visual on the server");
 	VirtualPixmap *vpm = new VirtualPixmap(dpy, vis->visual, pm);
 	if(vpm)

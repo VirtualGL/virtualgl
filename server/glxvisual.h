@@ -21,6 +21,7 @@
 typedef struct _VGLFBConfig
 {
 	int id, screen, nConfigs;
+	int alphaSize, stencilSize, samples;
 	GLXFBConfig glxConfig;
 	VisualID visualID;
 } *VGLFBConfig;
@@ -56,6 +57,10 @@ namespace glxvisual
 	// This function : VGLFBConfig :: glXChooseFBConfig() : GLXFBConfig
 	VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
 		int &nElements);
+
+	// This function returns the default FB config attached to a given visual ID
+	// in the visual attribute table.
+	VGLFBConfig getDefaultFBConfig(Display *dpy, int screen, VisualID vid);
 }
 
 

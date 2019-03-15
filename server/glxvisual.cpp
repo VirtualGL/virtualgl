@@ -18,20 +18,32 @@
 #include "glxvisual.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include "Error.h"
 #include "Mutex.h"
 #include "faker.h"
+#include "vglutil.h"
 
 using namespace vglutil;
+
+
+#define GLXFBCID(c)  glxvisual::visAttrib3D(c, GLX_FBCONFIG_ID)
 
 
 namespace glxvisual {
 
 typedef struct
 {
+	int doubleBuffer, alphaSize, depthSize, stencilSize, samples;
+} OGLAttrib;
+
+typedef struct
+{
 	VisualID visualID;
+	VGLFBConfig config;
 	int depth, c_class, nVisuals;
 	int isStereo, isDB, isGL;
+	OGLAttrib ogl;
 } VisAttrib;
 
 
@@ -46,6 +58,148 @@ typedef struct
 		THROW("Could not retrieve visual attribute table for screen"); \
 	va = (VisAttrib *)extData->private_data; \
 	vaEntries = va[0].nVisuals;
+
+
+#define GET_CA_TABLE() \
+	struct _VGLFBConfig *ca;  int caEntries; \
+	XEDataObject obj; \
+	XExtData *extData; \
+	\
+	obj.screen = XScreenOfDisplay(dpy, screen); \
+	extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 4); \
+	if(!extData) \
+		THROW("Could not retrieve FB config attribute table for screen"); \
+	ca = (struct _VGLFBConfig *)extData->private_data; \
+	caEntries = ca[0].nConfigs;
+
+
+// This function assigns, as much as possible, various permutations of common
+// OpenGL rendering attributes to the available 2D X server visuals.  This is
+// necessary because 3D applications sometimes "hunt for visuals"; they use X11
+// functions to obtain a list of 2D X server visuals, then they iterate through
+// the list with glXGetConfig() until they find a visual with a desired set of
+// OpenGL rendering attributes.  However, if a visual doesn't originate from
+// glXChooseVisual() or glXGetVisualFromFBConfig(), then VirtualGL has no idea
+// which OpenGL rendering attributes should be assigned to it.  Historically,
+// when VGL encountered such an "unknown visual", it assigned a default FB
+// config to it and allowed the rendering attributes of that default FB config
+// to be specified in an environment variable (VGL_DEFAULTFBCONFIG.)  Instead,
+// VirtualGL now pre-assigns OpenGL rendering attributes to all available 2D X
+// server visuals.  Furthermore, VGL assigns all of the common OpenGL rendering
+// attributes to the first 2D X server visual, in order to maximize the odds
+// that a "visual hunting" 3D application will work with a 2D X server that
+// exports only one or two visuals.  VGL_DEFAULTFBCONFIG can still be used to
+// modify the OpenGL rendering attributes of all visuals, but the usefulness of
+// that feature is now very limited.
+
+#define TEST_ATTRIB(attrib, var, min, max) \
+{ \
+	if(!strcmp(argv[i], #attrib) && i < argc - 1) \
+	{ \
+		int temp = atoi(argv[++i]); \
+		if(temp >= min && temp <= max) \
+			var = temp; \
+	} \
+}
+
+static void buildCfgAttribTable(Display *dpy, int screen);
+
+static void assignDefaultFBConfigAttribs(Display *dpy, int screen,
+	XVisualInfo *visuals, int nVisuals, int visualDepth, int visualClass,
+	bool stereo, VisAttrib *va)
+{
+	int i = 0, alphaSize = -1, doubleBuffer = -1, stencilSize = -1,
+		depthSize = -1, numSamples = -1;
+
+	if(nVisuals < 1) return;
+
+	buildCfgAttribTable(dpy, screen);
+	GET_CA_TABLE()
+
+	// Allow the default FB config attribs to be manually specified.
+	if(strlen(fconfig.defaultfbconfig) > 0)
+	{
+		char *str = strdup(fconfig.defaultfbconfig);
+		if(!str) THROW_UNIX();
+		char *argv[512];  int argc = 0;
+		char *arg = strtok(str, ", \t");
+		while(arg && argc < 512)
+		{
+		  argv[argc] = arg;  argc++;
+		  arg = strtok(NULL, ", \t");
+		}
+		for(int i = 0; i < argc; i++)
+		{
+			TEST_ATTRIB(GLX_ALPHA_SIZE, alphaSize, 0, INT_MAX);
+			TEST_ATTRIB(GLX_DOUBLEBUFFER, doubleBuffer, 0, 1);
+			TEST_ATTRIB(GLX_STENCIL_SIZE, stencilSize, 0, INT_MAX);
+			TEST_ATTRIB(GLX_DEPTH_SIZE, depthSize, 0, INT_MAX);
+			TEST_ATTRIB(GLX_SAMPLES, numSamples, 0, INT_MAX);
+		}
+		free(str);
+	}
+
+	if(fconfig.samples >= 0) numSamples = fconfig.samples;
+	if(fconfig.forcealpha) alphaSize = 8;
+
+	// Determine the range of values that the FB configs provide.
+	int minAlpha = INT_MAX, maxAlpha = 0, minDB = 0, maxDB = 1,
+		minStencil = INT_MAX, maxStencil = 0, minDepth = 24, maxDepth = 24,
+		minSamples = INT_MAX, maxSamples = 0;
+	for(int i = 0; i < caEntries; i++)
+	{
+		if(ca[i].alphaSize < 0 || ca[i].stencilSize < 0 || ca[i].samples < 0)
+			continue;
+		minAlpha = min(minAlpha, ca[i].alphaSize);
+		maxAlpha = max(maxAlpha, ca[i].alphaSize);
+		minStencil = min(minStencil, ca[i].stencilSize);
+		maxStencil = max(maxStencil, ca[i].stencilSize);
+		minSamples = min(minSamples, ca[i].samples);
+		maxSamples = max(maxSamples, ca[i].samples);
+	}
+	if(minAlpha < 0) minAlpha = 0;
+	minAlpha = 8 * !!minAlpha;  maxAlpha = 8 * !!maxAlpha;
+	if(minStencil < 0) minStencil = 0;
+	minStencil = 8 * !!minStencil;  maxStencil = 8 * !!maxStencil;
+	if(minSamples < 0) minSamples = 0;
+	if(maxSamples > 64) maxSamples = 64;
+
+	if(alphaSize >= 0) minAlpha = maxAlpha = alphaSize;
+	if(doubleBuffer >= 0) minDB = maxDB = doubleBuffer;
+	if(stencilSize >= 0) minStencil = maxStencil = stencilSize;
+	if(depthSize >= 0) minDepth = maxDepth = depthSize;
+	if(numSamples >= 0) minSamples = maxSamples = numSamples;
+
+	// Assign the default FB config attributes.
+	for(int samples = minSamples; samples <= maxSamples;
+		samples = (samples ? samples * 2 : 2))
+	{
+		for(int depth = maxDepth; depth >= minDepth; depth -= 24)
+		{
+			for(int stencil = maxStencil; stencil >= minStencil; stencil -= 8)
+			{
+				if(!depth && stencil) continue;
+				for(int db = maxDB; db >= minDB; db--)
+				{
+					for(int alpha = maxAlpha; alpha >= minAlpha; alpha -= 8)
+					{
+						while(va[i].c_class != visualClass || va[i].depth != visualDepth
+							|| va[i].isStereo != stereo)
+						{
+							i++;  if(i >= nVisuals) return;
+						}
+						va[i].ogl.doubleBuffer = db;
+						va[i].ogl.alphaSize = alpha;
+						va[i].ogl.depthSize = depth;
+						va[i].ogl.stencilSize = stencil;
+						va[i++].ogl.samples = samples;
+						if(i >= nVisuals) return;
+					}
+				}
+			}
+		}
+	}
+}
 
 
 static void buildVisAttribTable(Display *dpy, int screen)
@@ -93,8 +247,27 @@ static void buildVisAttribTable(Display *dpy, int screen)
 				_glXGetConfig(dpy, &visuals[i], GLX_USE_GL, &va[i].isGL);
 				_glXGetConfig(dpy, &visuals[i], GLX_STEREO, &va[i].isStereo);
 			}
+			va[i].ogl.alphaSize = va[i].ogl.depthSize = va[i].ogl.stencilSize =
+				va[i].ogl.samples = -1;
 		}
 
+		int nDepths, *depths = XListDepths(dpy, screen, &nDepths);
+		if(!depths) THROW("Memory allocation error");
+		for(int i = 0; i < nDepths; i++)
+		{
+			if(depths[i] >= 24)
+			{
+				assignDefaultFBConfigAttribs(dpy, screen, visuals, nVisuals, depths[i],
+					TrueColor, true, va);
+				assignDefaultFBConfigAttribs(dpy, screen, visuals, nVisuals, depths[i],
+					DirectColor, true, va);
+				assignDefaultFBConfigAttribs(dpy, screen, visuals, nVisuals, depths[i],
+					TrueColor, false, va);
+				assignDefaultFBConfigAttribs(dpy, screen, visuals, nVisuals, depths[i],
+					DirectColor, false, va);
+			}
+		}
+		XFree(depths);
 		XFree(visuals);
 
 		if(!(extData = (XExtData *)calloc(1, sizeof(XExtData))))
@@ -161,6 +334,17 @@ static VisualID matchVisual2D(Display *dpy, int screen, GLXFBConfig config,
 
 	if(!dpy || screen < 0 || !config) return 0;
 
+	buildVisAttribTable(dpy, screen);
+	GET_VA_TABLE()
+
+	// Check if the FB config is already the default FB config for a visual and,
+	// if so, return that visual.
+	for(int i = 0; i < vaEntries; i++)
+	{
+		if(va[i].config && GLXFBCID(config) == GLXFBCID(va[i].config))
+			return va[i].visualID;
+	}
+
 	XVisualInfo *vis = _glXGetVisualFromFBConfig(DPY3D, config);
 	if(vis)
 	{
@@ -187,19 +371,6 @@ static VisualID matchVisual2D(Display *dpy, int screen, GLXFBConfig config,
 
 	return vid;
 }
-
-
-#define GET_CA_TABLE() \
-	struct _VGLFBConfig *ca;  int caEntries; \
-	XEDataObject obj; \
-	XExtData *extData; \
-	\
-	obj.screen = XScreenOfDisplay(dpy, screen); \
-	extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 4); \
-	if(!extData) \
-		THROW("Could not retrieve FB config attribute table for screen"); \
-	ca = (struct _VGLFBConfig *)extData->private_data; \
-	caEntries = ca[0].nConfigs;
 
 
 static void buildCfgAttribTable(Display *dpy, int screen)
@@ -234,18 +405,37 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 			ca[i].id = visAttrib3D(glxConfigs[i], GLX_FBCONFIG_ID);
 			ca[i].screen = screen;
 			ca[i].nConfigs = nConfigs;
+			int drawableType = visAttrib3D(glxConfigs[i], GLX_DRAWABLE_TYPE);
+			if((drawableType & (GLX_PBUFFER_BIT | GLX_WINDOW_BIT))
+				== (GLX_PBUFFER_BIT | GLX_WINDOW_BIT))
+			{
+				ca[i].alphaSize = visAttrib3D(glxConfigs[i], GLX_ALPHA_SIZE);
+				ca[i].stencilSize = visAttrib3D(glxConfigs[i], GLX_STENCIL_SIZE);
+				ca[i].samples = visAttrib3D(glxConfigs[i], GLX_SAMPLES);
+			}
+			else
+			{
+				ca[i].alphaSize = ca[i].stencilSize = ca[i].samples = -1;
+			}
 			ca[i].glxConfig = glxConfigs[i];
-			ca[i].visualID = matchVisual2D(dpy, screen, glxConfigs[i],
-				visAttrib3D(glxConfigs[i], GLX_STEREO));
 		}
-
-		XFree(glxConfigs);
 
 		if(!(extData = (XExtData *)calloc(1, sizeof(XExtData))))
 			THROW("Memory allocation error");
 		extData->private_data = (XPointer)ca;
 		extData->number = 4;
 		XAddToExtensionList(XEHeadOfExtensionList(obj), extData);
+
+		for(int i = 0; i < nConfigs; i++)
+		{
+			ca[i].visualID = matchVisual2D(dpy, screen, glxConfigs[i],
+				visAttrib3D(glxConfigs[i], GLX_STEREO));
+			if(fconfig.trace && ca[i].visualID)
+				vglout.println("[VGL] FB config 0x%.2x has attached visual 0x%.2x",
+					ca[i].id, (unsigned int)ca[i].visualID);
+		}
+
+		XFree(glxConfigs);
 	}
 	catch(...)
 	{
@@ -489,6 +679,73 @@ VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
 	bailout:
 	if(glxConfigs) XFree(glxConfigs);
 	return configs;
+}
+
+
+VGLFBConfig getDefaultFBConfig(Display *dpy, int screen, VisualID vid)
+{
+	buildVisAttribTable(dpy, screen);
+	GET_VA_TABLE()
+
+	for(int i = 0; i < vaEntries; i++)
+	{
+		if(va[i].visualID == vid)
+		{
+			if(va[i].config) return va[i].config;
+
+			if(va[i].ogl.doubleBuffer < 0 || va[i].ogl.alphaSize < 0
+				|| va[i].ogl.depthSize < 0 || va[i].ogl.stencilSize < 0
+				|| va[i].ogl.samples < 0)
+				return NULL;
+
+			int glxattribs[] = { GLX_DOUBLEBUFFER, va[i].ogl.doubleBuffer,
+				GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8,
+				GLX_ALPHA_SIZE, va[i].ogl.alphaSize, GLX_RENDER_TYPE, GLX_RGBA_BIT,
+				GLX_STEREO, va[i].isStereo,
+				GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT |
+					(va[i].ogl.samples ? 0 : GLX_PIXMAP_BIT) | GLX_WINDOW_BIT,
+				GLX_X_VISUAL_TYPE,
+				va[i].c_class == DirectColor ? GLX_DIRECT_COLOR : GLX_TRUE_COLOR,
+				GLX_DEPTH_SIZE, va[i].ogl.depthSize,
+				GLX_STENCIL_SIZE, va[i].ogl.stencilSize,
+				GLX_SAMPLES, va[i].ogl.samples, None };
+			if(va[i].depth == 30)
+			{
+				glxattribs[3] = glxattribs[5] = glxattribs[7] = 10;
+				if(va[i].ogl.alphaSize) glxattribs[9] = 2;
+			}
+
+			int n;
+			VGLFBConfig *configs = chooseFBConfig(dpy, screen, glxattribs, n);
+			if(configs)
+			{
+				// Make sure that the FB config actually has the requested
+				// attributes, i.e. that its attributes are unique among the
+				// list of visuals.  Otherwise, skip it.
+				int actualDB = visAttrib3D(configs[0], GLX_DOUBLEBUFFER);
+				int actualDepth = visAttrib3D(configs[0], GLX_DEPTH_SIZE);
+
+				if(configs[0]->alphaSize >= 0
+					&& !!configs[0]->alphaSize == !!va[i].ogl.alphaSize
+					&& !!actualDB == !!va[i].ogl.doubleBuffer
+					&& configs[0]->stencilSize >= 0
+					&& !!configs[0]->stencilSize == !!va[i].ogl.stencilSize
+					&& !!actualDepth == !!va[i].ogl.depthSize
+					&& configs[0]->samples >= 0
+					&& configs[0]->samples == va[i].ogl.samples)
+				{
+					if(fconfig.trace)
+						vglout.println("[VGL] Visual 0x%.2x has default FB config 0x%.2x",
+							(unsigned int)va[i].visualID, GLXFBCID(configs[0]));
+					va[i].config = configs[0];
+				}
+				XFree(configs);
+			}
+			return va[i].config;
+		}
+	}
+
+	return 0;
 }
 
 }  // namespace

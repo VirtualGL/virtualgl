@@ -1245,9 +1245,11 @@ int visTest(void)
 			XVisualInfo *vis2 = NULL;
 			try
 			{
-				int level = 0;
+				int level = 0, useGL = 1;
 				glXGetConfig(dpy, &vis0[i], GLX_LEVEL, &level);
 				if(level) continue;
+				glXGetConfig(dpy, &vis0[i], GLX_USE_GL, &useGL);
+				if(!useGL) continue;
 				printf("Vis 0x%.2x:  ", (int)vis0[i].visualid);
 				if(!(config = getFBConfigFromVisual(dpy, &vis0[i])))
 					THROWNL("No matching CFG for X Visual");
