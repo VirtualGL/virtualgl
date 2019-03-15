@@ -54,7 +54,7 @@ while [ $# -gt 0 ]; do
 		NOSTEREO=-nostereo
 		;;
 	-wrap)
-		WRAP=$2;  shift
+		WRAP=$2; shift
 		;;
 	esac
 	shift

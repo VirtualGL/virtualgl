@@ -137,14 +137,14 @@ addtotop()
 	cat > $SCRFILE <<EOF
 BEGIN {DONE=0} {
 	if(/^$|^[^#]/ && DONE==0) {
-		printf("$2");  printf("\n");
+		printf("$2"); printf("\n");
 		DONE=1;
 	}
 	print \$0
 }
 END {
 	if(DONE==0) {
-		printf("$2");  printf("\n");
+		printf("$2"); printf("\n");
 	}
 }
 EOF
@@ -164,7 +164,7 @@ addtoconf()
 		TMPFILE=`maketemp vglserver_config_7`
 		AWK=nawk
 		type $AWK >/dev/null 2>/dev/null || AWK=gawk
-		$AWK -vstanza=$2 -vadd="$4" '{ if($0 ~ stanza) { print "["stanza"]";  print add } else print $0; }' $1 >$TMPFILE && cp $TMPFILE $1
+		$AWK -vstanza=$2 -vadd="$4" '{ if($0 ~ stanza) { print "["stanza"]"; print add } else print $0; }' $1 >$TMPFILE && cp $TMPFILE $1
 		if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 	else
 		addtobottom $1 "[$2]"
@@ -1004,10 +1004,10 @@ while [ $# -gt 0 ]; do
 		+s) VGLUSERSONLY=0 ;;
 		+f) FBDEVVGLUSERSONLY=0 ;;
 		+t) DISABLEXTEST=0 ;;
-		-gid) GID=$2;  shift ;;
-		+glx) CONFIG_VGL="configglx";  UNATTENDED=1 ;;
+		-gid) GID=$2; shift ;;
+		+glx) CONFIG_VGL="configglx"; UNATTENDED=1 ;;
 		-glx) CONFIG_VGL="unconfigglx"; UNATTENDED=1 ;;
-		-config) CONFIG_VGL="configglx";  UNATTENDED=1 ;;
+		-config) CONFIG_VGL="configglx"; UNATTENDED=1 ;;
 		-unconfig) CONFIG_VGL="unconfigglx"; UNATTENDED=1 ;;
 		*) usage 0
 	esac

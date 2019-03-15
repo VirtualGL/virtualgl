@@ -260,10 +260,11 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[], int &nElements,
 	bool glx13)
 {
 	int glxattribs[257], j = 0;
-	int doubleBuffer = 0, redSize = -1, greenSize = -1, blueSize = -1,
-		alphaSize = -1, samples = -1, stereo = 0,
-		renderType = glx13 ? GLX_RGBA_BIT : GLX_COLOR_INDEX_BIT,
-		visualType = GLX_TRUE_COLOR;
+	int doubleBuffer = glx13 ? -1 : 0, redSize = -1, greenSize = -1,
+		blueSize = -1, alphaSize = -1, samples = -1, stereo = 0,
+		renderType = glx13 ? -1 : GLX_COLOR_INDEX_BIT,
+		drawableType = glx13 ? -1 : GLX_WINDOW_BIT | GLX_PIXMAP_BIT,
+		visualType = -1;
 
 	for(int i = 0; attribs[i] != None && i <= 254; i++)
 	{
@@ -272,8 +273,8 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[], int &nElements,
 			if(glx13) { doubleBuffer = attribs[i + 1];  i++; }
 			else doubleBuffer = 1;
 		}
-		else if(attribs[i] == GLX_RGBA) renderType = GLX_RGBA_BIT;
-		else if(attribs[i] == GLX_RENDER_TYPE)
+		else if(attribs[i] == GLX_RGBA && !glx13) renderType = GLX_RGBA_BIT;
+		else if(attribs[i] == GLX_RENDER_TYPE && glx13)
 		{
 			renderType = attribs[i + 1];  i++;
 		}
@@ -304,14 +305,9 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[], int &nElements,
 		{
 			samples = attribs[i + 1];  i++;
 		}
-		else if(attribs[i] == GLX_DRAWABLE_TYPE) i++;
 		else if(attribs[i] == GLX_X_VISUAL_TYPE)
 		{
-			int temp = attribs[i + 1];  i++;
-			if(temp == GLX_DIRECT_COLOR)
-			{
-				visualType = temp;
-			}
+			visualType = attribs[i + 1];  i++;
 		}
 		else if(attribs[i] == GLX_VISUAL_ID) i++;
 		else if(attribs[i] == GLX_X_RENDERABLE) i++;
@@ -326,8 +322,10 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[], int &nElements,
 			i++;
 		}
 	}
-	glxattribs[j++] = GLX_DOUBLEBUFFER;  glxattribs[j++] = doubleBuffer;
-	glxattribs[j++] = GLX_RENDER_TYPE;  glxattribs[j++] = renderType;
+	if(doubleBuffer >= 0)
+	{
+		glxattribs[j++] = GLX_DOUBLEBUFFER;  glxattribs[j++] = doubleBuffer;
+	}
 	if(fconfig.forcealpha == 1 && redSize > 0 && greenSize > 0 && blueSize > 0
 		&& alphaSize < 1)
 		alphaSize = 1;
@@ -356,19 +354,29 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[], int &nElements,
 	{
 		glxattribs[j++] = GLX_STEREO;  glxattribs[j++] = stereo;
 	}
-	glxattribs[j++] = GLX_DRAWABLE_TYPE;
-	if(fconfig.drawable == RRDRAWABLE_PIXMAP)
-		glxattribs[j++] = GLX_PIXMAP_BIT | GLX_WINDOW_BIT;
-	else
+	if(drawableType >= 0 && drawableType & GLX_WINDOW_BIT)
 	{
-		// Multisampling cannot be used with Pixmap rendering, and on nVidia GPUs,
-		// there are no multisample-enabled FB configs that support GLX_PIXMAP_BIT.
-		if(samples > 0)
-			glxattribs[j++] = GLX_PBUFFER_BIT;
+		drawableType &= ~GLX_WINDOW_BIT;
+		if(fconfig.drawable == RRDRAWABLE_PIXMAP)
+			drawableType |= GLX_PIXMAP_BIT | GLX_WINDOW_BIT;
 		else
-			glxattribs[j++] = GLX_PIXMAP_BIT | GLX_PBUFFER_BIT;
+			drawableType |= GLX_PBUFFER_BIT;
+		if(visualType >= 0)
+			drawableType |= GLX_WINDOW_BIT;
+		renderType = GLX_RGBA_BIT;
 	}
-	glxattribs[j++] = GLX_X_VISUAL_TYPE;  glxattribs[j++] = visualType;
+	if(renderType >= 0)
+	{
+		glxattribs[j++] = GLX_RENDER_TYPE;  glxattribs[j++] = renderType;
+	}
+	if(drawableType >= 0)
+	{
+		glxattribs[j++] = GLX_DRAWABLE_TYPE;  glxattribs[j++] = drawableType;
+	}
+	if(visualType >= 0)
+	{
+		glxattribs[j++] = GLX_X_VISUAL_TYPE;  glxattribs[j++] = visualType;
+	}
 	glxattribs[j] = None;
 
 	if(fconfig.trace) PRARGAL13(glxattribs);

@@ -59,6 +59,10 @@ using namespace vglutil;
 }
 
 
+#define GLX_EXTENSION_EXISTS(ext) \
+	strstr(glXQueryExtensionsString(dpy, DefaultScreen(dpy)), #ext)
+
+
 #if 0
 void clickToContinue(Display *dpy)
 {
@@ -815,6 +819,21 @@ int cfgid(Display *dpy, GLXFBConfig config);
 }
 
 
+static int visualClassToGLXVisualType(int visualClass)
+{
+	switch(visualClass)
+	{
+		case StaticGray:   return GLX_STATIC_GRAY;
+		case GrayScale:    return GLX_GRAY_SCALE;
+		case StaticColor:  return GLX_STATIC_COLOR;
+		case PseudoColor:  return GLX_PSEUDO_COLOR;
+		case TrueColor:    return GLX_TRUE_COLOR;
+		case DirectColor:  return GLX_DIRECT_COLOR;
+		default:           return GLX_NONE;
+	}
+}
+
+
 void configVsVisual(Display *dpy, GLXFBConfig config, XVisualInfo *vis)
 {
 	int ctemp, vtemp, r, g, b, bs;
@@ -849,9 +868,9 @@ void configVsVisual(Display *dpy, GLXFBConfig config, XVisualInfo *vis)
 	#ifdef GLX_SAMPLES_ARB
 	COMPARE_ATTRIB(config, vis, GLX_SAMPLES_ARB, ctemp);
 	#endif
-	#ifdef GLX_X_VISUAL_TYPE_EXT
-	COMPARE_ATTRIB(config, vis, GLX_X_VISUAL_TYPE_EXT, ctemp);
-	#endif
+	COMPARE_ATTRIB(config, vis, GLX_X_VISUAL_TYPE, ctemp);
+	if(visualClassToGLXVisualType(vis->c_class) != ctemp)
+		THROWNL("GLX_X_VISUAL_TYPE mismatch w/ X visual");
 	#ifdef GLX_TRANSPARENT_TYPE_EXT
 	COMPARE_ATTRIB(config, vis, GLX_TRANSPARENT_TYPE_EXT, ctemp);
 	#endif
@@ -985,57 +1004,72 @@ int visTest(void)
 				GLX_ALPHA_SIZE, 0, GLX_DEPTH_SIZE, 0, GLX_AUX_BUFFERS, 0,
 				GLX_STENCIL_SIZE, 0, GLX_ACCUM_RED_SIZE, 0, GLX_ACCUM_GREEN_SIZE, 0,
 				GLX_ACCUM_BLUE_SIZE, 0, GLX_ACCUM_ALPHA_SIZE, 0, GLX_SAMPLE_BUFFERS, 0,
-				GLX_SAMPLES, 1, GLX_RGBA, None, None, None };
+				GLX_SAMPLES, 1, GLX_RGBA, GLX_X_VISUAL_TYPE, GLX_NONE, None, None,
+				None };
 			int rgbattrib13[] = { GLX_DOUBLEBUFFER, 1, GLX_STEREO, 1,
 				GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8,
 				GLX_ALPHA_SIZE, 0, GLX_DEPTH_SIZE, 0, GLX_AUX_BUFFERS, 0,
 				GLX_STENCIL_SIZE, 0, GLX_ACCUM_RED_SIZE, 0, GLX_ACCUM_GREEN_SIZE, 0,
 				GLX_ACCUM_BLUE_SIZE, 0, GLX_ACCUM_ALPHA_SIZE, 0, GLX_SAMPLE_BUFFERS, 0,
-				GLX_SAMPLES, 1, None };
+				GLX_SAMPLES, 1, GLX_X_VISUAL_TYPE, GLX_NONE, None };
+			unsigned int visualTypes[3] = { GLX_TRUE_COLOR, GLX_DIRECT_COLOR,
+				GLX_DONT_CARE };
 
 			for(int db = 0; db <= 1; db++)
 			{
 				rgbattrib13[1] = db;
-				rgbattrib[27] = db ? GLX_DOUBLEBUFFER : 0;
+				rgbattrib[29] = db ? GLX_DOUBLEBUFFER : 0;
+
 				for(int stereo = 0; stereo <= 1; stereo++)
 				{
 					rgbattrib13[3] = stereo;
-					rgbattrib[db ? 28 : 27] = stereo ? GLX_STEREO : 0;
+					rgbattrib[db ? 30 : 29] = stereo ? GLX_STEREO : 0;
+
 					for(int alpha = 0; alpha <= 1; alpha++)
 					{
 						rgbattrib13[11] = rgbattrib[7] = alpha;
+
 						for(int depth = 0; depth <= 1; depth++)
 						{
 							rgbattrib13[13] = rgbattrib[9] = depth;
+
 							for(int aux = 0; aux <= 1; aux++)
 							{
 								rgbattrib13[15] = rgbattrib[11] = aux;
+
 								for(int stencil = 0; stencil <= 1; stencil++)
 								{
 									rgbattrib13[17] = rgbattrib[13] = stencil;
+
 									for(int accum = 0; accum <= 1; accum++)
 									{
 										rgbattrib13[19] = rgbattrib13[21] =
 											rgbattrib13[23] = accum;
 										rgbattrib[15] = rgbattrib[17] = rgbattrib[19] = accum;
 										if(alpha) { rgbattrib13[25] = rgbattrib[21] = accum; }
+
 										for(int samples = 0; samples <= 16;
 											samples == 0 ? samples = 1 : samples *= 2)
 										{
 											rgbattrib13[29] = rgbattrib[25] = samples;
 											rgbattrib13[27] = rgbattrib[23] = samples ? 1 : 0;
 
-											if((!(configs = glXChooseFBConfig(dpy,
-												DefaultScreen(dpy), rgbattrib13, &n)) || n == 0)
-												&& !stereo && !samples && !aux && !accum)
-												THROW("No FB configs found");
-											if(!(vis0 = glXChooseVisual(dpy, DefaultScreen(dpy),
-												rgbattrib)) && !stereo && !samples && !aux && !accum)
-												THROW("Could not find visual");
-											if(vis0 && configs)
+											for(int visualTypeIndex = 0; visualTypeIndex < 3;
+												visualTypeIndex++)
 											{
-												configVsVisual(dpy, configs[0], vis0);
-												XFree(vis0);  XFree(configs);
+												rgbattrib13[31] = rgbattrib[28] =
+													visualTypes[visualTypeIndex];
+												if((!(configs = glXChooseFBConfig(dpy,
+													DefaultScreen(dpy), rgbattrib13, &n)) || n == 0)
+													&& !stereo && !samples && !aux && !accum)
+													THROW("No FB configs found");
+												if(!(vis0 = glXChooseVisual(dpy, DefaultScreen(dpy),
+													rgbattrib)) && !stereo && !samples && !aux && !accum)
+													THROW("Could not find visual");
+												if(vis0 && configs)
+													configVsVisual(dpy, configs[0], vis0);
+												if(vis0) XFree(vis0);
+												if(configs) XFree(configs);
 											}
 										}
 									}
@@ -1062,6 +1096,13 @@ int visTest(void)
 			THROW("Memory allocation error");
 		memset(visuals, 0, sizeof(XVisualInfo *) * n);
 
+#ifdef GLX_ARB_fbconfig_float
+		int numFloatCfgs = 0;
+#endif
+#ifdef GLX_NV_float_buffer
+		int numNVFloatCfgs = 0;
+#endif
+
 		for(i = 0; i < n; i++)
 		{
 			if(!configs[i]) continue;
@@ -1069,6 +1110,9 @@ int visTest(void)
 			{
 				int drawableType, renderType, transparentType, visualID, visualType,
 					xRenderable;
+#ifdef GLX_NV_float_buffer
+				int floatComponents = -1;
+#endif
 				fbcid = cfgid(dpy, configs[i]);
 				// The old fglrx driver unfortunately assigns the same FB config ID to
 				// multiple FB configs with different attributes, some of which support
@@ -1079,10 +1123,34 @@ int visTest(void)
 					continue;
 				GET_CFG_ATTRIB(configs[i], GLX_DRAWABLE_TYPE, drawableType);
 				GET_CFG_ATTRIB(configs[i], GLX_RENDER_TYPE, renderType);
+#ifdef GLX_ARB_fbconfig_float
+				if(renderType & GLX_RGBA_FLOAT_BIT_ARB)
+				{
+					if(!GLX_EXTENSION_EXISTS(GLX_ARB_fbconfig_float))
+					{
+						printf("CFG 0x%.2x:  ", fbcid);
+						THROWNL("GLX_ARB_fbconfig_float not advertised");
+					}
+					numFloatCfgs++;
+				}
+#endif
 				GET_CFG_ATTRIB(configs[i], GLX_TRANSPARENT_TYPE, transparentType);
 				GET_CFG_ATTRIB(configs[i], GLX_VISUAL_ID, visualID);
 				GET_CFG_ATTRIB(configs[i], GLX_X_VISUAL_TYPE, visualType);
 				GET_CFG_ATTRIB(configs[i], GLX_X_RENDERABLE, xRenderable);
+#ifdef GLX_NV_float_buffer
+				glXGetFBConfigAttrib(dpy, configs[i], GLX_FLOAT_COMPONENTS_NV,
+					&floatComponents);
+				if(floatComponents > 0)
+				{
+					if(!GLX_EXTENSION_EXISTS(GLX_NV_float_buffer))
+					{
+						printf("CFG 0x%.2x:  ", fbcid);
+						THROWNL("GLX_NV_float_buffer not advertised");
+					}
+					numNVFloatCfgs++;
+				}
+#endif
 				visuals[i] = glXGetVisualFromFBConfig(dpy, configs[i]);
 				// VirtualGL should return a visual only for opaque GLXFBConfigs that
 				// support X rendering.
@@ -1103,16 +1171,39 @@ int visTest(void)
 			}
 		}
 
+#ifdef GLX_ARB_fbconfig_float
+		if(numFloatCfgs)
+		{
+			int nc = 0, glxattribs[] = { GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT,
+				GLX_RENDER_TYPE, GLX_RGBA_FLOAT_BIT_ARB, None };
+			GLXFBConfig *fbconfigs =
+				glXChooseFBConfig(dpy, DefaultScreen(dpy), glxattribs, &nc);
+			if(fbconfigs) XFree(fbconfigs);
+			if(nc != numFloatCfgs)
+				THROWNL("Wrong number of FB configs with GLX_RGBA_FLOAT_BIT");
+		}
+#endif
+
+#ifdef GLX_NV_float_buffer
+		if(numNVFloatCfgs)
+		{
+			int nc = 0, glxattribs[] = { GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT,
+				GLX_FLOAT_COMPONENTS_NV, 1, None };
+			GLXFBConfig *fbconfigs =
+				glXChooseFBConfig(dpy, DefaultScreen(dpy), glxattribs, &nc);
+			if(fbconfigs) XFree(fbconfigs);
+			if(nc != numNVFloatCfgs)
+				THROWNL("Wrong number of FB configs with GLX_FLOAT_COMPONENTS_NV");
+		}
+#endif
+
 		for(i = 0; i < n; i++)
 		{
 			XVisualInfo *vis1 = NULL;
 			if(!configs[i]) continue;
 			try
 			{
-				int renderType, visualType;
 				fbcid = cfgid(dpy, configs[i]);
-				GET_CFG_ATTRIB(configs[i], GLX_RENDER_TYPE, renderType);
-				GET_CFG_ATTRIB(configs[i], GLX_X_VISUAL_TYPE, visualType);
 				if(!visuals[i]) continue;
 				printf("CFG 0x%.2x:  ", fbcid);
 				if(!(vis1 = glXGetVisualFromFBConfig(dpy, configs[i])))
