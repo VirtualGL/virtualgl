@@ -70,7 +70,7 @@ int test(const char *testName)
 {
 	Display *dpy = NULL;  Window win = 0, root;
 	int dpyw, dpyh, lastFrame = 0, retval = 0;
-	int glxattrib[] = { GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8,
+	int glxattribs[] = { GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8,
 		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None, None };
 	XVisualInfo *v = NULL;  GLXContext ctx = 0;
 	XSetWindowAttributes swa;
@@ -81,7 +81,7 @@ int test(const char *testName)
 	dpyw = DisplayWidth(dpy, DefaultScreen(dpy));
 	dpyh = DisplayHeight(dpy, DefaultScreen(dpy));
 
-	if((v = _glXChooseVisual(dpy, DefaultScreen(dpy), glxattrib)) == NULL)
+	if((v = _glXChooseVisual(dpy, DefaultScreen(dpy), glxattribs)) == NULL)
 		_throw("Could not find a suitable visual");
 
 	root = RootWindow(dpy, DefaultScreen(dpy));
