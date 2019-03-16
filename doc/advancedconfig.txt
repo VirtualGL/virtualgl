@@ -841,7 +841,7 @@ previous method:
 	into the 3D application's window __using the X11 Transport with no frame
 	spoiling__.  The frame trigger function will not return control to the 3D
 	application until VirtualGL has verified that the rendered frame has been
-	composited into the application's window.  As such, this mode can have
+	composited into the application's window.  Therefore, this mode can have
 	potentially dire effects on performance when used with a 2D X server on a
 	machine other than the VirtualGL server.  It is strongly recommended that
 	''VGL_SYNC'' be used only in conjunction with an X proxy running on the
