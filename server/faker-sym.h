@@ -602,6 +602,8 @@ FUNCDEF2(int, XDestroySubwindows, Display *, dpy, Window, win,
 
 FUNCDEF2(int, XDestroyWindow, Display *, dpy, Window, win, XDestroyWindow);
 
+FUNCDEF1(int, XFree, void *, data, XFree);
+
 FUNCDEF9(Status, XGetGeometry, Display *, display, Drawable, d, Window *, root,
 	int *, x, int *, y, unsigned int *, width, unsigned int *, height,
 	unsigned int *, border_width, unsigned int *, depth, XGetGeometry);

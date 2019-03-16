@@ -20,6 +20,7 @@
 #include "ContextHash.h"
 #include "GLXDrawableHash.h"
 #include "PixmapHash.h"
+#include "VisualHash.h"
 #include "WindowHash.h"
 #include "rr.h"
 #include "faker.h"
@@ -61,8 +62,10 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 	if(!dpy || !vis) return 0;
 
 	// If the visual was obtained from glXChooseVisual() or
-	// glXGetVisualFromFBConfig(), then it should have an attached FB config.
-	if(!(config = vglfaker::getConfigForVisual(dpy, vis)))
+	// glXGetVisualFromFBConfig(), then it should have a corresponding FB config
+	// in the visual hash.
+	if(!(config = vishash.getConfig(dpy, vis))
+		&& !(config = vishash.mostRecentConfig(dpy, vis)))
 	{
 		// Punt.  We can't figure out where the visual came from, so fall back to
 		// using a default FB config.
@@ -157,7 +160,7 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 		XFree(configs);
 		if(config)
 		{
-			vglfaker::setConfigForVisual(dpy, vis, config);
+			vishash.add(dpy, vis, config);
 			glxvisual::attachVisualID(dpy, vis->screen, config, vis->visualid);
 		}
 	}
@@ -302,7 +305,7 @@ GLXFBConfigSGIX *glXChooseFBConfigSGIX(Display *dpy, int screen,
 
 // Obtain a 3D X server FB config that supports off-screen rendering and has
 // the desired set of attributes, match it to an appropriate 2D X server
-// visual, attach the two, and return the visual.
+// visual, hash the two, and return the visual.
 
 XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 {
@@ -346,15 +349,15 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	vis = glxvisual::visualFromID(dpy, screen, vid);
 	if(!vis) goto done;
 
-	if((prevConfig = vglfaker::getConfigForVisual(dpy, vis))
+	if((prevConfig = vishash.getConfig(dpy, vis))
 		&& FBCID(config) != FBCID(prevConfig) && fconfig.trace)
 		vglout.println("[VGL] WARNING: Visual 0x%.2x was previously mapped to FB config 0x%.2x and is now mapped to 0x%.2x\n",
 			vis->visualid, FBCID(prevConfig), FBCID(config));
 
-	// Attach the FB config and the visual so that we can look up the FB config
+	// Hash the FB config and the visual so that we can look up the FB config
 	// whenever the appplication subsequently passes the visual to
 	// glXCreateContext() or other functions.
-	vglfaker::setConfigForVisual(dpy, vis, config);
+	vishash.add(dpy, vis, config);
 
 	done:
 		STOPTRACE();  PRARGV(vis);  PRARGC(config);  CLOSETRACE();
@@ -1385,9 +1388,7 @@ void glXGetSelectedEventSGIX(Display *dpy, GLXDrawable drawable,
 }
 
 
-// Return the 2D X server visual that was attached to the 3D X server FB config
-// during a previous call to glXChooseFBConfig(), or pick out an appropriate
-// visual and return it.
+// Return the 2D X server visual that is attached to the 3D X server FB config.
 
 XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 {
@@ -1407,7 +1408,7 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 	if(!vid) goto done;
 	vis = glxvisual::visualFromID(dpy, DefaultScreen(dpy), vid);
 	if(!vis) goto done;
-	vglfaker::setConfigForVisual(dpy, vis, config);
+	vishash.add(dpy, vis, config);
 
 	done:
 		STOPTRACE();  PRARGV(vis);  CLOSETRACE();
@@ -1720,7 +1721,7 @@ int glXQueryContextInfoEXT(Display *dpy, GLXContext ctx, int attribute,
 
 // Hand off to the 3D X server without modification, except that 'draw' is
 // replaced with its corresponding off-screen drawable ID and
-// GLX_SWAP_INTERVAL_INT is emulated.
+// GLX_SWAP_INTERVAL_EXT is emulated.
 
 void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 	unsigned int *value)

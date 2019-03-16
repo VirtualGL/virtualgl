@@ -81,23 +81,6 @@ namespace vglfaker
 
 		return *(vglutil::CriticalSection *)extData->private_data;
 	}
-
-	extern void setConfigForVisual(Display *dpy, XVisualInfo *vis,
-		GLXFBConfig config);
-
-	INLINE GLXFBConfig getConfigForVisual(Display *dpy, XVisualInfo *vis)
-	{
-		XEDataObject obj;
-		obj.visual = vis ? vis->visual : NULL;
-		XExtData *extData;
-
-		// The 3D X server may have its own extensions that conflict with ours.
-		if(dpy == dpy3D)
-			THROW("vglfaker::getConfigForVisual() called with 3D X server handle (this should never happen)");
-		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 4);
-
-		return extData ? *(GLXFBConfig *)extData->private_data : 0;
-	}
 }
 
 #define DPY3D  vglfaker::init3D()

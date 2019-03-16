@@ -66,6 +66,7 @@ set(FAKER_SOURCES
 	VirtualDrawable.cpp
 	VirtualPixmap.cpp
 	VirtualWin.cpp
+	VisualHash.cpp
 	WindowHash.cpp
 	X11Trans.cpp
 	vglconfigLauncher.cpp

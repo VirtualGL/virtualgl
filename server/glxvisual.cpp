@@ -199,7 +199,7 @@ typedef struct
 	XExtData *extData; \
 	\
 	obj.screen = XScreenOfDisplay(dpy, screen); \
-	extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 5); \
+	extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 4); \
 	if(!extData) \
 		THROW("Could not retrieve FB config attribute table for screen"); \
 	ca = (CfgAttrib *)extData->private_data; \
@@ -222,7 +222,7 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 	{
 		CriticalSection::SafeLock l(vglfaker::getDisplayCS(dpy));
 
-		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 5);
+		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 4);
 		if(extData && extData->private_data) return;
 
 		if(!(configs = _glXGetFBConfigs(DPY3D, DefaultScreen(DPY3D), &nConfigs)))
@@ -244,7 +244,7 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 		if(!(extData = (XExtData *)calloc(1, sizeof(XExtData))))
 			THROW("Memory allocation error");
 		extData->private_data = (XPointer)ca;
-		extData->number = 5;
+		extData->number = 4;
 		XAddToExtensionList(XEHeadOfExtensionList(obj), extData);
 	}
 	catch(...)
