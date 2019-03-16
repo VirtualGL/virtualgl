@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2019-02-17T18:58:07">
+<meta name="date" content="2019-03-15T22:50:17">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.6.80</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -4336,10 +4336,10 @@ Image transport plugins are free to handle or ignore any configuration option as
         <em>using the X11 Transport with no frame spoiling</em>.  The frame 
         trigger function will not return control to the 3D application until 
         VirtualGL has verified that the rendered frame has been composited into 
-        the application&rsquo;s window.  As such, this mode can have potentially 
-        dire effects on performance when used with a 2D X server on a machine 
-        other than the VirtualGL server.  It is strongly recommended that 
-        <code>VGL_SYNC</code> be used only in conjunction with an X proxy 
+        the application&rsquo;s window.  Therefore, this mode can have 
+        potentially dire effects on performance when used with a 2D X server on 
+        a machine other than the VirtualGL server.  It is strongly recommended 
+        that <code>VGL_SYNC</code> be used only in conjunction with an X proxy 
         running on the VirtualGL server.
         <div class="important"><p class="important">
         If an image transport plugin is being used, then VirtualGL does not automatically enable the X11 Transport or disable frame spoiling when <code>VGL_SYNC</code> is set.  This allows the plugin to handle synchronous image delivery as it sees fit (or to simply ignore this option.)

@@ -315,9 +315,9 @@ int readbackTest(bool stereo)
 	TestColor clr(0), sclr(3);
 	Display *dpy = NULL;  Window win0 = 0, win1 = 0;
 	int dpyw, dpyh, lastFrame0 = 0, lastFrame1 = 0, retval = 1;
-	int glxattrib[] = { GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8,
+	int glxattribs[] = { GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8,
 		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None, None };
-	int glxattrib13[] = { GLX_DOUBLEBUFFER, 1, GLX_RENDER_TYPE, GLX_RGBA_BIT,
+	int glxattribs13[] = { GLX_DOUBLEBUFFER, 1, GLX_RENDER_TYPE, GLX_RGBA_BIT,
 		GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
 		GLX_BLUE_SIZE, 8, None, None, None };
 	XVisualInfo *vis0 = NULL, *vis1 = NULL;
@@ -328,8 +328,8 @@ int readbackTest(bool stereo)
 
 	if(stereo)
 	{
-		glxattrib[8] = glxattrib13[12] = GLX_STEREO;
-		glxattrib13[13] = 1;
+		glxattribs[8] = glxattribs13[12] = GLX_STEREO;
+		glxattribs13[13] = 1;
 	}
 
 	printf("Readback heuristics test ");
@@ -342,9 +342,9 @@ int readbackTest(bool stereo)
 		dpyw = DisplayWidth(dpy, DefaultScreen(dpy));
 		dpyh = DisplayHeight(dpy, DefaultScreen(dpy));
 
-		if((vis0 = glXChooseVisual(dpy, DefaultScreen(dpy), glxattrib)) == NULL)
+		if((vis0 = glXChooseVisual(dpy, DefaultScreen(dpy), glxattribs)) == NULL)
 			THROW("Could not find a suitable visual");
-		if((configs = glXChooseFBConfig(dpy, DefaultScreen(dpy), glxattrib13, &n))
+		if((configs = glXChooseFBConfig(dpy, DefaultScreen(dpy), glxattribs13, &n))
 			== NULL || n == 0)
 			THROW("Could not find a suitable FB config");
 		config = configs[0];
@@ -724,7 +724,7 @@ int flushTest(void)
 	TestColor clr(0);
 	Display *dpy = NULL;  Window win = 0;
 	int dpyw, dpyh, lastFrame = 0, retval = 1;
-	int glxattrib[] = { GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8,
+	int glxattribs[] = { GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8,
 		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None };
 	XVisualInfo *vis = NULL;
 	GLXContext ctx = 0;
@@ -739,7 +739,7 @@ int flushTest(void)
 		dpyw = DisplayWidth(dpy, DefaultScreen(dpy));
 		dpyh = DisplayHeight(dpy, DefaultScreen(dpy));
 
-		if((vis = glXChooseVisual(dpy, DefaultScreen(dpy), glxattrib)) == NULL)
+		if((vis = glXChooseVisual(dpy, DefaultScreen(dpy), glxattribs)) == NULL)
 			THROW("Could not find a suitable visual");
 
 		Window root = RootWindow(dpy, DefaultScreen(dpy));
@@ -1337,7 +1337,7 @@ class TestThread : public Runnable
 
 int multiThreadTest(int nThreads)
 {
-	int glxattrib[] = { GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8,
+	int glxattribs[] = { GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8,
 		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None };
 	XVisualInfo *vis = NULL;
 	Display *dpy = NULL;  Window windows[MAXTHREADS];
@@ -1359,7 +1359,7 @@ int multiThreadTest(int nThreads)
 	{
 		if(!(dpy = XOpenDisplay(0))) THROW("Could not open display");
 
-		if((vis = glXChooseVisual(dpy, DefaultScreen(dpy), glxattrib)) == NULL)
+		if((vis = glXChooseVisual(dpy, DefaultScreen(dpy), glxattribs)) == NULL)
 			THROW("Could not find a suitable visual");
 		Window root = RootWindow(dpy, DefaultScreen(dpy));
 		swa.colormap = XCreateColormap(dpy, root, vis->visual, AllocNone);
@@ -1504,7 +1504,7 @@ int offScreenTest(bool dbPixmap)
 	Display *dpy = NULL;  Window win = 0;  Pixmap pm0 = 0, pm1 = 0, pm2 = 0;
 	GLXPixmap glxpm0 = 0, glxpm1 = 0;  GLXPbuffer pb = 0;  GLXWindow glxwin = 0;
 	int dpyw, dpyh, lastFrame = 0, retval = 1;
-	int glxattrib[] = { GLX_DOUBLEBUFFER, 1, GLX_RENDER_TYPE, GLX_RGBA_BIT,
+	int glxattribs[] = { GLX_DOUBLEBUFFER, 1, GLX_RENDER_TYPE, GLX_RGBA_BIT,
 		GLX_DRAWABLE_TYPE, GLX_PIXMAP_BIT | GLX_PBUFFER_BIT | GLX_WINDOW_BIT,
 		GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None };
 	XVisualInfo *vis = NULL;  GLXFBConfig config = 0, *configs = NULL;
@@ -1529,7 +1529,7 @@ int offScreenTest(bool dbPixmap)
 		minChar = fontInfo->min_char_or_byte2;
 		maxChar = fontInfo->max_char_or_byte2;
 
-		if((configs = glXChooseFBConfigSGIX(dpy, DefaultScreen(dpy), glxattrib,
+		if((configs = glXChooseFBConfigSGIX(dpy, DefaultScreen(dpy), glxattribs,
 			&n)) == NULL || n == 0)
 			THROW("Could not find a suitable FB config");
 		config = configs[0];
@@ -1913,10 +1913,10 @@ int contextMismatchTest(void)
 {
 	Display *dpy = NULL;  Window win = 0;
 	int dpyw, dpyh, retval = 1;
-	int glxattrib1[] = { GLX_DOUBLEBUFFER, 1, GLX_RENDER_TYPE, GLX_RGBA_BIT,
+	int glxattribs1[] = { GLX_DOUBLEBUFFER, 1, GLX_RENDER_TYPE, GLX_RGBA_BIT,
 		GLX_DRAWABLE_TYPE, GLX_PIXMAP_BIT | GLX_PBUFFER_BIT | GLX_WINDOW_BIT,
 		GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None };
-	int glxattrib2[] = { GLX_DOUBLEBUFFER, 0, GLX_RENDER_TYPE, GLX_RGBA_BIT,
+	int glxattribs2[] = { GLX_DOUBLEBUFFER, 0, GLX_RENDER_TYPE, GLX_RGBA_BIT,
 		GLX_DRAWABLE_TYPE, GLX_PIXMAP_BIT | GLX_PBUFFER_BIT | GLX_WINDOW_BIT,
 		GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, GLX_ALPHA_SIZE, 8,
 		None };
@@ -1934,12 +1934,12 @@ int contextMismatchTest(void)
 		dpyh = DisplayHeight(dpy, DefaultScreen(dpy));
 		if(DefaultDepth(dpy, DefaultScreen(dpy)) == 30)
 		{
-			glxattrib1[7] = glxattrib1[9] = glxattrib1[11] = 10;
-			glxattrib2[7] = glxattrib2[9] = glxattrib2[11] = 10;
-			glxattrib2[13] = 2;
+			glxattribs1[7] = glxattribs1[9] = glxattribs1[11] = 10;
+			glxattribs2[7] = glxattribs2[9] = glxattribs2[11] = 10;
+			glxattribs2[13] = 2;
 		}
 
-		if((configs = glXChooseFBConfig(dpy, DefaultScreen(dpy), glxattrib1,
+		if((configs = glXChooseFBConfig(dpy, DefaultScreen(dpy), glxattribs1,
 			&n)) == NULL || n == 0)
 			THROW("Could not find a suitable FB config");
 		config1 = configs[0];
@@ -1947,7 +1947,7 @@ int contextMismatchTest(void)
 			THROW("glXGetVisualFromFBConfig()");
 		XFree(configs);  configs = NULL;
 
-		if((configs = glXChooseFBConfig(dpy, DefaultScreen(dpy), glxattrib2,
+		if((configs = glXChooseFBConfig(dpy, DefaultScreen(dpy), glxattribs2,
 			&n)) == NULL || n == 0)
 			THROW("Could not find a suitable FB config");
 		config2 = configs[0];
@@ -2021,7 +2021,7 @@ int subWinTest(void)
 	Display *dpy = NULL;  Window win = 0, win1 = 0, win2 = 0;
 	TestColor clr(0);
 	int dpyw, dpyh, retval = 1, lastFrame = 0;
-	int glxattrib[] = { GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8,
+	int glxattribs[] = { GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8,
 		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None };
 	XVisualInfo *vis = NULL;
 	GLXContext ctx = 0;
@@ -2040,7 +2040,8 @@ int subWinTest(void)
 				dpyw = DisplayWidth(dpy, DefaultScreen(dpy));
 				dpyh = DisplayHeight(dpy, DefaultScreen(dpy));
 
-				if((vis = glXChooseVisual(dpy, DefaultScreen(dpy), glxattrib)) == NULL)
+				if((vis = glXChooseVisual(dpy, DefaultScreen(dpy),
+					glxattribs)) == NULL)
 					THROW("Could not find a suitable visual");
 
 				Window root = RootWindow(dpy, DefaultScreen(dpy));

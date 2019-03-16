@@ -36,9 +36,9 @@ using namespace vglserver;
 // Applications will sometimes use X11 functions to obtain a list of 2D X
 // server visuals, then pass one of those visuals to glXCreateContext(),
 // glXGetConfig(), etc.  Since the visual didn't come from glXChooseVisual(),
-// VGL has no idea what properties the application is looking for, so if no 3D
-// X server FB config is already attached to the visual, we have to create one
-// using default attributes.
+// VGL has no idea which OpenGL rendering attributes the application is looking
+// for, so if no 3D X server FB config is already hashed to the visual, we have
+// to create one using default attributes.
 
 #define TEST_ATTRIB(attrib, index, min, max) \
 { \
@@ -59,9 +59,13 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 	GLXFBConfig config = 0, *configs = NULL;  int n = 0;
 
 	if(!dpy || !vis) return 0;
+
+	// If the visual was obtained from glXChooseVisual() or
+	// glXGetVisualFromFBConfig(), then it should have an attached FB config.
 	if(!(config = vglfaker::getConfigForVisual(dpy, vis)))
 	{
-		// Punt.  We can't figure out where the visual came from
+		// Punt.  We can't figure out where the visual came from, so fall back to
+		// using a default FB config.
 		int defaultAttribs[] = { GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8,
 			GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT,
 			GLX_STEREO, 0, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT | GLX_WINDOW_BIT,
@@ -393,9 +397,6 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 		OPENTRACE(glXCreateContext);  PRARGD(dpy);  PRARGV(vis);
 		PRARGX(share_list);  PRARGI(direct);  STARTTRACE();
 
-	// If 'vis' was obtained through a previous call to glXChooseVisual(), find
-	// the corresponding FB config.  Otherwise, we have to fall back to using a
-	// default FB config returned from matchConfig().
 	if(!(config = matchConfig(dpy, vis)))
 		THROW("Could not obtain RGB visual on the server suitable for off-screen rendering.");
 	ctx = _glXCreateNewContext(DPY3D, config, GLX_RGBA_TYPE, share_list,
@@ -936,24 +937,26 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 		OPENTRACE(glXGetConfig);  PRARGD(dpy);  PRARGV(vis);  PRARGIX(attrib);
 		STARTTRACE();
 
-	// If 'vis' was obtained through a previous call to glXChooseVisual(), find
-	// the corresponding FB config in the hash.  Otherwise, we have to fall back
-	// to using a default FB config returned from matchConfig().
-	if(!(config = matchConfig(dpy, vis)))
-		THROW("Could not obtain RGB visual on the server suitable for off-screen rendering");
-
-	if(attrib == GLX_USE_GL)
+	if((config = matchConfig(dpy, vis)) != 0)
 	{
-		if(vis->c_class == TrueColor || vis->c_class == DirectColor) *value = 1;
-		else *value = 0;
+		if(attrib == GLX_USE_GL)
+		{
+			if(vis->c_class == TrueColor || vis->c_class == DirectColor) *value = 1;
+			else *value = 0;
+		}
+		else if(attrib == GLX_RGBA)
+		{
+			if((glxvisual::visAttrib3D(config, GLX_RENDER_TYPE) & GLX_RGBA_BIT) != 0)
+				*value = 1;
+			else *value = 0;
+		}
+		else retval = _glXGetFBConfigAttrib(DPY3D, config, attrib, value);
 	}
-	else if(attrib == GLX_RGBA)
+	else
 	{
-		if((glxvisual::visAttrib3D(config, GLX_RENDER_TYPE) & GLX_RGBA_BIT) != 0)
-			*value = 1;
-		else *value = 0;
+		*value = 0;
+		if(attrib != GLX_USE_GL) retval = GLX_BAD_VISUAL;
 	}
-	else retval = _glXGetFBConfigAttrib(DPY3D, config, attrib, value);
 
 		STOPTRACE();  if(value) { PRARGIX(*value); }  else { PRARGX(value); }
 		CLOSETRACE();
