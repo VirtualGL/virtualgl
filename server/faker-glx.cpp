@@ -159,7 +159,7 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 			configs = _glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), attribs, &n);
 		}
 
-			stoptrace();  prargc(configs[0]);  closetrace();
+			stoptrace();  if(configs) prargc(configs[0]);  closetrace();
 
 		if(!configs || n < 1) return 0;
 		config = configs[0];
