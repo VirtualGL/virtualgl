@@ -1,5 +1,5 @@
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2014, 2016 D. R. Commander
+// Copyright (C)2014, 2016, 2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -22,7 +22,7 @@
 #include "Hash.h"
 
 
-#define HASH  Hash<char *, int, VisualID>
+#define HASH  Hash<char *, int, XVisualInfo *>
 
 namespace vglserver
 {
@@ -42,24 +42,30 @@ namespace vglserver
 
 			static bool isAlloc(void) { return instance != NULL; }
 
-			void add(Display *dpy, GLXFBConfig config, VisualID vid)
+			void add(Display *dpy, int screen, GLXFBConfig config, VisualID vid)
 			{
-				if(!dpy || !vid || !config) _throw("Invalid argument");
+				if(!dpy || screen < 0 || !config || !vid)
+					_throw("Invalid argument");
 				char *dpystring = strdup(DisplayString(dpy));
-				if(!HASH::add(dpystring, _FBCID(config), vid))
+				XVisualInfo *vis;
+				vis = (XVisualInfo *)calloc(1, sizeof(XVisualInfo));
+				vis->screen = screen;
+				vis->visualid = vid;
+				remove(dpy, config);
+				if(!HASH::add(dpystring, _FBCID(config), vis))
+				{
 					free(dpystring);
+					XFree(vis);
+				}
 			}
 
-			VisualID getVisual(Display *dpy, GLXFBConfig config)
+			VisualID getVisual(Display *dpy, GLXFBConfig config, int &screen)
 			{
 				if(!dpy || !config) _throw("Invalid argument");
-				return HASH::find(DisplayString(dpy), _FBCID(config));
-			}
-
-			VisualID getVisual(Display *dpy, int fbcid)
-			{
-				if(!dpy || !fbcid) _throw("Invalid argument");
-				return HASH::find(DisplayString(dpy), fbcid);
+				XVisualInfo *vis = HASH::find(DisplayString(dpy), _FBCID(config));
+				if(!vis) return 0;
+				screen = vis->screen;
+				return vis->visualid;
 			}
 
 			void remove(Display *dpy, GLXFBConfig config)
@@ -83,6 +89,7 @@ namespace vglserver
 			void detach(HashEntry *entry)
 			{
 				if(entry && entry->key1) free(entry->key1);
+				if(entry && entry->value) XFree(entry->value);
 			}
 
 			static ConfigHash *instance;

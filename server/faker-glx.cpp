@@ -90,8 +90,7 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 		}
 		memset(attribs, 0, sizeof(attribs));
 		memcpy(attribs, defaultAttribs, sizeof(defaultAttribs));
-		if(glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
-			GLX_STEREO))
+		if(glxvisual::visAttrib2D(dpy, vis->screen, vis->visualid, GLX_STEREO))
 			attribs[11] = 1;
 
 		if(vis->c_class == DirectColor) attribs[15] = GLX_DIRECT_COLOR;
@@ -167,7 +166,7 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 		if(config)
 		{
 			vishash.add(dpy, vis, config);
-			cfghash.add(dpy, config, vis->visualid);
+			cfghash.add(dpy, vis->screen, config, vis->visualid);
 		}
 	}
 	return config;
@@ -177,12 +176,15 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 // Return the 2D X server visual that was previously hashed to 'config', or
 // find and return an appropriate 2D X server visual otherwise.
 
-static VisualID matchVisual(Display *dpy, GLXFBConfig config)
+static VisualID matchVisual(Display *dpy, GLXFBConfig config, int &screen)
 {
 	VisualID vid = 0;
+
 	if(!dpy || !config) return 0;
-	int screen = DefaultScreen(dpy);
-	if(!(vid = cfghash.getVisual(dpy, config)))
+
+	screen = DefaultScreen(dpy);
+
+	if(!(vid = cfghash.getVisual(dpy, config, screen)))
 	{
 		// If we get here, then the application is using an FB config that was not
 		// obtained through glXChooseFBConfig(), so we have no idea what attributes
@@ -207,7 +209,7 @@ static VisualID matchVisual(Display *dpy, GLXFBConfig config)
 				vid = glxvisual::matchVisual2D(dpy, screen, DefaultDepth(dpy, screen),
 					TrueColor, 0, 0, 0);
 		}
-		if(vid) cfghash.add(dpy, config, vid);
+		if(vid) cfghash.add(dpy, screen, config, vid);
 	}
 	return vid;
 }
@@ -362,7 +364,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 				if(!vid) continue;
 			}
 			nv++;
-			cfghash.add(dpy, configs[i], vid);
+			cfghash.add(dpy, screen, configs[i], vid);
 		}
 		if(!nv) { *nelements = 0;  XFree(configs);  configs = NULL; }
 	}
@@ -539,9 +541,9 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 	// If 'vis' is an overlay visual, hand off to the 2D X server.
 	if(vis)
 	{
-		int level = glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
+		int level = glxvisual::visAttrib2D(dpy, vis->screen, vis->visualid,
 			GLX_LEVEL);
-		int trans = (glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
+		int trans = (glxvisual::visAttrib2D(dpy, vis->screen, vis->visualid,
 			GLX_TRANSPARENT_TYPE) == GLX_TRANSPARENT_INDEX);
 		if(level && trans)
 		{
@@ -760,9 +762,9 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 	// we have to hand it off to the 2D X server.
 	if(vis)
 	{
-		int level = glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
+		int level = glxvisual::visAttrib2D(dpy, vis->screen, vis->visualid,
 			GLX_LEVEL);
-		int trans = (glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
+		int trans = (glxvisual::visAttrib2D(dpy, vis->screen, vis->visualid,
 			GLX_TRANSPARENT_TYPE) == GLX_TRANSPARENT_INDEX);
 		if(level && trans)
 		{
@@ -813,14 +815,14 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm,
 		opentrace(glXCreatePixmap);  prargd(dpy);  prargc(config);  prargx(pm);
 		starttrace();
 
-	Window root;  int x, y;  unsigned int w, h, bw, d;
+	Window root;  int x, y, screen;  unsigned int w, h, bw, d;
 	_XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
 
-	VisualID vid = matchVisual(dpy, config);
+	VisualID vid = matchVisual(dpy, config, screen);
 	VirtualPixmap *vpm = NULL;
 	if(vid)
 	{
-		XVisualInfo *vis = glxvisual::visualFromID(dpy, DefaultScreen(dpy), vid);
+		XVisualInfo *vis = glxvisual::visualFromID(dpy, screen, vid);
 		if(vis)
 		{
 			vpm = new VirtualPixmap(dpy, vis->visual, pm);
@@ -1138,9 +1140,9 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 		return GLX_BAD_VALUE;
 
 	// If 'vis' is an overlay visual, hand off to the 2D X server.
-	int level = glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
+	int level = glxvisual::visAttrib2D(dpy, vis->screen, vis->visualid,
 		GLX_LEVEL);
-	int trans = (glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
+	int trans = (glxvisual::visAttrib2D(dpy, vis->screen, vis->visualid,
 		GLX_TRANSPARENT_TYPE) == GLX_TRANSPARENT_INDEX);
 	if(level && trans && attrib != GLX_LEVEL && attrib != GLX_TRANSPARENT_TYPE)
 	{
@@ -1280,8 +1282,6 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 	if(isExcluded(dpy) || rcfghash.isOverlay(dpy, config))
 		return _glXGetFBConfigAttrib(dpy, config, attribute, value);
 
-	int screen = dpy ? DefaultScreen(dpy) : 0;
-
 		opentrace(glXGetFBConfigAttrib);  prargd(dpy);  prargc(config);
 		prargix(attribute);  starttrace();
 
@@ -1313,7 +1313,8 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 	// return attributes that take into account the interaction between visuals
 	// on the 2D X Server and FB Configs on the 3D X Server.
 
-	if((vid = cfghash.getVisual(dpy, config)) != 0)
+	int screen;
+	if((vid = cfghash.getVisual(dpy, config, screen)) != 0)
 	{
 		// Transparent overlay FB configs are located on the 2D X server, not the
 		// 3D X server.
@@ -1646,11 +1647,11 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 		opentrace(glXGetVisualFromFBConfig);  prargd(dpy);  prargc(config);
 		starttrace();
 
-	VisualID vid = 0;
+	VisualID vid = 0;  int screen;
 	if(!dpy || !config) goto done;
-	vid = matchVisual(dpy, config);
+	vid = matchVisual(dpy, config, screen);
 	if(!vid) goto done;
-	vis = glxvisual::visualFromID(dpy, DefaultScreen(dpy), vid);
+	vis = glxvisual::visualFromID(dpy, screen, vid);
 	if(!vis) goto done;
 	vishash.add(dpy, vis, config);
 
