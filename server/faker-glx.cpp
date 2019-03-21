@@ -1030,6 +1030,9 @@ static char glxextensions[1024] = VGL_GLX_EXTENSIONS;
 
 static const char *getGLXExtensions(void)
 {
+	const char *realGLXExtensions =
+		_glXQueryExtensionsString(DPY3D, DefaultScreen(DPY3D));
+
 	CHECKSYM_NONFATAL(glXCreateContextAttribsARB)
 	if(__glXCreateContextAttribsARB
 		&& !strstr(glxextensions, "GLX_ARB_create_context"))
@@ -1037,15 +1040,18 @@ static const char *getGLXExtensions(void)
 			" GLX_ARB_create_context GLX_ARB_create_context_profile",
 			1023 - strlen(glxextensions));
 
-	if(!strstr(glxextensions, "GLX_ARB_fbconfig_float"))
+	if(strstr(realGLXExtensions, "GLX_ARB_fbconfig_float")
+		&& !strstr(glxextensions, "GLX_ARB_fbconfig_float"))
 		strncat(glxextensions, " GLX_ARB_fbconfig_float",
 			1023 - strlen(glxextensions));
 
-	if(!strstr(glxextensions, "GLX_EXT_fbconfig_packed_float"))
+	if(strstr(realGLXExtensions, "GLX_EXT_fbconfig_packed_float")
+		&& !strstr(glxextensions, "GLX_EXT_fbconfig_packed_float"))
 		strncat(glxextensions, " GLX_EXT_fbconfig_packed_float",
 			1023 - strlen(glxextensions));
 
-	if(!strstr(glxextensions, "GLX_EXT_framebuffer_sRGB"))
+	if(strstr(realGLXExtensions, "GLX_EXT_framebuffer_sRGB")
+		&& !strstr(glxextensions, "GLX_EXT_framebuffer_sRGB"))
 		strncat(glxextensions, " GLX_EXT_framebuffer_sRGB",
 			1023 - strlen(glxextensions));
 
@@ -1069,7 +1075,8 @@ static const char *getGLXExtensions(void)
 		strncat(glxextensions, " GLX_EXT_texture_from_pixmap",
 			1023 - strlen(glxextensions));
 
-	if(!strstr(glxextensions, "GLX_NV_float_buffer"))
+	if(strstr(realGLXExtensions, "GLX_NV_float_buffer")
+		&& !strstr(glxextensions, "GLX_NV_float_buffer"))
 		strncat(glxextensions, " GLX_NV_float_buffer",
 			1023 - strlen(glxextensions));
 
