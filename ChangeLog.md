@@ -25,6 +25,15 @@ them.
 output, and tracing output to stdout if the `VGL_LOG` environment variable is
 set to `stdout`.
 
+7. Double buffering can now be disabled in the default FB config (which is used
+whenever a 3D application passes a visual with an unknown set of OpenGL
+rendering attributes to `glXCreateContext()`, `glXGetConfig()`, or
+`glXCreateGLXPixmap()`) by adding `GLX_DOUBLEBUFFER,0` to the
+`VGL_DEFAULTFBCONFIG` environment variable.
+
+8. The `VGL_FORCEALPHA` and `VGL_SAMPLES` environment variables now affect the
+default FB config.
+
 
 2.6.1
 =====
