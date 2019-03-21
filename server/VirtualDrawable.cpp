@@ -69,7 +69,7 @@ static Window create_window(Display *dpy, XVisualInfo *vis, int width,
 // Pbuffer constructor
 
 VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_,
-	GLXFBConfig config_) : cleared(false), stereo(false), glxDraw(0),
+	VGLFBConfig config_) : cleared(false), stereo(false), glxDraw(0),
 	width(width_), height(height_), depth(0), config(config_), glFormat(0),
 	pm(0), win(0), isPixmap(false)
 {
@@ -79,7 +79,7 @@ VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_,
 		GLX_PRESERVED_CONTENTS, True, None };
 
 	pbattribs[1] = width;  pbattribs[3] = height;
-	glxDraw = _glXCreatePbuffer(DPY3D, config, pbattribs);
+	glxDraw = _glXCreatePbuffer(DPY3D, GLXFBC(config), pbattribs);
 	if(!glxDraw) THROW("Could not create Pbuffer");
 
 	setVisAttribs();
@@ -89,7 +89,7 @@ VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_,
 // Pixmap constructor
 
 VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_, int depth_,
-	GLXFBConfig config_, const int *attribs) : cleared(false), stereo(false),
+	VGLFBConfig config_, const int *attribs) : cleared(false), stereo(false),
 	glxDraw(0), width(width_), height(height_), depth(depth_), config(config_),
 	glFormat(0), pm(0), win(0), isPixmap(true)
 {
@@ -97,7 +97,7 @@ VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_, int depth_,
 		THROW("Invalid argument");
 
 	XVisualInfo *vis = NULL;
-	if((vis = _glXGetVisualFromFBConfig(DPY3D, config)) == NULL)
+	if((vis = _glXGetVisualFromFBConfig(DPY3D, GLXFBC(config))) == NULL)
 		goto bailout;
 	win = create_window(DPY3D, vis, 1, 1);
 	if(!win) goto bailout;
@@ -105,7 +105,7 @@ VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_, int depth_,
 		depth > 0 ? depth : vis->depth);
 	if(!pm) goto bailout;
 	XFree(vis);
-	glxDraw = _glXCreatePixmap(DPY3D, config, pm, attribs);
+	glxDraw = _glXCreatePixmap(DPY3D, GLXFBC(config), pm, attribs);
 	if(!glxDraw) goto bailout;
 
 	setVisAttribs();
@@ -161,7 +161,7 @@ VirtualDrawable::OGLDrawable::~OGLDrawable(void)
 
 XVisualInfo *VirtualDrawable::OGLDrawable::getVisual(void)
 {
-	return _glXGetVisualFromFBConfig(DPY3D, config);
+	return _glXGetVisualFromFBConfig(DPY3D, GLXFBC(config));
 }
 
 
@@ -217,7 +217,7 @@ VirtualDrawable::~VirtualDrawable(void)
 }
 
 
-int VirtualDrawable::init(int width, int height, GLXFBConfig config_)
+int VirtualDrawable::init(int width, int height, VGLFBConfig config_)
 {
 	static bool alreadyPrintedDrawableType = false;
 	if(!config_ || width < 1 || height < 1) THROW("Invalid argument");
@@ -372,7 +372,7 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	{
 		if(!isInit())
 			THROW("VirtualDrawable instance has not been fully initialized");
-		if((ctx = _glXCreateNewContext(DPY3D, config, GLX_RGBA_TYPE, NULL,
+		if((ctx = _glXCreateNewContext(DPY3D, GLXFBC(config), GLX_RGBA_TYPE, NULL,
 			direct)) == 0)
 			THROW("Could not create OpenGL context for readback");
 	}
@@ -518,7 +518,7 @@ void VirtualDrawable::copyPixels(GLint srcX, GLint srcY, GLint width,
 	{
 		if(!isInit())
 			THROW("VirtualDrawable instance has not been fully initialized");
-		if((ctx = _glXCreateNewContext(DPY3D, config, GLX_RGBA_TYPE, NULL,
+		if((ctx = _glXCreateNewContext(DPY3D, GLXFBC(config), GLX_RGBA_TYPE, NULL,
 			direct)) == 0)
 			THROW("Could not create OpenGL context for readback");
 	}

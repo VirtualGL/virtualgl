@@ -118,7 +118,7 @@ VirtualWin::~VirtualWin(void)
 }
 
 
-int VirtualWin::init(int w, int h, GLXFBConfig config_)
+int VirtualWin::init(int w, int h, VGLFBConfig config_)
 {
 	CriticalSection::SafeLock l(mutex);
 	if(doWMDelete) THROW("Window has been deleted by window manager");
@@ -147,7 +147,7 @@ void VirtualWin::resize(int width, int height)
 // The FB config change doesn't actually occur until the next time
 // updatedrawable() is called
 
-void VirtualWin::checkConfig(GLXFBConfig config_)
+void VirtualWin::checkConfig(VGLFBConfig config_)
 {
 	CriticalSection::SafeLock l(mutex);
 	if(doWMDelete) THROW("Window has been deleted by window manager");
@@ -174,7 +174,7 @@ void VirtualWin::cleanup(void)
 }
 
 
-void VirtualWin::initFromWindow(GLXFBConfig config_)
+void VirtualWin::initFromWindow(VGLFBConfig config_)
 {
 	XSync(dpy, False);
 	XWindowAttributes xwa;

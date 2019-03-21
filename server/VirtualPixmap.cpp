@@ -36,7 +36,7 @@ VirtualPixmap::~VirtualPixmap()
 }
 
 
-int VirtualPixmap::init(int width, int height, int depth, GLXFBConfig config_,
+int VirtualPixmap::init(int width, int height, int depth, VGLFBConfig config_,
 	const int *attribs)
 {
 	if(!config_ || width < 1 || height < 1) THROW("Invalid argument");

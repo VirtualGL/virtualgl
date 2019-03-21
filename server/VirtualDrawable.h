@@ -15,7 +15,7 @@
 #ifndef __VIRTUALDRAWABLE_H__
 #define __VIRTUALDRAWABLE_H__
 
-#include "faker-sym.h"
+#include "glxvisual.h"
 #include "Mutex.h"
 #include "X11Trans.h"
 #include "fbx.h"
@@ -30,7 +30,7 @@ namespace vglserver
 
 			VirtualDrawable(Display *dpy, Drawable x11Draw);
 			~VirtualDrawable(void);
-			int init(int width, int height, GLXFBConfig config);
+			int init(int width, int height, VGLFBConfig config);
 			void setDirect(Bool direct);
 			void clear(void);
 			Display *getX11Display(void);
@@ -49,8 +49,8 @@ namespace vglserver
 			{
 				public:
 
-					OGLDrawable(int width, int height, GLXFBConfig config);
-					OGLDrawable(int width, int height, int depth, GLXFBConfig config,
+					OGLDrawable(int width, int height, VGLFBConfig config);
+					OGLDrawable(int width, int height, int depth, VGLFBConfig config,
 						const int *attribs);
 					~OGLDrawable(void);
 					GLXDrawable getGLXDrawable(void) { return glxDraw; }
@@ -65,7 +65,7 @@ namespace vglserver
 					int getHeight(void) { return height; }
 					int getDepth(void) { return depth; }
 					int getRGBSize(void) { return rgbSize; }
-					GLXFBConfig getConfig(void) { return config; }
+					VGLFBConfig getConfig(void) { return config; }
 					void clear(void);
 					void swap(void);
 					bool isStereo(void) { return stereo; }
@@ -79,7 +79,7 @@ namespace vglserver
 					bool cleared, stereo;
 					GLXDrawable glxDraw;
 					int width, height, depth, rgbSize;
-					GLXFBConfig config;
+					VGLFBConfig config;
 					GLenum glFormat;
 					Pixmap pm;
 					Window win;
@@ -91,7 +91,7 @@ namespace vglserver
 
 			vglutil::CriticalSection mutex;
 			Display *dpy;  Drawable x11Draw;
-			OGLDrawable *oglDraw;  GLXFBConfig config;
+			OGLDrawable *oglDraw;  VGLFBConfig config;
 			GLXContext ctx;
 			Bool direct;
 			X11Trans *x11Trans;

@@ -15,14 +15,14 @@
 #ifndef __VISUALHASH_H__
 #define __VISUALHASH_H__
 
-#include "glx.h"
+#include "glxvisual.h"
 #include <X11/Xlib.h>
 #include "Hash.h"
 
 
-#define HASH  Hash<char *, XVisualInfo *, GLXFBConfig>
+#define HASH  Hash<char *, XVisualInfo *, VGLFBConfig>
 
-// This maps a XVisualInfo * to a GLXFBConfig
+// This maps a XVisualInfo * to a VGLFBConfig
 
 namespace vglserver
 {
@@ -42,7 +42,7 @@ namespace vglserver
 
 			static bool isAlloc(void) { return instance != NULL; }
 
-			void add(Display *dpy, XVisualInfo *vis, GLXFBConfig config)
+			void add(Display *dpy, XVisualInfo *vis, VGLFBConfig config)
 			{
 				if(!dpy || !vis || !config) THROW("Invalid argument");
 				char *dpystring = strdup(DisplayString(dpy));
@@ -50,7 +50,7 @@ namespace vglserver
 					free(dpystring);
 			}
 
-			GLXFBConfig getConfig(Display *dpy, XVisualInfo *vis)
+			VGLFBConfig getConfig(Display *dpy, XVisualInfo *vis)
 			{
 				if(!dpy || !vis) THROW("Invalid argument");
 				return HASH::find(DisplayString(dpy), vis);
@@ -62,7 +62,7 @@ namespace vglserver
 				HASH::remove(dpy ? DisplayString(dpy) : NULL, vis);
 			}
 
-			GLXFBConfig mostRecentConfig(Display *dpy, XVisualInfo *vis)
+			VGLFBConfig mostRecentConfig(Display *dpy, XVisualInfo *vis)
 			{
 				if(!dpy || !vis) THROW("Invalid argument");
 				HashEntry *ptr = NULL;

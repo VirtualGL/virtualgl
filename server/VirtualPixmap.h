@@ -24,7 +24,7 @@ namespace vglserver
 
 			VirtualPixmap(Display *dpy, Visual *visual, Pixmap pm);
 			~VirtualPixmap();
-			int init(int width, int height, int depth, GLXFBConfig config,
+			int init(int width, int height, int depth, VGLFBConfig config,
 				const int *attribs);
 			void readback(void);
 			Pixmap get3DX11Pixmap(void);

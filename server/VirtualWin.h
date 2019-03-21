@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2009-2014, 2017-2018 D. R. Commander
+// Copyright (C)2009-2014, 2017-2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -35,10 +35,10 @@ namespace vglserver
 			void cleanup(void);
 			GLXDrawable getGLXDrawable(void);
 			GLXDrawable updateGLXDrawable(void);
-			void checkConfig(GLXFBConfig config);
+			void checkConfig(VGLFBConfig config);
 			void resize(int width, int height);
 			void checkResize(void);
-			void initFromWindow(GLXFBConfig config);
+			void initFromWindow(VGLFBConfig config);
 			void readback(GLint drawBuf, bool spoilLast, bool sync);
 			void swapBuffers(void);
 			bool isStereo(void);
@@ -51,7 +51,7 @@ namespace vglserver
 
 		private:
 
-			int init(int w, int h, GLXFBConfig config);
+			int init(int w, int h, VGLFBConfig config);
 			void readPixels(GLint x, GLint y, GLint width, GLint pitch, GLint height,
 				GLenum glFormat, PF *pf, GLubyte *bits, GLint buf, bool stereo);
 			void makeAnaglyph(vglcommon::Frame *f, int drawBuf, int stereoMode);

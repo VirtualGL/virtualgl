@@ -15,20 +15,20 @@
 #ifndef __CONTEXTHASH_H__
 #define __CONTEXTHASH_H__
 
-#include "faker-sym.h"
+#include "glxvisual.h"
 #include "Hash.h"
 
 
 typedef struct
 {
-	GLXFBConfig config;
+	VGLFBConfig config;
 	Bool direct;
 } ContextAttribs;
 
 
 #define HASH  Hash<GLXContext, void *, ContextAttribs *>
 
-// This maps a GLXContext to a GLXFBConfig
+// This maps a GLXContext to a VGLFBConfig
 
 namespace vglserver
 {
@@ -48,7 +48,7 @@ namespace vglserver
 
 			static bool isAlloc(void) { return instance != NULL; }
 
-			void add(GLXContext ctx, GLXFBConfig config, Bool direct)
+			void add(GLXContext ctx, VGLFBConfig config, Bool direct)
 			{
 				if(!ctx || !config) THROW("Invalid argument");
 				ContextAttribs *attribs = NULL;
@@ -58,7 +58,7 @@ namespace vglserver
 				HASH::add(ctx, NULL, attribs);
 			}
 
-			GLXFBConfig findConfig(GLXContext ctx)
+			VGLFBConfig findConfig(GLXContext ctx)
 			{
 				if(!ctx) THROW("Invalid argument");
 				ContextAttribs *attribs = HASH::find(ctx, NULL);

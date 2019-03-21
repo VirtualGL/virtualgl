@@ -18,15 +18,21 @@
 #include "faker-sym.h"
 
 
+typedef struct _VGLFBConfig
+{
+	int id, screen, nConfigs;
+	GLXFBConfig glxConfig;
+	VisualID visualID;
+} *VGLFBConfig;
+
+
 namespace glxvisual
 {
 	// Helper function used in glXChooseVisual() and glXChooseFBConfig().  It
 	// returns a list of "VirtualGL-friendly" FB configs that fit the given
-	// attribute list.  It also returns the visual parameters derived from that
-	// same attribute list, so those parameters can be used to match an
-	// appropriate visual on the 2D X server.
-	GLXFBConfig *configsFromVisAttribs(const int attribs[], int &nElements,
-		bool glx13 = false);
+	// attribute list.
+	VGLFBConfig *configsFromVisAttribs(Display *dpy, int screen,
+		const int attribs[], int &nElements, bool glx13 = false);
 
 	// These functions return attributes for visuals on the 2D X server (those
 	// attributes are read from the 2D X server and cached on first access, so
@@ -38,20 +44,22 @@ namespace glxvisual
 	// 3D X server.
 	int visAttrib3D(GLXFBConfig config, int attribute);
 
+	// Simple helper function that obtains an attribute for a VGLFBConfig.
+	int visAttrib3D(VGLFBConfig config, int attribute);
+
 	// This is just a convenience wrapper for XGetVisualInfo()
 	XVisualInfo *visualFromID(Display *dpy, int screen, VisualID vid);
 
-	// This function returns the visual ID attached to a given FB config in the
-	// FB config table.
-	VisualID getAttachedVisualID(Display *dpy, int screen, GLXFBConfig config);
+	// This function : VGLFBConfig :: glXGetFBConfigs() : GLXFBConfig
+	VGLFBConfig *getFBConfigs(Display *dpy, int screen, int &nElements);
 
-	// This function attaches a visual ID to a given FB config in the FB config
-	// table.
-	void attachVisualID(Display *dpy, int screen, GLXFBConfig config,
-		VisualID vid);
+	// This function : VGLFBConfig :: glXChooseFBConfig() : GLXFBConfig
+	VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
+		int &nElements);
 }
 
 
-#define FBCID(c)  glxvisual::visAttrib3D(c, GLX_FBCONFIG_ID)
+#define GLXFBC(c)  ((c) ? (c)->glxConfig : 0)
+#define FBCID(c)  ((c) ? (c)->id : 0)
 
 #endif  // __GLXVISUAL_H__

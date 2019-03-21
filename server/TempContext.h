@@ -33,7 +33,7 @@ namespace vglserver
 		public:
 
 			TempContext(Display *dpy, GLXDrawable draw, GLXDrawable read,
-				GLXContext ctx = _glXGetCurrentContext(), GLXFBConfig config = NULL,
+				GLXContext ctx = _glXGetCurrentContext(), VGLFBConfig config = NULL,
 				int renderType = 0) : olddpy(_glXGetCurrentDisplay()),
 				oldctx(_glXGetCurrentContext()), newctx(NULL),
 				oldread(_glXGetCurrentReadDrawable()),
@@ -45,7 +45,7 @@ namespace vglserver
 				if(draw == EXISTING_DRAWABLE) draw = olddraw;
 				if(draw && read && !ctx && config && renderType)
 					newctx = ctx =
-						_glXCreateNewContext(dpy, config, renderType, NULL, True);
+						_glXCreateNewContext(dpy, GLXFBC(config), renderType, NULL, True);
 				if(((read || draw) && ctx && dpy)
 					&& (oldread != read  || olddraw != draw || oldctx != ctx
 						|| olddpy != dpy))

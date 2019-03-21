@@ -73,7 +73,7 @@ namespace vglserver
 				else { vwin = vw;  return true; }
 			}
 
-			VirtualWin *initVW(Display *dpy, Window win, GLXFBConfig config)
+			VirtualWin *initVW(Display *dpy, Window win, VGLFBConfig config)
 			{
 				if(!dpy || !win || !config) THROW("Invalid argument");
 				HashEntry *ptr = NULL;

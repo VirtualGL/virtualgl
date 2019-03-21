@@ -186,15 +186,8 @@ static VisualID matchVisual2D(Display *dpy, int screen, GLXFBConfig config,
 }
 
 
-typedef struct
-{
-	int configID, nConfigs;
-	VisualID visualID;
-} CfgAttrib;
-
-
 #define GET_CA_TABLE() \
-	CfgAttrib *ca;  int caEntries; \
+	struct _VGLFBConfig *ca;  int caEntries; \
 	XEDataObject obj; \
 	XExtData *extData; \
 	\
@@ -202,15 +195,15 @@ typedef struct
 	extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 4); \
 	if(!extData) \
 		THROW("Could not retrieve FB config attribute table for screen"); \
-	ca = (CfgAttrib *)extData->private_data; \
+	ca = (struct _VGLFBConfig *)extData->private_data; \
 	caEntries = ca[0].nConfigs;
 
 
 static void buildCfgAttribTable(Display *dpy, int screen)
 {
 	int nConfigs = 0;
-	GLXFBConfig *configs = NULL;
-	CfgAttrib *ca = NULL;
+	GLXFBConfig *glxConfigs = NULL;
+	struct _VGLFBConfig *ca = NULL;
 	XEDataObject obj;
 	XExtData *extData;
 	obj.screen = XScreenOfDisplay(dpy, screen);
@@ -225,21 +218,25 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 4);
 		if(extData && extData->private_data) return;
 
-		if(!(configs = _glXGetFBConfigs(DPY3D, DefaultScreen(DPY3D), &nConfigs)))
+		if(!(glxConfigs = _glXGetFBConfigs(DPY3D, DefaultScreen(DPY3D),
+			&nConfigs)))
 			THROW("No FB configs found");
 
-		if(!(ca = (CfgAttrib *)calloc(nConfigs, sizeof(CfgAttrib))))
+		if(!(ca =
+			(struct _VGLFBConfig *)calloc(nConfigs, sizeof(struct _VGLFBConfig))))
 			THROW("Memory allocation error");
 
 		for(int i = 0; i < nConfigs; i++)
 		{
-			ca[i].configID = FBCID(configs[i]);
-			ca[i].visualID = matchVisual2D(dpy, screen, configs[i],
-				visAttrib3D(configs[i], GLX_STEREO));
+			ca[i].id = glxvisual::visAttrib3D(glxConfigs[i], GLX_FBCONFIG_ID);
+			ca[i].screen = screen;
 			ca[i].nConfigs = nConfigs;
+			ca[i].glxConfig = glxConfigs[i];
+			ca[i].visualID = matchVisual2D(dpy, screen, glxConfigs[i],
+				visAttrib3D(glxConfigs[i], GLX_STEREO));
 		}
 
-		XFree(configs);
+		XFree(glxConfigs);
 
 		if(!(extData = (XExtData *)calloc(1, sizeof(XExtData))))
 			THROW("Memory allocation error");
@@ -249,15 +246,15 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 	}
 	catch(...)
 	{
-		if(configs) XFree(configs);
+		if(glxConfigs) XFree(glxConfigs);
 		if(ca) free(ca);
 		throw;
 	}
 }
 
 
-GLXFBConfig *configsFromVisAttribs(const int attribs[], int &nElements,
-	bool glx13)
+VGLFBConfig *configsFromVisAttribs(Display *dpy, int screen,
+	const int attribs[], int &nElements, bool glx13)
 {
 	int glxattribs[257], j = 0;
 	int doubleBuffer = glx13 ? -1 : 0, redSize = -1, greenSize = -1,
@@ -381,8 +378,7 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[], int &nElements,
 
 	if(fconfig.trace) PRARGAL13(glxattribs);
 
-	return _glXChooseFBConfig(DPY3D, DefaultScreen(DPY3D), glxattribs,
-		&nElements);
+	return chooseFBConfig(dpy, screen, glxattribs, nElements);
 }
 
 
@@ -414,6 +410,12 @@ int visAttrib3D(GLXFBConfig config, int attribute)
 }
 
 
+int visAttrib3D(VGLFBConfig config, int attribute)
+{
+	return visAttrib3D(GLXFBC(config), attribute);
+}
+
+
 XVisualInfo *visualFromID(Display *dpy, int screen, VisualID vid)
 {
 	XVisualInfo vtemp;  int n = 0;
@@ -423,40 +425,67 @@ XVisualInfo *visualFromID(Display *dpy, int screen, VisualID vid)
 }
 
 
-VisualID getAttachedVisualID(Display *dpy, int screen, GLXFBConfig config)
+static VGLFBConfig *getFBConfigs(Display *dpy, int screen,
+	GLXFBConfig *glxConfigs, int nConfigs)
 {
-	if(!dpy || screen < 0 || !config) return 0;
+	if(!dpy || screen < 0 || !glxConfigs || nConfigs < 1)
+		return NULL;
 
 	buildCfgAttribTable(dpy, screen);
 	GET_CA_TABLE()
 
-	int fbcid = FBCID(config);
-	for(int i = 0; i < caEntries; i++)
+	VGLFBConfig *configs = (VGLFBConfig *)calloc(nConfigs, sizeof(VGLFBConfig));
+	if(!configs) return NULL;
+
+	for(int i = 0; i < nConfigs; i++)
 	{
-		if(fbcid == ca[i].configID)
-			return ca[i].visualID;
+		for(int j = 0; j < caEntries; j++)
+		{
+			if(ca[j].glxConfig == glxConfigs[i])
+			{
+				configs[i] = &ca[j];
+				break;
+			}
+		}
 	}
 
-	return 0;
+	return configs;
 }
 
 
-void attachVisualID(Display *dpy, int screen, GLXFBConfig config, VisualID vid)
+VGLFBConfig *getFBConfigs(Display *dpy, int screen, int &nElements)
 {
-	if(!dpy || screen < 0 || !config || !vid) return;
+	GLXFBConfig *glxConfigs = NULL;
+	VGLFBConfig *configs = NULL;
 
-	buildCfgAttribTable(dpy, screen);
-	GET_CA_TABLE()
+	if(!dpy || screen < 0) return NULL;
 
-	int fbcid = FBCID(config);
-	for(int i = 0; i < caEntries; i++)
-	{
-		if(fbcid == ca[i].configID)
-		{
-			ca[i].visualID = vid;
-			return;
-		}
-	}
+	glxConfigs = _glXGetFBConfigs(DPY3D, DefaultScreen(DPY3D), &nElements);
+	if(!glxConfigs) goto bailout;
+	configs = getFBConfigs(dpy, screen, glxConfigs, nElements);
+
+	bailout:
+	if(glxConfigs) XFree(glxConfigs);
+	return configs;
+}
+
+
+VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
+	int &nElements)
+{
+	GLXFBConfig *glxConfigs = NULL;
+	VGLFBConfig *configs = NULL;
+
+	if(!dpy || screen < 0) return NULL;
+
+	glxConfigs = _glXChooseFBConfig(DPY3D, DefaultScreen(DPY3D), attribs,
+		&nElements);
+	if(!glxConfigs) goto bailout;
+	configs = getFBConfigs(dpy, screen, glxConfigs, nElements);
+
+	bailout:
+	if(glxConfigs) XFree(glxConfigs);
+	return configs;
 }
 
 }  // namespace
