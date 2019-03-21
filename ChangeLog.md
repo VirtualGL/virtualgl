@@ -21,6 +21,10 @@ server screen other than 0.
 `GLX_NV_float_buffer` extensions if the underlying OpenGL library supports
 them.
 
+6. The VirtualGL Faker now prints all warning messages, notices, profiling
+output, and tracing output to stdout if the `VGL_LOG` environment variable is
+set to `stdout`.
+
 
 2.6.1
 =====

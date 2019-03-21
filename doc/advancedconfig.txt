@@ -398,9 +398,9 @@ previous method:
 #OPT: hiCol=first
 
 	Description :: Setting this environment variable to the pathname of a log
-	file on the VirtualGL server will cause VirtualGL to redirect all of its
-	messages (including profiling and trace output) to the specified log file
-	rather than to stderr.
+	file (or "stdout") on the VirtualGL server will cause VirtualGL to redirect
+	all of its messages (including profiling and trace output) to the specified
+	log file rather than to stderr.
 
 | Environment Variable | {pcode: VGL_LOGO = __0 \| 1__ } |
 | Summary | Disable or enable the display of a VGL logo in the 3D window(s) |

@@ -469,9 +469,10 @@ Display *XOpenDisplay(_Xconst char *name)
 	if(vglfaker::deadYet || vglfaker::getFakerLevel() > 0)
 		return _XOpenDisplay(name);
 
+	vglfaker::init();
+
 		OPENTRACE(XOpenDisplay);  PRARGS(name);  STARTTRACE();
 
-	vglfaker::init();
 	dpy = _XOpenDisplay(name);
 	if(dpy)
 	{
