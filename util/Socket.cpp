@@ -36,7 +36,7 @@
 using namespace vglutil;
 
 
-#define SOCK(f)  { if((f) == SOCKET_ERROR) THROW_SOCK(); }
+#define TRY_SOCK(f)  { if((f) == SOCKET_ERROR) THROW_SOCK(); }
 
 #ifdef _WIN32
 typedef int SOCKLEN_T;
@@ -279,8 +279,9 @@ void Socket::connect(char *serverName, unsigned short port)
 		if((sd = socket(addr->ai_family, SOCK_STREAM,
 			IPPROTO_TCP)) == INVALID_SOCKET)
 			THROW_SOCK();
-		SOCK(::connect(sd, addr->ai_addr, (SOCKLEN_T)addr->ai_addrlen));
-		SOCK(setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (char *)&m, sizeof(int)));
+		TRY_SOCK(::connect(sd, addr->ai_addr, (SOCKLEN_T)addr->ai_addrlen));
+		TRY_SOCK(setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (char *)&m,
+			sizeof(int)));
 		freeaddrinfo(addr);
 	}
 	catch(...)
@@ -319,10 +320,13 @@ unsigned short Socket::setupListener(unsigned short port, bool reuseAddr)
 	if((sd = socket(ipv6 ? AF_INET6 : AF_INET, SOCK_STREAM,
 		IPPROTO_TCP)) == INVALID_SOCKET)
 		THROW_SOCK();
-	SOCK(setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (char *)&one, sizeof(int)));
-	SOCK(setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(int)));
+	TRY_SOCK(setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (char *)&one,
+		sizeof(int)));
+	TRY_SOCK(setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse,
+		sizeof(int)));
 	#ifdef __CYGWIN__
-	SOCK(setsockopt(sd, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&zero, sizeof(int)));
+	TRY_SOCK(setsockopt(sd, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&zero,
+		sizeof(int)));
 	#endif
 
 	memset(&myaddr, 0, sizeof(myaddr));
@@ -340,8 +344,8 @@ unsigned short Socket::setupListener(unsigned short port, bool reuseAddr)
 		myaddr.u.sin.sin_port = (port == 0) ? 0 : htons(port);
 		addrlen = sizeof(struct sockaddr_in);
 	}
-	SOCK(bind(sd, &myaddr.u.sa, addrlen));
-	SOCK(getsockname(sd, &myaddr.u.sa, &addrlen));
+	TRY_SOCK(bind(sd, &myaddr.u.sa, addrlen));
+	TRY_SOCK(getsockname(sd, &myaddr.u.sa, &addrlen));
 
 	return ipv6 ? ntohs(myaddr.u.sin6.sin6_port) : ntohs(myaddr.u.sin.sin_port);
 }
@@ -362,7 +366,7 @@ unsigned short Socket::listen(unsigned short port, bool reuseAddr)
 
 	actualPort = setupListener(port, reuseAddr);
 
-	SOCK(::listen(sd, MAXCONN));
+	TRY_SOCK(::listen(sd, MAXCONN));
 
 	#ifdef USESSL
 	if(doSSL)
@@ -405,8 +409,8 @@ Socket *Socket::accept(void)
 	if(!sslctx && doSSL) THROW("SSL not initialized");
 	#endif
 
-	SOCK(clientsd = ::accept(sd, &remoteaddr.u.sa, &addrlen));
-	SOCK(setsockopt(clientsd, IPPROTO_TCP, TCP_NODELAY, (char *)&m,
+	TRY_SOCK(clientsd = ::accept(sd, &remoteaddr.u.sa, &addrlen));
+	TRY_SOCK(setsockopt(clientsd, IPPROTO_TCP, TCP_NODELAY, (char *)&m,
 		sizeof(int)));
 
 	#ifdef USESSL
@@ -432,7 +436,7 @@ const char *Socket::remoteName(void)
 	SOCKLEN_T addrlen = sizeof(struct sockaddr_storage);
 	const char *remoteName;
 
-	SOCK(getpeername(sd, &remoteaddr.u.sa, &addrlen));
+	TRY_SOCK(getpeername(sd, &remoteaddr.u.sa, &addrlen));
 	if(remoteaddr.u.ss.ss_family == AF_INET6)
 		remoteName = inet_ntop(remoteaddr.u.ss.ss_family,
 			&remoteaddr.u.sin6.sin6_addr, remoteNameBuf, INET6_ADDRSTRLEN);

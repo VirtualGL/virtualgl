@@ -103,10 +103,10 @@ void killproc(bool userOnly)
 		int mib_user[4] = { CTL_KERN, KERN_PROC, KERN_PROC_UID, getuid() };
 		size_t len = 0;
 
-		UNIX(sysctl(userOnly ? mib_user : mib_all, 4, NULL, &len, NULL, 0));
+		TRY_UNIX(sysctl(userOnly ? mib_user : mib_all, 4, NULL, &len, NULL, 0));
 		if(len < sizeof(kinfo_proc)) THROW("Process table is empty");
 		buf = new unsigned char[len];
-		UNIX(sysctl(userOnly ? mib_user : mib_all, 4, buf, &len, NULL, 0));
+		TRY_UNIX(sysctl(userOnly ? mib_user : mib_all, 4, buf, &len, NULL, 0));
 		int nprocs = len / sizeof(kinfo_proc);
 		kinfo_proc *kp = (kinfo_proc *)buf;
 

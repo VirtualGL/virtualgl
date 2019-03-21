@@ -41,7 +41,7 @@ static char lastError[1024] = "No error";
 	goto finally; \
 }
 
-#define W32(f) \
+#define TRY_W32(f) \
 { \
 	if(!(f)) \
 	{ \
@@ -52,7 +52,7 @@ static char lastError[1024] = "No error";
 	} \
 }
 
-#define X11(f) \
+#define TRY_X11(f) \
 { \
 	if(!(f)) \
 	{ \
@@ -67,7 +67,7 @@ static char *lastError = "No error";
 
 #define THROW(m)  { lastError = m;  errorLine = __LINE__;  goto finally; }
 
-#define X11(f) \
+#define TRY_X11(f) \
 	if(!(f)) \
 	{ \
 		lastError = "X11 Error (window may have disappeared)"; \
@@ -156,7 +156,7 @@ int fbx_init(fbx_struct *fb, fbx_wh wh, int width_, int height_, int useShm)
 	#ifdef _WIN32
 
 	if(!wh) THROW("Invalid argument");
-	W32(GetClientRect(wh, &rect));
+	TRY_W32(GetClientRect(wh, &rect));
 	if(width_ > 0) width = width_;
 	else
 	{
@@ -177,16 +177,18 @@ int fbx_init(fbx_struct *fb, fbx_wh wh, int width_, int height_, int useShm)
 	memset(fb, 0, sizeof(fbx_struct));
 	fb->wh = wh;
 
-	W32(hdc = GetDC(fb->wh));
-	W32(fb->hmdc = CreateCompatibleDC(hdc));
-	W32(hmembmp = CreateCompatibleBitmap(hdc, width, height));
-	W32(GetDeviceCaps(hdc, RASTERCAPS) & RC_BITBLT);
-	W32(GetDeviceCaps(fb->hmdc, RASTERCAPS) & RC_DI_BITMAP);
+	TRY_W32(hdc = GetDC(fb->wh));
+	TRY_W32(fb->hmdc = CreateCompatibleDC(hdc));
+	TRY_W32(hmembmp = CreateCompatibleBitmap(hdc, width, height));
+	TRY_W32(GetDeviceCaps(hdc, RASTERCAPS) & RC_BITBLT);
+	TRY_W32(GetDeviceCaps(fb->hmdc, RASTERCAPS) & RC_DI_BITMAP);
 	bminfo.bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 	bminfo.bmi.bmiHeader.biBitCount = 0;
-	W32(GetDIBits(fb->hmdc, hmembmp, 0, 1, NULL, &bminfo.bmi, DIB_RGB_COLORS));
-	W32(GetDIBits(fb->hmdc, hmembmp, 0, 1, NULL, &bminfo.bmi, DIB_RGB_COLORS));
-	W32(DeleteObject(hmembmp));  hmembmp = 0;
+	TRY_W32(GetDIBits(fb->hmdc, hmembmp, 0, 1, NULL, &bminfo.bmi,
+		DIB_RGB_COLORS));
+	TRY_W32(GetDIBits(fb->hmdc, hmembmp, 0, 1, NULL, &bminfo.bmi,
+		DIB_RGB_COLORS));
+	TRY_W32(DeleteObject(hmembmp));  hmembmp = 0;
 	/* (we only needed it to get the screen properties) */
 	ps = bminfo.bmi.bmiHeader.biBitCount / 8;
 	if(width > 0) bminfo.bmi.bmiHeader.biWidth = width;
@@ -231,9 +233,9 @@ int fbx_init(fbx_struct *fb, fbx_wh wh, int width_, int height_, int useShm)
 
 	bminfo.bmi.bmiHeader.biHeight = -bminfo.bmi.bmiHeader.biHeight;
 	/* (our convention is top-down) */
-	W32(fb->hdib = CreateDIBSection(hdc, &bminfo.bmi, DIB_RGB_COLORS,
+	TRY_W32(fb->hdib = CreateDIBSection(hdc, &bminfo.bmi, DIB_RGB_COLORS,
 		(void **)&fb->bits, NULL, 0));
-	W32(SelectObject(fb->hmdc, fb->hdib));
+	TRY_W32(SelectObject(fb->hmdc, fb->hdib));
 	ReleaseDC(fb->wh, hdc);
 	return 0;
 
@@ -246,7 +248,7 @@ int fbx_init(fbx_struct *fb, fbx_wh wh, int width_, int height_, int useShm)
 	if(!wh.dpy || !wh.d) THROW("Invalid argument");
 	if(wh.v)
 	{
-		X11(XGetGeometry(wh.dpy, wh.d, &xwa.root, &xwa.x, &xwa.y,
+		TRY_X11(XGetGeometry(wh.dpy, wh.d, &xwa.root, &xwa.x, &xwa.y,
 			(unsigned int *)&xwa.width, (unsigned int *)&xwa.height,
 			(unsigned int *)&xwa.border_width, (unsigned int *)&xwa.depth));
 		xwa.visual = wh.v;
@@ -255,7 +257,7 @@ int fbx_init(fbx_struct *fb, fbx_wh wh, int width_, int height_, int useShm)
 	}
 	else
 	{
-		X11(XGetWindowAttributes(wh.dpy, wh.d, &xwa));
+		TRY_X11(XGetWindowAttributes(wh.dpy, wh.d, &xwa));
 	}
 	if(width_ > 0) width = width_;  else width = xwa.width;
 	if(height_ > 0) height = height_;  else height = xwa.height;
@@ -359,10 +361,10 @@ int fbx_init(fbx_struct *fb, fbx_wh wh, int width_, int height_, int useShm)
 	#endif
 	{
 		if(!pixmap)
-			X11(fb->pm = XCreatePixmap(fb->wh.dpy, fb->wh.d, width, height,
+			TRY_X11(fb->pm = XCreatePixmap(fb->wh.dpy, fb->wh.d, width, height,
 				xwa.depth));
-		X11(fb->xi = XCreateImage(fb->wh.dpy, xwa.visual, xwa.depth, ZPixmap, 0,
-			NULL, width, height, 8, 0));
+		TRY_X11(fb->xi = XCreateImage(fb->wh.dpy, xwa.visual, xwa.depth, ZPixmap,
+			0, NULL, width, height, 8, 0));
 		if((fb->xi->data =
 			(char *)malloc(fb->xi->bytes_per_line * fb->xi->height + 1)) == NULL)
 			THROW("Memory allocation error");
@@ -402,7 +404,8 @@ int fbx_init(fbx_struct *fb, fbx_wh wh, int width_, int height_, int useShm)
 
 	fb->bits = fb->xi->data;
 	fb->pixmap = pixmap;
-	X11(fb->xgc = XCreateGC(fb->wh.dpy, fb->pm ? fb->pm : fb->wh.d, 0, NULL));
+	TRY_X11(fb->xgc = XCreateGC(fb->wh.dpy, fb->pm ? fb->pm : fb->wh.d, 0,
+		NULL));
 	return 0;
 
 	finally:
@@ -429,9 +432,9 @@ int fbx_read(fbx_struct *fb, int x_, int y_)
 
 	if(!fb->hmdc || fb->width <= 0 || fb->height <= 0 || !fb->bits || !fb->wh)
 		THROW("Not initialized");
-	W32(gc = GetDC(fb->wh));
-	W32(BitBlt(fb->hmdc, 0, 0, fb->width, fb->height, gc, x, y, SRCCOPY));
-	W32(ReleaseDC(fb->wh, gc));
+	TRY_W32(gc = GetDC(fb->wh));
+	TRY_W32(BitBlt(fb->hmdc, 0, 0, fb->width, fb->height, gc, x, y, SRCCOPY));
+	TRY_W32(ReleaseDC(fb->wh, gc));
 	return 0;
 
 	#else
@@ -441,19 +444,19 @@ int fbx_read(fbx_struct *fb, int x_, int y_)
 	#ifdef USESHM
 	if(!fb->xattach && fb->shm)
 	{
-		X11(XShmAttach(fb->wh.dpy, &fb->shminfo));  fb->xattach = 1;
+		TRY_X11(XShmAttach(fb->wh.dpy, &fb->shminfo));  fb->xattach = 1;
 	}
 	#endif
 
 	#ifdef USESHM
 	if(fb->shm)
 	{
-		X11(XShmGetImage(fb->wh.dpy, fb->wh.d, fb->xi, x, y, AllPlanes));
+		TRY_X11(XShmGetImage(fb->wh.dpy, fb->wh.d, fb->xi, x, y, AllPlanes));
 	}
 	else
 	#endif
 	{
-		X11(XGetSubImage(fb->wh.dpy, fb->wh.d, x, y, fb->width, fb->height,
+		TRY_X11(XGetSubImage(fb->wh.dpy, fb->wh.d, x, y, fb->width, fb->height,
 			AllPlanes, ZPixmap, fb->xi, 0, 0));
 	}
 	return 0;
@@ -496,10 +499,10 @@ int fbx_write(fbx_struct *fb, int srcX_, int srcY_, int dstX_, int dstY_,
 	bmi.bmiHeader.biPlanes = 1;
 	bmi.bmiHeader.biBitCount = fb->pf->size * 8;
 	bmi.bmiHeader.biCompression = BI_RGB;
-	W32(gc = GetDC(fb->wh));
-	W32(SetDIBitsToDevice(gc, dstX, dstY, width, height, srcX, 0, 0, height,
+	TRY_W32(gc = GetDC(fb->wh));
+	TRY_W32(SetDIBitsToDevice(gc, dstX, dstY, width, height, srcX, 0, 0, height,
 		&fb->bits[srcY * fb->pitch], &bmi, DIB_RGB_COLORS));
-	W32(ReleaseDC(fb->wh, gc));
+	TRY_W32(ReleaseDC(fb->wh, gc));
 	return 0;
 
 	#else
@@ -584,10 +587,10 @@ int fbx_awrite(fbx_struct *fb, int srcX_, int srcY_, int dstX_, int dstY_,
 	{
 		if(!fb->xattach)
 		{
-			X11(XShmAttach(fb->wh.dpy, &fb->shminfo));  fb->xattach = 1;
+			TRY_X11(XShmAttach(fb->wh.dpy, &fb->shminfo));  fb->xattach = 1;
 		}
-		X11(XShmPutImage(fb->wh.dpy, fb->wh.d, fb->xgc, fb->xi, srcX, srcY, dstX,
-			dstY, width, height, False));
+		TRY_X11(XShmPutImage(fb->wh.dpy, fb->wh.d, fb->xgc, fb->xi, srcX, srcY,
+			dstX, dstY, width, height, False));
 	}
 	else
 	#endif

@@ -31,7 +31,7 @@ static char lastError[1024] = "No error";
 	snprintf(lastError, 1023, "%s", m);  errorLine = __LINE__;  goto finally; \
 }
 
-#define X11(f) \
+#define TRY_X11(f) \
 { \
 	int __err = 0; \
 	if((__err = (f)) != Success) \
@@ -251,13 +251,13 @@ int fbxv_write(fbxv_struct *fb, int srcX_, int srcY_, int srcWidth_,
 		{
 			ERRIFNOT(XShmAttach(fb->dpy, &fb->shminfo));  fb->xattach = 1;
 		}
-		X11(XvShmPutImage(fb->dpy, fb->port, fb->win, fb->xgc, fb->xvi, srcX,
+		TRY_X11(XvShmPutImage(fb->dpy, fb->port, fb->win, fb->xgc, fb->xvi, srcX,
 			srcY, srcWidth, srcHeight, dstX, dstY, dstWidth, dstHeight, False));
 	}
 	else
 	#endif
 
-	X11(XvPutImage(fb->dpy, fb->port, fb->win, fb->xgc, fb->xvi, srcX, srcY,
+	TRY_X11(XvPutImage(fb->dpy, fb->port, fb->win, fb->xgc, fb->xvi, srcX, srcY,
 		srcWidth, srcHeight, dstX, dstY, dstWidth, dstHeight));
 	XFlush(fb->dpy);
 	XSync(fb->dpy, False);

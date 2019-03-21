@@ -447,7 +447,7 @@ void CompressedFrame::compressYUV(Frame &f)
 
 	init(f.hdr, 0);
 	if(f.flags & FRAME_BOTTOMUP) tjflags |= TJ_BOTTOMUP;
-	TJ(tjEncodeYUV2(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
+	TRY_TJ(tjEncodeYUV2(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
 		tjpf[f.pf->id], bits, TJSUBSAMP(f.hdr.subsamp), tjflags));
 	hdr.size = (unsigned int)tjBufSizeYUV(f.hdr.width, f.hdr.height,
 		TJSUBSAMP(f.hdr.subsamp));
@@ -467,7 +467,7 @@ void CompressedFrame::compressJPEG(Frame &f)
 	init(f.hdr, f.stereo ? RR_LEFT : 0);
 	if(f.flags & FRAME_BOTTOMUP) tjflags |= TJ_BOTTOMUP;
 	unsigned long size;
-	TJ(tjCompress2(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
+	TRY_TJ(tjCompress2(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
 		tjpf[f.pf->id], &bits, &size, TJSUBSAMP(f.hdr.subsamp), f.hdr.qual,
 		tjflags | TJFLAG_NOREALLOC));
 	hdr.size = (unsigned int)size;
@@ -475,7 +475,7 @@ void CompressedFrame::compressJPEG(Frame &f)
 	{
 		init(f.hdr, RR_RIGHT);
 		if(rbits)
-			TJ(tjCompress2(tjhnd, f.rbits, f.hdr.width, f.pitch, f.hdr.height,
+			TRY_TJ(tjCompress2(tjhnd, f.rbits, f.hdr.width, f.pitch, f.hdr.height,
 				tjpf[f.pf->id], &rbits, &size, TJSUBSAMP(f.hdr.subsamp), f.hdr.qual,
 				tjflags | TJFLAG_NOREALLOC));
 		rhdr.size = (unsigned int)size;
@@ -614,11 +614,11 @@ void FBXFrame::init(rrframeheader &h)
 	if((env = getenv("VGL_USEXSHM")) != NULL && strlen(env) > 0
 		&& !strcmp(env, "0"))
 		usexshm = 0;
-	FBX(fbx_init(&fb, wh, h.framew, h.frameh, usexshm));
+	TRY_FBX(fbx_init(&fb, wh, h.framew, h.frameh, usexshm));
 	if(h.framew > fb.width || h.frameh > fb.height)
 	{
 		XSync(wh.dpy, False);
-		FBX(fbx_init(&fb, wh, h.framew, h.frameh, usexshm));
+		TRY_FBX(fbx_init(&fb, wh, h.framew, h.frameh, usexshm));
 	}
 	hdr = h;
 	if(hdr.framew > fb.width) hdr.framew = fb.width;
@@ -654,7 +654,7 @@ FBXFrame &FBXFrame::operator= (CompressedFrame &cf)
 				if((tjhnd = tjInitDecompress()) == NULL)
 					throw(Error("FBXFrame::decompressor", tjGetErrorStr()));
 			}
-			TJ(tjDecompress2(tjhnd, cf.bits, cf.hdr.size,
+			TRY_TJ(tjDecompress2(tjhnd, cf.bits, cf.hdr.size,
 				(unsigned char *)&fb.bits[fb.pitch * cf.hdr.y + cf.hdr.x * pf->size],
 				width, fb.pitch, height, tjpf[pf->id], tjflags));
 		}
@@ -665,8 +665,8 @@ FBXFrame &FBXFrame::operator= (CompressedFrame &cf)
 
 void FBXFrame::redraw(void)
 {
-	if(flags & FRAME_BOTTOMUP) FBX(fbx_flip(&fb, 0, 0, 0, 0));
-	FBX(fbx_write(&fb, 0, 0, 0, 0, fb.width, fb.height));
+	if(flags & FRAME_BOTTOMUP) TRY_FBX(fbx_flip(&fb, 0, 0, 0, 0));
+	TRY_FBX(fbx_write(&fb, 0, 0, 0, 0, fb.width, fb.height));
 }
 
 
@@ -725,7 +725,7 @@ XVFrame &XVFrame::operator= (Frame &f)
 		if((tjhnd = tjInitCompress()) == NULL)
 			throw(Error("XVFrame::compressor", tjGetErrorStr()));
 	}
-	TJ(tjEncodeYUV2(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
+	TRY_TJ(tjEncodeYUV2(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
 		tjpf[f.pf->id], bits, TJ_420, tjflags));
 	hdr.size = (unsigned int)tjBufSizeYUV(f.hdr.width, f.hdr.height, TJ_420);
 	if(hdr.size != (unsigned long)fb.xvi->data_size)
@@ -737,11 +737,11 @@ XVFrame &XVFrame::operator= (Frame &f)
 void XVFrame::init(rrframeheader &h)
 {
 	checkHeader(h);
-	FBXV(fbxv_init(&fb, dpy, win, h.framew, h.frameh, I420_PLANAR, 0));
+	TRY_FBXV(fbxv_init(&fb, dpy, win, h.framew, h.frameh, I420_PLANAR, 0));
 	if(h.framew > fb.xvi->width || h.frameh > fb.xvi->height)
 	{
 		XSync(dpy, False);
-		FBXV(fbxv_init(&fb, dpy, win, h.framew, h.frameh, I420_PLANAR, 0));
+		TRY_FBXV(fbxv_init(&fb, dpy, win, h.framew, h.frameh, I420_PLANAR, 0));
 	}
 	hdr = h;
 	if(hdr.framew > fb.xvi->width) hdr.framew = fb.xvi->width;
@@ -754,7 +754,7 @@ void XVFrame::init(rrframeheader &h)
 
 void XVFrame::redraw(void)
 {
-	FBXV(fbxv_write(&fb, 0, 0, 0, 0, 0, 0, hdr.framew, hdr.frameh));
+	TRY_FBXV(fbxv_write(&fb, 0, 0, 0, 0, 0, 0, hdr.framew, hdr.frameh));
 }
 
 #endif

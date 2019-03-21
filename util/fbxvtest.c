@@ -28,7 +28,7 @@
 	retval = -1;  printf("ERROR: %s\n", m);  goto bailout; \
 }
 
-#define FBXV(f) \
+#define TRY_FBXV(f) \
 { \
 	if((f) == -1) \
 	{ \
@@ -102,10 +102,11 @@ int doTest(int id, char *name)
 
 	memset(&s, 0, sizeof(s));
 	memset(&s1, 0, sizeof(s));
-	FBXV(fbxv_init(&s, dpy, win, width / scale, height / scale, id, useShm));
+	TRY_FBXV(fbxv_init(&s, dpy, win, width / scale, height / scale, id, useShm));
 	if(!filename)
 	{
-		FBXV(fbxv_init(&s1, dpy, win, width / scale, height / scale, id, useShm));
+		TRY_FBXV(fbxv_init(&s1, dpy, win, width / scale, height / scale, id,
+			useShm));
 	}
 	printf("Image:\n");
 	printf("  Data size:   %d\n", s.xvi->data_size);
@@ -152,8 +153,8 @@ int doTest(int id, char *name)
 	do
 	{
 		if(filename || iter % 2 == 0)
-			{ FBXV(fbxv_write(&s, 0, 0, 0, 0, 0, 0, width, height)); }
-		else { FBXV(fbxv_write(&s1, 0, 0, 0, 0, 0, 0, width, height)); }
+			{ TRY_FBXV(fbxv_write(&s, 0, 0, 0, 0, 0, 0, width, height)); }
+		else { TRY_FBXV(fbxv_write(&s1, 0, 0, 0, 0, 0, 0, width, height)); }
 		iter++;
 	} while((elapsed = GetTime() - t) < testTime);
 	printf("%f Mpixels/sec\n",
@@ -213,10 +214,10 @@ int doInteractiveTest(Display *dpy, int id, char *name)
 		}
 		if(doDisplay)
 		{
-			FBXV(fbxv_init(&s, dpy, win, width / scale, height / scale, id,
+			TRY_FBXV(fbxv_init(&s, dpy, win, width / scale, height / scale, id,
 				useShm));
 			initBuf(&s, id, iter);  iter++;
-			FBXV(fbxv_write(&s, 0, 0, 0, 0, 0, 0, width, height));
+			TRY_FBXV(fbxv_write(&s, 0, 0, 0, 0, 0, 0, width, height));
 		}
 	}
 

@@ -61,7 +61,7 @@ static const char *errorStr = "No error";
 { \
 	errorStr = m;  ret = -1;  goto finally; \
 }
-#define UNIX(f) \
+#define TRY_UNIX(f) \
 { \
 	if((f) == -1) THROW(strerror(errno)); \
 }
@@ -189,7 +189,7 @@ int bmp_load(char *filename, unsigned char **buf, int *width, int align,
 		THROW("Invalid argument to bmp_load()");
 	if((align & (align - 1)) != 0)
 		THROW("Alignment must be a power of 2");
-	UNIX(fd = open(filename, flags));
+	TRY_UNIX(fd = open(filename, flags));
 
 	READ(fd, &bh.bfType, sizeof(unsigned short));
 	if(!LittleEndian()) bh.bfType = BYTESWAP16(bh.bfType);
@@ -258,7 +258,7 @@ int bmp_load(char *filename, unsigned char **buf, int *width, int align,
 		THROW("Memory allocation error");
 	if(lseek(fd, (long)bh.bfOffBits, SEEK_SET) != (long)bh.bfOffBits)
 		THROW(strerror(errno));
-	UNIX(bytesRead = read(fd, tempbuf, srcPitch * (*height)));
+	TRY_UNIX(bytesRead = read(fd, tempbuf, srcPitch * (*height)));
 	if(bytesRead != srcPitch * (*height)) THROW("Read error");
 
 	pixelConvert(tempbuf, *width, srcPitch, *height, pf_get(PF_BGR), *buf,
@@ -323,7 +323,7 @@ int bmp_save(char *filename, unsigned char *buf, int width, int pitch,
 			return ppm_save(filename, buf, width, pitch, height, pf, orientation);
 	}
 
-	UNIX(fd = open(filename, flags, mode));
+	TRY_UNIX(fd = open(filename, flags, mode));
 	dstPitch = ((width * 3) + 3) & (~3);
 
 	bh.bfType = 0x4d42;

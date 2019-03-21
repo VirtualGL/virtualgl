@@ -147,12 +147,12 @@ GLFrame &GLFrame::operator= (CompressedFrame &cf)
 					throw(Error("GLFrame::decompressor", tjGetErrorStr()));
 			}
 			int y = max(0, hdr.frameh - cf.hdr.y - height);
-			TJ(tjDecompress2(tjhnd, cf.bits, cf.hdr.size,
+			TRY_TJ(tjDecompress2(tjhnd, cf.bits, cf.hdr.size,
 				(unsigned char *)&bits[pitch * y + cf.hdr.x * pf->size],
 				width, pitch, height, tjpf[pf->id], tjflags));
 			if(stereo && cf.rbits && rbits)
 			{
-				TJ(tjDecompress2(tjhnd, cf.rbits, cf.rhdr.size,
+				TRY_TJ(tjDecompress2(tjhnd, cf.rbits, cf.rhdr.size,
 					(unsigned char *)&rbits[pitch * y + cf.hdr.x * pf->size],
 					width, pitch, height, tjpf[pf->id], tjflags));
 			}

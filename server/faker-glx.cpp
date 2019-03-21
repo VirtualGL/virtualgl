@@ -84,8 +84,7 @@ static VGLFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 		}
 		memset(attribs, 0, sizeof(attribs));
 		memcpy(attribs, defaultAttribs, sizeof(defaultAttribs));
-		if(glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
-			GLX_STEREO))
+		if(glxvisual::visAttrib2D(dpy, vis->screen, vis->visualid, GLX_STEREO))
 			attribs[11] = 1;
 
 		if(vis->c_class == DirectColor) attribs[15] = GLX_DIRECT_COLOR;
@@ -153,7 +152,7 @@ static VGLFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 			configs = glxvisual::chooseFBConfig(dpy, vis->screen, attribs, n);
 		}
 
-			STOPTRACE();  PRARGC(configs[0]);  CLOSETRACE();
+			STOPTRACE();  if(configs) PRARGC(configs[0]);  CLOSETRACE();
 
 		if(!configs || n < 1) return 0;
 		config = configs[0];

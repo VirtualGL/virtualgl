@@ -44,8 +44,6 @@ static char __lasterror[1024] = "No error";
 }
 #define CATCH(f)  { if((f) == -1) goto bailout; }
 
-#define NP2(i)  ((i) > 0 ? (1 << (int)(log((double)(i)) / log(2.))) : 0)
-
 #define SPHERE_RED(f) \
 	(GLfloat)fabs(MAXI * (2. * f - 1.))
 #define SPHERE_GREEN(f) \

@@ -38,7 +38,7 @@ using namespace vglutil;
 { \
 	fprintf(stderr, "%s (%d):\n%s\n", f, l, m);  fflush(stderr);  exit(1); \
 }
-#define FBX(a) \
+#define TRY_FBX(a) \
 { \
 	if((a) == -1) THROW("fbx.c", fbx_geterrline(), fbx_geterrmsg()); \
 }
@@ -298,11 +298,11 @@ int main(int argc, char **argv)
 
 	fbx_struct fb;
 	memset(&fb, 0, sizeof(fb));
-	FBX(fbx_init(&fb, wh, 0, 0, 1));
+	TRY_FBX(fbx_init(&fb, wh, 0, 0, 1));
 	int width = fb.width, height = fb.height;
 	fbx_term(&fb);
 	memset(&fb, 0, sizeof(fb));
-	FBX(fbx_init(&fb, wh, 32, 32, 1));
+	TRY_FBX(fbx_init(&fb, wh, 32, 32, 1));
 
 	int frames = 0, samples = 0;
 	if(x < 0) x = width / 2 - 16;
@@ -342,7 +342,7 @@ int main(int argc, char **argv)
 	timer.start();
 	do
 	{
-		FBX(fbx_read(&fb, x, y));
+		TRY_FBX(fbx_read(&fb, x, y));
 		if(moveX > 0 || moveY > 0)
 			MOVE_MOUSE();
 		samples++;

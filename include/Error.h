@@ -122,7 +122,7 @@ namespace vglutil
 }
 
 #define THROW_W32()  throw(vglutil::W32Error(__FUNCTION__, __LINE__))
-#define W32(f)  { if(!(f)) THROW_W32(); }
+#define TRY_W32(f)  { if(!(f)) THROW_W32(); }
 
 #endif  // _WIN32
 
@@ -140,20 +140,20 @@ namespace vglutil
 }
 
 #define THROW_UNIX()  throw(vglutil::UnixError(__FUNCTION__, __LINE__))
-#define UNIX(f)  { if((f) == -1) THROW_UNIX(); }
+#define TRY_UNIX(f)  { if((f) == -1) THROW_UNIX(); }
 
 
-#define FBX(f) \
+#define TRY_FBX(f) \
 { \
 	if((f) == -1) \
 		throw(vglutil::Error("FBX", fbx_geterrmsg(), fbx_geterrline())); \
 }
-#define FBXV(f) \
+#define TRY_FBXV(f) \
 { \
 	if((f) == -1) \
 		throw(vglutil::Error("FBXV", fbxv_geterrmsg(), fbxv_geterrline())); \
 }
-#define TJ(f) \
+#define TRY_TJ(f) \
 { \
 	if((f) == -1) \
 		throw(vglutil::Error(__FUNCTION__, tjGetErrorStr(), __LINE__)); \
