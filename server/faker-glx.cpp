@@ -184,19 +184,27 @@ static VisualID matchVisual(Display *dpy, GLXFBConfig config, int &screen)
 		{
 			if(vis->depth >= 24
 				&& (vis->c_class == TrueColor || vis->c_class == DirectColor))
+			{
 				vid = glxvisual::matchVisual2D(dpy, screen, vis->depth, vis->c_class,
 					0, glxvisual::visAttrib3D(config, GLX_STEREO), 0);
+				if(!vid && vis->depth == 32)
+					vid = glxvisual::matchVisual2D(dpy, screen, 24, vis->c_class,
+						0, glxvisual::visAttrib3D(config, GLX_STEREO), 0);
+				if(!vid && vis->depth == 24)
+					vid = glxvisual::matchVisual2D(dpy, screen, 32, vis->c_class,
+						0, glxvisual::visAttrib3D(config, GLX_STEREO), 0);
+				// Failing that, we try to find a mono visual.
+				if(!vid)
+					vid = glxvisual::matchVisual2D(dpy, screen, vis->depth, vis->c_class,
+						0, 0, 0);
+				if(!vid && vis->depth == 32)
+					vid = glxvisual::matchVisual2D(dpy, screen, 24, vis->c_class,
+						0, 0, 0);
+				if(!vid && vis->depth == 24)
+					vid = glxvisual::matchVisual2D(dpy, screen, 32, vis->c_class,
+						0, 0, 0);
+			}
 			XFree(vis);
-
-			// Failing that, we try to find a TrueColor visual with the same stereo
-			// properties, using the default depth of the 2D X server.
-			if(!vid)
-				vid = glxvisual::matchVisual2D(dpy, screen, DefaultDepth(dpy, screen),
-					TrueColor, 0, glxvisual::visAttrib3D(config, GLX_STEREO), 0);
-			// Failing that, we try to find a TrueColor mono visual.
-			if(!vid)
-				vid = glxvisual::matchVisual2D(dpy, screen, DefaultDepth(dpy, screen),
-					TrueColor, 0, 0, 0);
 		}
 		if(vid) cfghash.add(dpy, screen, config, vid);
 	}
@@ -1289,28 +1297,13 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 
 	retval = _glXGetFBConfigAttrib(DPY3D, config, attribute, value);
 
-	if(attribute == GLX_DRAWABLE_TYPE && retval == Success)
-	{
-		int temp = *value;
-		*value = 0;
-		if((fconfig.drawable == RRDRAWABLE_PBUFFER
-			&& glxvisual::visAttrib3D(config, GLX_VISUAL_ID) != 0
-			&& temp & GLX_PBUFFER_BIT)
-			|| (fconfig.drawable == RRDRAWABLE_PIXMAP && temp & GLX_WINDOW_BIT
-				&& temp & GLX_PIXMAP_BIT))
-			*value |= GLX_WINDOW_BIT;
-		if(temp & GLX_PIXMAP_BIT && temp & GLX_WINDOW_BIT)
-			*value |= GLX_PIXMAP_BIT;
-		if(temp & GLX_PBUFFER_BIT) *value |= GLX_PBUFFER_BIT;
-	}
-
 	// If there is a corresponding 2D X server visual hashed to this FB config,
 	// then that means it was obtained via glXChooseFBConfig(), and we can
 	// return attributes that take into account the interaction between visuals
 	// on the 2D X Server and FB Configs on the 3D X Server.
 
 	int screen;
-	if((vid = cfghash.getVisual(dpy, config, screen)) != 0)
+	if((vid = matchVisual(dpy, config, screen)) != 0)
 	{
 		// Transparent overlay FB configs are located on the 2D X server, not the
 		// 3D X server.
@@ -1323,6 +1316,22 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 			*value = glxvisual::visAttrib2D(dpy, screen, vid, attribute);
 		else if(attribute == GLX_VISUAL_ID)
 			*value = vid;
+	}
+
+	if(attribute == GLX_DRAWABLE_TYPE && retval == Success)
+	{
+		int temp = *value;
+		*value = 0;
+		if(glxvisual::visAttrib3D(config, GLX_VISUAL_ID) != 0 && vid)
+		{
+			if((fconfig.drawable == RRDRAWABLE_PBUFFER && temp & GLX_PBUFFER_BIT)
+				|| (fconfig.drawable == RRDRAWABLE_PIXMAP && temp & GLX_WINDOW_BIT
+					&& temp & GLX_PIXMAP_BIT))
+				*value |= GLX_WINDOW_BIT;
+			if(temp & GLX_PIXMAP_BIT && temp & GLX_WINDOW_BIT)
+				*value |= GLX_PIXMAP_BIT;
+		}
+		if(temp & GLX_PBUFFER_BIT) *value |= GLX_PBUFFER_BIT;
 	}
 
 	done:
