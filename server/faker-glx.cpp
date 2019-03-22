@@ -47,10 +47,7 @@ using namespace vglserver;
 	{ \
 		int temp = atoi(argv[++i]); \
 		if(temp >= min && temp <= max) \
-		{ \
-			attribs[index++] = attrib; \
-			attribs[index++] = temp; \
-		} \
+			attribs[index] = temp; \
 	} \
 }
 
@@ -64,26 +61,24 @@ static VGLFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 	// If the visual was obtained from glXChooseVisual() or
 	// glXGetVisualFromFBConfig(), then it should have a corresponding FB config
 	// in the visual hash.
-	if(!(config = vishash.getConfig(dpy, vis))
-		&& !(config = vishash.mostRecentConfig(dpy, vis)))
+	if(!(config = vishash.getConfig(dpy, vis)))
 	{
 		// Punt.  We can't figure out where the visual came from, so fall back to
 		// using a default FB config.
-		int defaultAttribs[] = { GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8,
-			GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT,
-			GLX_STEREO, 0, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT | GLX_WINDOW_BIT,
+		int attribs[] = { GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
+			GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_STEREO, 0,
+			GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT | GLX_WINDOW_BIT,
 			GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR, GLX_DEPTH_SIZE, 1,
-			GLX_STENCIL_SIZE, 8, None };
-		int attribs[256];
+			GLX_STENCIL_SIZE, 8, GLX_ALPHA_SIZE, GLX_DONT_CARE, GLX_SAMPLES, 0,
+			GLX_AUX_BUFFERS, 0, GLX_ACCUM_RED_SIZE, 0, GLX_ACCUM_GREEN_SIZE, 0,
+			GLX_ACCUM_BLUE_SIZE, 0, GLX_ACCUM_ALPHA_SIZE, 0, None };
 
 		if(pixmap || fconfig.drawable == RRDRAWABLE_PIXMAP)
-			defaultAttribs[13] = GLX_PIXMAP_BIT | GLX_WINDOW_BIT;
+			attribs[13] = GLX_PIXMAP_BIT | GLX_WINDOW_BIT;
 		if(vis->depth == 30)
 		{
-			defaultAttribs[3] = defaultAttribs[5] = defaultAttribs[7] = 10;
+			attribs[3] = attribs[5] = attribs[7] = 10;
 		}
-		memset(attribs, 0, sizeof(attribs));
-		memcpy(attribs, defaultAttribs, sizeof(defaultAttribs));
 		if(glxvisual::visAttrib2D(dpy, vis->screen, vis->visualid, GLX_STEREO))
 			attribs[11] = 1;
 
@@ -109,30 +104,26 @@ static VGLFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 				argv[argc] = arg;  argc++;
 				arg = strtok(NULL, ", \t");
 			}
-			for(int i = 0, j = 20; i < argc && j < 256; i++)
+			for(int i = 0; i < argc; i++)
 			{
-				int index;
-				index = 2;
-				TEST_ATTRIB(GLX_RED_SIZE, index, 0, INT_MAX);
-				index = 4;
-				TEST_ATTRIB(GLX_GREEN_SIZE, index, 0, INT_MAX);
-				index = 6;
-				TEST_ATTRIB(GLX_BLUE_SIZE, index, 0, INT_MAX);
-				index = 16;
-				TEST_ATTRIB(GLX_DEPTH_SIZE, index, 0, INT_MAX);
-				index = 18;
-				TEST_ATTRIB(GLX_STENCIL_SIZE, index, 0, INT_MAX);
-				TEST_ATTRIB(GLX_ALPHA_SIZE, j, 0, INT_MAX);
-				TEST_ATTRIB(GLX_AUX_BUFFERS, j, 0, INT_MAX);
-				TEST_ATTRIB(GLX_ACCUM_RED_SIZE, j, 0, INT_MAX);
-				TEST_ATTRIB(GLX_ACCUM_GREEN_SIZE, j, 0, INT_MAX);
-				TEST_ATTRIB(GLX_ACCUM_BLUE_SIZE, j, 0, INT_MAX);
-				TEST_ATTRIB(GLX_ACCUM_ALPHA_SIZE, j, 0, INT_MAX);
-				TEST_ATTRIB(GLX_SAMPLE_BUFFERS, j, 0, INT_MAX);
-				TEST_ATTRIB(GLX_SAMPLES, j, 0, INT_MAX);
+				TEST_ATTRIB(GLX_DOUBLEBUFFER, 1, 0, 1);
+				TEST_ATTRIB(GLX_RED_SIZE, 3, 0, INT_MAX);
+				TEST_ATTRIB(GLX_GREEN_SIZE, 5, 0, INT_MAX);
+				TEST_ATTRIB(GLX_BLUE_SIZE, 7, 0, INT_MAX);
+				TEST_ATTRIB(GLX_DEPTH_SIZE, 17, 0, INT_MAX);
+				TEST_ATTRIB(GLX_STENCIL_SIZE, 19, 0, INT_MAX);
+				TEST_ATTRIB(GLX_ALPHA_SIZE, 21, 0, INT_MAX);
+				TEST_ATTRIB(GLX_SAMPLES, 23, 0, INT_MAX);
+				TEST_ATTRIB(GLX_AUX_BUFFERS, 25, 0, INT_MAX);
+				TEST_ATTRIB(GLX_ACCUM_RED_SIZE, 27, 0, INT_MAX);
+				TEST_ATTRIB(GLX_ACCUM_GREEN_SIZE, 29, 0, INT_MAX);
+				TEST_ATTRIB(GLX_ACCUM_BLUE_SIZE, 31, 0, INT_MAX);
+				TEST_ATTRIB(GLX_ACCUM_ALPHA_SIZE, 33, 0, INT_MAX);
 			}
 			free(str);
 		}
+		if(fconfig.forcealpha) attribs[21] = vis->depth == 30 ? 2 : 8;
+		if(fconfig.samples >= 0) attribs[23] = fconfig.samples;
 
 			OPENTRACE(Choosing FB config for visual with unknown OpenGL attributes);
 			if(fconfig.trace) vglout.print("VGL_DEFAULTFBCONFIG ");
@@ -833,6 +824,9 @@ static char glxextensions[1024] = VGL_GLX_EXTENSIONS;
 
 static const char *getGLXExtensions(void)
 {
+	const char *realGLXExtensions =
+		_glXQueryExtensionsString(DPY3D, DefaultScreen(DPY3D));
+
 	CHECKSYM_NONFATAL(glXCreateContextAttribsARB)
 	if(__glXCreateContextAttribsARB
 		&& !strstr(glxextensions, "GLX_ARB_create_context"))
@@ -840,15 +834,18 @@ static const char *getGLXExtensions(void)
 			" GLX_ARB_create_context GLX_ARB_create_context_profile",
 			1023 - strlen(glxextensions));
 
-	if(!strstr(glxextensions, "GLX_ARB_fbconfig_float"))
+	if(strstr(realGLXExtensions, "GLX_ARB_fbconfig_float")
+		&& !strstr(glxextensions, "GLX_ARB_fbconfig_float"))
 		strncat(glxextensions, " GLX_ARB_fbconfig_float",
 			1023 - strlen(glxextensions));
 
-	if(!strstr(glxextensions, "GLX_EXT_fbconfig_packed_float"))
+	if(strstr(realGLXExtensions, "GLX_EXT_fbconfig_packed_float")
+		&& !strstr(glxextensions, "GLX_EXT_fbconfig_packed_float"))
 		strncat(glxextensions, " GLX_EXT_fbconfig_packed_float",
 			1023 - strlen(glxextensions));
 
-	if(!strstr(glxextensions, "GLX_EXT_framebuffer_sRGB"))
+	if(strstr(realGLXExtensions, "GLX_EXT_framebuffer_sRGB")
+		&& !strstr(glxextensions, "GLX_EXT_framebuffer_sRGB"))
 		strncat(glxextensions, " GLX_EXT_framebuffer_sRGB",
 			1023 - strlen(glxextensions));
 
@@ -872,7 +869,8 @@ static const char *getGLXExtensions(void)
 		strncat(glxextensions, " GLX_EXT_texture_from_pixmap",
 			1023 - strlen(glxextensions));
 
-	if(!strstr(glxextensions, "GLX_NV_float_buffer"))
+	if(strstr(realGLXExtensions, "GLX_NV_float_buffer")
+		&& !strstr(glxextensions, "GLX_NV_float_buffer"))
 		strncat(glxextensions, " GLX_NV_float_buffer",
 			1023 - strlen(glxextensions));
 
@@ -1062,27 +1060,28 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config_, int attribute,
 
 	retval = _glXGetFBConfigAttrib(DPY3D, GLXFBC(config), attribute, value);
 
-	if(attribute == GLX_DRAWABLE_TYPE && retval == Success)
-	{
-		int temp = *value;
-		*value = 0;
-		if((fconfig.drawable == RRDRAWABLE_PBUFFER
-			&& glxvisual::visAttrib3D(config, GLX_VISUAL_ID) != 0
-			&& temp & GLX_PBUFFER_BIT)
-			|| (fconfig.drawable == RRDRAWABLE_PIXMAP && temp & GLX_WINDOW_BIT
-				&& temp & GLX_PIXMAP_BIT))
-			*value |= GLX_WINDOW_BIT;
-		if(temp & GLX_PIXMAP_BIT && temp & GLX_WINDOW_BIT)
-			*value |= GLX_PIXMAP_BIT;
-		if(temp & GLX_PBUFFER_BIT) *value |= GLX_PBUFFER_BIT;
-	}
-
 	// If there is a corresponding 2D X server visual attached to this FB config,
 	// then that means it was obtained via glXChooseFBConfig(), and we can
 	// return attributes that take into account the interaction between visuals
 	// on the 2D X Server and FB Configs on the 3D X Server.
 	if(config->visualID != 0 && attribute == GLX_VISUAL_ID)
 		*value = config->visualID;
+
+	if(attribute == GLX_DRAWABLE_TYPE && retval == Success)
+	{
+		int temp = *value;
+		*value = 0;
+		if(glxvisual::visAttrib3D(config, GLX_VISUAL_ID) != 0 && config->visualID)
+		{
+			if((fconfig.drawable == RRDRAWABLE_PBUFFER && temp & GLX_PBUFFER_BIT)
+				|| (fconfig.drawable == RRDRAWABLE_PIXMAP && temp & GLX_WINDOW_BIT
+					&& temp & GLX_PIXMAP_BIT))
+				*value |= GLX_WINDOW_BIT;
+			if(temp & GLX_PIXMAP_BIT && temp & GLX_WINDOW_BIT)
+				*value |= GLX_PIXMAP_BIT;
+		}
+		if(temp & GLX_PBUFFER_BIT) *value |= GLX_PBUFFER_BIT;
+	}
 
 	done:
 		STOPTRACE();  if(value) { PRARGIX(*value); }  else { PRARGX(value); }

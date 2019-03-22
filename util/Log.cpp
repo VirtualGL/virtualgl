@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2014 D. R. Commander
+// Copyright (C)2014, 2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -14,6 +14,7 @@
 
 #include "Log.h"
 #include <stdarg.h>
+#include <string.h>
 
 using namespace vglutil;
 
@@ -57,7 +58,9 @@ void Log::logTo(char *logFileName)
 		{
 			fclose(logFile);  newFile = false;
 		}
-		if((logFile_ = fopen(logFileName, "w")) != NULL)
+		if(!strcasecmp(logFileName, "stdout"))
+			logFile = stdout;
+		else if((logFile_ = fopen(logFileName, "w")) != NULL)
 		{
 			logFile = logFile_;  newFile = true;
 		}

@@ -240,10 +240,6 @@ previous method:
 	GeForce adapters are known to require this.)  See the
 	[[#VGL_READBACK][''VGL_READBACK'']] option for further information.
 
-	!!! ''VGL_FORCEALPHA'' overrides the 3D application's choice of visuals.  It
-	has no effect if the application is not explicitly choosing a visual.  In
-	that case, use [[#VGL_DEFAULTFBCONFIG][''VGL_DEFAULTFBCONFIG'']] instead.
-
 {anchor: VGL_FPS}
 | Environment Variable | {pcode: VGL_FPS = __{f}__ } |
 | ''vglrun'' argument | {pcode: -fps __{f}__ } |
@@ -397,9 +393,9 @@ previous method:
 #OPT: hiCol=first
 
 	Description :: Setting this environment variable to the pathname of a log
-	file on the VirtualGL server will cause VirtualGL to redirect all of its
-	messages (including profiling and trace output) to the specified log file
-	rather than to stderr.
+	file (or "stdout") on the VirtualGL server will cause VirtualGL to redirect
+	all of its messages (including profiling and trace output) to the specified
+	log file rather than to stderr.
 
 | Environment Variable | {pcode: VGL_LOGO = __0 \| 1__ } |
 | Summary | Disable or enable the display of a VGL logo in the 3D window(s) |
@@ -604,10 +600,6 @@ previous method:
 	to ''glXChooseVisual()''.  If ''VGL_SAMPLES'' is ''0'', then VirtualGL forces
 	multisampling to be disabled, even if the 3D application explicitly tries to
 	enable it.
-
-	!!! ''VGL_SAMPLES'' overrides the 3D application's choice of visuals.  It has
-	no effect if the application is not explicitly choosing a visual.  In that
-	case, use [[#VGL_DEFAULTFBCONFIG][''VGL_DEFAULTFBCONFIG'']] instead.
 
 	!!! Multisampling cannot be used with Pixmap rendering.  Any application
 	that uses Pixmap rendering will fail if ''VGL_SAMPLES'' is set to a value

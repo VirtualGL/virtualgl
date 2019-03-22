@@ -164,22 +164,25 @@ static VisualID matchVisual2D(Display *dpy, int screen, GLXFBConfig config,
 	XVisualInfo *vis = _glXGetVisualFromFBConfig(DPY3D, config);
 	if(vis)
 	{
-		// We first try to match the FB config with a 2D X Server visual that has
-		// the same class, depth, and stereo properties.
 		if(vis->depth >= 24
 			&& (vis->c_class == TrueColor || vis->c_class == DirectColor))
+		{
+			// We first try to match the FB config with a 2D X Server visual that has
+			// the same class, depth, and stereo properties.
 			vid = matchVisual2D(dpy, screen, vis->depth, vis->c_class, stereo);
+			if(!vid && vis->depth == 32)
+				vid = matchVisual2D(dpy, screen, 24, vis->c_class, stereo);
+			if(!vid && vis->depth == 24)
+				vid = matchVisual2D(dpy, screen, 32, vis->c_class, stereo);
+			// Failing that, we try to find a mono visual.
+			if(!vid)
+				vid = matchVisual2D(dpy, screen, vis->depth, vis->c_class, 0);
+			if(!vid && vis->depth == 32)
+				vid = matchVisual2D(dpy, screen, 24, vis->c_class, 0);
+			if(!vid && vis->depth == 24)
+				vid = matchVisual2D(dpy, screen, 32, vis->c_class, 0);
+		}
 		XFree(vis);
-
-		// Failing that, we try to find a TrueColor visual with the same stereo
-		// properties, using the default depth of the 2D X server.
-		if(!vid)
-			vid = matchVisual2D(dpy, screen, DefaultDepth(dpy, screen), TrueColor,
-				stereo);
-		// Failing that, we try to find a TrueColor mono visual.
-		if(!vid)
-			vid = matchVisual2D(dpy, screen, DefaultDepth(dpy, screen), TrueColor,
-				0);
 	}
 
 	return vid;
@@ -228,7 +231,7 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 
 		for(int i = 0; i < nConfigs; i++)
 		{
-			ca[i].id = glxvisual::visAttrib3D(glxConfigs[i], GLX_FBCONFIG_ID);
+			ca[i].id = visAttrib3D(glxConfigs[i], GLX_FBCONFIG_ID);
 			ca[i].screen = screen;
 			ca[i].nConfigs = nConfigs;
 			ca[i].glxConfig = glxConfigs[i];

@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2012, 2015, 2017-2018 D. R. Commander
+ * Copyright (C)2009, 2012, 2015, 2017-2019 D. R. Commander
  * Copyright (C)2015 Open Text SA and/or Open Text ULC (in Canada)
  *
  * This library is free software and may be redistributed and/or modified under
@@ -75,6 +75,7 @@ void *dlopen(const char *filename, int flag)
 	char *env = NULL, *env2 = NULL;  const char *envname = "FAKERLIB32";
 	int verbose = 0, trace = 0;
 	void *retval = NULL;
+	FILE *file = stderr;
 
 	/* Prevent segfault if an application interposes getenv() and calls dlopen()
 	   within the body of its interposed getenv() function (I'm looking at you,
@@ -90,10 +91,12 @@ void *dlopen(const char *filename, int flag)
 		&& !strncmp(env2, "1", 1)) verbose = 1;
 	if((env2 = getenv("VGL_TRACE")) != NULL && strlen(env2) > 0
 		&& !strncmp(env2, "1", 1)) trace = 1;
+	if((env2 = getenv("VGL_LOG")) != NULL && strlen(env2) > 0
+		&& !strcasecmp(env2, "stdout")) file = stdout;
 
 	if(trace)
 	{
-		fprintf(stderr, "[VGL] dlopen (filename=%s flag=%d",
+		fprintf(file, "[VGL] dlopen (filename=%s flag=%d",
 			filename ? filename : "NULL", flag);
 	}
 
@@ -111,7 +114,7 @@ void *dlopen(const char *filename, int flag)
 							|| strstr(filename, "/libopengl.")))))
 	{
 		if(verbose)
-			fprintf(stderr,
+			fprintf(file,
 				"[VGL] NOTICE: Replacing dlopen(\"%s\") with dlopen(\"%s\")\n",
 				filename ? filename : "NULL", env ? env : "NULL");
 		retval = _vgl_dlopen(env, flag);
@@ -120,7 +123,7 @@ void *dlopen(const char *filename, int flag)
 		|| strstr(filename, "/libdl.")))
 	{
 		if(verbose)
-			fprintf(stderr, "[VGL] NOTICE: Replacing dlopen(\"%s\") with dlopen(\"lib" VGL_DLFAKER_NAME ".so\")\n",
+			fprintf(file, "[VGL] NOTICE: Replacing dlopen(\"%s\") with dlopen(\"lib" VGL_DLFAKER_NAME ".so\")\n",
 				filename ? filename : "NULL");
 		retval = _vgl_dlopen("lib" VGL_DLFAKER_NAME ".so", flag);
 	}
@@ -132,15 +135,15 @@ void *dlopen(const char *filename, int flag)
 		snprintf(temps, 255, "/usr/lib/virtualbox/%s", filename);
 		if(verbose)
 		{
-			fprintf(stderr, "[VGL] NOTICE: dlopen(\"%s\") failed.\n", filename);
-			fprintf(stderr, "[VGL]    Trying dlopen(\"%s\")\n", temps);
+			fprintf(file, "[VGL] NOTICE: dlopen(\"%s\") failed.\n", filename);
+			fprintf(file, "[VGL]    Trying dlopen(\"%s\")\n", temps);
 		}
 		retval = _vgl_dlopen(temps, flag);
 	}
 
 	if(trace)
 	{
-		fprintf(stderr, " retval=0x%.8lx)\n", (long)retval);
+		fprintf(file, " retval=0x%.8lx)\n", (long)retval);
 	}
 
 	setDLFakerLevel(getDLFakerLevel() - 1);

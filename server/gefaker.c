@@ -42,10 +42,16 @@ static void __loadsymbol(void)
 char *getenv(const char *name)
 {
 	char *env = NULL, *tmp;  int verbose = 0;
+	FILE *file = stderr;
+
 	__loadsymbol();
 	if(!__getenv) return NULL;
+
 	if((env = __getenv("VGL_VERBOSE")) != NULL && strlen(env) > 0
 		&& !strncmp(env, "1", 1)) verbose = 1;
+	if((env = __getenv("VGL_LOG")) != NULL && strlen(env) > 0
+		&& !strcasecmp(env, "stdout")) file = stdout;
+
 	tmp = (char *)name;
 	if(tmp && (!strcmp(name, "LD_PRELOAD")
 	#ifdef sun
@@ -54,7 +60,7 @@ char *getenv(const char *name)
 	))
 	{
 		if(verbose)
-			fprintf(stderr, "[VGL] NOTICE: Fooling application into thinking that LD_PRELOAD is unset\n");
+			fprintf(file, "[VGL] NOTICE: Fooling application into thinking that LD_PRELOAD is unset\n");
 		return NULL;
 	}
 	else return __getenv(name);
