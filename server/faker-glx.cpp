@@ -64,8 +64,7 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 	// If the visual was obtained from glXChooseVisual() or
 	// glXGetVisualFromFBConfig(), then it should have a corresponding FB config
 	// in the visual hash.
-	if(!(config = vishash.getConfig(dpy, vis))
-		&& !(config = vishash.mostRecentConfig(dpy, vis)))
+	if(!(config = vishash.getConfig(dpy, vis)))
 	{
 		// Punt.  We can't figure out where the visual came from, so fall back to
 		// using a default FB config.

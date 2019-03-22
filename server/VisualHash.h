@@ -62,22 +62,6 @@ namespace vglserver
 				HASH::remove(dpy ? DisplayString(dpy) : NULL, vis);
 			}
 
-			GLXFBConfig mostRecentConfig(Display *dpy, XVisualInfo *vis)
-			{
-				if(!dpy || !vis) THROW("Invalid argument");
-				HashEntry *ptr = NULL;
-				vglutil::CriticalSection::SafeLock l(mutex);
-				ptr = end;
-				while(ptr != NULL)
-				{
-					if(ptr->key1 && !strcasecmp(DisplayString(dpy), ptr->key1)
-						&& ptr->key2 && vis->visualid == ptr->key2->visualid)
-						return ptr->value;
-					ptr = ptr->prev;
-				}
-				return 0;
-			}
-
 		private:
 
 			~VisualHash(void)
