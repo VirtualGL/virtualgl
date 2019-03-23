@@ -7,7 +7,7 @@
 VirtualGL.  That feature will continue to be maintained in the 2.6.x branch on
 a break/fix basis only.  Most applications that once used transparent overlay
 visuals used them with color index rendering, which was removed in OpenGL 3.1
-in 2009.  As such, almost all applications that render overlays now do so using
+in 2009.  Thus, almost all applications that render overlays now do so using
 other mechanisms.  Furthermore, the need for VirtualGL to hand off the
 rendering of transparent overlay visuals to the 2D X server has always limited
 the usefulness of the feature, and the discontinuation of the VirtualGL Client
