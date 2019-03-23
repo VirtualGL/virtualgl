@@ -15,6 +15,7 @@
 #include "Log.h"
 #include <stdarg.h>
 #include <string.h>
+#include "vglutil.h"
 
 using namespace vglutil;
 
@@ -58,7 +59,7 @@ void Log::logTo(char *logFileName)
 		{
 			fclose(logFile);  newFile = false;
 		}
-		if(!strcasecmp(logFileName, "stdout"))
+		if(!stricmp(logFileName, "stdout"))
 			logFile = stdout;
 		else if((logFile_ = fopen(logFileName, "w")) != NULL)
 		{
