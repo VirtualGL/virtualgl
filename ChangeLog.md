@@ -34,6 +34,11 @@ rendering attributes to `glXCreateContext()`, `glXGetConfig()`, or
 8. The `VGL_FORCEALPHA` and `VGL_SAMPLES` environment variables now affect the
 default FB config.
 
+9. Fixed numerous minor issues with the VirtualGL Faker's visual matching
+algorithms.  These issues mostly affected DirectColor rendering, 2D X servers
+with multiple screens, and 2D X servers with a different default depth than the
+3D X server.
+
 
 2.6.1
 =====

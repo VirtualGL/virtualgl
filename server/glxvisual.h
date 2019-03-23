@@ -39,7 +39,7 @@ namespace glxvisual
 	// attributes from the 2D X server, or it caches them if they have not
 	// already been read.
 	VisualID matchVisual2D(Display *dpy, int screen, int depth, int c_class,
-		int level, int stereo, int trans);
+		int bpc, int level, int stereo, int trans, bool strictMatch);
 
 	// Simple helper function that obtains an attribute for a GLXFBConfig on the
 	// 3D X server.

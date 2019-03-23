@@ -1014,6 +1014,11 @@ int visTest(void)
 				GLX_SAMPLES, 1, GLX_X_VISUAL_TYPE, GLX_NONE, None };
 			unsigned int visualTypes[3] = { GLX_TRUE_COLOR, GLX_DIRECT_COLOR,
 				GLX_DONT_CARE };
+			if(DefaultDepth(dpy, DefaultScreen(dpy)) == 30)
+			{
+				rgbattrib[1] = rgbattrib[3] = rgbattrib[5] = 10;
+				rgbattrib13[5] = rgbattrib13[7] = rgbattrib13[9] = 10;
+			}
 
 			for(int db = 0; db <= 1; db++)
 			{

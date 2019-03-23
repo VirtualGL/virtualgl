@@ -71,7 +71,7 @@ Display *dpy = NULL;  Window win = 0, olWin = 0;
 GLXContext ctx = 0, olCtx = 0;
 int useStereo = 0, useOverlay = 0, useDC = 0, useImm = 0, interactive = 0,
 	olDB = 1, loColor = 0, maxFrames = 0, totalFrames = 0, directCtx = True,
-	bpc = 8, deadYet = 0;
+	bpc = -1, deadYet = 0;
 int rshift = 0, gshift = 0, bshift = 0;
 double benchTime = DEFBENCHTIME;
 int nColors = 0, nOlColors, colorScheme = GRAY;
@@ -524,6 +524,8 @@ void usage(char **argv)
 	printf("-s = Use stereographic rendering initially\n");
 	printf("     (this can be switched on and off in the application)\n");
 	printf("-alpha = Use a visual with an alpha channel\n");
+	printf("-bpc = Specify bits per component (default: determined from the default depth\n");
+	printf("       of the X server)\n");
 	printf("-f <n> = max frames to render\n");
 	printf("-bt <t> = print benchmark results every <t> seconds (default: %.1f)\n",
 		DEFBENCHTIME);
@@ -593,6 +595,12 @@ int main(int argc, char **argv)
 			useStereo = 1;
 		}
 		else if(!stricmp(argv[i], "-alpha")) useAlpha = 1;
+		else if(!stricmp(argv[i], "-bpc") && i < argc - 1)
+		{
+			int temp = atoi(argv[++i]);
+			if(temp != 8 && temp != 10) usage(argv);
+			bpc = temp;
+		}
 		else if(!stricmp(argv[i], "-n") && i < argc - 1)
 		{
 			int temp = atoi(argv[++i]);
@@ -627,11 +635,12 @@ int main(int argc, char **argv)
 	if((dpy = XOpenDisplay(0)) == NULL) THROW("Could not open display");
 	if(screen < 0) screen = DefaultScreen(dpy);
 
-	if(DefaultDepth(dpy, DefaultScreen(dpy)) == 30)
+	if(bpc < 0)
 	{
-		bpc = 10;
-		rgbAttribs[3] = rgbAttribs[5] = rgbAttribs[7] = bpc;
+		if(DefaultDepth(dpy, DefaultScreen(dpy)) == 30) bpc = 10;
+		else bpc = 8;
 	}
+	rgbAttribs[3] = rgbAttribs[5] = rgbAttribs[7] = bpc;
 	if(useAlpha)
 	{
 		rgbAttribs[16] = GLX_ALPHA_SIZE;
@@ -643,6 +652,14 @@ int main(int argc, char **argv)
 		THROW("Could not obtain RGB visual with requested properties");
 	if((v = glXGetVisualFromFBConfig(dpy, c[0])) == NULL)
 		THROW("Could not obtain RGB visual with requested properties");
+	int fbcid = -1, red = -1, green = -1, blue = -1, alpha = -1;
+	glXGetFBConfigAttrib(dpy, c[0], GLX_FBCONFIG_ID, &fbcid);
+	glXGetFBConfigAttrib(dpy, c[0], GLX_RED_SIZE, &red);
+	glXGetFBConfigAttrib(dpy, c[0], GLX_GREEN_SIZE, &green);
+	glXGetFBConfigAttrib(dpy, c[0], GLX_BLUE_SIZE, &blue);
+	glXGetFBConfigAttrib(dpy, c[0], GLX_ALPHA_SIZE, &alpha);
+	fprintf(stderr, "GLX FB config ID of %s: 0x%.2x (%d/%d/%d/%d)\n",
+		useOverlay ? "underlay" : "window", fbcid, red, green, blue, alpha);
 	XFree(c);  c = NULL;
 	fprintf(stderr, "Visual ID of %s: 0x%.2x\n",
 		useOverlay ? "underlay" : "window", (int)v->visualid);

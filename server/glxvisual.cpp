@@ -28,7 +28,7 @@ using namespace vglutil;
 typedef struct
 {
 	VisualID visualID;
-	int depth, c_class;
+	int depth, c_class, bpc;
 	int level, isStereo, isDB, isGL, isTrans;
 	int transIndex, transRed, transGreen, transBlue, transAlpha;
 } VisAttrib;
@@ -71,6 +71,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 			va[i].visualID = visuals[i].visualid;
 			va[i].depth = visuals[i].depth;
 			va[i].c_class = visuals[i].c_class;
+			va[i].bpc = visuals[i].bits_per_rgb;
 		}
 
 		if((atom = XInternAtom(dpy, "SERVER_OVERLAY_VISUALS", True)) != None)
@@ -265,6 +266,7 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[], int &level,
 			drawableType |= GLX_PBUFFER_BIT;
 		if(visualType >= 0)
 			drawableType |= GLX_WINDOW_BIT;
+		if(samples >= 0) drawableType &= ~GLX_PIXMAP_BIT;
 		renderType = GLX_RGBA_BIT;
 	}
 	if(renderType >= 0)
@@ -336,7 +338,7 @@ int visAttrib3D(GLXFBConfig config, int attribute)
 
 
 VisualID matchVisual2D(Display *dpy, int screen, int depth, int c_class,
-	int level, int stereo, int trans)
+	int bpc, int level, int stereo, int trans, bool strictMatch)
 {
 	int i, tryStereo;
 	if(!dpy) return 0;
@@ -350,7 +352,26 @@ VisualID matchVisual2D(Display *dpy, int screen, int depth, int c_class,
 		{
 			int match = 1;
 			if(va[i].c_class != c_class) match = 0;
-			if(va[i].depth != depth) match = 0;
+			if(strictMatch)
+			{
+				if(va[i].depth != depth) match = 0;
+				if(va[i].bpc != bpc && va[i].depth > 30) match = 0;
+			}
+			else
+			{
+				if(depth == 24 && (va[i].depth != 24
+					&& (va[i].depth != 32 || va[i].bpc != 8)))
+					match = 0;
+				if(depth == 30 && (va[i].depth != 30
+					&& (va[i].depth != 32 || va[i].bpc != 10)))
+					match = 0;
+				if(depth == 32 && bpc == 8 && (va[i].depth != 24
+					&& (va[i].depth != depth || va[i].bpc != bpc)))
+					match = 0;
+				if(depth == 32 && bpc == 10 && (va[i].depth != 30
+					&& (va[i].depth != depth || va[i].bpc != bpc)))
+					match = 0;
+			}
 			if(fconfig.stereo == RRSTEREO_QUADBUF && tryStereo)
 			{
 				if(stereo != va[i].isStereo) match = 0;
