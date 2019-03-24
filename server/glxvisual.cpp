@@ -41,7 +41,7 @@ typedef struct
 {
 	VisualID visualID;
 	VGLFBConfig config;
-	int depth, c_class, nVisuals;
+	int depth, c_class, bpc, nVisuals;
 	int isStereo, isDB, isGL;
 	OGLAttrib ogl;
 } VisAttrib;
@@ -106,7 +106,7 @@ static void buildCfgAttribTable(Display *dpy, int screen);
 
 static void assignDefaultFBConfigAttribs(Display *dpy, int screen,
 	XVisualInfo *visuals, int nVisuals, int visualDepth, int visualClass,
-	bool stereo, VisAttrib *va)
+	int visualBPC, bool stereo, VisAttrib *va)
 {
 	int i = 0, alphaSize = -1, doubleBuffer = -1, stencilSize = -1,
 		depthSize = -1, numSamples = -1;
@@ -140,7 +140,7 @@ static void assignDefaultFBConfigAttribs(Display *dpy, int screen,
 	}
 
 	if(fconfig.samples >= 0) numSamples = fconfig.samples;
-	if(fconfig.forcealpha) alphaSize = 8;
+	if(fconfig.forcealpha) alphaSize = 1;
 
 	// Determine the range of values that the FB configs provide.
 	int minAlpha = INT_MAX, maxAlpha = 0, minDB = 0, maxDB = 1,
@@ -158,7 +158,7 @@ static void assignDefaultFBConfigAttribs(Display *dpy, int screen,
 		maxSamples = max(maxSamples, ca[i].samples);
 	}
 	if(minAlpha < 0) minAlpha = 0;
-	minAlpha = 8 * !!minAlpha;  maxAlpha = 8 * !!maxAlpha;
+	minAlpha = !!minAlpha;  maxAlpha = !!maxAlpha;
 	if(minStencil < 0) minStencil = 0;
 	minStencil = 8 * !!minStencil;  maxStencil = 8 * !!maxStencil;
 	if(minSamples < 0) minSamples = 0;
@@ -181,9 +181,10 @@ static void assignDefaultFBConfigAttribs(Display *dpy, int screen,
 				if(!depth && stencil) continue;
 				for(int db = maxDB; db >= minDB; db--)
 				{
-					for(int alpha = maxAlpha; alpha >= minAlpha; alpha -= 8)
+					for(int alpha = maxAlpha; alpha >= minAlpha; alpha--)
 					{
 						while(va[i].c_class != visualClass || va[i].depth != visualDepth
+							|| (va[i].bpc != visualBPC && visualDepth == 32)
 							|| va[i].isStereo != stereo)
 						{
 							i++;  if(i >= nVisuals) return;
@@ -239,6 +240,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 			va[i].visualID = visuals[i].visualid;
 			va[i].depth = visuals[i].depth;
 			va[i].c_class = visuals[i].c_class;
+			va[i].bpc = visuals[i].bits_per_rgb;
 			va[i].nVisuals = nVisuals;
 
 			if(clientGLX)
@@ -257,14 +259,21 @@ static void buildVisAttribTable(Display *dpy, int screen)
 		{
 			if(depths[i] >= 24)
 			{
-				assignDefaultFBConfigAttribs(dpy, screen, visuals, nVisuals, depths[i],
-					TrueColor, true, va);
-				assignDefaultFBConfigAttribs(dpy, screen, visuals, nVisuals, depths[i],
-					DirectColor, true, va);
-				assignDefaultFBConfigAttribs(dpy, screen, visuals, nVisuals, depths[i],
-					TrueColor, false, va);
-				assignDefaultFBConfigAttribs(dpy, screen, visuals, nVisuals, depths[i],
-					DirectColor, false, va);
+				int minBPC = 8, maxBPC = 8;
+				if(depths[i] == 30) minBPC = 10;
+				if(depths[i] >= 30) maxBPC = 10;
+
+				for(int bpc = minBPC; bpc <= maxBPC; bpc += 2)
+				{
+					assignDefaultFBConfigAttribs(dpy, screen, visuals, nVisuals,
+						depths[i], TrueColor, bpc, true, va);
+					assignDefaultFBConfigAttribs(dpy, screen, visuals, nVisuals,
+						depths[i], DirectColor, bpc, true, va);
+					assignDefaultFBConfigAttribs(dpy, screen, visuals, nVisuals,
+						depths[i], TrueColor, bpc, false, va);
+					assignDefaultFBConfigAttribs(dpy, screen, visuals, nVisuals,
+						depths[i], DirectColor, bpc, false, va);
+				}
 			}
 		}
 		XFree(depths);
@@ -291,7 +300,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 // already been read.
 
 static VisualID matchVisual2D(Display *dpy, int screen, int depth, int c_class,
-	int stereo)
+	int bpc, int stereo, bool strictMatch)
 {
 	int i, tryStereo;
 	if(!dpy) return 0;
@@ -306,7 +315,26 @@ static VisualID matchVisual2D(Display *dpy, int screen, int depth, int c_class,
 		{
 			int match = 1;
 			if(va[i].c_class != c_class) match = 0;
-			if(va[i].depth != depth) match = 0;
+			if(strictMatch)
+			{
+				if(va[i].depth != depth) match = 0;
+				if(va[i].bpc != bpc && va[i].depth > 30) match = 0;
+			}
+			else
+			{
+				if(depth == 24 && (va[i].depth != 24
+					&& (va[i].depth != 32 || va[i].bpc != 8)))
+					match = 0;
+				if(depth == 30 && (va[i].depth != 30
+					&& (va[i].depth != 32 || va[i].bpc != 10)))
+					match = 0;
+				if(depth == 32 && bpc == 8 && (va[i].depth != 24
+					&& (va[i].depth != depth || va[i].bpc != bpc)))
+					match = 0;
+				if(depth == 32 && bpc == 10 && (va[i].depth != 30
+					&& (va[i].depth != depth || va[i].bpc != bpc)))
+					match = 0;
+			}
 			if(fconfig.stereo == RRSTEREO_QUADBUF && tryStereo)
 			{
 				if(stereo != va[i].isStereo) match = 0;
@@ -353,18 +381,18 @@ static VisualID matchVisual2D(Display *dpy, int screen, GLXFBConfig config,
 		{
 			// We first try to match the FB config with a 2D X Server visual that has
 			// the same class, depth, and stereo properties.
-			vid = matchVisual2D(dpy, screen, vis->depth, vis->c_class, stereo);
-			if(!vid && vis->depth == 32)
-				vid = matchVisual2D(dpy, screen, 24, vis->c_class, stereo);
-			if(!vid && vis->depth == 24)
-				vid = matchVisual2D(dpy, screen, 32, vis->c_class, stereo);
+			vid = matchVisual2D(dpy, screen, vis->depth, vis->c_class,
+				vis->bits_per_rgb, stereo, true);
+			if(!vid)
+				vid = matchVisual2D(dpy, screen, vis->depth, vis->c_class,
+					vis->bits_per_rgb, stereo, false);
 			// Failing that, we try to find a mono visual.
 			if(!vid)
-				vid = matchVisual2D(dpy, screen, vis->depth, vis->c_class, 0);
-			if(!vid && vis->depth == 32)
-				vid = matchVisual2D(dpy, screen, 24, vis->c_class, 0);
-			if(!vid && vis->depth == 24)
-				vid = matchVisual2D(dpy, screen, 32, vis->c_class, 0);
+				vid = matchVisual2D(dpy, screen, vis->depth, vis->c_class,
+					vis->bits_per_rgb, 0, true);
+			if(!vid)
+				vid = matchVisual2D(dpy, screen, vis->depth, vis->c_class,
+					vis->bits_per_rgb, 0, false);
 		}
 		XFree(vis);
 	}
@@ -553,6 +581,7 @@ VGLFBConfig *configsFromVisAttribs(Display *dpy, int screen,
 			drawableType |= GLX_PBUFFER_BIT;
 		if(visualType >= 0)
 			drawableType |= GLX_WINDOW_BIT;
+		if(samples >= 0) drawableType &= ~GLX_PIXMAP_BIT;
 		renderType = GLX_RGBA_BIT;
 	}
 	if(renderType >= 0)
@@ -709,10 +738,9 @@ VGLFBConfig getDefaultFBConfig(Display *dpy, int screen, VisualID vid)
 				GLX_DEPTH_SIZE, va[i].ogl.depthSize,
 				GLX_STENCIL_SIZE, va[i].ogl.stencilSize,
 				GLX_SAMPLES, va[i].ogl.samples, None };
-			if(va[i].depth == 30)
+			if(va[i].depth == 30 || (va[i].depth == 32 && va[i].bpc == 10))
 			{
 				glxattribs[3] = glxattribs[5] = glxattribs[7] = 10;
-				if(va[i].ogl.alphaSize) glxattribs[9] = 2;
 			}
 
 			int n;

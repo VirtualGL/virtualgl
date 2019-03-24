@@ -158,6 +158,28 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 	else configs = glxvisual::configsFromVisAttribs(dpy, screen, attrib_list,
 		*nelements, true);
 
+	if(configs && *nelements && drawableType & (GLX_WINDOW_BIT | GLX_PIXMAP_BIT))
+	{
+		int nv = 0;
+		VGLFBConfig *newConfigs =
+			(VGLFBConfig *)calloc(*nelements, sizeof(VGLFBConfig));
+		if(!newConfigs)
+		{
+			XFree(configs);  configs = NULL;
+			THROW("Memory allocation error");
+		}
+
+		for(int i = 0; i < *nelements; i++)
+		{
+			if(!configs[i]->visualID) continue;
+			newConfigs[nv++] = configs[i];
+		}
+		*nelements = nv;
+		XFree(configs);
+		configs = newConfigs;
+		if(!nv) { XFree(configs);  configs = NULL; }
+	}
+
 	done:
 		STOPTRACE();
 		if(configs && nelements)
