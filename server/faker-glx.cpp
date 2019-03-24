@@ -478,7 +478,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 		stereo, trans, true);
 	if(!vid)
 	{
-		vid = glxvisual::matchVisual2D(dpy, screen, 24, c_class, bpc, level,
+		vid = glxvisual::matchVisual2D(dpy, screen, depth, c_class, bpc, level,
 			stereo, trans, false);
 		if(!vid) goto done;
 	}
