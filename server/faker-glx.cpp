@@ -184,18 +184,18 @@ static VisualID matchVisual(Display *dpy, GLXFBConfig config, int &screen)
 			if(vis->depth >= 24
 				&& (vis->c_class == TrueColor || vis->c_class == DirectColor))
 			{
+				int stereo = glxvisual::visAttrib3D(config, GLX_STEREO);
+
 				vid = glxvisual::matchVisual2D(dpy, screen, vis->depth, vis->c_class,
-					vis->bits_per_rgb, 0, glxvisual::visAttrib3D(config, GLX_STEREO), 0,
-					true);
+					vis->bits_per_rgb, 0, stereo, 0, true);
 				if(!vid)
 					vid = glxvisual::matchVisual2D(dpy, screen, vis->depth, vis->c_class,
-						vis->bits_per_rgb, 0, glxvisual::visAttrib3D(config, GLX_STEREO),
-						0, false);
+						vis->bits_per_rgb, 0, stereo, 0, false);
 				// Failing that, we try to find a mono visual.
-				if(!vid)
+				if(!vid && stereo)
 					vid = glxvisual::matchVisual2D(dpy, screen, vis->depth, vis->c_class,
 						vis->bits_per_rgb, 0, 0, 0, true);
-				if(!vid)
+				if(!vid && stereo)
 					vid = glxvisual::matchVisual2D(dpy, screen, vis->depth, vis->c_class,
 						vis->bits_per_rgb, 0, 0, 0, false);
 			}
