@@ -643,47 +643,22 @@ XVisualInfo *visualFromID(Display *dpy, int screen, VisualID vid)
 }
 
 
-static VGLFBConfig *getFBConfigs(Display *dpy, int screen,
-	GLXFBConfig *glxConfigs, int nConfigs)
-{
-	if(!dpy || screen < 0 || !glxConfigs || nConfigs < 1)
-		return NULL;
-
-	buildCfgAttribTable(dpy, screen);
-	GET_CA_TABLE()
-
-	VGLFBConfig *configs = (VGLFBConfig *)calloc(nConfigs, sizeof(VGLFBConfig));
-	if(!configs) return NULL;
-
-	for(int i = 0; i < nConfigs; i++)
-	{
-		for(int j = 0; j < caEntries; j++)
-		{
-			if(ca[j].glxConfig == glxConfigs[i])
-			{
-				configs[i] = &ca[j];
-				break;
-			}
-		}
-	}
-
-	return configs;
-}
-
-
 VGLFBConfig *getFBConfigs(Display *dpy, int screen, int &nElements)
 {
-	GLXFBConfig *glxConfigs = NULL;
 	VGLFBConfig *configs = NULL;
 
 	if(!dpy || screen < 0) return NULL;
 
-	glxConfigs = _glXGetFBConfigs(DPY3D, DefaultScreen(DPY3D), &nElements);
-	if(!glxConfigs) goto bailout;
-	configs = getFBConfigs(dpy, screen, glxConfigs, nElements);
+	buildCfgAttribTable(dpy, screen);
+	GET_CA_TABLE()
 
-	bailout:
-	if(glxConfigs) XFree(glxConfigs);
+	configs = (VGLFBConfig *)calloc(caEntries, sizeof(VGLFBConfig));
+	if(!configs) return NULL;
+
+	nElements = caEntries;
+	for(int i = 0; i < nElements; i++)
+		configs[i] = &ca[i];
+
 	return configs;
 }
 
@@ -699,7 +674,24 @@ VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
 	glxConfigs = _glXChooseFBConfig(DPY3D, DefaultScreen(DPY3D), attribs,
 		&nElements);
 	if(!glxConfigs) goto bailout;
-	configs = getFBConfigs(dpy, screen, glxConfigs, nElements);
+
+	buildCfgAttribTable(dpy, screen);
+	GET_CA_TABLE()
+
+	configs = (VGLFBConfig *)calloc(nElements, sizeof(VGLFBConfig));
+	if(!configs) goto bailout;
+
+	for(int i = 0; i < nElements; i++)
+	{
+		for(int j = 0; j < caEntries; j++)
+		{
+			if(ca[j].glxConfig == glxConfigs[i])
+			{
+				configs[i] = &ca[j];
+				break;
+			}
+		}
+	}
 
 	bailout:
 	if(glxConfigs) XFree(glxConfigs);
