@@ -27,9 +27,6 @@
 using namespace vglutil;
 
 
-#define GLXFBCID(c)  glxvisual::visAttrib3D(c, GLX_FBCONFIG_ID)
-
-
 namespace glxvisual {
 
 typedef struct
@@ -355,8 +352,7 @@ static VisualID matchVisual2D(Display *dpy, int screen, int depth, int c_class,
 // This function finds a 2D X server visual that is suitable for use with a
 // particular 3D X server FB config.
 
-static VisualID matchVisual2D(Display *dpy, int screen, GLXFBConfig config,
-	bool stereo)
+static VisualID matchVisual2D(Display *dpy, int screen, VGLFBConfig config)
 {
 	VisualID vid = 0;
 
@@ -369,11 +365,11 @@ static VisualID matchVisual2D(Display *dpy, int screen, GLXFBConfig config,
 	// if so, return that visual.
 	for(int i = 0; i < vaEntries; i++)
 	{
-		if(va[i].config && GLXFBCID(config) == GLXFBCID(va[i].config))
+		if(va[i].config && config->id == va[i].config->id)
 			return va[i].visualID;
 	}
 
-	XVisualInfo *vis = _glXGetVisualFromFBConfig(DPY3D, config);
+	XVisualInfo *vis = _glXGetVisualFromFBConfig(DPY3D, config->glxConfig);
 	if(vis)
 	{
 		if(vis->depth >= 24
@@ -382,15 +378,15 @@ static VisualID matchVisual2D(Display *dpy, int screen, GLXFBConfig config,
 			// We first try to match the FB config with a 2D X Server visual that has
 			// the same class, depth, and stereo properties.
 			vid = matchVisual2D(dpy, screen, vis->depth, vis->c_class,
-				vis->bits_per_rgb, stereo, true);
+				vis->bits_per_rgb, config->stereo, true);
 			if(!vid)
 				vid = matchVisual2D(dpy, screen, vis->depth, vis->c_class,
-					vis->bits_per_rgb, stereo, false);
+					vis->bits_per_rgb, config->stereo, false);
 			// Failing that, we try to find a mono visual.
-			if(!vid)
+			if(!vid && config->stereo)
 				vid = matchVisual2D(dpy, screen, vis->depth, vis->c_class,
 					vis->bits_per_rgb, 0, true);
-			if(!vid)
+			if(!vid && config->stereo)
 				vid = matchVisual2D(dpy, screen, vis->depth, vis->c_class,
 					vis->bits_per_rgb, 0, false);
 		}
@@ -445,6 +441,7 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 			{
 				ca[i].alphaSize = ca[i].stencilSize = ca[i].samples = -1;
 			}
+			ca[i].stereo = visAttrib3D(glxConfigs[i], GLX_STEREO);
 			ca[i].glxConfig = glxConfigs[i];
 		}
 
@@ -456,8 +453,7 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 
 		for(int i = 0; i < nConfigs; i++)
 		{
-			ca[i].visualID = matchVisual2D(dpy, screen, glxConfigs[i],
-				visAttrib3D(glxConfigs[i], GLX_STEREO));
+			ca[i].visualID = matchVisual2D(dpy, screen, &ca[i]);
 			if(fconfig.trace && ca[i].visualID)
 				vglout.println("[VGL] FB config 0x%.2x has attached visual 0x%.2x",
 					ca[i].id, (unsigned int)ca[i].visualID);
@@ -764,7 +760,7 @@ VGLFBConfig getDefaultFBConfig(Display *dpy, int screen, VisualID vid)
 				{
 					if(fconfig.trace)
 						vglout.println("[VGL] Visual 0x%.2x has default FB config 0x%.2x",
-							(unsigned int)va[i].visualID, GLXFBCID(configs[0]));
+							(unsigned int)va[i].visualID, configs[0]->id);
 					va[i].config = configs[0];
 				}
 				XFree(configs);

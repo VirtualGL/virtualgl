@@ -22,6 +22,7 @@ typedef struct _VGLFBConfig
 {
 	int id, screen, nConfigs;
 	int alphaSize, stencilSize, samples;
+	bool stereo;
 	GLXFBConfig glxConfig;
 	VisualID visualID;
 } *VGLFBConfig;
