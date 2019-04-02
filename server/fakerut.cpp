@@ -976,6 +976,14 @@ GLXFBConfig getFBConfigFromVisual(Display *dpy, XVisualInfo *vis)
 }
 
 
+#define TEST_ATTRIB(vattribs, cattribs, desc)  \
+	vis0 = glXChooseVisual(dpy, DefaultScreen(dpy), vattribs);  \
+	if(vis0) THROW(desc " visual found");  \
+	XFree(vis0);  vis0 = NULL;  \
+	configs = glXChooseFBConfig(dpy, DefaultScreen(dpy), cattribs, &n);  \
+	if(configs) THROW(desc " FB config found");  \
+	XFree(configs);  configs = NULL;  \
+
 // This tests the faker's client/server visual matching heuristics
 int visTest(void)
 {
@@ -994,6 +1002,17 @@ int visTest(void)
 			|| n == 0)
 			THROW("No FB configs found");
 		XFree(configs);  configs = NULL;
+
+		// These should fail, since we no longer support transparent overlays.
+		int attribs0[] = { GLX_LEVEL, 1, None };
+		TEST_ATTRIB(attribs0, attribs0, "Overlay")
+		int vattribs1[] = { None };
+		int cattribs1[] = { GLX_RENDER_TYPE, GLX_COLOR_INDEX_BIT, None };
+		TEST_ATTRIB(vattribs1, cattribs1, "CI")
+		int vattribs2[] = { GLX_RGBA, GLX_TRANSPARENT_TYPE, GLX_TRANSPARENT_RGB,
+			None };
+		int cattribs2[] = { GLX_TRANSPARENT_TYPE, GLX_TRANSPARENT_RGB, None };
+		TEST_ATTRIB(vattribs2, cattribs2, "Transparent")
 
 		try
 		{
