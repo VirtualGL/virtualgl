@@ -105,8 +105,8 @@ static void assignDefaultFBConfigAttribs(Display *dpy, int screen,
 	XVisualInfo *visuals, int nVisuals, int visualDepth, int visualClass,
 	int visualBPC, bool stereo, VisAttrib *va)
 {
-	int i = 0, alphaSize = -1, doubleBuffer = -1, stencilSize = -1,
-		depthSize = -1, numSamples = -1;
+	int alphaSize = -1, doubleBuffer = -1, stencilSize = -1, depthSize = -1,
+		numSamples = -1;
 
 	if(nVisuals < 1) return;
 
@@ -168,6 +168,7 @@ static void assignDefaultFBConfigAttribs(Display *dpy, int screen,
 	if(numSamples >= 0) minSamples = maxSamples = numSamples;
 
 	// Assign the default FB config attributes.
+	int i = 0;
 	for(int samples = minSamples; samples <= maxSamples;
 		samples = (samples ? samples * 2 : 2))
 	{
