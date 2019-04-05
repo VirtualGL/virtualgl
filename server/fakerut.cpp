@@ -975,13 +975,13 @@ GLXFBConfig getFBConfigFromVisual(Display *dpy, XVisualInfo *vis)
 }
 
 
-#define TEST_ATTRIB(vattribs, cattribs, desc)  \
-	vis0 = glXChooseVisual(dpy, DefaultScreen(dpy), vattribs);  \
-	if(vis0) THROW(desc " visual found");  \
-	XFree(vis0);  vis0 = NULL;  \
-	configs = glXChooseFBConfig(dpy, DefaultScreen(dpy), cattribs, &n);  \
-	if(configs) THROW(desc " FB config found");  \
-	XFree(configs);  configs = NULL;  \
+#define TEST_ATTRIB(vattribs, cattribs, desc) \
+	vis0 = glXChooseVisual(dpy, DefaultScreen(dpy), vattribs); \
+	if(vis0) THROW(desc " visual found"); \
+	XFree(vis0);  vis0 = NULL; \
+	configs = glXChooseFBConfig(dpy, DefaultScreen(dpy), cattribs, &n); \
+	if(configs) THROW(desc " FB config found"); \
+	XFree(configs);  configs = NULL; \
 
 // This tests the faker's client/server visual matching heuristics
 int visTest(void)
