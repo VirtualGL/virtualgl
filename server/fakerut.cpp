@@ -552,8 +552,7 @@ int readbackTest(bool stereo)
 			// with VGL 2.3.3 and earlier)
 			glXSwapBuffers(dpy, win1);
 			checkFrame(dpy, win1, 1, lastFrame1);
-			if(!stereo)  // Also due to the nVidia bug
-				checkWindowColor(dpy, win1, clr.bits(-1));
+			checkWindowColor(dpy, win1, clr.bits(-1));
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)
@@ -997,7 +996,7 @@ int visTest(void)
 
 		try
 		{
-			printf("RGBA:   ");
+			printf("GLX attributes:         ");
 
 			// Iterate through RGBA attributes
 			int rgbattrib[] = { GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8,
@@ -1092,7 +1091,8 @@ int visTest(void)
 		}
 		fflush(stdout);
 
-		printf("\n");
+		printf("FB configs->X visuals:  ");
+
 		if(!(configs = glXGetFBConfigs(dpy, DefaultScreen(dpy), &n)) || n == 0)
 			THROW("No FB configs found");
 
@@ -1132,10 +1132,7 @@ int visTest(void)
 				if(renderType & GLX_RGBA_FLOAT_BIT_ARB)
 				{
 					if(!GLX_EXTENSION_EXISTS(GLX_ARB_fbconfig_float))
-					{
-						printf("CFG 0x%.2x:  ", fbcid);
 						THROWNL("GLX_ARB_fbconfig_float not advertised");
-					}
 					numFloatCfgs++;
 				}
 #endif
@@ -1149,10 +1146,7 @@ int visTest(void)
 				if(floatComponents > 0)
 				{
 					if(!GLX_EXTENSION_EXISTS(GLX_NV_float_buffer))
-					{
-						printf("CFG 0x%.2x:  ", fbcid);
 						THROWNL("GLX_NV_float_buffer not advertised");
-					}
 					numNVFloatCfgs++;
 				}
 #endif
@@ -1164,11 +1158,9 @@ int visTest(void)
 					&& (renderType & GLX_RGBA_BIT) != 0 && transparentType == GLX_NONE
 					&& visualID != 0 && visualType != GLX_NONE && xRenderable != 0;
 				if(hasVis != shouldHaveVis)
-				{
-					printf("CFG 0x%.2x:  ", fbcid);
-					THROWNL(hasVis ? "CFG shouldn't have matching X visual but does" :
-						"No matching X visual for CFG");
-				}
+					PRERROR1(hasVis ?
+						"CFG 0x%.2x shouldn't have matching X visual but does" :
+						"No matching X visual for CFG 0x%.2x", fbcid);
 			}
 			catch(Error &e)
 			{
@@ -1202,17 +1194,17 @@ int visTest(void)
 		}
 #endif
 
-		for(i = 0; i < n; i++)
+		XVisualInfo *vis1 = NULL;
+		try
 		{
-			XVisualInfo *vis1 = NULL;
-			if(!configs[i]) continue;
-			try
+			for(i = 0; i < n; i++)
 			{
+				if(!configs[i]) continue;
 				fbcid = cfgid(dpy, configs[i]);
 				if(!visuals[i]) continue;
-				printf("CFG 0x%.2x:  ", fbcid);
+
 				if(!(vis1 = glXGetVisualFromFBConfig(dpy, configs[i])))
-					THROWNL("No matching X visual for CFG");
+					PRERROR1("No matching X visual for CFG 0x%.2x", fbcid);
 
 				configVsVisual(dpy, configs[i], visuals[i]);
 				configVsVisual(dpy, configs[i], vis1);
@@ -1221,53 +1213,57 @@ int visTest(void)
 
 				config = getFBConfigFromVisual(dpy, visuals[i]);
 				if(!config || cfgid(dpy, config) != fbcid)
-					THROWNL("getFBConfigFromVisual");
+					PRERROR1("CFG 0x%.2x: getFBConfigFromVisual()", fbcid);
 				config = getFBConfigFromVisual(dpy, vis1);
 				if(!config || cfgid(dpy, config) != fbcid)
-					THROWNL("getFBConfigFromVisual");
+					PRERROR1("CFG 0x%.2x: getFBConfigFromVisual()", fbcid);
 
-				printf("SUCCESS!\n");
+				XFree(vis1);  vis1 = NULL;
 			}
-			catch(Error &e)
-			{
-				printf("Failed! (%s)\n", e.getMessage());  retval = 0;
-			}
-			if(vis1) { XFree(vis1);  vis1 = NULL; }
+			printf("SUCCESS!\n");
 		}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+		}
+		if(vis1) { XFree(vis1);  vis1 = NULL; }
 
 		XFree(configs);  configs = NULL;
 		for(i = 0; i < n; i++) { if(visuals[i]) XFree(visuals[i]); }
 		free(visuals);  visuals = NULL;  n = 0;
 		fflush(stdout);
 
+		printf("X visuals->FB configs:  ");
+
 		vtemp.screen = DefaultScreen(dpy);
 		if(!(vis0 = XGetVisualInfo(dpy, VisualScreenMask, &vtemp, &n)) || n == 0)
 			THROW("No X Visuals found");
-		printf("\n");
 
-		for(i = 0; i < n; i++)
+		XVisualInfo *vis2 = NULL;
+		try
 		{
-			XVisualInfo *vis2 = NULL;
-			try
+			for(i = 0; i < n; i++)
 			{
 				int level = 0;
 				glXGetConfig(dpy, &vis0[i], GLX_LEVEL, &level);
 				if(level) continue;
-				printf("Vis 0x%.2x:  ", (int)vis0[i].visualid);
+
 				if(!(config = getFBConfigFromVisual(dpy, &vis0[i])))
-					THROWNL("No matching CFG for X Visual");
+					PRERROR1("No matching CFG for X Visual 0x%.2x",
+						(int)vis0[i].visualid);
 				configVsVisual(dpy, config, &vis0[i]);
+
 				vis2 = glXGetVisualFromFBConfig(dpy, config);
 				configVsVisual(dpy, config, vis2);
-
-				printf("SUCCESS!\n");
+				XFree(vis2);  vis2 = NULL;
 			}
-			catch(Error &e)
-			{
-				printf("Failed! (%s)\n", e.getMessage());  retval = 0;
-			}
-			if(vis2) { XFree(vis2);  vis2 = NULL; }
+			printf("SUCCESS!\n");
 		}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+		}
+		if(vis2) { XFree(vis2);  vis2 = NULL; }
 	}
 	catch(Error &e)
 	{
@@ -1504,7 +1500,7 @@ void checkDrawable(Display *dpy, GLXDrawable draw, int width, int height,
 }
 
 // Test off-screen rendering
-int offScreenTest(bool dbPixmap)
+int offScreenTest(bool dbPixmap, bool doSelectEvent)
 {
 	Display *dpy = NULL;  Window win = 0;  Pixmap pm0 = 0, pm1 = 0, pm2 = 0;
 	GLXPixmap glxpm0 = 0, glxpm1 = 0;  GLXPbuffer pb = 0;  GLXWindow glxwin = 0;
@@ -1579,18 +1575,10 @@ int offScreenTest(bool dbPixmap)
 		_glXQueryGLXPbufferSGIXType __glXQueryGLXPbufferSGIX =
 			(_glXQueryGLXPbufferSGIXType)glXGetProcAddress(
 				(const GLubyte *)"glXQueryGLXPbufferSGIX");
-		if(__glXQueryGLXPbufferSGIX)
-		{
-			printf("GLX_SGIX_pbuffer appears to work.\n");
-			__glXQueryGLXPbufferSGIX(dpy, pb, GLX_WIDTH_SGIX, &tempw);
-			__glXQueryGLXPbufferSGIX(dpy, pb, GLX_HEIGHT_SGIX, &temph);
-		}
-		else
-		{
-			printf("GLX_SGIX_pbuffer doesn't appear to work.\n");
-			glXQueryDrawable(dpy, pb, GLX_WIDTH, &tempw);
-			glXQueryDrawable(dpy, pb, GLX_HEIGHT, &temph);
-		}
+		if(!__glXQueryGLXPbufferSGIX)
+			THROW("GLX_SGIX_pbuffer does not work");
+		__glXQueryGLXPbufferSGIX(dpy, pb, GLX_WIDTH_SGIX, &tempw);
+		glXQueryDrawable(dpy, pb, GLX_HEIGHT, &temph);
 
 		if(tempw != (unsigned int)dpyw / 2 || temph != (unsigned int)dpyh / 2)
 			THROW("Could not query context");
@@ -1611,6 +1599,28 @@ int offScreenTest(bool dbPixmap)
 		if(!doubleBufferTest())
 			THROW("Double-buffered off-screen rendering not available");
 		checkFrame(dpy, win, -1, lastFrame);
+
+		if(doSelectEvent)
+		{
+			// In most modern implementations, glXSelectEvent() doesn't do anything
+			// meaningful.  This just verifies that glXGetSelectedEvent() is
+			// returning the correct mask.
+			unsigned long mask = 1;
+			glXGetSelectedEvent(dpy, glxwin, &mask);
+			if(mask) THROW("glXGetSelectedEvent()");
+			mask = 1;
+			glXGetSelectedEvent(dpy, pb, &mask);
+			if(mask) THROW("glXGetSelectedEvent()");
+			glXSelectEvent(dpy, glxwin, GLX_PBUFFER_CLOBBER_MASK);
+			glXSelectEvent(dpy, pb, GLX_PBUFFER_CLOBBER_MASK);
+			glXGetSelectedEvent(dpy, glxwin, &mask);
+			if(mask != GLX_PBUFFER_CLOBBER_MASK) THROW("glXGetSelectedEvent()");
+			mask = 0;
+			glXGetSelectedEvent(dpy, pb, &mask);
+			if(mask != GLX_PBUFFER_CLOBBER_MASK) THROW("glXGetSelectedEvent()");
+			glXSelectEvent(dpy, glxwin, 0);
+			glXSelectEvent(dpy, pb, 0);
+		}
 
 		try
 		{
@@ -2018,6 +2028,268 @@ int contextMismatchTest(void)
 }
 
 
+// Test whether glXCopyContext() works properly
+
+#define CHECK_BOOL(param, expected) \
+{ \
+	glGetBooleanv(param, &b); \
+	if(b != expected) THROWNL(#param); \
+}
+
+#define CHECK_FLOAT1(param, expected) \
+{ \
+	glGetFloatv(param, f); \
+	if(f[0] != expected) THROWNL(#param); \
+}
+
+#define CHECK_FLOAT4(param, expected) \
+{ \
+	glGetFloatv(param, f); \
+	if(f[0] != expected || f[1] != expected || f[2] != expected \
+		|| f[3] != expected) \
+		THROWNL(#param); \
+}
+
+#define CHECK_INT1(param, expected) \
+{ \
+	glGetIntegerv(param, i); \
+	if(i[0] != expected) THROWNL(#param); \
+}
+
+#define CHECK_INT4(param, expected) \
+{ \
+	glGetIntegerv(param, i); \
+	if(i[0] != expected || i[1] != expected || i[2] != expected \
+		|| i[3] != expected) \
+		THROWNL(#param); \
+}
+
+static void checkContext(unsigned long mask)
+{
+	GLfloat f[4];
+	GLboolean b;
+	GLint i[4];
+	GLubyte stippleImage[32 * 32], expectedStippleImage[32 * 32];
+
+	GLfloat expectedAccumClearValue = mask & GL_ACCUM_BUFFER_BIT ? 0.5 : 0.0;
+	GLfloat expectedColorClearValue = mask & GL_COLOR_BUFFER_BIT ? 0.5 : 0.0;
+	GLboolean expectedEdgeFlag = mask & GL_CURRENT_BIT ? GL_FALSE : GL_TRUE;
+	GLfloat expectedDepthClearValue = mask & GL_DEPTH_BUFFER_BIT ? 0.5 : 1.0;
+	GLboolean expectedLight0 = mask & GL_ENABLE_BIT ? GL_TRUE : GL_FALSE;
+	GLint expectedMap1GridSegments = mask & GL_EVAL_BIT ? 2 : 1;
+	GLint expectedFogMode = mask & GL_FOG_BIT ? GL_LINEAR : GL_EXP;
+	GLint expectedFogHint = mask & GL_HINT_BIT ? GL_FASTEST : GL_DONT_CARE;
+	GLint expectedShadeModel = mask & GL_LIGHTING_BIT ? GL_FLAT : GL_SMOOTH;
+	GLint expectedLineWidth = mask & GL_LINE_BIT ? 2 : 1;
+	GLint expectedListBase = mask & GL_LIST_BIT ? 1 : 0;
+//GLboolean expectedSampleCoverageInvert =
+//  mask & GL_MULTISAMPLE_BIT ? GL_TRUE : GL_FALSE;
+	GLfloat expectedRedScale = mask & GL_PIXEL_MODE_BIT ? 0.5 : 1.0;
+	GLint expectedPointSize = mask & GL_POINT_BIT ? 2 : 1;
+	GLint expectedCullFaceMode = mask & GL_POLYGON_BIT ? GL_FRONT : GL_BACK;
+	memset(expectedStippleImage, mask & GL_POLYGON_STIPPLE_BIT ? 170 : 255,
+		32 * 4);
+	GLint expectedScissorBox = mask & GL_SCISSOR_BIT ? 10 : 20;
+	GLint expectedStencilClearValue = mask & GL_STENCIL_BUFFER_BIT ? 128 : 0;
+	GLint expectedTextureGenMode =
+		mask & GL_TEXTURE_BIT ? GL_OBJECT_LINEAR : GL_EYE_LINEAR;
+	GLint expectedMatrixMode =
+		mask & GL_TRANSFORM_BIT ? GL_PROJECTION : GL_MODELVIEW;
+	GLint expectedViewport = mask & GL_VIEWPORT_BIT ? 10 : 20;
+
+	CHECK_FLOAT4(GL_ACCUM_CLEAR_VALUE, expectedAccumClearValue);
+	CHECK_FLOAT4(GL_COLOR_CLEAR_VALUE, expectedColorClearValue);
+	CHECK_BOOL(GL_EDGE_FLAG, expectedEdgeFlag);
+	CHECK_FLOAT1(GL_DEPTH_CLEAR_VALUE, expectedDepthClearValue);
+	CHECK_BOOL(GL_LIGHT0, expectedLight0);
+	CHECK_INT1(GL_MAP1_GRID_SEGMENTS, expectedMap1GridSegments);
+	CHECK_INT1(GL_FOG_MODE, expectedFogMode);
+	CHECK_INT1(GL_FOG_HINT, expectedFogHint);
+	CHECK_INT1(GL_SHADE_MODEL, expectedShadeModel);
+	CHECK_INT1(GL_LINE_WIDTH, expectedLineWidth);
+	CHECK_INT1(GL_LIST_BASE, expectedListBase);
+//CHECK_BOOL(GL_SAMPLE_COVERAGE_INVERT, expectedSampleCoverageInvert);
+	CHECK_FLOAT1(GL_RED_SCALE, expectedRedScale);
+	CHECK_INT1(GL_POINT_SIZE, expectedPointSize);
+	CHECK_INT1(GL_CULL_FACE_MODE, expectedCullFaceMode);
+	glGetPolygonStipple(stippleImage);
+	if(memcmp(stippleImage, expectedStippleImage, 32 * 4))
+		THROWNL("Stipple image");
+	CHECK_INT4(GL_SCISSOR_BOX, expectedScissorBox);
+	CHECK_INT1(GL_STENCIL_CLEAR_VALUE, expectedStencilClearValue);
+	glGetTexGeniv(GL_Q, GL_TEXTURE_GEN_MODE, i);
+	if(i[0] != expectedTextureGenMode)
+		THROWNL("GL_TEXTURE_GEN_MODE");
+	CHECK_INT1(GL_MATRIX_MODE, expectedMatrixMode);
+	CHECK_INT4(GL_VIEWPORT, expectedViewport);
+}
+
+#define CHECK_GL_ERROR() \
+{ \
+	int e = glGetError(); \
+	if(e != GL_NO_ERROR) THROW("OpenGL error"); \
+}
+
+#define CHECK_CONTEXT(m) \
+{ \
+	if(!(glXMakeCurrent(dpy, win, ctx1))) \
+		THROW("Could not make context current"); \
+	glXCopyContext(dpy, ctx1, ctx2, m); \
+	mask |= m; \
+	if(!(glXMakeCurrent(dpy, win, ctx2))) \
+		THROW("Could not make context current"); \
+	checkContext(mask); \
+}
+
+int copyContextTest(void)
+{
+	Display *dpy = NULL;  Window win = 0;
+	int dpyw, dpyh, retval = 1;
+	int glxattribs[] = { GLX_DOUBLEBUFFER, GLX_RGBA, None };
+	XVisualInfo *vis = NULL;
+	GLXContext ctx1 = 0, ctx2 = 0;
+	XSetWindowAttributes swa;
+
+	printf("glXCopyContext() test:\n\n");
+
+	try
+	{
+		if(!(dpy = XOpenDisplay(0))) THROW("Could not open display");
+		dpyw = DisplayWidth(dpy, DefaultScreen(dpy));
+		dpyh = DisplayHeight(dpy, DefaultScreen(dpy));
+
+		if(!(vis = glXChooseVisual(dpy, DefaultScreen(dpy), glxattribs)))
+			THROW("glXChooseVisual()");
+
+		Window root = RootWindow(dpy, DefaultScreen(dpy));
+		swa.colormap = XCreateColormap(dpy, root, vis->visual, AllocNone);
+		swa.border_pixel = 0;
+		swa.background_pixel = 0;
+		swa.event_mask = 0;
+		if((win = XCreateWindow(dpy, root, 0, 0, dpyw / 2, dpyh / 2, 0, vis->depth,
+			InputOutput, vis->visual, CWBorderPixel | CWColormap | CWEventMask,
+			&swa)) == 0)
+			THROW("Could not create window");
+		XMapWindow(dpy, win);
+
+		try
+		{
+			if(!(ctx1 = glXCreateContext(dpy, vis, NULL, True)))
+				THROW("Could not create context");
+			if(!(ctx2 = glXCreateContext(dpy, vis, NULL, True)))
+				THROW("Could not create context");
+
+			if(!(glXMakeCurrent(dpy, win, ctx1)))
+				THROW("Could not make context current");
+
+			while(glGetError() != GL_NO_ERROR) {}
+			glClearAccum(0.5, 0.5, 0.5, 0.5);     // GL_ACCUM_BUFFER_BIT
+			CHECK_GL_ERROR();
+			glClearColor(0.5, 0.5, 0.5, 0.5);     // GL_COLOR_BUFFER_BIT
+			CHECK_GL_ERROR();
+			glEdgeFlag(GL_FALSE);                 // GL_CURRENT_BIT
+			CHECK_GL_ERROR();
+			glClearDepthf(0.5);                   // GL_DEPTH_BUFFER_BIT
+			CHECK_GL_ERROR();
+			glEnable(GL_LIGHT0);                  // GL_ENABLE_BIT
+			CHECK_GL_ERROR();
+			glMapGrid1f(2, 0.5, 0.5);             // GL_EVAL_BIT
+			CHECK_GL_ERROR();
+			glFogi(GL_FOG_MODE, GL_LINEAR);       // GL_FOG_BIT
+			CHECK_GL_ERROR();
+			glHint(GL_FOG_HINT, GL_FASTEST);      // GL_HINT_BIT
+			CHECK_GL_ERROR();
+			glShadeModel(GL_FLAT);                // GL_LIGHTING_BIT
+			CHECK_GL_ERROR();
+			glLineWidth(2);                       // GL_LINE_BIT
+			CHECK_GL_ERROR();
+			glListBase(1);                        // GL_LIST_BIT
+			CHECK_GL_ERROR();
+// NOTE: We can't check GL_MULTISAMPLE_BIT because nVidia's implementation of
+// glXCopyContext() copies those parameters with GL_COLOR_BUFFER_BIT.
+//    glSampleCoverage(0.5, GL_TRUE);       // GL_MULTISAMPLE_BIT
+//    CHECK_GL_ERROR();
+			glPixelTransferf(GL_RED_SCALE, 0.5);  // GL_PIXEL_MODE_BIT
+			CHECK_GL_ERROR();
+			glPointSize(2);                       // GL_POINT_BIT
+			CHECK_GL_ERROR();
+			glCullFace(GL_FRONT);                 // GL_POLYGON_BIT
+			CHECK_GL_ERROR();
+			GLubyte stippleImage[32 * 4];
+			memset(stippleImage, 170, 32 * 4);
+			glPolygonStipple(stippleImage);       // GL_POLYGON_STIPPLE_BIT
+			CHECK_GL_ERROR();
+			glScissor(10, 10, 10, 10);            // GL_SCISSOR_BIT
+			CHECK_GL_ERROR();
+			glClearStencil(128);                  // GL_STENCIL_BUFFER_BIT
+			CHECK_GL_ERROR();
+			glTexGeni(GL_Q, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
+			                                      // GL_TEXTURE_BIT
+			CHECK_GL_ERROR();
+			glMatrixMode(GL_PROJECTION);          // GL_TRANSFORM_BIT
+			CHECK_GL_ERROR();
+			glViewport(10, 10, 10, 10);           // GL_VIEWPORT_BIT
+			CHECK_GL_ERROR();
+
+			if(!(glXMakeCurrent(dpy, win, ctx2)))
+				THROW("Could not make context current");
+
+			glScissor(20, 20, 20, 20);
+			glViewport(20, 20, 20, 20);
+			unsigned long mask = 0;
+			checkContext(mask);
+
+			CHECK_CONTEXT(GL_ACCUM_BUFFER_BIT);
+			CHECK_CONTEXT(GL_COLOR_BUFFER_BIT);
+			CHECK_CONTEXT(GL_CURRENT_BIT);
+			CHECK_CONTEXT(GL_DEPTH_BUFFER_BIT);
+			CHECK_CONTEXT(GL_ENABLE_BIT);
+			CHECK_CONTEXT(GL_EVAL_BIT);
+			CHECK_CONTEXT(GL_FOG_BIT);
+			CHECK_CONTEXT(GL_HINT_BIT);
+			CHECK_CONTEXT(GL_LIGHTING_BIT);
+			CHECK_CONTEXT(GL_LINE_BIT);
+			CHECK_CONTEXT(GL_LIST_BIT);
+//    CHECK_CONTEXT(GL_MULTISAMPLE_BIT);
+			CHECK_CONTEXT(GL_PIXEL_MODE_BIT);
+			CHECK_CONTEXT(GL_POINT_BIT);
+			CHECK_CONTEXT(GL_POLYGON_BIT);
+			CHECK_CONTEXT(GL_POLYGON_STIPPLE_BIT);
+			CHECK_CONTEXT(GL_SCISSOR_BIT);
+			CHECK_CONTEXT(GL_STENCIL_BUFFER_BIT);
+			CHECK_CONTEXT(GL_TEXTURE_BIT);
+			CHECK_CONTEXT(GL_TRANSFORM_BIT);
+			CHECK_CONTEXT(GL_VIEWPORT_BIT);
+
+			printf("SUCCESS\n");
+		}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+		}
+		fflush(stdout);
+	}
+	catch(Error &e)
+	{
+		printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+	}
+	if(ctx1 && dpy)
+	{
+		glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx1);
+		ctx1 = 0;
+	}
+	if(ctx2 && dpy)
+	{
+		glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx2);
+		ctx2 = 0;
+	}
+	if(win && dpy) { XDestroyWindow(dpy, win);  win = 0; }
+	if(vis) { XFree(vis);  vis = NULL; }
+	if(dpy) { XCloseDisplay(dpy);  dpy = NULL; }
+	return retval;
+}
+
+
 // Test whether VirtualGL properly handles explicit and implicit destruction of
 // subwindows
 
@@ -2119,31 +2391,41 @@ int extensionQueryTest(void)
 	try
 	{
 		int major = -1, minor = -1;
+
 		if((dpy = XOpenDisplay(0)) == NULL)
 			THROW("Could not open display");
+
 		if(!XQueryExtension(dpy, "GLX", &dummy1, &dummy2, &dummy3)
 			|| dummy1 < 0 || dummy2 < 0 || dummy3 < 0)
 			THROW("GLX Extension not reported as present");
+
 		char *vendor = XServerVendor(dpy);
 		if(!vendor || strcmp(vendor, "Spacely Sprockets, Inc."))
 			THROW("XServerVendor()");
+
 		glXQueryVersion(dpy, &major, &minor);
-		printf("glXQueryVersion():  %d.%d\n", major, minor);
-		printf("glXGetClientString():\n");
-		printf("  Version=%s\n", glXGetClientString(dpy, GLX_VERSION));
-		printf("  Vendor=%s\n", glXGetClientString(dpy, GLX_VENDOR));
-		printf("  Extensions=%s\n", glXGetClientString(dpy, GLX_EXTENSIONS));
-		printf("glXQueryServerString():\n");
-		printf("  Version=%s\n",
-			glXQueryServerString(dpy, DefaultScreen(dpy), GLX_VERSION));
-		printf("  Vendor=%s\n",
-			glXQueryServerString(dpy, DefaultScreen(dpy), GLX_VENDOR));
-		printf("  Extensions=%s\n",
-			glXQueryServerString(dpy, DefaultScreen(dpy), GLX_EXTENSIONS));
-		if(major < 1 || minor < 3)
-			THROW("glXQueryVersion() reports version < 1.3");
-		printf("glXQueryExtensionsString():\n%s\n",
-			glXQueryExtensionsString(dpy, DefaultScreen(dpy)));
+		if(major != 1 || minor != 4)
+			THROW("glXQueryVersion()");
+
+		if(strcmp(glXGetClientString(dpy, GLX_VERSION), "1.4"))
+			THROW("glXGetClientString(..., GLX_VERSION)");
+		if(strcmp(glXGetClientString(dpy, GLX_VENDOR),
+			"Slate Rock and Gravel Company"))
+			THROW("glXGetClientString(..., GLX_VENDOR)");
+		if(strcmp(glXGetClientString(dpy, GLX_EXTENSIONS),
+			glXQueryExtensionsString(dpy, DefaultScreen(dpy))))
+			THROW("glXGetClientString(..., GLX_EXTENSIONS)");
+
+		if(strcmp(glXQueryServerString(dpy, DefaultScreen(dpy), GLX_VERSION),
+			"1.4"))
+			THROW("glXQueryServerString(..., GLX_VERSION)");
+		if(strcmp(glXQueryServerString(dpy, DefaultScreen(dpy), GLX_VENDOR),
+			"Slate Rock and Gravel Company"))
+			THROW("glXQueryServerString(..., GLX_VENDOR)");
+		if(strcmp(glXQueryServerString(dpy, DefaultScreen(dpy), GLX_EXTENSIONS),
+			glXQueryExtensionsString(dpy, DefaultScreen(dpy))))
+			THROW("glXQueryServerString(..., GLX_EXTENSIONS)");
+
 		printf("SUCCESS!\n");
 	}
 	catch(Error &e)
@@ -2196,6 +2478,10 @@ void usage(char **argv)
 	fprintf(stderr, "         (default: %d).  <n>=0 disables the multithreaded rendering test.\n",
 		DEFTHREADS);
 	fprintf(stderr, "-nostereo = Disable stereo tests\n");
+	fprintf(stderr, "-nodbpixmap = Assume GLXPixmaps are always single-buffered, even if created\n");
+	fprintf(stderr, "              with a double-buffered visual or FB config.\n");
+	fprintf(stderr, "-nocopycontext = Disable glXCopyContext() tests\n");
+	fprintf(stderr, "-selectevent = Enable glXSelectEvent() tests\n");
 	fprintf(stderr, "\n");
 	exit(1);
 }
@@ -2204,11 +2490,13 @@ void usage(char **argv)
 int main(int argc, char **argv)
 {
 	int ret = 0, nThreads = DEFTHREADS;
-	bool doStereo = true, doDBPixmap = true;
+	bool doStereo = true, doDBPixmap = true, doCopyContext = true,
+		doSelectEvent = false;
 
 	if(putenv((char *)"VGL_AUTOTEST=1") == -1
 		|| putenv((char *)"VGL_SPOIL=0") == -1
-		|| putenv((char *)"VGL_XVENDOR=Spacely Sprockets, Inc.") == -1)
+		|| putenv((char *)"VGL_XVENDOR=Spacely Sprockets, Inc.") == -1
+		|| putenv((char *)"VGL_GLXVENDOR=Slate Rock and Gravel Company"))
 	{
 		printf("putenv() failed!\n");  return -1;
 	}
@@ -2223,6 +2511,8 @@ int main(int argc, char **argv)
 		}
 		else if(!strcasecmp(argv[i], "-nostereo")) doStereo = false;
 		else if(!strcasecmp(argv[i], "-nodbpixmap")) doDBPixmap = false;
+		else if(!strcasecmp(argv[i], "-nocopycontext")) doCopyContext = false;
+		else if(!strcasecmp(argv[i], "-selectevent")) doSelectEvent = true;
 		else usage(argv);
 	}
 
@@ -2245,13 +2535,18 @@ int main(int argc, char **argv)
 	}
 	if(!contextMismatchTest()) ret = -1;
 	printf("\n");
+	if(doCopyContext)
+	{
+		if(!copyContextTest()) ret = -1;
+		printf("\n");
+	}
 	if(!flushTest()) ret = -1;
 	printf("\n");
 	if(!visTest()) ret = -1;
 	printf("\n");
 	if(!multiThreadTest(nThreads)) ret = -1;
 	printf("\n");
-	if(!offScreenTest(doDBPixmap)) ret = -1;
+	if(!offScreenTest(doDBPixmap, doSelectEvent)) ret = -1;
 	printf("\n");
 	if(!subWinTest()) ret = -1;
 	printf("\n");

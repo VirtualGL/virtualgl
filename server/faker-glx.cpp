@@ -1622,7 +1622,8 @@ void (*glXGetProcAddress(const GLubyte *procName))(void)
 
 // Hand off to the 2D X server (overlay rendering) or the 3D X server (opaque
 // rendering) without modification, except that, if 'draw' is not an overlay
-// window, we replace it with its corresponding off-screen drawable ID.
+// window, we replace it with its corresponding off-screen drawable ID.  See
+// notes for glXSelectEvent().
 
 void glXGetSelectedEvent(Display *dpy, GLXDrawable draw,
 	unsigned long *event_mask)
@@ -2111,7 +2112,11 @@ Bool glXQueryVersion(Display *dpy, int *major, int *minor)
 	if(IS_EXCLUDED(dpy))
 		return _glXQueryVersion(dpy, major, minor);
 
-	return _glXQueryVersion(DPY3D, major, minor);
+	if(major && minor)
+	{
+		*major = 1;  *minor = 4;
+		return True;
+	}
 
 	CATCH();
 	return False;
@@ -2119,7 +2124,14 @@ Bool glXQueryVersion(Display *dpy, int *major, int *minor)
 
 
 // Hand off to the 2D X server (overlay rendering) or the 3D X server (opaque
-// rendering) without modification.
+// rendering) without modification.  NOTE: Since this is passed through to the
+// 3D X server, any GLXPbufferClobberEvent that is generated will have an
+// incorrect draw_type field (if draw is a GLXWindow) and display field.
+// However, the number of applications that use this function seems to be
+// approximately zero, because the reasons behind it (Pbuffer clobbering due to
+// a resource conflict) are not generally valid with modern systems.  As a for
+// instance, Mesa doesn't seem to generate GLXPbufferClobberEvents at all, and
+// nVidia's implementation of this function appears to be a no-op.
 
 void glXSelectEvent(Display *dpy, GLXDrawable draw, unsigned long event_mask)
 {

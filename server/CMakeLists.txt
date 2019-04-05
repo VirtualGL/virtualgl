@@ -197,5 +197,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND GNUCXX)
 	target_link_libraries(vgltrans_test2 stdc++)
 endif()
 
-configure_file(servertest.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/servertest)
+configure_file(servertest.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/servertest
+	@ONLY)
 execute_process(COMMAND chmod +x ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/servertest)

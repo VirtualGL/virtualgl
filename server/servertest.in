@@ -29,8 +29,7 @@ LIB=@CMAKE_LIBRARY_OUTPUT_DIRECTORY@
 SSL=@VGL_USESSL@
 
 NODL=
-NOSTEREO=
-NODBPIXMAP=
+FAKERUTARGS=
 DEPTH=24
 IPV6=1
 WRAP=
@@ -40,25 +39,27 @@ while [ $# -gt 0 ]; do
 		echo "Testing without dlopen() interposer"
 		NODL=-nodl
 		;;
-	-nostereo)
-		NOSTEREO=-nostereo
-		;;
-	-nodbpixmap)
-		NODBPIXMAP=-nodbpixmap
-		;;
 	-noipv6)
 		IPV6=0
 		;;
 	-10bpc)
 		DEPTH=30
-		NOSTEREO=-nostereo
+		FAKERUTARGS=-nostereo
 		;;
 	-wrap)
 		WRAP=$2; shift
 		;;
+	*)
+		break;
+		;;
 	esac
 	shift
 done
+if [ ! "$FAKERUTARGS" = "" ]; then
+	FAKERUTARGS=$FAKERUTARGS ${1+"$@"}
+else
+	FAKERUTARGS=${1+"$@"}
+fi
 
 which Xvfb >/dev/null 2>&1 || (
 	echo Xvfb not found!
@@ -88,17 +89,17 @@ for SCREEN in 0 1; do
 		echo
 		$BIN/vglclient >vglclient.log 2>&1 & VGLCLIENTPID=$!
 		VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
-			$BIN/vglrun $NODL -c jpeg $WRAP $BIN/fakerut $NOSTEREO $NODBPIXMAP
+			$BIN/vglrun $NODL -c jpeg $WRAP $BIN/fakerut $FAKERUTARGS
 		if [ "$SSL" = "1" ]; then
 			VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
-				$BIN/vglrun $NODL -c jpeg +s $WRAP $BIN/fakerut $NOSTEREO $NODBPIXMAP
+				$BIN/vglrun $NODL -c jpeg +s $WRAP $BIN/fakerut $FAKERUTARGS
 		fi
 		VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB VGL_READBACK=sync \
-			$BIN/vglrun $NODL -np 2 -c rgb $WRAP $BIN/fakerut $NOSTEREO $NODBPIXMAP
+			$BIN/vglrun $NODL -np 2 -c rgb $WRAP $BIN/fakerut $FAKERUTARGS
 		# (we can't test stereo here, because the transport plugin assumes
 		# quad-buffered, which isn't available with an X proxy.)
 		VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
-			$BIN/vglrun $NODL -trans test $WRAP $BIN/fakerut -nostereo $NODBPIXMAP
+			$BIN/vglrun $NODL -trans test $WRAP $BIN/fakerut -nostereo $FAKERUTARGS
 		kill $VGLCLIENTPID
 		VGLCLIENTPID=-1
 
@@ -107,13 +108,13 @@ for SCREEN in 0 1; do
 			echo
 			$BIN/vglclient -ipv6 >vglclient.log 2>&1 & VGLCLIENTPID=$!
 			VGL_CLIENT=::1 LD_LIBRARY_PATH=$LIB \
-				$BIN/vglrun $NODL -c jpeg $WRAP $BIN/fakerut $NOSTEREO $NODBPIXMAP
+				$BIN/vglrun $NODL -c jpeg $WRAP $BIN/fakerut $FAKERUTARGS
 			if [ "$SSL" = "1" ]; then
 				VGL_CLIENT=::1 LD_LIBRARY_PATH=$LIB \
-					$BIN/vglrun $NODL -c jpeg +s $WRAP $BIN/fakerut $NOSTEREO $NODBPIXMAP
+					$BIN/vglrun $NODL -c jpeg +s $WRAP $BIN/fakerut $FAKERUTARGS
 			fi
 			VGL_CLIENT=[::1]:0 LD_LIBRARY_PATH=$LIB \
-				$BIN/vglrun $NODL -trans test $WRAP $BIN/fakerut -nostereo $NODBPIXMAP
+				$BIN/vglrun $NODL -trans test $WRAP $BIN/fakerut -nostereo $FAKERUTARGS
 			kill $VGLCLIENTPID
 			VGLCLIENTPID=-1
 		fi
@@ -123,10 +124,10 @@ for SCREEN in 0 1; do
 	echo \*\*\*\*\* Testing X11 Transport, Screen $SCREEN \*\*\*\*\*
 	echo
 	LD_LIBRARY_PATH=$LIB \
-		$BIN/vglrun $NODL -c proxy $WRAP $BIN/fakerut $NOSTEREO $NODBPIXMAP
+		$BIN/vglrun $NODL -c proxy $WRAP $BIN/fakerut $FAKERUTARGS
 	if [ $DEPTH = 24 ]; then
 		LD_LIBRARY_PATH=$LIB \
-			$BIN/vglrun $NODL -trans test2 $WRAP $BIN/fakerut $NOSTEREO $NODBPIXMAP
+			$BIN/vglrun $NODL -trans test2 $WRAP $BIN/fakerut $FAKERUTARGS
 	fi
 
 done
