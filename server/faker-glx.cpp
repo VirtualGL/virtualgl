@@ -1040,7 +1040,7 @@ void glXFreeContextEXT(Display *dpy, GLXContext ctx)
 // properly report the extensions and GLX version it supports.
 
 #define VGL_GLX_EXTENSIONS \
-	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index"
+	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_swap_control GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGI_swap_control GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index"
 // Allow enough space here for all of the extensions
 static char glxextensions[1024] = VGL_GLX_EXTENSIONS;
 
@@ -1079,11 +1079,6 @@ static const char *getGLXExtensions(void)
 		strncat(glxextensions, " GLX_EXT_import_context",
 			1023 - strlen(glxextensions));
 
-	CHECKSYM_NONFATAL(glXSwapIntervalEXT)
-	if(__glXSwapIntervalEXT && !strstr(glxextensions, "GLX_EXT_swap_control"))
-		strncat(glxextensions, " GLX_EXT_swap_control",
-			1023 - strlen(glxextensions));
-
 	CHECKSYM_NONFATAL(glXBindTexImageEXT)
 	CHECKSYM_NONFATAL(glXReleaseTexImageEXT)
 	if(__glXBindTexImageEXT && __glXReleaseTexImageEXT
@@ -1106,11 +1101,6 @@ static const char *getGLXExtensions(void)
 		&& __glXQueryMaxSwapGroupsNV && __glXQuerySwapGroupNV
 		&& __glXResetFrameCountNV && !strstr(glxextensions, "GLX_NV_swap_group"))
 		strncat(glxextensions, " GLX_NV_swap_group", 1023 - strlen(glxextensions));
-
-	CHECKSYM_NONFATAL(glXSwapIntervalSGI)
-	if(__glXSwapIntervalSGI && !strstr(glxextensions, "GLX_SGI_swap_control"))
-		strncat(glxextensions, " GLX_SGI_swap_control",
-			1023 - strlen(glxextensions));
 
 	return glxextensions;
 }
