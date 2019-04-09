@@ -1056,6 +1056,11 @@ static const char *getGLXExtensions(void)
 			" GLX_ARB_create_context GLX_ARB_create_context_profile",
 			1023 - strlen(glxextensions));
 
+	if(strstr(realGLXExtensions, "GLX_ARB_create_context_robustness")
+		&& !strstr(glxextensions, "GLX_ARB_create_context_robustness"))
+		strncat(glxextensions, " GLX_ARB_create_context_robustness",
+			1023 - strlen(glxextensions));
+
 	if(strstr(realGLXExtensions, "GLX_ARB_fbconfig_float")
 		&& !strstr(glxextensions, "GLX_ARB_fbconfig_float"))
 		strncat(glxextensions, " GLX_ARB_fbconfig_float",

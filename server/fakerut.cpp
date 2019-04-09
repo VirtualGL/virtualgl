@@ -1992,7 +1992,14 @@ int contextMismatchTest(void)
 			int attribs[] = { GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
 				GLX_CONTEXT_MINOR_VERSION_ARB, 2, GLX_CONTEXT_FLAGS_ARB,
 				GLX_CONTEXT_DEBUG_BIT_ARB | GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
-				GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB, None };
+				GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB, None,
+				None, None };
+			if(GLX_EXTENSION_EXISTS(GLX_ARB_create_context_robustness))
+			{
+				attribs[5] |= GLX_CONTEXT_ROBUST_ACCESS_BIT_ARB;
+				attribs[8] = GLX_CONTEXT_RESET_NOTIFICATION_STRATEGY_ARB;
+				attribs[9] = GLX_LOSE_CONTEXT_ON_RESET_ARB;
+			}
 			if(!(ctx2 =
 				glXCreateContextAttribsARB(dpy, config2, NULL, True, attribs)))
 				THROW("Could not create context");
@@ -2006,21 +2013,28 @@ int contextMismatchTest(void)
 				THROWNL("Could not make context current");
 			glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
 			if(flags)
-				PRERROR1("Context flags 0x%.8x != 0x00000000\n", flags);
+				PRERROR1("Context flags 0x%.8x != 0x00000000", flags);
 			if(!(glXMakeContextCurrent(dpy, win, win, ctx2)))
 				THROWNL("Could not make context current");
 			major = minor = mask = flags = -20;
 			glGetIntegerv(GL_MAJOR_VERSION, &major);
 			glGetIntegerv(GL_MINOR_VERSION, &minor);
 			if(major != 3 || minor < 2 || minor > 3)
-				PRERROR2("Incorrect context version %d.%d\n", major, minor);
+				PRERROR2("Incorrect context version %d.%d", major, minor);
 			glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &mask);
-			if(mask != GL_CONTEXT_CORE_PROFILE_BIT)
-				PRERROR1("Context profile mask 0x%.8x != 0x00000001\n", mask);
+			if(mask != attribs[7])
+				PRERROR2("Context profile mask 0x%.8x != 0x%.8x", mask, attribs[7]);
 			glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-			if(flags != (GL_CONTEXT_FLAG_DEBUG_BIT |
-				GL_CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT))
-				PRERROR1("Context flags 0x%.8x != 0x00000003\n", flags);
+			if(flags != attribs[5])
+				PRERROR2("Context flags 0x%.8x != 0x%.8x", flags, attribs[5]);
+			if(GLX_EXTENSION_EXISTS(GLX_ARB_create_context_robustness))
+			{
+				int notificationStrategy = -20;
+				glGetIntegerv(GL_RESET_NOTIFICATION_STRATEGY, &notificationStrategy);
+				if(notificationStrategy != attribs[9])
+					PRERROR2("Reset notification strategy 0x%.8x != 0x%.8x",
+						notificationStrategy, attribs[9]);
+			}
 
 			printf("SUCCESS\n");
 		}
