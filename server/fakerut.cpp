@@ -839,6 +839,9 @@ void configVsVisual(Display *dpy, GLXFBConfig config, XVisualInfo *vis)
 	if(!dpy) THROWNL("Invalid display handle");
 	if(!config) THROWNL("Invalid FB config");
 	if(!vis) THROWNL("Invalid visual pointer");
+	GLXFBConfig config0 = glXGetFBConfigFromVisualSGIX(dpy, vis);
+	if(cfgid(dpy, config0) != cfgid(dpy, config))
+		THROWNL("glXGetFBConfigFromVisualSGIX()");
 	GET_CFG_ATTRIB(config, GLX_VISUAL_ID, ctemp);
 	if(ctemp != (int)vis->visualid)
 		THROWNL("Visual ID mismatch");
@@ -1981,11 +1984,17 @@ int contextMismatchTest(void)
 
 		try
 		{
+			int major, minor, mask, flags;
+
 			if(!(ctx1 =
 				glXCreateNewContext(dpy, config1, GLX_RGBA_TYPE, NULL, True)))
 				THROW("Could not create context");
+			int attribs[] = { GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
+				GLX_CONTEXT_MINOR_VERSION_ARB, 2, GLX_CONTEXT_FLAGS_ARB,
+				GLX_CONTEXT_DEBUG_BIT_ARB | GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+				GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB, None };
 			if(!(ctx2 =
-				glXCreateNewContext(dpy, config2, GLX_RGBA_TYPE, NULL, True)))
+				glXCreateContextAttribsARB(dpy, config2, NULL, True, attribs)))
 				THROW("Could not create context");
 
 			if(!(glXMakeCurrent(dpy, win, ctx1)))
@@ -1995,8 +2004,23 @@ int contextMismatchTest(void)
 
 			if(!(glXMakeContextCurrent(dpy, win, win, ctx1)))
 				THROWNL("Could not make context current");
+			glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+			if(flags)
+				PRERROR1("Context flags 0x%.8x != 0x00000000\n", flags);
 			if(!(glXMakeContextCurrent(dpy, win, win, ctx2)))
 				THROWNL("Could not make context current");
+			major = minor = mask = flags = -20;
+			glGetIntegerv(GL_MAJOR_VERSION, &major);
+			glGetIntegerv(GL_MINOR_VERSION, &minor);
+			if(major != 3 || minor < 2 || minor > 3)
+				PRERROR2("Incorrect context version %d.%d\n", major, minor);
+			glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &mask);
+			if(mask != GL_CONTEXT_CORE_PROFILE_BIT)
+				PRERROR1("Context profile mask 0x%.8x != 0x00000001\n", mask);
+			glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+			if(flags != (GL_CONTEXT_FLAG_DEBUG_BIT |
+				GL_CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT))
+				PRERROR1("Context flags 0x%.8x != 0x00000003\n", flags);
 
 			printf("SUCCESS\n");
 		}
