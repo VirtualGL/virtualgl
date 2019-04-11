@@ -43,8 +43,7 @@ Build Requirements
 
 - Cygwin or Cygwin64 with the following packages:
   * GCC and G++
-  * X11 and OpenGL development libraries:
-    libX11, libXext, libGL, and libGLU
+  * X11 and OpenGL development libraries (see above)
   * libturbojpeg-devel
     (Both Cygwin and Cygwin64 provide the TurboJPEG API DLL for libjpeg-turbo,
     so you can optionally build against this rather than the official
@@ -62,9 +61,7 @@ VirtualGL.  To build 32-bit VirtualGL components on an x86-64 Linux system, you
 will need, at minimum, the following 32-bit development libraries:
 
 - glibc and libstdc++
-- X11 and OpenGL
-  * libX11, libXext, libXtst, libGL, libGLU, and (unless you wish to disable X
-    Video support) libXv
+- X11 and OpenGL (see above)
 
 Instructions for installing these on specific distributions:
 
