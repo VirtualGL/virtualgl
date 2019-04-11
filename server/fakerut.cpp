@@ -17,6 +17,7 @@
 #define GLX_GLXEXT_PROTOTYPES
 #define GL_GLEXT_PROTOTYPES
 #include "glx.h"
+#include "glxext.h"
 #include <GL/glu.h>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
@@ -48,6 +49,22 @@ using namespace vglutil;
 #endif
 #ifndef GLX_HEIGHT
 #define GLX_HEIGHT  0x801E
+#endif
+
+#ifndef GL_MAJOR_VERSION
+#define GL_MAJOR_VERSION  0x821B
+#endif
+#ifndef GL_MINOR_VERSION
+#define GL_MINOR_VERSION  0x821C
+#endif
+#ifndef GL_CONTEXT_FLAGS
+#define GL_CONTEXT_FLAGS  0x821E
+#endif
+#ifndef GL_RESET_NOTIFICATION_STRATEGY_ARB
+#define GL_RESET_NOTIFICATION_STRATEGY_ARB  0x8256
+#endif
+#ifndef GL_CONTEXT_PROFILE_MASK
+#define GL_CONTEXT_PROFILE_MASK  0x9126
 #endif
 
 
@@ -1594,10 +1611,8 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			THROW("Could not create Pbuffer");
 		checkDrawable(dpy, pb, dpyw / 2, dpyh / 2, 1, 0, fbcid);
 		unsigned int tempw = 0, temph = 0;
-		typedef int (*_glXQueryGLXPbufferSGIXType)(Display *, GLXPbufferSGIX, int,
-			unsigned int *);
-		_glXQueryGLXPbufferSGIXType __glXQueryGLXPbufferSGIX =
-			(_glXQueryGLXPbufferSGIXType)glXGetProcAddress(
+		PFNGLXQUERYGLXPBUFFERSGIXPROC __glXQueryGLXPbufferSGIX =
+			(PFNGLXQUERYGLXPBUFFERSGIXPROC)glXGetProcAddress(
 				(const GLubyte *)"glXQueryGLXPbufferSGIX");
 		if(!__glXQueryGLXPbufferSGIX)
 			THROW("GLX_SGIX_pbuffer does not work");
@@ -2013,10 +2028,22 @@ int contextMismatchTest(void)
 			int attribs[] = { GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
 				GLX_CONTEXT_MINOR_VERSION_ARB, 2, GLX_CONTEXT_FLAGS_ARB,
 				GLX_CONTEXT_DEBUG_BIT_ARB | GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
-				GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB, None };
-			if(!(ctx2 =
-				glXCreateContextAttribsARB(dpy, config2, NULL, True, attribs)))
-				THROW("Could not create context");
+				GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB, None,
+				None, None };
+			if(GLX_EXTENSION_EXISTS(GLX_ARB_create_context_robustness))
+			{
+				attribs[5] |= GLX_CONTEXT_ROBUST_ACCESS_BIT_ARB;
+				attribs[8] = GLX_CONTEXT_RESET_NOTIFICATION_STRATEGY_ARB;
+				attribs[9] = GLX_LOSE_CONTEXT_ON_RESET_ARB;
+			}
+			PFNGLXCREATECONTEXTATTRIBSARBPROC __glXCreateContextAttribsARB =
+				(PFNGLXCREATECONTEXTATTRIBSARBPROC)glXGetProcAddress(
+					(const GLubyte *)"glXCreateContextAttribsARB");
+			if(__glXCreateContextAttribsARB)
+				ctx2 = __glXCreateContextAttribsARB(dpy, config2, NULL, True, attribs);
+			else
+				ctx2 = glXCreateNewContext(dpy, config2, GLX_RGBA_TYPE, NULL, True);
+			if(!ctx2) THROW("Could not create context");
 
 			if(!(glXMakeCurrent(dpy, win, ctx1)))
 				THROWNL("Could not make context current");
@@ -2025,23 +2052,35 @@ int contextMismatchTest(void)
 
 			if(!(glXMakeContextCurrent(dpy, win, win, ctx1)))
 				THROWNL("Could not make context current");
-			glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-			if(flags)
-				PRERROR1("Context flags 0x%.8x != 0x00000000\n", flags);
-			if(!(glXMakeContextCurrent(dpy, win, win, ctx2)))
-				THROWNL("Could not make context current");
-			major = minor = mask = flags = -20;
-			glGetIntegerv(GL_MAJOR_VERSION, &major);
-			glGetIntegerv(GL_MINOR_VERSION, &minor);
-			if(major != 3 || minor < 2 || minor > 3)
-				PRERROR2("Incorrect context version %d.%d\n", major, minor);
-			glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &mask);
-			if(mask != GL_CONTEXT_CORE_PROFILE_BIT)
-				PRERROR1("Context profile mask 0x%.8x != 0x00000001\n", mask);
-			glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-			if(flags != (GL_CONTEXT_FLAG_DEBUG_BIT |
-				GL_CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT))
-				PRERROR1("Context flags 0x%.8x != 0x00000003\n", flags);
+
+			if(GLX_EXTENSION_EXISTS(GLX_ARB_create_context))
+			{
+				glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+				if(flags)
+					PRERROR1("Context flags 0x%.8x != 0x00000000", flags);
+				if(!(glXMakeContextCurrent(dpy, win, win, ctx2)))
+					THROWNL("Could not make context current");
+				major = minor = mask = flags = -20;
+				glGetIntegerv(GL_MAJOR_VERSION, &major);
+				glGetIntegerv(GL_MINOR_VERSION, &minor);
+				if(major != 3 || minor < 2 || minor > 3)
+					PRERROR2("Incorrect context version %d.%d", major, minor);
+				glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &mask);
+				if(mask != attribs[7])
+					PRERROR2("Context profile mask 0x%.8x != 0x%.8x", mask, attribs[7]);
+				glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+				if(flags != attribs[5])
+					PRERROR2("Context flags 0x%.8x != 0x%.8x", flags, attribs[5]);
+			}
+			if(GLX_EXTENSION_EXISTS(GLX_ARB_create_context_robustness))
+			{
+				int notificationStrategy = -20;
+				glGetIntegerv(GL_RESET_NOTIFICATION_STRATEGY_ARB,
+					&notificationStrategy);
+				if(notificationStrategy != attribs[9])
+					PRERROR2("Reset notification strategy 0x%.8x != 0x%.8x",
+						notificationStrategy, attribs[9]);
+			}
 
 			printf("SUCCESS\n");
 		}
@@ -2234,7 +2273,7 @@ int copyContextTest(void)
 			CHECK_GL_ERROR();
 			glEdgeFlag(GL_FALSE);                 // GL_CURRENT_BIT
 			CHECK_GL_ERROR();
-			glClearDepthf(0.5);                   // GL_DEPTH_BUFFER_BIT
+			glClearDepth(0.5);                    // GL_DEPTH_BUFFER_BIT
 			CHECK_GL_ERROR();
 			glEnable(GL_LIGHT0);                  // GL_ENABLE_BIT
 			CHECK_GL_ERROR();
@@ -2426,23 +2465,66 @@ int subWinTest(void)
 }
 
 
+int x11Error = -1;
+char x11ErrorString[256] = { 0 };
+
+int xhandler(Display *dpy, XErrorEvent *xe)
+{
+	x11Error = xe->error_code;
+	XGetErrorText(dpy, x11Error, x11ErrorString, 255);
+	return 0;
+}
+
 int extensionQueryTest(void)
 {
 	Display *dpy = NULL;  int retval = 1;
-	int dummy1 = -1, dummy2 = -1, dummy3 = -1;
+	int majorOpcode = -1, eventBase = -1, errorBase = -1;
+	XErrorHandler prevHandler;
 
 	printf("Extension query test:\n\n");
 
 	try
 	{
-		int major = -1, minor = -1;
+		int major = -1, minor = -1, dummy1;
+		unsigned int dummy2;
+		GLXFBConfig *configs = NULL;
 
 		if((dpy = XOpenDisplay(0)) == NULL)
 			THROW("Could not open display");
 
-		if(!XQueryExtension(dpy, "GLX", &dummy1, &dummy2, &dummy3)
-			|| dummy1 < 0 || dummy2 < 0 || dummy3 < 0)
+		if(!XQueryExtension(dpy, "GLX", &majorOpcode, &eventBase, &errorBase)
+			|| majorOpcode <= 0 || eventBase <= 0 || errorBase <= 0)
 			THROW("GLX Extension not reported as present");
+		// For some reason, the GLX error string table isn't initialized until a
+		// substantial GLX command completes.
+		if((configs = glXGetFBConfigs(dpy, DefaultScreen(dpy), &dummy1)) != NULL)
+			XFree(configs);
+		prevHandler = XSetErrorHandler(xhandler);
+		glXQueryDrawable(dpy, 0, GLX_WIDTH, &dummy2);
+		XSync(dpy, False);
+		XSetErrorHandler(prevHandler);
+		if(x11Error != errorBase + 2)  // 2 == GLXBadDrawable
+			PRERROR2("XQueryExtension: X11 error code %d != %d", x11Error,
+				errorBase + 2);
+		if(strcmp(x11ErrorString, "GLXBadDrawable"))
+			PRERROR1("XQueryExtension: X11 error string %s != GLXBadDrawable",
+				x11ErrorString);
+
+		if(!glXQueryExtension(dpy, &errorBase, &eventBase) || errorBase <= 0
+			|| errorBase <= 0)
+			THROW("GLX Extension not reported as present");
+		x11Error = -1;
+		x11ErrorString[0] = 0;
+		prevHandler = XSetErrorHandler(xhandler);
+		glXQueryDrawable(dpy, 0, GLX_WIDTH, &dummy2);
+		XSync(dpy, False);
+		XSetErrorHandler(prevHandler);
+		if(x11Error != errorBase + 2)
+			PRERROR2("glXQueryExtension: X11 error code %d != %d", x11Error,
+				errorBase + 2);
+		if(strcmp(x11ErrorString, "GLXBadDrawable"))
+			PRERROR1("glXQueryExtension: X11 error string %s != GLXBadDrawable",
+				x11ErrorString);
 
 		char *vendor = XServerVendor(dpy);
 		if(!vendor || strcmp(vendor, "Spacely Sprockets, Inc."))
