@@ -34,11 +34,16 @@ DEPTH=24
 IPV6=1
 WRAP=
 XVFBARGS=
+VGLTRANS=1
 while [ $# -gt 0 ]; do
 	case "$1" in
 	-nodl)
 		echo "Testing without dlopen() interposer"
 		NODL=-nodl
+		;;
+	-novgltrans)
+		echo "Testing without VGL Transport"
+		VGLTRANS=0
 		;;
 	-noipv6)
 		IPV6=0
@@ -88,7 +93,7 @@ for SCREEN in 0 1; do
 	$WRAP $BIN/frameut -check -logo
 
 	# VGL Transport
-	if [ $DEPTH = 24 ]; then
+	if [ $DEPTH = 24 -a $VGLTRANS = 1 ]; then
 		echo \*\*\*\*\* Testing VGL Transport/IPv4, Screen $SCREEN \*\*\*\*\*
 		echo
 		$BIN/vglclient >vglclient.log 2>&1 & VGLCLIENTPID=$!
