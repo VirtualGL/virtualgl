@@ -55,10 +55,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #undef GL_EXT_polygon_offset  /* use GL 1.1 version instead of extension */
 
 
-#ifndef GLX_SAMPLES
-#  define GLX_SAMPLES     0x186a1
-#endif
-
 #ifndef EXIT_FAILURE
 #  define EXIT_FAILURE    1
 #endif

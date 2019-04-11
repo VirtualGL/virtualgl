@@ -27,6 +27,13 @@ OpenGL rendering attributes) will find an suitable visual.
 rendering attributes to all 2D X server visuals, although the usefulness of
 that feature is now very limited.
 
+3. VirtualGL no longer provides in-tree GLX headers.  Traditionally, these were
+provided because, since VirtualGL is a GLX emulator, it has the ability to
+support certain newer GLX features that aren't available in the underlying
+libGL implementation.  However, the operating systems that lack these GLX
+features are, for the most part, EOL.  In general, VirtualGL can now only be
+built on systems that have Mesa 9 or later, or the equivalent.
+
 
 2.6.2
 =====

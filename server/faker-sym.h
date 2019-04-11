@@ -18,7 +18,7 @@
 #include <stdio.h>
 #define GL_GLEXT_PROTOTYPES
 #define GLX_GLXEXT_PROTOTYPES
-#include "glx.h"
+#include <GL/glx.h>
 #include "Log.h"
 #include "GlobalCriticalSection.h"
 #include "vglinline.h"

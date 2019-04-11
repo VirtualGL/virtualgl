@@ -37,6 +37,8 @@ Build Requirements
     Video support) libXv
   * On Mac platforms, these are distributed with
     [XQuartz](http://xquartz.macosforge.org).
+  * The OpenGL and GLX headers must be reasonably modern (generally Mesa 9 or
+    later, or the equivalent.)
 
 
 ### Windows

@@ -14,22 +14,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef GLX_RGBA_TYPE
-#define GLX_RGBA_TYPE 0x8014
-#endif
-#ifndef GLX_RGBA_BIT
-#define GLX_RGBA_BIT 0x00000001
-#endif
-#ifndef GLX_LARGEST_PBUFFER
-#define GLX_LARGEST_PBUFFER 0x801C
-#endif
-#ifndef GLX_PBUFFER_WIDTH
-#define GLX_PBUFFER_WIDTH 0x8041
-#endif
-#ifndef GLX_PBUFFER_HEIGHT
-#define GLX_PBUFFER_HEIGHT 0x8040
-#endif
-
 void configure(unsigned int width, unsigned int height);
 void drawBuffer(void);
 

@@ -11,7 +11,7 @@
  * wxWindows Library License for more details.
  */
 
-#include "glx.h"
+#include <GL/glx.h>
 
 /* This will cause a crash in VirtualGL 2.4 beta1 and earlier. */
 PFNGLBINDBUFFERPROC glBindBuffer = NULL;

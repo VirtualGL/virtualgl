@@ -43,7 +43,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <GL/gl.h>
-#include "../common/glx.h"
+#include <GL/glx.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

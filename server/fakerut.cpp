@@ -16,8 +16,7 @@
 #include <stdlib.h>
 #define GLX_GLXEXT_PROTOTYPES
 #define GL_GLEXT_PROTOTYPES
-#include "glx.h"
-#include "glxext.h"
+#include <GL/glx.h>
 #include <GL/glu.h>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
@@ -28,44 +27,6 @@
 #include "glext-vgl.h"
 
 using namespace vglutil;
-
-#ifndef GLX_RGBA_BIT
-#define GLX_RGBA_BIT  0x00000001
-#endif
-#ifndef GLX_RGBA_TYPE
-#define GLX_RGBA_TYPE  0x8014
-#endif
-#ifndef GLX_LARGEST_PBUFFER
-#define GLX_LARGEST_PBUFFER  0x801C
-#endif
-#ifndef GLX_PBUFFER_WIDTH
-#define GLX_PBUFFER_WIDTH  0x8041
-#endif
-#ifndef GLX_PBUFFER_HEIGHT
-#define GLX_PBUFFER_HEIGHT  0x8040
-#endif
-#ifndef GLX_WIDTH
-#define GLX_WIDTH  0x801D
-#endif
-#ifndef GLX_HEIGHT
-#define GLX_HEIGHT  0x801E
-#endif
-
-#ifndef GL_MAJOR_VERSION
-#define GL_MAJOR_VERSION  0x821B
-#endif
-#ifndef GL_MINOR_VERSION
-#define GL_MINOR_VERSION  0x821C
-#endif
-#ifndef GL_CONTEXT_FLAGS
-#define GL_CONTEXT_FLAGS  0x821E
-#endif
-#ifndef GL_RESET_NOTIFICATION_STRATEGY_ARB
-#define GL_RESET_NOTIFICATION_STRATEGY_ARB  0x8256
-#endif
-#ifndef GL_CONTEXT_PROFILE_MASK
-#define GL_CONTEXT_PROFILE_MASK  0x9126
-#endif
 
 
 #define CLEAR_BUFFER(buffer, r, g, b, a) \
