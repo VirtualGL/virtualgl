@@ -33,6 +33,7 @@ FAKERUTARGS=
 DEPTH=24
 IPV6=1
 WRAP=
+XVFBARGS=
 while [ $# -gt 0 ]; do
 	case "$1" in
 	-nodl)
@@ -41,6 +42,9 @@ while [ $# -gt 0 ]; do
 		;;
 	-noipv6)
 		IPV6=0
+		;;
+	-noglx)
+		XVFBARGS="-extension GLX"
 		;;
 	-10bpc)
 		DEPTH=30
@@ -65,8 +69,8 @@ which Xvfb >/dev/null 2>&1 || (
 	echo Xvfb not found!
 	exit 1
 )
-Xvfb :42 -screen 0 1920x1200x$DEPTH -screen 1 1920x1200x$DEPTH >/dev/null 2>&1 & PID=$!
-echo Xvfb started as process $PID
+Xvfb :42 -screen 0 1920x1200x$DEPTH -screen 1 1920x1200x$DEPTH $XVFBARGS >/dev/null 2>&1 & PID=$!
+echo Xvfb $XVFBARGS started as process $PID
 sleep 2
 
 DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut

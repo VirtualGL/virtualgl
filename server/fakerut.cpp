@@ -2419,23 +2419,66 @@ int subWinTest(void)
 }
 
 
+int x11Error = -1;
+char x11ErrorString[256] = { 0 };
+
+int xhandler(Display *dpy, XErrorEvent *xe)
+{
+	x11Error = xe->error_code;
+	XGetErrorText(dpy, x11Error, x11ErrorString, 255);
+	return 0;
+}
+
 int extensionQueryTest(void)
 {
 	Display *dpy = NULL;  int retval = 1;
-	int dummy1 = -1, dummy2 = -1, dummy3 = -1;
+	int majorOpcode = -1, eventBase = -1, errorBase = -1;
+	XErrorHandler prevHandler;
 
 	printf("Extension query test:\n\n");
 
 	try
 	{
-		int major = -1, minor = -1;
+		int major = -1, minor = -1, dummy1;
+		unsigned int dummy2;
+		GLXFBConfig *configs = NULL;
 
 		if((dpy = XOpenDisplay(0)) == NULL)
 			THROW("Could not open display");
 
-		if(!XQueryExtension(dpy, "GLX", &dummy1, &dummy2, &dummy3)
-			|| dummy1 < 0 || dummy2 < 0 || dummy3 < 0)
+		if(!XQueryExtension(dpy, "GLX", &majorOpcode, &eventBase, &errorBase)
+			|| majorOpcode <= 0 || eventBase <= 0 || errorBase <= 0)
 			THROW("GLX Extension not reported as present");
+		// For some reason, the GLX error string table isn't initialized until a
+		// substantial GLX command completes.
+		if((configs = glXGetFBConfigs(dpy, DefaultScreen(dpy), &dummy1)) != NULL)
+			XFree(configs);
+		prevHandler = XSetErrorHandler(xhandler);
+		glXQueryDrawable(dpy, 0, GLX_WIDTH, &dummy2);
+		XSync(dpy, False);
+		XSetErrorHandler(prevHandler);
+		if(x11Error != errorBase + 2)  // 2 == GLXBadDrawable
+			PRERROR2("XQueryExtension: X11 error code %d != %d", x11Error,
+				errorBase + 2);
+		if(strcmp(x11ErrorString, "GLXBadDrawable"))
+			PRERROR1("XQueryExtension: X11 error string %s != GLXBadDrawable",
+				x11ErrorString);
+
+		if(!glXQueryExtension(dpy, &errorBase, &eventBase) || errorBase <= 0
+			|| errorBase <= 0)
+			THROW("GLX Extension not reported as present");
+		x11Error = -1;
+		x11ErrorString[0] = 0;
+		prevHandler = XSetErrorHandler(xhandler);
+		glXQueryDrawable(dpy, 0, GLX_WIDTH, &dummy2);
+		XSync(dpy, False);
+		XSetErrorHandler(prevHandler);
+		if(x11Error != errorBase + 2)
+			PRERROR2("glXQueryExtension: X11 error code %d != %d", x11Error,
+				errorBase + 2);
+		if(strcmp(x11ErrorString, "GLXBadDrawable"))
+			PRERROR1("glXQueryExtension: X11 error string %s != GLXBadDrawable",
+				x11ErrorString);
 
 		char *vendor = XServerVendor(dpy);
 		if(!vendor || strcmp(vendor, "Spacely Sprockets, Inc."))
