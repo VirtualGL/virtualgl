@@ -1961,7 +1961,16 @@ int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 		OPENTRACE(glXQueryContext);  PRARGD(dpy);  PRARGX(ctx);
 		PRARGIX(attribute);  STARTTRACE();
 
-	retval = _glXQueryContext(DPY3D, ctx, attribute, value);
+	GLXFBConfig config;  VisualID vid;  int screen;
+
+	if(ctx && attribute == GLX_SCREEN && value
+		&& (config = ctxhash.findConfig(ctx)) != NULL
+		&& (vid = cfghash.getVisual(dpy, config, screen)) != 0)
+	{
+		*value = screen;
+		retval = Success;
+	}
+	else retval = _glXQueryContext(DPY3D, ctx, attribute, value);
 
 		STOPTRACE();  if(value) PRARGIX(*value);  CLOSETRACE();
 
@@ -1983,7 +1992,22 @@ int glXQueryContextInfoEXT(Display *dpy, GLXContext ctx, int attribute,
 		OPENTRACE(glXQueryContextInfoEXT);  PRARGD(dpy);  PRARGX(ctx);
 		PRARGIX(attribute);  STARTTRACE();
 
-	retval = _glXQueryContextInfoEXT(DPY3D, ctx, attribute, value);
+	GLXFBConfig config;  VisualID vid;  int screen;
+
+	if(ctx && attribute == GLX_SCREEN_EXT && value
+		&& (config = ctxhash.findConfig(ctx)) != NULL
+		&& (vid = cfghash.getVisual(dpy, config, screen)) != 0)
+	{
+		*value = screen;
+		retval = Success;
+	}
+	else if(ctx && attribute == GLX_VISUAL_ID_EXT && value
+		&& (config = ctxhash.findConfig(ctx)) != NULL)
+	{
+		*value = cfghash.getVisual(dpy, config, screen);
+		retval = Success;
+	}
+	else retval = _glXQueryContextInfoEXT(DPY3D, ctx, attribute, value);
 
 		STOPTRACE();  if(value) PRARGIX(*value);  CLOSETRACE();
 

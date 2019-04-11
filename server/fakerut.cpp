@@ -955,6 +955,21 @@ void queryContextTest(Display *dpy, XVisualInfo *vis, GLXFBConfig config)
 		temp = -20;
 		glXQueryContext(dpy, ctx, GLX_RENDER_TYPE, &temp);
 		if(temp != GLX_RGBA_TYPE) THROWNL("glXQueryContext render type");
+		temp = -20;
+		glXQueryContext(dpy, ctx, GLX_SCREEN, &temp);
+		if(temp != DefaultScreen(dpy)) THROWNL("glXQueryContext screen");
+
+		if(GLX_EXTENSION_EXISTS(GLX_EXT_import_context))
+		{
+			temp = -20;
+			glXQueryContextInfoEXT(dpy, ctx, GLX_SCREEN_EXT, &temp);
+			if(temp != DefaultScreen(dpy)) THROWNL("glXQueryContextInfoEXT screen");
+			temp = -20;
+			glXQueryContextInfoEXT(dpy, ctx, GLX_VISUAL_ID_EXT, &temp);
+			if((VisualID)temp != vis->visualid)
+				THROWNL("glXQueryContextInfoEXT visual ID");
+		}
+
 		glXDestroyContext(dpy, ctx);  ctx = 0;
 	}
 	catch(...)
