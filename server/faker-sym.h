@@ -27,19 +27,11 @@
 #include "vglinline.h"
 #ifdef FAKEXCB
 extern "C" {
-#ifdef SYSXCBHEADERS
 	#include <xcb/xcb.h>
 	#include <xcb/xcbext.h>
 	#include <xcb/xcb_keysyms.h>
 	#include <xcb/glx.h>
 	#include <X11/Xlib-xcb.h>
-#else
-	#include "xcb_headers/xcb.h"
-	#include "xcb_headers/xcbext.h"
-	#include "xcb_headers/xcb_keysyms.h"
-	#include "xcb_headers/glx.h"
-	#include "xcb_headers/Xlib-xcb.h"
-#endif
 }
 #endif
 #include "faker.h"

@@ -52,13 +52,6 @@ option(VGL_FAKEXCB "Interpose enough of the XCB API to make Qt 5 work" ON)
 if(VGL_FAKEXCB)
 	add_definitions(-DFAKEXCB)
 	set(FAKER_XCB_SOURCES faker-xcb.cpp XCBConnHash.cpp)
-	set(VGL_DEFAULTSYSTEMXCB 0)
-	option(VGL_SYSTEMXCB
-		"Compile against system-supplied versions of the XCB headers instead of the in-tree versions."
-			${VGL_DEFAULTSYSTEMXCB})
-	if(VGL_SYSTEMXCB)
-		add_definitions(-DSYSXCBHEADERS)
-	endif()
 endif()
 
 get_directory_property(DEFS_PROP COMPILE_DEFINITIONS)

@@ -94,7 +94,6 @@ Ertl 2000.)
 #-->  -DCMAKE_INSTALL_DOCDIR=%{docdir} -DCMAKE_INSTALL_INCLUDEDIR=%{incdir} \
 #-->  -DCMAKE_INSTALL_LIBDIR=%{libdir} -DCMAKE_INSTALL_PREFIX=%{prefix} \
 #-->  -DVGL_BUILDSERVER=@VGL_BUILDSERVER@ -DVGL_SYSTEMFLTK=@VGL_SYSTEMFLTK@ \
-#-->  -DVGL_SYSTEMXCB=@VGL_SYSTEMXCB@ \
 #-->  -DVGL_USESSL=@VGL_USESSL@ -DVGL_USEXV=@VGL_USEXV@
 #-->export NUMCPUS=`grep -c '^processor' /proc/cpuinfo`
 #-->make -j$NUMCPUS --load-average=$NUMCPUS
