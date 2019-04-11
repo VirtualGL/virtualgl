@@ -27,7 +27,8 @@
 #include "rr.h"
 #include "faker.h"
 #include "glxvisual.h"
-#include "glxproto.h"
+#include <X11/Xmd.h>
+#include <GL/glxproto.h>
 
 using namespace vglutil;
 using namespace vglserver;

@@ -14,16 +14,6 @@
 #undef GLX_SGIX_pbuffer
 
 
-#if !defined(GLX_SAMPLES) && defined(GLX_SAMPLES_ARB)
-#define GLX_SAMPLES GLX_SAMPLES_ARB
-#endif
-
-
-#if !defined(GLX_SAMPLE_BUFFERS) && defined(GLX_SAMPLE_BUFFERS_ARB)
-#define GLX_SAMPLE_BUFFERS GLX_SAMPLE_BUFFERS_ARB
-#endif
-
-
 /**
  * Test if we pixel buffers are available for a particular X screen.
  * Input:  dpy - the X display

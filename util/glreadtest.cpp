@@ -22,7 +22,7 @@
 #include "Error.h"
 #include <errno.h>
 #define GL_GLEXT_PROTOTYPES
-#include "../common/glx.h"
+#include <GL/glx.h>
 #include <GL/glu.h>
 #include "x11err.h"
 #ifdef USEIFR

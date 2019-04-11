@@ -15,7 +15,7 @@
 #ifndef __GLXDRAWABLEHASH_H__
 #define __GLXDRAWABLEHASH_H__
 
-#include "glx.h"
+#include <GL/glx.h>
 #include <X11/Xlib.h>
 #include "Hash.h"
 

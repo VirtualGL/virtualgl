@@ -19,7 +19,7 @@
 #include "Error.h"
 #include "Log.h"
 #include "Mutex.h"
-#include "glx.h"
+#include <GL/glx.h>
 #include "fakerconfig.h"
 #include "Timer.h"
 #include "DisplayHash.h"

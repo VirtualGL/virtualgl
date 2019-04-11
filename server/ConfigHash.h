@@ -16,7 +16,7 @@
 
 #define GL_GLEXT_PROTOTYPES
 #define GLX_GLXEXT_PROTOTYPES
-#include "glx.h"
+#include <GL/glx.h>
 #include <X11/Xlib.h>
 #include "glxvisual.h"
 #include "Hash.h"

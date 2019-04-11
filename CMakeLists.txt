@@ -321,17 +321,6 @@ if(APPLE)
 	set(OPENGL_glu_LIBRARY /usr/X11/lib/libGLU.dylib)
 endif()
 
-# Not all OpenGL installations include all of the prototypes and constants in
-# glx.h and glxext.h that are necessary to build VirtualGL.  If you know that
-# yours does, then you can set VGL_SYSTEMGLX.
-set(VGL_DEFAULTSYSTEMGLX 0)
-option(VGL_SYSTEMGLX
-	"Compile against system-supplied versions of glx.h and glxext.h instead of the in-tree versions."
-	${VGL_DEFAULTSYSTEMGLX})
-if(VGL_SYSTEMGLX)
-	add_definitions(-DSYSGLXHEADERS)
-endif()
-
 include_directories(${X11_X11_INCLUDE_PATH} ${OPENGL_INCLUDE_DIR})
 
 option(VGL_USEXV "Enable X Video support" TRUE)

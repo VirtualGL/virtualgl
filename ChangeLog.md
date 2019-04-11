@@ -25,6 +25,13 @@ interoperability functions with VirtualGL.  Note that 3D applications must link
 directly with libOpenCL (as opposed to using `dlopen()` to load OpenCL
 functions) in order to take advantage of this fix.
 
+4. VirtualGL no longer provides in-tree GLX headers.  Traditionally, these were
+provided because, since VirtualGL is a GLX emulator, it has the ability to
+support certain newer GLX features that aren't available in the underlying
+libGL implementation.  However, the operating systems that lack these GLX
+features are, for the most part, EOL.  In general, VirtualGL can now only be
+built on systems that have Mesa 9 or later, or the equivalent.
+
 
 2.6.2
 =====
