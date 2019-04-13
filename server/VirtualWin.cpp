@@ -77,7 +77,8 @@ VirtualWin::VirtualWin(Display *dpy_, Window win) :
 	newConfig = false;
 	swapInterval = 0;
 	XWindowAttributes xwa;
-	XGetWindowAttributes(dpy, win, &xwa);
+	if(!XGetWindowAttributes(dpy, win, &xwa) || !xwa.visual)
+		throw(vglutil::Error(__FUNCTION__, "Invalid window", -1));
 	if(!fconfig.wm && !(xwa.your_event_mask & StructureNotifyMask))
 	{
 		if(!(eventdpy = _XOpenDisplay(DisplayString(dpy))))

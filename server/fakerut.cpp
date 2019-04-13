@@ -26,6 +26,7 @@
 #include "Error.h"
 #include "Thread.h"
 #include "glext-vgl.h"
+#include "glxproto.h"
 
 using namespace vglutil;
 
@@ -2459,28 +2460,54 @@ int subWinTest(void)
 }
 
 
-int x11Error = -1;
+int x11Error = -1, x11MinorCode = -1;
 char x11ErrorString[256] = { 0 };
 
 int xhandler(Display *dpy, XErrorEvent *xe)
 {
 	x11Error = xe->error_code;
+	x11MinorCode = xe->minor_code;
 	XGetErrorText(dpy, x11Error, x11ErrorString, 255);
 	return 0;
+}
+
+#define XERRTEST_START() \
+{ \
+	x11Error = x11MinorCode = -1; \
+	x11ErrorString[0] = 0; \
+	prevHandler = XSetErrorHandler(xhandler); \
+}
+
+#define XERRTEST_STOP(expectedErrCode, expectedMinorCode, expectedErrString) \
+{ \
+	XSetErrorHandler(prevHandler); \
+	if(x11Error != expectedErrCode) \
+		PRERROR3("%d: X11 error code %d != %d", __LINE__, x11Error, \
+			expectedErrCode); \
+	if(expectedMinorCode >= 0 && x11MinorCode != expectedMinorCode) \
+		PRERROR3("%d: X11 minor code %d != %d", __LINE__, x11MinorCode, \
+			expectedMinorCode); \
+	if(strcmp(x11ErrorString, expectedErrString)) \
+		PRERROR3("%d: X11 error string %s != %s", __LINE__, x11ErrorString, \
+			expectedErrString); \
 }
 
 int extensionQueryTest(void)
 {
 	Display *dpy = NULL;  int retval = 1;
-	int majorOpcode = -1, eventBase = -1, errorBase = -1;
+	int majorOpcode = -1, eventBase = -1, errorBase = -1, n;
 	XErrorHandler prevHandler;
+	XVisualInfo *vis = NULL;
+	GLXContext ctx = 0;
+	Pixmap pm = 0;
 
-	printf("Extension query test:\n\n");
+	printf("Extension query and error handling test:\n\n");
 
 	try
 	{
 		int major = -1, minor = -1, dummy1;
 		unsigned int dummy2;
+		unsigned long dummy3;
 		GLXFBConfig *configs = NULL;
 
 		if((dpy = XOpenDisplay(0)) == NULL)
@@ -2493,32 +2520,16 @@ int extensionQueryTest(void)
 		// substantial GLX command completes.
 		if((configs = glXGetFBConfigs(dpy, DefaultScreen(dpy), &dummy1)) != NULL)
 			XFree(configs);
-		prevHandler = XSetErrorHandler(xhandler);
+		XERRTEST_START();
 		glXQueryDrawable(dpy, 0, GLX_WIDTH, &dummy2);
-		XSync(dpy, False);
-		XSetErrorHandler(prevHandler);
-		if(x11Error != errorBase + 2)  // 2 == GLXBadDrawable
-			PRERROR2("XQueryExtension: X11 error code %d != %d", x11Error,
-				errorBase + 2);
-		if(strcmp(x11ErrorString, "GLXBadDrawable"))
-			PRERROR1("XQueryExtension: X11 error string %s != GLXBadDrawable",
-				x11ErrorString);
+		XERRTEST_STOP(errorBase + GLXBadDrawable, -1, "GLXBadDrawable");
 
-		if(!glXQueryExtension(dpy, &errorBase, &eventBase) || errorBase <= 0
-			|| errorBase <= 0)
+		int errorBase2 = -1, eventBase2 = -1;
+		if(!glXQueryExtension(dpy, &errorBase2, &eventBase2) || errorBase2 <= 0
+			|| eventBase2 <= 0)
 			THROW("GLX Extension not reported as present");
-		x11Error = -1;
-		x11ErrorString[0] = 0;
-		prevHandler = XSetErrorHandler(xhandler);
-		glXQueryDrawable(dpy, 0, GLX_WIDTH, &dummy2);
-		XSync(dpy, False);
-		XSetErrorHandler(prevHandler);
-		if(x11Error != errorBase + 2)
-			PRERROR2("glXQueryExtension: X11 error code %d != %d", x11Error,
-				errorBase + 2);
-		if(strcmp(x11ErrorString, "GLXBadDrawable"))
-			PRERROR1("glXQueryExtension: X11 error string %s != GLXBadDrawable",
-				x11ErrorString);
+		if(errorBase != errorBase2 || eventBase != eventBase2)
+			THROW("XQueryExtension()/glXQueryExtension() mismatch");
 
 		char *vendor = XServerVendor(dpy);
 		if(!vendor || strcmp(vendor, "Spacely Sprockets, Inc."))
@@ -2547,6 +2558,350 @@ int extensionQueryTest(void)
 			glXQueryExtensionsString(dpy, DefaultScreen(dpy))))
 			THROW("glXQueryServerString(..., GLX_EXTENSIONS)");
 
+		// Test whether particular GLX functions trigger the errors that the spec
+		// says they should
+
+		int vattribs[] = { GLX_RGBA, None };
+		if(!(vis = glXChooseVisual(dpy, DefaultScreen(dpy), vattribs)))
+			THROW("Could not find visual");
+
+		int cattribs[] = { None };
+		GLXFBConfig config;
+		if(!(configs = glXChooseFBConfig(dpy, DefaultScreen(dpy), cattribs, &n)))
+			THROW("Could not find FB config");
+		config = configs[0];
+		XFree(configs);
+
+		//-------------------------------------------------------------------------
+		//    glXBindTexImageEXT()
+		//-------------------------------------------------------------------------
+
+		if(GLX_EXTENSION_EXISTS(GLX_EXT_texture_from_pixmap))
+		{
+			PFNGLXBINDTEXIMAGEEXTPROC __glXBindTexImageEXT =
+				(PFNGLXBINDTEXIMAGEEXTPROC)glXGetProcAddress(
+					(GLubyte *)"glXBindTexImageEXT");
+			if(__glXBindTexImageEXT)
+			{
+				// GLXBadPixmap error thrown if drawable is not valid or is not a
+				// Pixmap
+				for(int badValue = 0; badValue <= 1; badValue++)
+				{
+					XERRTEST_START();
+					__glXBindTexImageEXT(dpy, (GLXDrawable)badValue, GL_BACK, NULL);
+					XERRTEST_STOP(errorBase + GLXBadPixmap, X_GLXVendorPrivate,
+						"GLXBadPixmap");
+				}
+				XERRTEST_START();
+				__glXBindTexImageEXT(dpy, DefaultRootWindow(dpy), GL_BACK, NULL);
+				XERRTEST_STOP(errorBase + GLXBadPixmap, X_GLXVendorPrivate,
+					"GLXBadPixmap");
+			}
+		}
+
+		//-------------------------------------------------------------------------
+		//    glXChooseFBConfig()
+		//-------------------------------------------------------------------------
+
+		// NULL returned if display doesn't support GLX or screen is not valid
+		if(glXChooseFBConfig(NULL, DefaultScreen(dpy), cattribs, &n))
+			THROW("glXChooseFBConfig(NULL display) != NULL");
+		if(glXChooseFBConfig(dpy, -1, cattribs, &n))
+			THROW("glXChooseFBConfig(bogus screen) != NULL");
+
+		//-------------------------------------------------------------------------
+		//    glXCreateContext()
+		//-------------------------------------------------------------------------
+
+		// BadValue error thrown and NULL returned if visual is not valid
+		//
+		// (NOTE: VirtualGL can't distinguish between a bogus non-NULL visual and a
+		// valid visual, so passing the former will result in a segfault.)
+		XERRTEST_START();
+		if(glXCreateContext(dpy, NULL, NULL, True))
+			THROW("glXCreateContext(bad visual) != NULL");
+		XERRTEST_STOP(BadValue, X_GLXCreateContext,
+			"BadValue (integer parameter out of range for operation)");
+
+		//-------------------------------------------------------------------------
+		//    glXCreateGLXPixmap()
+		//    glXCreatePixmap()
+		//-------------------------------------------------------------------------
+
+		if(!(pm = XCreatePixmap(dpy, DefaultRootWindow(dpy), 10, 10,
+			DefaultDepth(dpy, DefaultScreen(dpy)))))
+			THROW("Could not create Pixmap");
+
+		// BadValue error thrown and NULL returned if visual is not valid
+		XERRTEST_START();
+		if(glXCreateGLXPixmap(dpy, NULL, pm))
+			THROW("glXCreateGLXPixmap(bad visual) != NULL");
+		XERRTEST_STOP(BadValue, X_GLXCreateGLXPixmap,
+			"BadValue (integer parameter out of range for operation)");
+
+		// GLXBadFBConfig error thrown and NULL returned if FB config is not valid
+		XERRTEST_START();
+		if(glXCreatePixmap(dpy, NULL, pm, NULL))
+			THROW("glXCreatePixmap(bogus FB config) != NULL");
+		XERRTEST_STOP(errorBase + GLXBadFBConfig, X_GLXCreatePixmap,
+			"GLXBadFBConfig");
+
+		// BadMatch error thrown and NULL returned if FB config doesn't support
+		// window rendering
+#ifdef GLX_ARB_fbconfig_float
+		if(GLX_EXTENSION_EXISTS(GLX_ARB_fbconfig_float))
+		{
+			int floatAttribs[] = { GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT,
+				GLX_RENDER_TYPE, GLX_RGBA_FLOAT_BIT_ARB, None };
+			if((configs = glXChooseFBConfig(dpy, DefaultScreen(dpy), floatAttribs,
+				&n)))
+			{
+				XERRTEST_START();
+				if(glXCreatePixmap(dpy, configs[0], pm, NULL))
+					THROW("glXCreatePixmap(non-X-renderable FB config) != NULL");
+				XERRTEST_STOP(BadMatch, X_GLXCreatePixmap,
+					"BadMatch (invalid parameter attributes)");
+				XFree(configs);  configs = NULL;
+			}
+		}
+#endif
+
+		// BadPixmap error thrown and NULL returned if Pixmap is not valid
+		for(int badValue = 0; badValue <= 1; badValue++)
+		{
+			XERRTEST_START();
+			if(glXCreateGLXPixmap(dpy, vis, (Pixmap)badValue))
+				THROW("glXCreateGLXPixmap(bad Pixmap) != NULL");
+			XERRTEST_STOP(BadPixmap, X_GLXCreateGLXPixmap,
+				"BadPixmap (invalid Pixmap parameter)");
+
+			XERRTEST_START();
+			if(glXCreatePixmap(dpy, config, (Pixmap)badValue, NULL))
+				THROW("glXCreateGLXPixmap(bogus Pixmap) != NULL");
+			XERRTEST_STOP(BadPixmap, X_GLXCreatePixmap,
+				"BadPixmap (invalid Pixmap parameter)");
+		}
+
+		//-------------------------------------------------------------------------
+		//    glXCreateWindow()
+		//-------------------------------------------------------------------------
+
+		// GLXBadFBConfig error thrown and NULL returned if FB config is not valid
+		XERRTEST_START();
+		if(glXCreateWindow(dpy, NULL, DefaultRootWindow(dpy), NULL))
+			THROW("glXCreateWindow(bogus FB config) != NULL");
+		XERRTEST_STOP(errorBase + GLXBadFBConfig, X_GLXCreateWindow,
+			"GLXBadFBConfig");
+
+		// BadWindow error thrown and NULL returned if Window is not valid or is
+		// not a window
+		for(int badValue = 0; badValue <= 1; badValue++)
+		{
+			XERRTEST_START();
+			if(glXCreateWindow(dpy, config, (Window)badValue, NULL))
+				THROW("glXCreateGLXWindow(bogus Window) != NULL");
+			XERRTEST_STOP(BadWindow, X_GLXCreateWindow,
+				"BadWindow (invalid Window parameter)");
+		}
+
+		XERRTEST_START();
+		if(glXCreateWindow(dpy, config, pm, NULL))
+			THROW("glXCreateGLXWindow(bogus Window) != NULL");
+		XERRTEST_STOP(BadWindow, X_GLXCreateWindow,
+			"BadWindow (invalid Window parameter)");
+
+		XFreePixmap(dpy, pm);  pm = 0;
+
+		//-------------------------------------------------------------------------
+		//    glXDestroyGLXPixmap()
+		//    glXDestroyPixmap()
+		//-------------------------------------------------------------------------
+
+		// These functions should throw a GLXBadPixmap error when passed an invalid
+		// GLXPixmap, but VirtualGL's implementation has historically treated that
+		// situation as a no-op.
+		for(int badValue = 0; badValue <= 1; badValue++)
+			glXDestroyGLXPixmap(dpy, (GLXPixmap)badValue);
+		for(int badValue = 0; badValue <= 1; badValue++)
+			glXDestroyPixmap(dpy, (GLXPixmap)badValue);
+
+		//-------------------------------------------------------------------------
+		//    glXGetConfig()
+		//-------------------------------------------------------------------------
+
+		// GLX_NO_EXTENSION returned if display doesn't support GLX
+		if(glXGetConfig(NULL, vis, GLX_RGBA, &dummy1) != GLX_NO_EXTENSION)
+			THROW("glXGetConfig(bad display) != GLX_NO_EXTENSION");
+		// GLX_BAD_VISUAL returned if visual doesn't support GLX and an attribute
+		// other than GLX_USE_GL is requested
+		if(glXGetConfig(dpy, NULL, GLX_RGBA, &dummy1) != GLX_BAD_VISUAL)
+			THROW("glXGetConfig(bad visual) != GLX_BAD_VISUAL");
+		// GLX_BAD_ATTRIBUTE returned if attribute is not valid
+		if(glXGetConfig(dpy, vis, 0x42424242, &dummy1) != GLX_BAD_ATTRIBUTE)
+			THROW("glXGetConfig(bad attrib) != GLX_BAD_ATTRIBUTE");
+
+		//-------------------------------------------------------------------------
+		//    glXGetFBConfigAttrib()
+		//-------------------------------------------------------------------------
+
+		// GLX_NO_EXTENSION returned if display doesn't support GLX
+		if(glXGetFBConfigAttrib(NULL, NULL, GLX_RENDER_TYPE, &dummy1)
+			!= GLX_NO_EXTENSION)
+			THROW("glXGetFBConfigAttrib(bad display) != GLX_NO_EXTENSION");
+		// GLX_BAD_ATTRIBUTE returned if attribute is not valid
+		if(glXGetFBConfigAttrib(dpy, config, 0x42424242, &dummy1)
+			!= GLX_BAD_ATTRIBUTE)
+			THROW("glXGetFBConfigAttrib(bad attrib) != GLX_BAD_ATTRIBUTE");
+
+		//-------------------------------------------------------------------------
+		//    glXGetSelectedEvent()
+		//-------------------------------------------------------------------------
+
+		// GLXBadDrawable error thrown if drawable is not valid
+		for(int badValue = 0; badValue <= 1; badValue++)
+		{
+			XERRTEST_START();
+			glXGetSelectedEvent(dpy, (GLXDrawable)badValue, &dummy3);
+			XERRTEST_STOP(errorBase + GLXBadDrawable, -1, "GLXBadDrawable");
+		}
+
+		//-------------------------------------------------------------------------
+		//    glXGetVisualFromFBConfig()
+		//-------------------------------------------------------------------------
+
+		// NULL returned if FB config is not valid
+		if(glXGetVisualFromFBConfig(dpy, NULL))
+			THROW("glXGetVisualFromFBConfig(bogus FB config) != NULL");
+
+		//-------------------------------------------------------------------------
+		//    glXMakeCurrent()
+		//    glXMakeContextCurrent()
+		//-------------------------------------------------------------------------
+
+		if(!(ctx = glXCreateContext(dpy, vis, NULL, True)))
+			THROW("Could not create context");
+
+		// VirtualGL's implementation of these functions has historically tolerated
+		// a NULL drawable, because other implementations tend to tolerate that.
+		// However, this should technically trigger a BadMatch (glXMakeCurrent())
+		// or GLXBadDrawable (glXMakeContextCurrent()) error.  The return value
+		// differs among different underlying GLX implementations.
+		glXMakeCurrent(dpy, None, ctx);
+		glXMakeContextCurrent(dpy, None, None, ctx);
+
+		// GLXBadDrawable error thrown and False returned if drawable is not valid
+		for(int i = 0; i < 2; i++)
+		{
+			// We do this twice, in order to test what happens when the unknown
+			// drawable is hashed
+			XERRTEST_START();
+			if(glXMakeCurrent(dpy, (GLXDrawable)1, ctx))
+				THROW("glXMakeCurrent(bogus drawable) succeeded");
+			XERRTEST_STOP(errorBase + GLXBadDrawable, X_GLXMakeCurrent,
+				"GLXBadDrawable");
+
+			XERRTEST_START();
+			if(glXMakeContextCurrent(dpy, (GLXDrawable)2, None, ctx))
+				THROW("glXMakeContextCurrent(bogus drawable) succeeded");
+			XERRTEST_STOP(errorBase + GLXBadDrawable, X_GLXMakeContextCurrent,
+				"GLXBadDrawable");
+		}
+
+		// Technically these functions should throw a GLXBadContext error if passed
+		// a dead context, but other implementations just return False, and at
+		// least one commercial application relies on that behavior.
+		glXDestroyContext(dpy, ctx);
+		if(glXMakeCurrent(dpy, DefaultRootWindow(dpy), ctx)
+			|| glXMakeContextCurrent(dpy, DefaultRootWindow(dpy),
+				DefaultRootWindow(dpy), ctx))
+		{
+			ctx = 0;
+			THROW("glXMake[Context]Current(dead context) succeeded");
+		}
+		ctx = 0;
+
+		// GLXBadContext error thrown and False returned if context is not valid
+		XERRTEST_START();
+		if(glXMakeCurrent(dpy, DefaultRootWindow(dpy), NULL))
+			THROW("glXMakeCurrent(NULL context) succeeded");
+		XERRTEST_STOP(errorBase + GLXBadContext, X_GLXMakeCurrent,
+			"GLXBadContext");
+
+		XERRTEST_START();
+		if(glXMakeContextCurrent(dpy, DefaultRootWindow(dpy),
+			DefaultRootWindow(dpy), NULL))
+			THROW("glXMakeContextCurrent(NULL context) succeeded");
+		XERRTEST_STOP(errorBase + GLXBadContext, X_GLXMakeContextCurrent,
+			"GLXBadContext");
+
+		// VirtualGL can't distinguish between a dead context and a bogus non-zero
+		// one, but at least we can verify that this doesn't cause a segfault.
+		if(glXMakeCurrent(dpy, DefaultRootWindow(dpy), (GLXContext)1))
+			THROW("glXMakeCurrent(bogus context) succeeded");
+		if(glXMakeContextCurrent(dpy, DefaultRootWindow(dpy),
+			DefaultRootWindow(dpy), (GLXContext)2))
+			THROW("glXMakeContextCurrent(bogus context) succeeded");
+
+		//-------------------------------------------------------------------------
+		//    glXSwapIntervalEXT()
+		//    glXSwapIntervalSGI()
+		//-------------------------------------------------------------------------
+
+		if(GLX_EXTENSION_EXISTS(GLX_EXT_swap_control))
+		{
+			PFNGLXSWAPINTERVALEXTPROC __glXSwapIntervalEXT =
+				(PFNGLXSWAPINTERVALEXTPROC)glXGetProcAddress(
+					(GLubyte *)"glXSwapIntervalEXT");
+			if(__glXSwapIntervalEXT)
+			{
+				// Technically this function should throw a BadValue error if passed
+				// an interval < 0, but nVidia's implementation doesn't, so we emulate
+				// that behavior.
+				__glXSwapIntervalEXT(dpy, DefaultRootWindow(dpy), -1);
+
+				// Technically this function should throw a BadWindow error if passed
+				// an invalid drawable, but nVidia's implementation doesn't, so we
+				// emulate that behavior.
+				__glXSwapIntervalEXT(dpy, 0, 1);
+				__glXSwapIntervalEXT(dpy, (GLXDrawable)1, 1);
+			}
+		}
+
+		if(GLX_EXTENSION_EXISTS(GLX_SGI_swap_control))
+		{
+			PFNGLXSWAPINTERVALSGIPROC __glXSwapIntervalSGI =
+				(PFNGLXSWAPINTERVALSGIPROC)glXGetProcAddress(
+					(GLubyte *)"glXSwapIntervalSGI");
+			if(__glXSwapIntervalSGI)
+			{
+				// Return GLX_BAD_VALUE if interval < 0
+				if(__glXSwapIntervalSGI(-1) != GLX_BAD_VALUE)
+					THROW("glXSwapIntervalSGI(0) != GLX_BAD_VALUE");
+				// Return GLX_BAD_CONTEXT if no context is current
+				if(__glXSwapIntervalSGI(1) != GLX_BAD_CONTEXT)
+					THROW("glXSwapIntervalSGI() w/ no context != GLX_BAD_CONTEXT");
+			}
+		}
+
+		//-------------------------------------------------------------------------
+		//    glXUseXFont()
+		//-------------------------------------------------------------------------
+
+		// BadFont error thrown if font is not valid
+		if(!(ctx = glXCreateContext(dpy, vis, NULL, True)))
+			THROW("Could not create context");
+		if(!glXMakeCurrent(dpy, DefaultRootWindow(dpy), ctx))
+			THROW("Could not make context current");
+		int fontListBase = glGenLists(2);
+		for(int badValue = 0; badValue <= 1; badValue++)
+		{
+			XERRTEST_START();
+			glXUseXFont((Font)badValue, 0, 2, fontListBase);
+			XERRTEST_STOP(BadFont, X_GLXUseXFont,
+				"BadFont (invalid Font parameter)");
+		}
+		glXDestroyContext(dpy, ctx);  ctx = 0;
+
 		printf("SUCCESS!\n");
 	}
 	catch(Error &e)
@@ -2554,7 +2909,10 @@ int extensionQueryTest(void)
 		printf("Failed! (%s)\n", e.getMessage());  retval = 0;
 	}
 	fflush(stdout);
-	if(dpy) { XCloseDisplay(dpy);  dpy = NULL; }
+	if(pm) XFreePixmap(dpy, pm);
+	if(vis) XFree(vis);
+	if(ctx) glXDestroyContext(dpy, ctx);
+	if(dpy) XCloseDisplay(dpy);
 	return retval;
 }
 

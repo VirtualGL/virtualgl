@@ -50,6 +50,9 @@ namespace vglfaker
 	extern void setAutotestDrawable(long d);
 
 	extern bool excludeDisplay(char *name);
+
+	extern void sendGLXError(unsigned short minorCode, unsigned char errorCode,
+		bool x11Error);
 }
 
 #define DPY3D  vglfaker::init3D()

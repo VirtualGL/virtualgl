@@ -39,7 +39,7 @@ static CriticalSection vaMutex;
 static VisAttrib *va;
 
 
-static void buildVisAttribTable(Display *dpy, int screen)
+static bool buildVisAttribTable(Display *dpy, int screen)
 {
 	int clientGLX = 0, majorOpcode = -1, firstEvent = -1, firstError = -1,
 		nVisuals = 0;
@@ -51,7 +51,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 	{
 		CriticalSection::SafeLock l(vaMutex);
 
-		if(dpy == vaDisplay && screen == vaScreen) return;
+		if(dpy == vaDisplay && screen == vaScreen) return true;
 		if(fconfig.probeglx
 			&& _XQueryExtension(dpy, "GLX", &majorOpcode, &firstEvent, &firstError)
 			&& majorOpcode >= 0 && firstEvent >= 0 && firstError >= 0)
@@ -143,8 +143,9 @@ static void buildVisAttribTable(Display *dpy, int screen)
 		if(visuals) XFree(visuals);
 		if(va) { delete [] va;  va = NULL; }
 		vaDisplay = NULL;  vaScreen = -1;  vaEntries = 0;
-		throw;
+		return false;
 	}
+	return true;
 }
 
 
@@ -292,7 +293,7 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[], int &level,
 
 int visAttrib2D(Display *dpy, int screen, VisualID vid, int attribute)
 {
-	buildVisAttribTable(dpy, screen);
+	if(!buildVisAttribTable(dpy, screen)) return 0;
 
 	for(int i = 0; i < vaEntries; i++)
 	{
@@ -343,7 +344,7 @@ VisualID matchVisual2D(Display *dpy, int screen, int depth, int c_class,
 	int i, tryStereo;
 	if(!dpy) return 0;
 
-	buildVisAttribTable(dpy, screen);
+	if(!buildVisAttribTable(dpy, screen)) return 0;
 
 	// Try to find an exact match
 	for(tryStereo = 1; tryStereo >= 0; tryStereo--)

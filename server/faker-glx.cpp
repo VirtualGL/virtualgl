@@ -28,6 +28,7 @@
 #include "rr.h"
 #include "faker.h"
 #include "glxvisual.h"
+#include "glxproto.h"
 
 using namespace vglutil;
 using namespace vglserver;
@@ -522,7 +523,10 @@ void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst,
 		_glXCopyContext(dpy, src, dst, mask);  return;
 	}
 	else if(srcOverlay != dstOverlay)
-		THROW("glXCopyContext() cannot copy between overlay and non-overlay contexts");
+	{
+		vglfaker::sendGLXError(X_GLXCopyContext, BadMatch, true);
+		return;
+	}
 	_glXCopyContext(DPY3D, src, dst, mask);
 
 	CATCH();
@@ -565,7 +569,10 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 		PRARGX(share_list);  PRARGI(direct);  STARTTRACE();
 
 	if(!(config = matchConfig(dpy, vis)))
-		THROW("Could not obtain RGB visual on the server suitable for off-screen rendering.");
+	{
+		vglfaker::sendGLXError(X_GLXCreateContext, BadValue, true);
+		goto done;
+	}
 	ctx = _glXCreateNewContext(DPY3D, config, GLX_RGBA_TYPE, share_list,
 		direct);
 	if(ctx)
@@ -585,6 +592,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 		ctxhash.add(ctx, config, newctxIsDirect);
 	}
 
+	done:
 		STOPTRACE();  PRARGC(config);  PRARGX(ctx);  CLOSETRACE();
 
 	CATCH();
@@ -757,6 +765,7 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 {
 	GLXPixmap drawable = 0;  GLXFBConfig config = 0;
 	int x = 0, y = 0;  unsigned int width = 0, height = 0, depth = 0;
+	VirtualPixmap *vpm = NULL;
 
 	TRY();
 
@@ -785,11 +794,18 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 		STARTTRACE();
 
 	Window root;  unsigned int bw;
-	_XGetGeometry(dpy, pm, &root, &x, &y, &width, &height, &bw, &depth);
 	if(!(config = matchConfig(dpy, vis, true, true)))
-		THROW("Could not obtain pixmap-capable RGB visual on the server");
-	VirtualPixmap *vpm = new VirtualPixmap(dpy, vis->visual, pm);
-	if(vpm)
+	{
+		vglfaker::sendGLXError(X_GLXCreateGLXPixmap, BadValue, true);
+		goto done;
+	}
+	if(!pm
+		|| !_XGetGeometry(dpy, pm, &root, &x, &y, &width, &height, &bw, &depth))
+	{
+		vglfaker::sendGLXError(X_GLXCreateGLXPixmap, BadPixmap, true);
+		goto done;
+	}
+	if((vpm = new VirtualPixmap(dpy, vis->visual, pm)) != NULL)
 	{
 		// Hash the VirtualPixmap instance to the 2D pixmap and also hash the 2D X
 		// display handle to the 3D pixmap.
@@ -799,6 +815,7 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 		drawable = vpm->getGLXDrawable();
 	}
 
+	done:
 		STOPTRACE();  PRARGI(x);  PRARGI(y);  PRARGI(width);  PRARGI(height);
 		PRARGI(depth);  PRARGC(config);  PRARGX(drawable);  CLOSETRACE();
 
@@ -811,6 +828,9 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm,
 	const int *attribs)
 {
 	GLXPixmap drawable = 0;
+	VirtualPixmap *vpm = NULL;
+	VisualID vid = 0;
+	XVisualInfo *vis = NULL;
 
 	TRY();
 
@@ -820,19 +840,28 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm,
 		OPENTRACE(glXCreatePixmap);  PRARGD(dpy);  PRARGC(config);  PRARGX(pm);
 		STARTTRACE();
 
-	Window root;  int x, y, screen;  unsigned int w, h, bw, d;
-	_XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
-
-	VisualID vid = matchVisual(dpy, config, screen);
-	VirtualPixmap *vpm = NULL;
-	if(vid)
+	if(!config)
 	{
-		XVisualInfo *vis = glxvisual::visualFromID(dpy, screen, vid);
-		if(vis)
-		{
-			vpm = new VirtualPixmap(dpy, vis->visual, pm);
-			XFree(vis);
-		}
+		vglfaker::sendGLXError(X_GLXCreatePixmap, GLXBadFBConfig, false);
+		goto done;
+	}
+	Window root;  int x, y, screen;  unsigned int w, h, bw, d;
+	if(!pm
+		|| !_XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d))
+	{
+		vglfaker::sendGLXError(X_GLXCreatePixmap, BadPixmap, true);
+		goto done;
+	}
+
+	if(!(vid = matchVisual(dpy, config, screen)))
+	{
+		vglfaker::sendGLXError(X_GLXCreatePixmap, BadMatch, true);
+		goto done;
+	}
+	if((vis = glxvisual::visualFromID(dpy, screen, vid)) != NULL)
+	{
+		vpm = new VirtualPixmap(dpy, vis->visual, pm);
+		XFree(vis);
 	}
 	if(vpm)
 	{
@@ -842,6 +871,7 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm,
 		drawable = vpm->getGLXDrawable();
 	}
 
+	done:
 		STOPTRACE();  PRARGI(x);  PRARGI(y);  PRARGI(w);  PRARGI(h);
 		PRARGI(d);  PRARGX(drawable);  CLOSETRACE();
 
@@ -881,16 +911,42 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
 		STARTTRACE();
 
 	XSync(dpy, False);
-	vw = winhash.initVW(dpy, win, config);
-	if(!vw && !glxdhash.getCurrentDisplay(win))
+	if(!config)
 	{
-		// Apparently win was created in another process or using XCB.
-		winhash.add(dpy, win);
+		vglfaker::sendGLXError(X_GLXCreateWindow, GLXBadFBConfig, false);
+		win = 0;
+		goto done;
+	}
+	if(!win)
+	{
+		vglfaker::sendGLXError(X_GLXCreateWindow, BadWindow, true);
+		goto done;
+	}
+	try
+	{
 		vw = winhash.initVW(dpy, win, config);
+		if(!vw && !glxdhash.getCurrentDisplay(win))
+		{
+			// Apparently win was created in another process or using XCB.
+			winhash.add(dpy, win);
+			vw = winhash.initVW(dpy, win, config);
+		}
+	}
+	catch(Error &e)
+	{
+		if(!strcmp(e.getMethod(), "VirtualWin")
+			&& !strcmp(e.getMessage(), "Invalid window"))
+		{
+			vglfaker::sendGLXError(X_GLXCreateWindow, BadWindow, true);
+			win = 0;
+			goto done;
+		}
+		throw;
 	}
 	if(!vw)
 		THROW("Cannot create virtual window for specified X window");
 
+	done:
 		STOPTRACE();  if(vw) { PRARGX(vw->getGLXDrawable()); }
 		CLOSETRACE();
 
@@ -1143,8 +1199,9 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 	if(IS_EXCLUDED(dpy))
 		return _glXGetConfig(dpy, vis, attrib, value);
 
-	if(!dpy || !vis || !value)
-		return GLX_BAD_VALUE;
+	if(!dpy) return GLX_NO_EXTENSION;
+	if(!vis) return GLX_BAD_VISUAL;
+	if(!value) return GLX_BAD_VALUE;
 
 	// If 'vis' is an overlay visual, hand off to the 2D X server.
 	int level = glxvisual::visAttrib2D(dpy, vis->screen, vis->visualid,
@@ -1292,10 +1349,17 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 		OPENTRACE(glXGetFBConfigAttrib);  PRARGD(dpy);  PRARGC(config);
 		PRARGIX(attribute);  STARTTRACE();
 
-	if(!dpy || !config || !value)
+	if(!dpy)
 	{
-		retval = GLX_BAD_VALUE;
-		goto done;
+		retval = GLX_NO_EXTENSION;  goto done;
+	}
+	if(!config)
+	{
+		retval = GLX_BAD_VISUAL;  goto done;
+	}
+	if(!value)
+	{
+		retval = GLX_BAD_VALUE;  goto done;
 	}
 
 	retval = _glXGetFBConfigAttrib(DPY3D, config, attribute, value);
@@ -1411,10 +1475,12 @@ void glXBindTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer,
 
 	VirtualPixmap *vpm = NULL;
 	if((vpm = pmhash.find(dpy, drawable)) == NULL)
+	{
 		// If we get here, then the drawable wasn't created with
-		// glXCreate[GLX]Pixmap().  Thus, we set it to 0 so _glXBindTexImageEXT()
-		// will throw a GLXBadPixmap error for us.
-		drawable = 0;
+		// glXCreate[GLX]Pixmap().
+		vglfaker::sendGLXError(X_GLXVendorPrivate, GLXBadPixmap, false);
+		goto done;
+	}
 	else
 	{
 		// Transfer pixels from the 2D Pixmap (stored on the 2D X server) to the
@@ -1426,14 +1492,17 @@ void glXBindTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer,
 			XPutImage(DPY3D, vpm->get3DX11Pixmap(), gc, image, 0, 0, 0, 0,
 				vpm->getWidth(), vpm->getHeight());
 		else
-			// Also trigger GLXBadPixmap error
-			drawable = 0;
+		{
+			vglfaker::sendGLXError(X_GLXVendorPrivate, GLXBadPixmap, false);
+			goto done;
+		}
 		if(gc) XFreeGC(DPY3D, gc);
 		if(image) XDestroyImage(image);
 	}
 
 	_glXBindTexImageEXT(DPY3D, drawable, buffer, attrib_list);
 
+	done:
 		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
@@ -1777,25 +1846,46 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 			vglout.PRINTLN("[VGL] WARNING: glXMakeCurrent() called with a previously-destroyed context.");
 			goto done;
 		}
-		vw = winhash.initVW(dpy, drawable, config);
-		if(vw)
+		try
 		{
-			setWMAtom(dpy, drawable, vw);
-			drawable = vw->updateGLXDrawable();
-			vw->setDirect(direct);
-		}
-		else if(!glxdhash.getCurrentDisplay(drawable))
-		{
-			// Apparently it isn't a Pbuffer or a Pixmap, so it must be a window
-			// that was created in another process.
-			winhash.add(dpy, drawable);
 			vw = winhash.initVW(dpy, drawable, config);
 			if(vw)
 			{
+				setWMAtom(dpy, drawable, vw);
 				drawable = vw->updateGLXDrawable();
 				vw->setDirect(direct);
 			}
+			else if(!glxdhash.getCurrentDisplay(drawable))
+			{
+				// Apparently it isn't a Pbuffer or a Pixmap, so it must be a window
+				// that was created in another process.
+				winhash.add(dpy, drawable);
+				vw = winhash.initVW(dpy, drawable, config);
+				if(vw)
+				{
+					drawable = vw->updateGLXDrawable();
+					vw->setDirect(direct);
+				}
+			}
 		}
+		catch(Error &e)
+		{
+			if(!strcmp(e.getMethod(), "VirtualWin")
+				&& !strcmp(e.getMessage(), "Invalid window"))
+			{
+				vglfaker::sendGLXError(X_GLXMakeCurrent, GLXBadDrawable, false);
+				goto done;
+			}
+			throw;
+		}
+	}
+	else if(drawable && !ctx)
+	{
+		// This situation would cause _glXMakeContextCurrent() to trigger an X11
+		// error anyhow, but the error it triggers is implementation-dependent.
+		// It's better to provide consistent behavior to the calling program.
+		vglfaker::sendGLXError(X_GLXMakeCurrent, GLXBadContext, false);
+		goto done;
 	}
 
 	retval = _glXMakeContextCurrent(DPY3D, drawable, drawable, ctx);
@@ -1877,47 +1967,75 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 			vglout.PRINTLN("[VGL] WARNING: glXMakeContextCurrent() called with a previously-destroyed context");
 			goto done;
 		}
-
-		drawVW = winhash.initVW(dpy, draw, config);
-		if(drawVW)
+		try
 		{
-			setWMAtom(dpy, draw, drawVW);
-			draw = drawVW->updateGLXDrawable();
-			drawVW->setDirect(direct);
-		}
-		else if(!glxdhash.getCurrentDisplay(draw))
-		{
-			// Apparently it isn't a Pbuffer or a Pixmap, so it must be a window
-			// that was created in another process.
-			winhash.add(dpy, draw);
-			drawVW = winhash.initVW(dpy, draw, config);
-			if(drawVW)
+			if(draw)
 			{
-				draw = drawVW->updateGLXDrawable();
-				drawVW->setDirect(direct);
+				drawVW = winhash.initVW(dpy, draw, config);
+				if(drawVW)
+				{
+					setWMAtom(dpy, draw, drawVW);
+					draw = drawVW->updateGLXDrawable();
+					drawVW->setDirect(direct);
+				}
+				else if(!glxdhash.getCurrentDisplay(draw))
+				{
+					// Apparently it isn't a Pbuffer or a Pixmap, so it must be a window
+					// that was created in another process.
+					winhash.add(dpy, draw);
+					drawVW = winhash.initVW(dpy, draw, config);
+					if(drawVW)
+					{
+						draw = drawVW->updateGLXDrawable();
+						drawVW->setDirect(direct);
+					}
+				}
+			}
+
+			if(read)
+			{
+				readVW = winhash.initVW(dpy, read, config);
+				if(readVW)
+				{
+					setWMAtom(dpy, read, readVW);
+					read = readVW->updateGLXDrawable();
+					readVW->setDirect(direct);
+				}
+				else if(!glxdhash.getCurrentDisplay(read))
+				{
+					// Apparently it isn't a Pbuffer or a Pixmap, so it must be a window
+					// that was created in another process.
+					winhash.add(dpy, read);
+					readVW = winhash.initVW(dpy, read, config);
+					if(readVW)
+					{
+						read = readVW->updateGLXDrawable();
+						readVW->setDirect(direct);
+					}
+				}
 			}
 		}
-
-		readVW = winhash.initVW(dpy, read, config);
-		if(readVW)
+		catch(Error &e)
 		{
-			setWMAtom(dpy, read, readVW);
-			read = readVW->updateGLXDrawable();
-			readVW->setDirect(direct);
-		}
-		else if(!glxdhash.getCurrentDisplay(read))
-		{
-			// Apparently it isn't a Pbuffer or a Pixmap, so it must be a window
-			// that was created in another process.
-			winhash.add(dpy, read);
-			readVW = winhash.initVW(dpy, read, config);
-			if(readVW)
+			if(!strcmp(e.getMethod(), "VirtualWin")
+				&& !strcmp(e.getMessage(), "Invalid window"))
 			{
-				read = readVW->updateGLXDrawable();
-				readVW->setDirect(direct);
+				vglfaker::sendGLXError(X_GLXMakeContextCurrent, GLXBadDrawable,
+					false);
+				goto done;
 			}
+			throw;
 		}
 	}
+	else if((draw || read) && !ctx)
+	{
+		// This situation would cause _glXMakeContextCurrent() to trigger an X11
+		// error anyhow, but the error it triggers is implementation-dependent.
+		// It's better to provide consistent behavior to the calling program.
+		vglfaker::sendGLXError(X_GLXMakeContextCurrent, GLXBadContext, false);
+		goto done;
+	}
+
 	retval = _glXMakeContextCurrent(DPY3D, draw, read, ctx);
 	if(fconfig.trace && retval)
 		renderer = (const char *)_glGetString(GL_RENDERER);
