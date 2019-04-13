@@ -882,42 +882,17 @@ void configVsVisual(Display *dpy, GLXFBConfig config, XVisualInfo *vis)
 	COMPARE_ATTRIB(config, vis, GLX_ACCUM_GREEN_SIZE, ctemp);
 	COMPARE_ATTRIB(config, vis, GLX_ACCUM_BLUE_SIZE, ctemp);
 	COMPARE_ATTRIB(config, vis, GLX_ACCUM_ALPHA_SIZE, ctemp);
-	#ifdef GLX_SAMPLE_BUFFERS_ARB
 	COMPARE_ATTRIB(config, vis, GLX_SAMPLE_BUFFERS_ARB, ctemp);
-	#endif
-	#ifdef GLX_SAMPLES_ARB
 	COMPARE_ATTRIB(config, vis, GLX_SAMPLES_ARB, ctemp);
-	#endif
 	COMPARE_ATTRIB(config, vis, GLX_X_VISUAL_TYPE, ctemp);
 	if(visualClassToGLXVisualType(vis->c_class) != ctemp)
 		THROWNL("GLX_X_VISUAL_TYPE mismatch w/ X visual");
-	#ifdef GLX_TRANSPARENT_TYPE_EXT
 	COMPARE_ATTRIB(config, vis, GLX_TRANSPARENT_TYPE_EXT, ctemp);
-	#endif
-	#ifdef GLX_TRANSPARENT_INDEX_VALUE_EXT
 	COMPARE_ATTRIB(config, vis, GLX_TRANSPARENT_INDEX_VALUE_EXT, ctemp);
-	#endif
-	#ifdef GLX_TRANSPARENT_RED_VALUE_EXT
 	COMPARE_ATTRIB(config, vis, GLX_TRANSPARENT_RED_VALUE_EXT, ctemp);
-	#endif
-	#ifdef GLX_TRANSPARENT_GREEN_VALUE_EXT
 	COMPARE_ATTRIB(config, vis, GLX_TRANSPARENT_GREEN_VALUE_EXT, ctemp);
-	#endif
-	#ifdef GLX_TRANSPARENT_BLUE_VALUE_EXT
 	COMPARE_ATTRIB(config, vis, GLX_TRANSPARENT_BLUE_VALUE_EXT, ctemp);
-	#endif
-	#ifdef GLX_TRANSPARENT_ALPHA_VALUE_EXT
 	COMPARE_ATTRIB(config, vis, GLX_TRANSPARENT_ALPHA_VALUE_EXT, ctemp);
-	#endif
-	#ifdef GLX_VIDEO_RESIZE_SUN
-	COMPARE_ATTRIB(config, vis, GLX_VIDEO_RESIZE_SUN, ctemp);
-	#endif
-	#ifdef GLX_VIDEO_REFRESH_TIME_SUN
-	COMPARE_ATTRIB(config, vis, GLX_VIDEO_REFRESH_TIME_SUN, ctemp);
-	#endif
-	#ifdef GLX_GAMMA_VALUE_SUN
-	COMPARE_ATTRIB(config, vis, GLX_GAMMA_VALUE_SUN, ctemp);
-	#endif
 }
 
 
@@ -1137,12 +1112,7 @@ int visTest(void)
 			THROW("Memory allocation error");
 		memset(visuals, 0, sizeof(XVisualInfo *) * n);
 
-#ifdef GLX_ARB_fbconfig_float
-		int numFloatCfgs = 0;
-#endif
-#ifdef GLX_NV_float_buffer
-		int numNVFloatCfgs = 0;
-#endif
+		int numFloatCfgs = 0, numNVFloatCfgs = 0;
 
 		for(i = 0; i < n; i++)
 		{
@@ -1150,10 +1120,7 @@ int visTest(void)
 			try
 			{
 				int drawableType, renderType, transparentType, visualID, visualType,
-					xRenderable;
-#ifdef GLX_NV_float_buffer
-				int floatComponents = -1;
-#endif
+					xRenderable, floatComponents = -1;
 				fbcid = cfgid(dpy, configs[i]);
 				// The old fglrx driver unfortunately assigns the same FB config ID to
 				// multiple FB configs with different attributes, some of which support
@@ -1164,19 +1131,16 @@ int visTest(void)
 					continue;
 				GET_CFG_ATTRIB(configs[i], GLX_DRAWABLE_TYPE, drawableType);
 				GET_CFG_ATTRIB(configs[i], GLX_RENDER_TYPE, renderType);
-#ifdef GLX_ARB_fbconfig_float
 				if(renderType & GLX_RGBA_FLOAT_BIT_ARB)
 				{
 					if(!GLX_EXTENSION_EXISTS(GLX_ARB_fbconfig_float))
 						THROWNL("GLX_ARB_fbconfig_float not advertised");
 					numFloatCfgs++;
 				}
-#endif
 				GET_CFG_ATTRIB(configs[i], GLX_TRANSPARENT_TYPE, transparentType);
 				GET_CFG_ATTRIB(configs[i], GLX_VISUAL_ID, visualID);
 				GET_CFG_ATTRIB(configs[i], GLX_X_VISUAL_TYPE, visualType);
 				GET_CFG_ATTRIB(configs[i], GLX_X_RENDERABLE, xRenderable);
-#ifdef GLX_NV_float_buffer
 				glXGetFBConfigAttrib(dpy, configs[i], GLX_FLOAT_COMPONENTS_NV,
 					&floatComponents);
 				if(floatComponents > 0)
@@ -1185,7 +1149,6 @@ int visTest(void)
 						THROWNL("GLX_NV_float_buffer not advertised");
 					numNVFloatCfgs++;
 				}
-#endif
 				visuals[i] = glXGetVisualFromFBConfig(dpy, configs[i]);
 				// VirtualGL should return a visual only for opaque GLXFBConfigs that
 				// support X rendering.
@@ -1204,7 +1167,6 @@ int visTest(void)
 			}
 		}
 
-#ifdef GLX_ARB_fbconfig_float
 		if(numFloatCfgs)
 		{
 			int nc = 0, glxattribs[] = { GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT,
@@ -1215,9 +1177,7 @@ int visTest(void)
 			if(nc != numFloatCfgs)
 				THROWNL("Wrong number of FB configs with GLX_RGBA_FLOAT_BIT");
 		}
-#endif
 
-#ifdef GLX_NV_float_buffer
 		if(numNVFloatCfgs)
 		{
 			int nc = 0, glxattribs[] = { GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT,
@@ -1228,7 +1188,6 @@ int visTest(void)
 			if(nc != numNVFloatCfgs)
 				THROWNL("Wrong number of FB configs with GLX_FLOAT_COMPONENTS_NV");
 		}
-#endif
 
 		XVisualInfo *vis1 = NULL;
 		try
@@ -2648,7 +2607,6 @@ int extensionQueryTest(void)
 
 		// BadMatch error thrown and NULL returned if FB config doesn't support
 		// window rendering
-#ifdef GLX_ARB_fbconfig_float
 		if(GLX_EXTENSION_EXISTS(GLX_ARB_fbconfig_float))
 		{
 			int floatAttribs[] = { GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT,
@@ -2664,7 +2622,6 @@ int extensionQueryTest(void)
 				XFree(configs);  configs = NULL;
 			}
 		}
-#endif
 
 		// BadPixmap error thrown and NULL returned if Pixmap is not valid
 		for(int badValue = 0; badValue <= 1; badValue++)
