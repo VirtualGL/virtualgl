@@ -23,6 +23,8 @@
 #include "fakerconfig.h"
 #include "threadlocal.h"
 #include <dlfcn.h>
+#include <X11/Xlibint.h>
+#include "faker.h"
 
 
 using namespace vglutil;
@@ -100,6 +102,28 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 	vglout.PRINT("[VGL] WARNING: X11 error trapped\n[VGL]    Error:  %s\n[VGL]    XID:    0x%.8x\n",
 		temps, xe->resourceid);
 	return 0;
+}
+
+
+void sendGLXError(unsigned short minorCode, unsigned char errorCode,
+	bool x11Error)
+{
+	xError error;
+	int majorCode, errorBase, dummy;
+
+	ERRIFNOT(_XQueryExtension(DPY3D, "GLX", &majorCode, &dummy, &errorBase));
+
+	LockDisplay(dpy3D);
+
+	error.type = X_Error;
+	error.errorCode = x11Error ? errorCode : errorBase + errorCode;
+	error.sequenceNumber = dpy3D->request;
+	error.resourceID = 0;
+	error.minorCode = minorCode;
+	error.majorCode = majorCode;
+	_XError(dpy3D, &error);
+
+	UnlockDisplay(dpy3D);
 }
 
 

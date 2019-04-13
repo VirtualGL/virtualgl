@@ -56,6 +56,7 @@ namespace vglfaker
 		XEDataObject obj = { dpy };
 		XExtData *extData;
 
+		if(!dpy) return false;
 		// The 3D X server may have its own extensions that conflict with ours.
 		if(dpy == dpy3D) return true;
 		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 1);
@@ -81,6 +82,9 @@ namespace vglfaker
 
 		return *(vglutil::CriticalSection *)extData->private_data;
 	}
+
+	extern void sendGLXError(unsigned short minorCode, unsigned char errorCode,
+		bool x11Error);
 }
 
 #define DPY3D  vglfaker::init3D()

@@ -201,7 +201,7 @@ static void assignDefaultFBConfigAttribs(Display *dpy, int screen,
 }
 
 
-static void buildVisAttribTable(Display *dpy, int screen)
+static bool buildVisAttribTable(Display *dpy, int screen)
 {
 	int clientGLX = 0, majorOpcode = -1, firstEvent = -1, firstError = -1,
 		nVisuals = 0;
@@ -219,7 +219,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 		CriticalSection::SafeLock l(vglfaker::getDisplayCS(dpy));
 
 		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 3);
-		if(extData && extData->private_data) return;
+		if(extData && extData->private_data) return true;
 
 		if(fconfig.probeglx
 			&& _XQueryExtension(dpy, "GLX", &majorOpcode, &firstEvent, &firstError)
@@ -287,8 +287,9 @@ static void buildVisAttribTable(Display *dpy, int screen)
 	{
 		if(visuals) XFree(visuals);
 		if(va) free(va);
-		throw;
+		return false;
 	}
+	return true;
 }
 
 
@@ -606,7 +607,7 @@ VGLFBConfig *configsFromVisAttribs(Display *dpy, int screen,
 
 int visAttrib2D(Display *dpy, int screen, VisualID vid, int attribute)
 {
-	buildVisAttribTable(dpy, screen);
+	if(!buildVisAttribTable(dpy, screen)) return 0;
 	GET_VA_TABLE()
 
 	for(int i = 0; i < vaEntries; i++)
@@ -705,7 +706,7 @@ VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
 
 VGLFBConfig getDefaultFBConfig(Display *dpy, int screen, VisualID vid)
 {
-	buildVisAttribTable(dpy, screen);
+	if(!buildVisAttribTable(dpy, screen)) return NULL;
 	GET_VA_TABLE()
 
 	for(int i = 0; i < vaEntries; i++)

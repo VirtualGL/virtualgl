@@ -82,6 +82,11 @@ algorithms.  These issues mostly affected DirectColor rendering, 2D X servers
 with multiple screens, and 2D X servers with a different default depth than the
 3D X server.
 
+10. Error handling in the VirtualGL Faker is now more conformant with the GLX
+spec.  More specifically, when erroneous arguments are passed to interposed GLX
+functions, the faker now sends GLX errors through the X11 error handler rather
+than throwing fatal exceptions.
+
 
 2.6.1
 =====

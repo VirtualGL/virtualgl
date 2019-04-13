@@ -173,8 +173,10 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
    }
 
    fs = XQueryFont(dpy, font);
-   if (!fs)
-      THROW("Couldn't get font structure information");
+   if (!fs) {
+      vglfaker::sendGLXError(X_GLXUseXFont, BadFont, true);
+      return;
+   }
 
    if (fconfig.trace) {
       unsigned long name_value;
