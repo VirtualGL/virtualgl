@@ -498,27 +498,6 @@ VFUNCDEF3(glXReleaseTexImageEXT, Display *, dpy, GLXDrawable, drawable,
 	int, buffer, glXReleaseTexImageEXT)
 
 
-// GLX_NV_swap_group
-
-FUNCDEF3(Bool, glXJoinSwapGroupNV, Display *, dpy, GLXDrawable, drawable,
-	GLuint, group, glXJoinSwapGroupNV);
-
-FUNCDEF3(Bool, glXBindSwapBarrierNV, Display *, dpy, GLuint, group,
-	GLuint, barrier, glXBindSwapBarrierNV);
-
-FUNCDEF4(Bool, glXQuerySwapGroupNV, Display *, dpy, GLXDrawable, drawable,
-	GLuint *, group, GLuint *, barrier, glXQuerySwapGroupNV);
-
-FUNCDEF4(Bool, glXQueryMaxSwapGroupsNV, Display *, dpy, int, screen,
-	GLuint *, maxGroups, GLuint *, maxBarriers, glXQueryMaxSwapGroupsNV);
-
-FUNCDEF3(Bool, glXQueryFrameCountNV, Display *, dpy, int, screen,
-	GLuint *, count, glXQueryFrameCountNV);
-
-FUNCDEF2(Bool, glXResetFrameCountNV, Display *, dpy, int, screen,
-	glXResetFrameCountNV);
-
-
 // GLX_SGI_swap_control
 
 FUNCDEF1(int, glXSwapIntervalSGI, int, interval, glXSwapIntervalSGI);

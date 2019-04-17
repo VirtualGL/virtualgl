@@ -65,14 +65,6 @@
 		glXBindTexImageEXT;
 		glXReleaseTexImageEXT;
 
-		/* GLX_NV_swap_group */
-		glXBindSwapBarrierNV;
-		glXJoinSwapGroupNV;
-		glXQueryFrameCountNV;
-		glXQueryMaxSwapGroupsNV;
-		glXQuerySwapGroupNV;
-		glXResetFrameCountNV;
-
 		/* GLX_SGI_make_current_read */
 		glXGetCurrentReadDrawableSGI;
 		glXMakeCurrentReadSGI;

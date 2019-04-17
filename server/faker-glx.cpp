@@ -846,17 +846,6 @@ static const char *getGLXExtensions(void)
 		strncat(glxextensions, " GLX_NV_float_buffer",
 			1023 - strlen(glxextensions));
 
-	CHECKSYM_NONFATAL(glXBindSwapBarrierNV)
-	CHECKSYM_NONFATAL(glXJoinSwapGroupNV)
-	CHECKSYM_NONFATAL(glXQueryFrameCountNV)
-	CHECKSYM_NONFATAL(glXQueryMaxSwapGroupsNV)
-	CHECKSYM_NONFATAL(glXQuerySwapGroupNV)
-	CHECKSYM_NONFATAL(glXResetFrameCountNV)
-	if(__glXBindSwapBarrierNV && __glXJoinSwapGroupNV && __glXQueryFrameCountNV
-		&& __glXQueryMaxSwapGroupsNV && __glXQuerySwapGroupNV
-		&& __glXResetFrameCountNV && !strstr(glxextensions, "GLX_NV_swap_group"))
-		strncat(glxextensions, " GLX_NV_swap_group", 1023 - strlen(glxextensions));
-
 	return glxextensions;
 }
 
@@ -1283,14 +1272,6 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		// GLX_EXT_texture_from_pixmap
 		CHECK_OPT_FAKED(glXBindTexImageEXT)
 		CHECK_OPT_FAKED(glXReleaseTexImageEXT)
-
-		// GLX_NV_swap_group
-		CHECK_OPT_FAKED(glXBindSwapBarrierNV)
-		CHECK_OPT_FAKED(glXJoinSwapGroupNV)
-		CHECK_OPT_FAKED(glXQueryFrameCountNV)
-		CHECK_OPT_FAKED(glXQueryMaxSwapGroupsNV)
-		CHECK_OPT_FAKED(glXQuerySwapGroupNV)
-		CHECK_OPT_FAKED(glXResetFrameCountNV)
 
 		// GLX_SGI_make_current_read
 		CHECK_FAKED(glXGetCurrentReadDrawableSGI)
@@ -1968,108 +1949,6 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
 		CLOSETRACE();
 
 	CATCH();
-}
-
-
-// Hand off to the 3D X server without modification, except that 'drawable' is
-// replaced with its corresponding off-screen drawable ID.
-
-Bool glXJoinSwapGroupNV(Display *dpy, GLXDrawable drawable, GLuint group)
-{
-	TRY();
-
-	if(IS_EXCLUDED(dpy))
-		return _glXJoinSwapGroupNV(dpy, drawable, group);
-
-	return _glXJoinSwapGroupNV(DPY3D, ServerDrawable(dpy, drawable), group);
-
-	CATCH();
-	return False;
-}
-
-
-// Hand off to the 3D X server without modification.
-
-Bool glXBindSwapBarrierNV(Display *dpy, GLuint group, GLuint barrier)
-{
-	TRY();
-
-	if(IS_EXCLUDED(dpy))
-		return _glXBindSwapBarrierNV(dpy, group, barrier);
-
-	return _glXBindSwapBarrierNV(DPY3D, group, barrier);
-
-	CATCH();
-	return False;
-}
-
-
-// Hand off to the 3D X server without modification, except that 'drawable' is
-// replaced with its corresponding off-screen drawable ID.
-
-Bool glXQuerySwapGroupNV(Display *dpy, GLXDrawable drawable, GLuint *group,
-	GLuint *barrier)
-{
-	TRY();
-
-	if(IS_EXCLUDED(dpy))
-		return _glXQuerySwapGroupNV(dpy, drawable, group, barrier);
-
-	return _glXQuerySwapGroupNV(DPY3D, ServerDrawable(dpy, drawable), group,
-		barrier);
-
-	CATCH();
-	return False;
-}
-
-
-// Hand off to the 3D X server without modification.
-
-Bool glXQueryMaxSwapGroupsNV(Display *dpy, int screen, GLuint *maxGroups,
-	GLuint *maxBarriers)
-{
-	TRY();
-
-	if(IS_EXCLUDED(dpy))
-		return _glXQueryMaxSwapGroupsNV(dpy, screen, maxGroups, maxBarriers);
-
-	return _glXQueryMaxSwapGroupsNV(DPY3D, DefaultScreen(DPY3D), maxGroups,
-		maxBarriers);
-
-	CATCH();
-	return False;
-}
-
-
-// Hand off to the 3D X server without modification.
-
-Bool glXQueryFrameCountNV(Display *dpy, int screen, GLuint *count)
-{
-	TRY();
-
-	if(IS_EXCLUDED(dpy))
-		return _glXQueryFrameCountNV(dpy, screen, count);
-
-	return _glXQueryFrameCountNV(DPY3D, DefaultScreen(DPY3D), count);
-
-	CATCH();
-	return False;
-}
-
-
-// Hand off to the 3D X server without modification.
-
-Bool glXResetFrameCountNV(Display *dpy, int screen)
-{
-	TRY();
-
-	if(IS_EXCLUDED(dpy))
-		return _glXResetFrameCountNV(dpy, screen);
-
-	return _glXResetFrameCountNV(DPY3D, DefaultScreen(DPY3D));
-
-	CATCH();
-	return False;
 }
 
 
