@@ -337,8 +337,8 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 
 		OPENTRACE(XGetGeometry);  PRARGD(dpy);  PRARGX(drawable);  STARTTRACE();
 
-	VirtualWin *vw = NULL;
-	if(winhash.find(drawable, vw))
+	VirtualWin *vw;
+	if((vw = winhash.find(NULL, drawable)) != NULL)
 	{
 		// Apparently drawable is a GLX drawable ID that backs a window, so we need
 		// to request the geometry of the window, not the GLX drawable.  This
@@ -348,7 +348,7 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 	}
 	ret = _XGetGeometry(dpy, drawable, root, x, y, &width, &height, border_width,
 		depth);
-	if(winhash.find(dpy, drawable, vw) && width > 0 && height > 0)
+	if((vw = winhash.find(dpy, drawable)) != NULL && width > 0 && height > 0)
 		vw->resize(width, height);
 
 		STOPTRACE();  if(root) PRARGX(*root);  if(x) PRARGI(*x);  if(y) PRARGI(*y);
@@ -571,14 +571,14 @@ char *XServerVendor(Display *dpy)
 
 static void handleEvent(Display *dpy, XEvent *xe)
 {
-	VirtualWin *vw = NULL;
+	VirtualWin *vw;
 
 	if(IS_EXCLUDED(dpy))
 		return;
 
 	if(xe && xe->type == ConfigureNotify)
 	{
-		if(winhash.find(dpy, xe->xconfigure.window, vw))
+		if((vw = winhash.find(dpy, xe->xconfigure.window)) != NULL)
 		{
 				OPENTRACE(handleEvent);  PRARGI(xe->xconfigure.width);
 				PRARGI(xe->xconfigure.height);  PRARGX(xe->xconfigure.window);
@@ -610,7 +610,7 @@ static void handleEvent(Display *dpy, XEvent *xe)
 		Atom deleteAtom = XInternAtom(dpy, "WM_DELETE_WINDOW", True);
 		if(protoAtom && deleteAtom && cme->message_type == protoAtom
 			&& cme->data.l[0] == (long)deleteAtom
-			&& winhash.find(dpy, cme->window, vw))
+			&& (vw = winhash.find(dpy, cme->window)) != NULL)
 			vw->wmDelete();
 	}
 }
@@ -683,8 +683,8 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 		if(values && (value_mask & CWHeight)) { PRARGI(values->height); }
 		STARTTRACE();
 
-	VirtualWin *vw = NULL;
-	if(winhash.find(dpy, win, vw) && values)
+	VirtualWin *vw;
+	if((vw = winhash.find(dpy, win)) != NULL && values)
 		vw->resize(value_mask & CWWidth ? values->width : 0,
 			value_mask & CWHeight ? values->height : 0);
 	retval = _XConfigureWindow(dpy, win, value_mask, values);
@@ -721,8 +721,9 @@ int XMoveResizeWindow(Display *dpy, Window win, int x, int y,
 		OPENTRACE(XMoveResizeWindow);  PRARGD(dpy);  PRARGX(win);  PRARGI(x);
 		PRARGI(y);  PRARGI(width);  PRARGI(height);  STARTTRACE();
 
-	VirtualWin *vw = NULL;
-	if(winhash.find(dpy, win, vw)) vw->resize(width, height);
+	VirtualWin *vw;
+	if((vw = winhash.find(dpy, win)) != NULL)
+		vw->resize(width, height);
 	retval = _XMoveResizeWindow(dpy, win, x, y, width, height);
 
 		STOPTRACE();  CLOSETRACE();
@@ -757,8 +758,9 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width,
 		OPENTRACE(XResizeWindow);  PRARGD(dpy);  PRARGX(win);  PRARGI(width);
 		PRARGI(height);  STARTTRACE();
 
-	VirtualWin *vw = NULL;
-	if(winhash.find(dpy, win, vw)) vw->resize(width, height);
+	VirtualWin *vw;
+	if((vw = winhash.find(dpy, win)) != NULL)
+		vw->resize(width, height);
 	retval = _XResizeWindow(dpy, win, width, height);
 
 		STOPTRACE();  CLOSETRACE();

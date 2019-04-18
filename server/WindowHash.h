@@ -49,28 +49,12 @@ namespace vglserver
 					free(dpystring);
 			}
 
-			VirtualWin *find(Display *dpy, Window win)
+			// dpy == NULL: search for VirtualWin instance by off-screen drawable ID
+			// dpy == non-NULL: search for VirtualWin instance by Window ID
+			VirtualWin *find(Display *dpy, GLXDrawable glxd)
 			{
-				if(!dpy || !win) return NULL;
-				return HASH::find(DisplayString(dpy), win);
-			}
-
-			bool find(Display *dpy, GLXDrawable glxd, VirtualWin* &vwin)
-			{
-				VirtualWin *vw;
-				if(!dpy || !glxd) return false;
-				vw = HASH::find(DisplayString(dpy), glxd);
-				if(vw == NULL) return false;
-				else { vwin = vw;  return true; }
-			}
-
-			bool find(GLXDrawable glxd, VirtualWin* &vwin)
-			{
-				VirtualWin *vw;
-				if(!glxd) return false;
-				vw = HASH::find(NULL, glxd);
-				if(vw == NULL) return false;
-				else { vwin = vw;  return true; }
+				if(!glxd) return NULL;
+				return HASH::find(dpy ? DisplayString(dpy) : NULL, glxd);
 			}
 
 			VirtualWin *initVW(Display *dpy, Window win, VGLFBConfig config)

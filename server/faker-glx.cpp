@@ -61,8 +61,9 @@ static INLINE VGLFBConfig matchConfig(Display *dpy, XVisualInfo *vis)
 
 GLXDrawable ServerDrawable(Display *dpy, GLXDrawable draw)
 {
-	VirtualWin *vw = NULL;
-	if(winhash.find(dpy, draw, vw)) return vw->getGLXDrawable();
+	VirtualWin *vw;
+	if((vw = winhash.find(dpy, draw)) != NULL)
+		return vw->getGLXDrawable();
 	else return draw;
 }
 
@@ -925,7 +926,7 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 
 Display *glXGetCurrentDisplay(void)
 {
-	Display *dpy = NULL;  VirtualWin *vw = NULL;
+	Display *dpy = NULL;  VirtualWin *vw;
 
 	if(vglfaker::getExcludeCurrent()) return _glXGetCurrentDisplay();
 
@@ -934,11 +935,10 @@ Display *glXGetCurrentDisplay(void)
 		OPENTRACE(glXGetCurrentDisplay);  STARTTRACE();
 
 	GLXDrawable curdraw = _glXGetCurrentDrawable();
-	if(winhash.find(curdraw, vw)) dpy = vw->getX11Display();
-	else
-	{
-		if(curdraw) dpy = glxdhash.getCurrentDisplay(curdraw);
-	}
+	if((vw = winhash.find(NULL, curdraw)) != NULL)
+		dpy = vw->getX11Display();
+	else if(curdraw)
+		dpy = glxdhash.getCurrentDisplay(curdraw);
 
 		STOPTRACE();  PRARGD(dpy);  CLOSETRACE();
 
@@ -953,7 +953,7 @@ Display *glXGetCurrentDisplay(void)
 
 GLXDrawable glXGetCurrentDrawable(void)
 {
-	VirtualWin *vw = NULL;  GLXDrawable draw = _glXGetCurrentDrawable();
+	VirtualWin *vw;  GLXDrawable draw = _glXGetCurrentDrawable();
 
 	if(vglfaker::getExcludeCurrent()) return draw;
 
@@ -961,7 +961,8 @@ GLXDrawable glXGetCurrentDrawable(void)
 
 		OPENTRACE(glXGetCurrentDrawable);  STARTTRACE();
 
-	if(winhash.find(draw, vw)) draw = vw->getX11Drawable();
+	if((vw = winhash.find(NULL, draw)) != NULL)
+		draw = vw->getX11Drawable();
 
 		STOPTRACE();  PRARGX(draw);  CLOSETRACE();
 
@@ -971,7 +972,7 @@ GLXDrawable glXGetCurrentDrawable(void)
 
 GLXDrawable glXGetCurrentReadDrawable(void)
 {
-	VirtualWin *vw = NULL;  GLXDrawable read = _glXGetCurrentReadDrawable();
+	VirtualWin *vw;  GLXDrawable read = _glXGetCurrentReadDrawable();
 
 	if(vglfaker::getExcludeCurrent()) return read;
 
@@ -979,7 +980,8 @@ GLXDrawable glXGetCurrentReadDrawable(void)
 
 		OPENTRACE(glXGetCurrentReadDrawable);  STARTTRACE();
 
-	if(winhash.find(read, vw)) read = vw->getX11Drawable();
+	if((vw = winhash.find(NULL, read)) != NULL)
+		read = vw->getX11Drawable();
 
 		STOPTRACE();  PRARGX(read);  CLOSETRACE();
 
@@ -1447,10 +1449,10 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	// why we read back the front buffer here if it is dirty.
 	GLXDrawable curdraw = _glXGetCurrentDrawable();
 	if(_glXGetCurrentContext() && _glXGetCurrentDisplay() == DPY3D
-		&& curdraw && winhash.find(curdraw, vw))
+		&& curdraw && (vw = winhash.find(NULL, curdraw)) != NULL)
 	{
 		VirtualWin *newvw;
-		if(drawable == 0 || !winhash.find(dpy, drawable, newvw)
+		if(drawable == 0 || !(newvw = winhash.find(dpy, drawable))
 			|| newvw->getGLXDrawable() != curdraw)
 		{
 			if(DrawingToFront() || vw->dirty)
@@ -1515,7 +1517,10 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		renderer = (const char *)_glGetString(GL_RENDERER);
 	// The pixels in a new off-screen drawable are undefined, so we have to clear
 	// it.
-	if(winhash.find(drawable, vw)) { vw->clear();  vw->cleanup(); }
+	if((vw = winhash.find(NULL, drawable)) != NULL)
+	{
+		vw->clear();  vw->cleanup();
+	}
 	VirtualPixmap *vpm;
 	if((vpm = pmhash.find(dpy, drawable)) != NULL)
 	{
@@ -1558,10 +1563,10 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	// which is why we read back the front buffer here if it is dirty.
 	GLXDrawable curdraw = _glXGetCurrentDrawable();
 	if(_glXGetCurrentContext() && _glXGetCurrentDisplay() == DPY3D && curdraw
-		&& winhash.find(curdraw, vw))
+		&& (vw = winhash.find(NULL, curdraw)) != NULL)
 	{
 		VirtualWin *newvw;
-		if(draw == 0 || !winhash.find(dpy, draw, newvw)
+		if(draw == 0 || !(newvw = winhash.find(dpy, draw))
 			|| newvw->getGLXDrawable() != curdraw)
 		{
 			if(DrawingToFront() || vw->dirty)
@@ -1652,8 +1657,12 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	retval = _glXMakeContextCurrent(DPY3D, draw, read, ctx);
 	if(fconfig.trace && retval)
 		renderer = (const char *)_glGetString(GL_RENDERER);
-	if(winhash.find(draw, drawVW)) { drawVW->clear();  drawVW->cleanup(); }
-	if(winhash.find(read, readVW)) readVW->cleanup();
+	if((drawVW = winhash.find(NULL, draw)) != NULL)
+	{
+		drawVW->clear();  drawVW->cleanup();
+	}
+	if((readVW = winhash.find(NULL, read)) != NULL)
+		readVW->cleanup();
 	VirtualPixmap *vpm;
 	if((vpm = pmhash.find(dpy, draw)) != NULL)
 	{
@@ -1765,8 +1774,8 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 	// GLX_EXT_swap_control attributes
 	if(attribute == GLX_SWAP_INTERVAL_EXT && value)
 	{
-		VirtualWin *vw = NULL;
-		if(winhash.find(dpy, draw, vw))
+		VirtualWin *vw;
+		if((vw = winhash.find(dpy, draw)) != NULL)
 			*value = vw->getSwapInterval();
 		else
 			*value = 0;
@@ -1919,7 +1928,7 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
 		OPENTRACE(glXSwapBuffers);  PRARGD(dpy);  PRARGX(drawable);  STARTTRACE();
 
 	fconfig.flushdelay = 0.;
-	if(winhash.find(dpy, drawable, vw))
+	if((vw = winhash.find(dpy, drawable)) != NULL)
 	{
 		vw->readback(GL_BACK, false, fconfig.sync);
 		vw->swapBuffers();
@@ -1976,8 +1985,8 @@ void glXSwapIntervalEXT(Display *dpy, GLXDrawable drawable, int interval)
 		// implementation doesn't, so we emulate their behavior.
 		interval = 1;
 
-	VirtualWin *vw = NULL;
-	if(winhash.find(dpy, drawable, vw))
+	VirtualWin *vw;
+	if((vw = winhash.find(dpy, drawable)) != NULL)
 		vw->setSwapInterval(interval);
 	// NOTE:  Technically, a BadWindow error should be triggered if drawable
 	// isn't a GLX window, but nVidia's implementation doesn't, so we emulate
@@ -2002,9 +2011,9 @@ int glXSwapIntervalSGI(int interval)
 
 	TRY();
 
-	VirtualWin *vw = NULL;  GLXDrawable draw = _glXGetCurrentDrawable();
+	VirtualWin *vw;  GLXDrawable draw = _glXGetCurrentDrawable();
 	if(interval < 0) retval = GLX_BAD_VALUE;
-	else if(!draw || !winhash.find(draw, vw))
+	else if(!draw || !(vw = winhash.find(NULL, draw)))
 		retval = GLX_BAD_CONTEXT;
 	else vw->setSwapInterval(interval);
 

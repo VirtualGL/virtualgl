@@ -132,7 +132,7 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
 
    GLXDrawable draw = _glXGetCurrentDrawable();
    if (!draw) return;
-   if (winhash.find(draw, pbw)) {
+   if ((pbw = winhash.find(NULL, draw)) != NULL) {
       /* Current drawable is a virtualized Window */
       ERRIFNOT(dpy = pbw->getX11Display());
       ERRIFNOT(win = pbw->getX11Drawable());

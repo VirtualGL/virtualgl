@@ -24,12 +24,11 @@ using namespace vglserver;
 
 static void doGLReadback(bool spoilLast, bool sync)
 {
-	VirtualWin *vw;  GLXDrawable drawable;
-
-	drawable = _glXGetCurrentDrawable();
+	GLXDrawable drawable = _glXGetCurrentDrawable();
 	if(!drawable) return;
 
-	if(winhash.find(drawable, vw))
+	VirtualWin *vw;
+	if((vw = winhash.find(NULL, drawable)) != NULL)
 	{
 		if(DrawingToFront() || vw->dirty)
 		{
@@ -123,11 +122,11 @@ void glDrawBuffer(GLenum mode)
 
 		OPENTRACE(glDrawBuffer);  PRARGX(mode);  STARTTRACE();
 
-	VirtualWin *vw = NULL;
+	VirtualWin *vw;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
 	GLXDrawable drawable = _glXGetCurrentDrawable();
 
-	if(drawable && winhash.find(drawable, vw))
+	if(drawable && (vw = winhash.find(NULL, drawable)) != NULL)
 	{
 		before = DrawingToFront();
 		rbefore = DrawingToRight();
@@ -160,11 +159,11 @@ void glPopAttrib(void)
 
 		OPENTRACE(glPopAttrib);  STARTTRACE();
 
-	VirtualWin *vw = NULL;
+	VirtualWin *vw;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
 	GLXDrawable drawable = _glXGetCurrentDrawable();
 
-	if(drawable && winhash.find(drawable, vw))
+	if(drawable && (vw = winhash.find(NULL, drawable)) != NULL)
 	{
 		before = DrawingToFront();
 		rbefore = DrawingToRight();
@@ -212,9 +211,8 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 	if(dpy && (draw || read) && ctx)
 	{
 		newRead = read, newDraw = draw;
-		VirtualWin *drawVW = NULL, *readVW = NULL;
-		winhash.find(draw, drawVW);
-		winhash.find(read, readVW);
+		VirtualWin *drawVW = winhash.find(NULL, draw);
+		VirtualWin *readVW = winhash.find(NULL, read);
 		if(drawVW) drawVW->checkResize();
 		if(readVW && readVW != drawVW) readVW->checkResize();
 		if(drawVW) newDraw = drawVW->updateGLXDrawable();
