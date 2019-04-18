@@ -12,9 +12,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // wxWindows Library License for more details.
 
-// This class attempts to manage visual properties across Windows and Pbuffers
-// and across GLX 1.0 and 1.3 in a sane manner
-
 #include "glxvisual.h"
 #include <stdio.h>
 #include <stdlib.h>
