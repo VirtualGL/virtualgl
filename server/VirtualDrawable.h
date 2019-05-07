@@ -98,9 +98,7 @@ namespace vglserver
 			vglcommon::Profiler profReadback;
 			int autotestFrameCount;
 
-			#ifdef GL_VERSION_1_5
 			GLuint pbo;
-			#endif
 			int numSync, numFrames, lastFormat;
 			bool usePBO;
 			bool alreadyPrinted, alreadyWarned, alreadyWarnedRenderMode;

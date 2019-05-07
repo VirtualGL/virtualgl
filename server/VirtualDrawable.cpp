@@ -197,9 +197,7 @@ VirtualDrawable::VirtualDrawable(Display *dpy_, Drawable x11Draw_)
 	config = 0;
 	ctx = 0;
 	direct = -1;
-	#ifdef GL_VERSION_1_5
 	pbo = 0;
-	#endif
 	numSync = numFrames = 0;
 	lastFormat = -1;
 	usePBO = (fconfig.readback == RRREAD_PBO);
@@ -393,7 +391,6 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 			if(!ext || !strstr(ext, "GL_ARB_pixel_buffer_object"))
 				THROW("GL_ARB_pixel_buffer_object extension not available");
 		}
-		#ifdef GL_VERSION_1_5
 		if(!pbo) _glGenBuffers(1, &pbo);
 		if(!pbo) THROW("Could not generate pixel buffer object");
 		if(!alreadyPrinted && fconfig.verbose)
@@ -411,9 +408,6 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 		_glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_EXT, GL_BUFFER_SIZE, &size);
 		if(size != pitch * height)
 			THROW("Could not set PBO size");
-		#else
-		THROW("PBO support not compiled in.  Rebuild VGL on a system that has OpenGL 1.5 or later.");
-		#endif
 	}
 	else
 	{
@@ -434,7 +428,6 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	if(usePBO)
 	{
 		tRead = GetTime() - t0;
-		#ifdef GL_VERSION_1_5
 		unsigned char *pboBits = NULL;
 		pboBits = (unsigned char *)_glMapBuffer(GL_PIXEL_PACK_BUFFER_EXT,
 			GL_READ_ONLY);
@@ -443,7 +436,6 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 		if(!_glUnmapBuffer(GL_PIXEL_PACK_BUFFER_EXT))
 			THROW("Could not unmap pixel buffer object");
 		_glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, 0);
-		#endif
 		tTotal = GetTime() - t0;
 		numFrames++;
 		if(tRead / tTotal > 0.5 && numFrames <= 10)

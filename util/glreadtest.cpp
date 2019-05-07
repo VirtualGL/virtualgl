@@ -63,7 +63,7 @@ GLXPbuffer pbuffer = 0;
 
 Timer timer;
 bool useWindow = false, usePixmap = false, useFBO = false, useRTT = false,
-	useAlpha = false;
+	useAlpha = false, usePBO = false;
 int visualID = 0, loops = 1;
 #ifdef USEIFR
 bool useIFR = false;
@@ -72,9 +72,6 @@ NV_IFROGL_SESSION_HANDLE ifrSession = NULL;
 #endif
 #ifdef GL_EXT_framebuffer_object
 GLuint fbo = 0, rbo = 0, texture = 0;
-#endif
-#ifdef GL_VERSION_1_5
-int pbo = 0;
 #endif
 double benchTime = BENCHTIME;
 
@@ -407,9 +404,7 @@ int readTest(int format)
 	unsigned char *rgbaBuffer = NULL;
 	int n, retval = 0;
 	double rbtime, readPixelsTime;  Timer timer2;
-	#ifdef GL_VERSION_1_5
 	GLuint bufferID = 0;
-	#endif
 	#ifdef USEIFR
 	NV_IFROGL_TRANSFEROBJECT_HANDLE ifrTransfer = NULL;
 	#endif
@@ -429,8 +424,7 @@ int readTest(int format)
 		#endif
 		glReadBuffer(GL_FRONT);
 
-		#ifdef GL_VERSION_1_5
-		if(pbo)
+		if(usePBO)
 		{
 			const char *ext = (const char *)glGetString(GL_EXTENSIONS);
 			if(!ext || !strstr(ext, "GL_ARB_pixel_buffer_object"))
@@ -447,9 +441,8 @@ int readTest(int format)
 				THROW("Could not generate PBO buffer");
 			temp = 0;
 			glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING_EXT, &temp);
-			if(temp != pbo) THROW("Could not bind PBO buffer");
+			if(!!temp != usePBO) THROW("Could not bind PBO buffer");
 		}
-		#endif
 		#ifdef USEIFR
 		if(useIFR)
 		{
@@ -472,8 +465,7 @@ int readTest(int format)
 		do
 		{
 			timer.start();
-			#ifdef GL_VERSION_1_5
-			if(pbo)
+			if(usePBO)
 			{
 				unsigned char *pixels = NULL;
 				glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, bufferID);
@@ -488,7 +480,6 @@ int readTest(int format)
 				glUnmapBuffer(GL_PIXEL_PACK_BUFFER_EXT);
 			}
 			else
-			#endif
 			#ifdef USEIFR
 			if(useIFR)
 			{
@@ -566,13 +557,11 @@ int readTest(int format)
 	}
 
 	if(rgbaBuffer) free(rgbaBuffer);
-	#ifdef GL_VERSION_1_5
-	if(pbo && bufferID > 0)
+	if(usePBO && bufferID > 0)
 	{
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, 0);
 		glDeleteBuffers(1, &bufferID);
 	}
-	#endif
 	#ifdef USEIFR
 	if(useIFR) ifr.nvIFROGLDestroyTransferObject(ifrTransfer);
 	#endif
@@ -623,9 +612,7 @@ void usage(char **argv)
 	fprintf(stderr, "-rtt = Render to a texture instead of a renderbuffer object\n");
 	fprintf(stderr, "       (implies -fbo)\n");
 	#endif
-	#ifdef GL_VERSION_1_5
 	fprintf(stderr, "-pbo = Use pixel buffer objects to perform readback\n");
-	#endif
 	#ifdef USEIFR
 	fprintf(stderr, "-ifr = Use nVidia Inband Frame Readback\n");
 	#endif
@@ -673,9 +660,7 @@ int main(int argc, char **argv)
 		else if(!stricmp(argv[i], "-fbo")) useFBO = true;
 		else if(!stricmp(argv[i], "-rtt")) { useRTT = true;  useFBO = true; }
 		#endif
-		#ifdef GL_VERSION_1_5
-		else if(!stricmp(argv[i], "-pbo")) pbo = 1;
-		#endif
+		else if(!stricmp(argv[i], "-pbo")) usePBO = true;
 		#ifdef USEIFR
 		else if(!stricmp(argv[i], "-ifr")) useIFR = true;
 		#endif
@@ -765,10 +750,10 @@ int main(int argc, char **argv)
 		else usage(argv);
 	}
 	#ifdef USEIFR
-	if(pbo && useIFR)
+	if(usePBO && useIFR)
 	{
 		fprintf(stderr, "IFR cannot be used with PBOs.  Disabling PBO readback.\n");
-		pbo = 0;
+		usePBO = false;
 	}
 	#endif
 
@@ -782,9 +767,7 @@ int main(int argc, char **argv)
 			fprintf(stderr, "Could not open display %s\n", XDisplayName(0));
 			exit(1);
 		}
-		#ifdef GL_VERSION_1_5
-		if(pbo) fprintf(stderr, "Using PBOs for readback\n");
-		#endif
+		if(usePBO) fprintf(stderr, "Using PBOs for readback\n");
 		#ifdef USEIFR
 		if(useIFR) fprintf(stderr, "Using nVidia Inband Frame Readback\n");
 		#endif
