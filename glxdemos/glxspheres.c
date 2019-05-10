@@ -728,7 +728,7 @@ int main(int argc, char **argv)
 		nOlColors = NP2(v->colormap_size);
 		if(nOlColors < 32) THROW("Color map is not large enough");
 
-		CATCH(setColorScheme(olColormap, nOlColors, 256, colorScheme));
+		CATCH(setColorScheme(olColormap, nOlColors, 8, colorScheme));
 
 		if((olWin = XCreateWindow(dpy, win, 0, 0, width, height, 0, v->depth,
 			InputOutput, v->visual, CWBorderPixel | CWColormap | CWEventMask,
