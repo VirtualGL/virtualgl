@@ -130,9 +130,9 @@ namespace vglutil
 	{
 		public:
 
-			UnixError(const char *method) : Error(method, strerror(errno)) {}
-			UnixError(const char *method, int line) :
-				Error(method, strerror(errno), line) {}
+			UnixError(const char *method_) : Error(method_, strerror(errno)) {}
+			UnixError(const char *method_, int line) :
+				Error(method_, strerror(errno), line) {}
 	};
 }
 

@@ -181,8 +181,7 @@ void nativeWrite(bool useShm)
 			i++;
 		} while(timer2.elapsed() < benchTime);
 		fprintf(stderr, "%f Mpixels/sec",
-			(double)i * (double)(fb.width * fb.height) /
-				((double)1000000. * drawTime));
+			(double)i * (double)(fb.width * fb.height) / (1000000. * drawTime));
 		memset(fb.bits, 0, fb.pitch * fb.height);
 		TRY_FBX(fbx_read(&fb, 0, 0));
 		if(!cmpBuf(0, 0, fb.width, fb.pitch, fb.height, fb.pf,
@@ -217,8 +216,7 @@ void nativeWrite(bool useShm)
 			i++;
 		} while(timer2.elapsed() < benchTime);
 		fprintf(stderr, "%f Mpixels/sec",
-			(double)i * (double)(fb.width * fb.height) /
-				((double)4000000. * drawTime));
+			(double)i * (double)(fb.width * fb.height) / (4000000. * drawTime));
 		memset(fb.bits, 0, fb.pitch * fb.height);
 		TRY_FBX(fbx_read(&fb, 0, 0));
 		if(!cmpBuf(0, 0, fb.width / 2, fb.pitch, fb.height / 2,
@@ -253,8 +251,7 @@ void nativeWrite(bool useShm)
 			i++;
 		} while(timer2.elapsed() < benchTime);
 		fprintf(stderr, "%f Mpixels/sec",
-			(double)i * (double)(fb.width * fb.height) /
-				((double)1000000. * drawTime));
+			(double)i * (double)(fb.width * fb.height) / (1000000. * drawTime));
 		memset(fb.bits, 0, fb.pitch * fb.height);
 		TRY_FBX(fbx_read(&fb, 0, 0));
 		if(!cmpBuf(0, 0, fb.width, fb.pitch, fb.height, fb.pf,
@@ -312,8 +309,7 @@ void nativeRead(bool useShm)
 			i++;
 		} while(timer2.elapsed() < benchTime);
 		fprintf(stderr, "%f Mpixels/sec",
-			(double)i * (double)(fb.width * fb.height) /
-				((double)1000000. * readTime));
+			(double)i * (double)(fb.width * fb.height) / (1000000. * readTime));
 		if(error)
 		{
 			fprintf(stderr, " (ERROR CHECK FAILED)\n");
@@ -455,7 +451,7 @@ void nativeStress(bool useShm)
 		} while(testTime < 1.);
 		fprintf(stderr, "%f Mpixels/sec\n",
 			(double)n * (double)(drawableWidth * drawableHeight) /
-				((double)1000000. * testTime));
+				(1000000. * testTime));
 
 	}
 	catch(Error &e)
@@ -491,7 +487,7 @@ void nativeStress(bool useShm)
 		} while(testTime < 1.);
 		fprintf(stderr, "%f Mpixels/sec\n",
 			(double)n * (double)(drawableWidth * drawableHeight) /
-				((double)1000000. * testTime));
+				(1000000. * testTime));
 
 	}
 	catch(Error &e)

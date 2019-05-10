@@ -34,8 +34,8 @@ double testTime = BENCHTIME;
 int getSetRGB = 0;
 
 
-void initBuf(unsigned char *buf, int width, int pitch, int height, PF *srcpf,
-	PF *dstpf)
+static void initBuf(unsigned char *buf, int width, int pitch, int height,
+	PF *srcpf, PF *dstpf)
 {
 	int i, j, maxRGB = min(1 << srcpf->bpc, 1 << dstpf->bpc);
 
@@ -57,8 +57,8 @@ void initBuf(unsigned char *buf, int width, int pitch, int height, PF *srcpf,
 }
 
 
-int cmpBuf(unsigned char *buf, int width, int pitch, int height, PF *srcpf,
-	PF *dstpf)
+static int cmpBuf(unsigned char *buf, int width, int pitch, int height,
+	PF *srcpf, PF *dstpf)
 {
 	int i, j, retval = 1, maxRGB = min(1 << srcpf->bpc, 1 << dstpf->bpc);
 
@@ -82,7 +82,7 @@ int cmpBuf(unsigned char *buf, int width, int pitch, int height, PF *srcpf,
 }
 
 
-int doTest(int width, int height, PF *srcpf, PF *dstpf)
+static int doTest(int width, int height, PF *srcpf, PF *dstpf)
 {
 	int retval = 0, iter = 0, srcPitch = BMPPAD(width * srcpf->size),
 		dstPitch = BMPPAD(width * dstpf->size);
@@ -185,7 +185,7 @@ int doTest(int width, int height, PF *srcpf, PF *dstpf)
 }
 
 
-void usage(char **argv)
+static void usage(char **argv)
 {
 	fprintf(stderr, "\nUSAGE: %s [options]\n\n", argv[0]);
 	fprintf(stderr, "Options:\n");

@@ -115,8 +115,7 @@ namespace vglserver
 
 			void detach(HashEntry *entry)
 			{
-				XCBConnAttribs *attribs =
-					entry ? (XCBConnAttribs *)entry->value : NULL;
+				XCBConnAttribs *attribs = entry ? entry->value : NULL;
 				if(attribs) delete attribs;
 			}
 

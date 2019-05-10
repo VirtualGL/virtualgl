@@ -35,7 +35,6 @@ using namespace vglutil;
 
 
 #define PAD(w)  (((w) + (align - 1)) & (~(align - 1)))
-#define BMPPAD(pitch)  ((pitch + (sizeof(int) - 1)) & (~(sizeof(int) - 1)))
 
 
 GLenum glFormat[PIXELFORMATS];
@@ -382,7 +381,7 @@ int writeTest(int format)
 		} while((rbtime = timer.elapsed()) < benchTime || n < 2);
 
 		double avgmps = (double)n * (double)(drawableWidth * drawableHeight) /
-			((double)1000000. * rbtime);
+			(1000000. * rbtime);
 		check_errors("frame buffer write");
 		fprintf(stderr, "%s Mpixels/sec\n", sigFig(4, temps, avgmps));
 
@@ -524,9 +523,8 @@ int readTest(int format)
 			n++;
 			rbtime += elapsed;
 			ssq += pow((double)(drawableWidth * drawableHeight) /
-				((double)1000000. * elapsed), 2.0);
-			sum += (double)(drawableWidth * drawableHeight) /
-				((double)1000000. * elapsed);
+				(1000000. * elapsed), 2.0);
+			sum += (double)(drawableWidth * drawableHeight) / (1000000. * elapsed);
 		} while(rbtime < benchTime || n < 2);
 
 		if(!cmpBuf(0, 0, drawableWidth, drawableHeight, pf, rgbaBuffer, 0))
@@ -536,11 +534,11 @@ int readTest(int format)
 		double stddev =
 			sqrt((ssq - 2.0 * mean * sum + mean * mean * (double)n) / (double)n);
 		double avgmps = (double)n * (double)(drawableWidth * drawableHeight) /
-			((double)1000000. * rbtime);
+			(1000000. * rbtime);
 		double minmps = (double)(drawableWidth * drawableHeight) /
-			((double)1000000. * tmax);
+			(1000000. * tmax);
 		double maxmps = (double)(drawableWidth * drawableHeight) /
-			((double)1000000. * tmin);
+			(1000000. * tmin);
 		check_errors("frame buffer read");
 
 		fprintf(stderr, "%s Mpixels/sec ", sigFig(4, temps, avgmps));
@@ -846,7 +844,7 @@ int main(int argc, char **argv)
 			if(fbo) glDeleteFramebuffersEXT(1, &fbo);
 		}
 		#endif
-		#if USEIFR
+		#ifdef USEIFR
 		if(useIFR)
 		{
 			if(ifrSession) ifr.nvIFROGLDestroySession(ifrSession);

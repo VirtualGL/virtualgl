@@ -22,9 +22,6 @@
 using namespace vglserver;
 
 
-#define ROUND(f)  ((f) >= 0 ? (long)((f) + 0.5) : (long)((f) - 0.5))
-
-
 static void doGLReadback(bool spoilLast, bool sync)
 {
 	VirtualWin *vw;  GLXDrawable drawable;

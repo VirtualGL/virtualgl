@@ -96,8 +96,7 @@ namespace vglserver
 
 			void detach(HashEntry *entry)
 			{
-				ContextAttribs *attribs =
-					entry ? (ContextAttribs *)entry->value : NULL;
+				ContextAttribs *attribs = entry ? entry->value : NULL;
 				if(attribs) delete attribs;
 			}
 

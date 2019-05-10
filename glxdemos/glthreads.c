@@ -594,7 +594,6 @@ main(int argc, char *argv[])
       usage();
    }
    else {
-      int i;
       for (i = 1; i < argc; i++) {
          if (strcmp(argv[i], "-display") == 0 && i + 1 < argc) {
             displayName = argv[i + 1];

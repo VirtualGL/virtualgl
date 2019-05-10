@@ -29,9 +29,6 @@
 #include "bmp.h"
 
 
-#ifndef BI_BITFIELDS
-#define BI_BITFIELDS  3L
-#endif
 #ifndef BI_RGB
 #define BI_RGB  0L
 #endif
@@ -176,8 +173,8 @@ static int ppm_load(int *fd, unsigned char **buf, int *width, int align,
 int bmp_load(char *filename, unsigned char **buf, int *width, int align,
 	int *height, int format, enum BMPORN orientation)
 {
-	int fd = -1, bytesRead, srcPitch, srcOrientation = BMPORN_BOTTOMUP,
-		srcPixelSize, dstPitch, ret = 0;
+	int fd = -1, bytesRead, srcPitch, srcPixelSize, dstPitch, ret = 0;
+	enum BMPORN srcOrientation = BMPORN_BOTTOMUP;
 	unsigned char *tempbuf = NULL;
 	BitmapHeader bh;  int flags = O_RDONLY;
 	PF *pf = pf_get(format);

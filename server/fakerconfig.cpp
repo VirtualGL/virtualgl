@@ -160,7 +160,7 @@ static void fconfig_init(void)
 	memset(&fconfig_env, 0, sizeof(FakerConfig));
 	fconfig.compress = -1;
 	strncpy(fconfig.config, VGLCONFIG_PATH, MAXSTR);
-	#if sun
+	#ifdef sun
 	fconfig.dlsymloader = true;
 	#endif
 	#ifdef FAKEXCB
@@ -584,7 +584,7 @@ void fconfig_setcompress(FakerConfig &fc, int i)
 }
 
 
-#define PRCONF_INT(i)  vglout.println(#i "  =  %d", (int)fc.i)
+#define PRCONF_INT(i)  vglout.println(#i "  =  %d", fc.i)
 #define PRCONF_STR(s) \
 	vglout.println(#s "  =  \"%s\"", strlen(fc.s) > 0 ? fc.s : "{Empty}")
 #define PRCONF_DBL(d)  vglout.println(#d "  =  %f", fc.d)

@@ -348,7 +348,7 @@ query_extension(char* extName) {
     char *p = (char *) glGetString(GL_EXTENSIONS);
     char *end = p + strlen(p);
     while (p < end) {
-        int n = strcspn(p, " ");
+        size_t n = strcspn(p, " ");
         if ((strlen(extName) == n) && (strncmp(extName, p, n) == 0))
             return GL_TRUE;
         p += (n + 1);

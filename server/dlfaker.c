@@ -55,7 +55,7 @@ static void setDLFakerLevel(int value)
 {
 	pthread_key_t dlFakerLevelKey = getDLFakerLevelKey();
 
-	if(dlFakerLevelKey != -1)
+	if(dlFakerLevelKey != (pthread_key_t)-1)
 		pthread_setspecific(dlFakerLevelKey, (const void *)(size_t)value);
 }
 

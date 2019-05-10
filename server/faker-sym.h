@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011, 2013-2016, 2018 D. R. Commander
+// Copyright (C)2009, 2011, 2013-2016, 2018-2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -39,18 +39,7 @@ extern "C" {
 #endif
 }
 #endif
-
-
-namespace vglfaker
-{
-	extern void safeExit(int);
-	extern void init(void);
-	extern long getFakerLevel(void);
-	extern void setFakerLevel(long level);
-
-	void *loadSymbol(const char *name, bool optional = false);
-	void unloadSymbols(void);
-}
+#include "faker.h"
 
 
 #define CHECKSYM_NONFATAL(s) \
@@ -782,4 +771,19 @@ FUNCDEF3(xcb_keysym_t, xcb_key_symbols_get_keysym, xcb_key_symbols_t *, syms,
 #endif
 
 
-#endif
+static INLINE int DrawingToFront(void)
+{
+	GLint drawbuf = GL_BACK;
+	_glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
+	return IS_FRONT(drawbuf);
+}
+
+
+static INLINE int DrawingToRight(void)
+{
+	GLint drawbuf = GL_LEFT;
+	_glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
+	return IS_RIGHT(drawbuf);
+}
+
+#endif  // __FAKER_SYM_H__

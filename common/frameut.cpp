@@ -399,10 +399,9 @@ class FrameTest
 {
 	public:
 
-		FrameTest(Display *dpy, int myID_) : compressor(NULL), decompressor(NULL),
-			blitter(NULL), myID(myID_)
+		FrameTest(Display *dpy_, int myID_) : dpy(dpy_), compressor(NULL),
+			decompressor(NULL), blitter(NULL), myID(myID_)
 		{
-			this->dpy = dpy;
 			ERRIFNOT(win = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy),
 				myID * (MINW + BORDER * 2), 0, MINW + BORDER, MINW + BORDER, 0,
 				WhitePixel(dpy, DefaultScreen(dpy)),

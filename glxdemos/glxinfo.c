@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  * Copyright (C) 2005-2007  Sun Microsystems, Inc.   All Rights Reserved.
- * Copyright (C) 2011, 2013, 2015  D. R. Commander   All Rights Reserved.
+ * Copyright (C) 2011, 2013, 2015, 2019  D. R. Commander   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -579,9 +579,10 @@ print_screen_info(Display *dpy, int scrnum,
       CheckError(__LINE__);
 #ifdef GL_VERSION_3_2
       if (version >= 32 && !es2Profile) {
-         GLint mask;
-         glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &mask);
-         printf("%s profile mask: %s\n", oglstring, profile_mask_string(mask));
+         GLint profileMask;
+         glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &profileMask);
+         printf("%s profile mask: %s\n", oglstring,
+                profile_mask_string(profileMask));
       }
 #endif
 

@@ -125,7 +125,7 @@ install(TARGETS ${VGL_GEFAKER_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR})
 set(HEADERS ../common/rr.h rrtransport.h)
 install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-include_directories(${FLTK_INCLUDE_DIR})
+include_directories(SYSTEM ${FLTK_INCLUDE_DIR})
 add_executable(vglconfig vglconfig.cpp fakerconfig.cpp)
 target_link_libraries(vglconfig ${X11_X11_LIB} ${FLTK_BASE_LIBRARY} vglutil)
 if(VGL_USEXV)

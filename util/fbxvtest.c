@@ -48,7 +48,7 @@ char *filename = NULL;
 Atom protoAtom = 0, deleteAtom = 0;
 
 
-void initBuf(fbxv_struct *s, int id, int seed)
+static void initBuf(fbxv_struct *fb, int id, int seed)
 {
 	int i, j, c;
 	int yindex0, yindex1, uindex, vindex;
@@ -64,34 +64,34 @@ void initBuf(fbxv_struct *s, int id, int seed)
 	}
 	if(id == YUY2_PACKED || id == UYVY_PACKED)
 	{
-		for(j = 0; j < s->xvi->height; j++)
+		for(j = 0; j < fb->xvi->height; j++)
 		{
-			for(i = 0; i < s->xvi->width; i += 2)
+			for(i = 0; i < fb->xvi->width; i += 2)
 			{
-				s->xvi->data[s->xvi->pitches[0] * j + i * 2 + yindex0] =
+				fb->xvi->data[fb->xvi->pitches[0] * j + i * 2 + yindex0] =
 					(j + seed) * (i + seed);
-				s->xvi->data[s->xvi->pitches[0] * j + i * 2 + yindex1] =
+				fb->xvi->data[fb->xvi->pitches[0] * j + i * 2 + yindex1] =
 					(j + seed + 1) * (i + seed + 1);
-				s->xvi->data[s->xvi->pitches[0] * j + i * 2 + uindex] =
+				fb->xvi->data[fb->xvi->pitches[0] * j + i * 2 + uindex] =
 					(j + seed) * (i + seed);
-				s->xvi->data[s->xvi->pitches[0] * j + i * 2 + vindex] =
+				fb->xvi->data[fb->xvi->pitches[0] * j + i * 2 + vindex] =
 					(j + seed) * (i + seed);
 			}
 		}
 	}
 	else
 	{
-		for(c = 0; c < s->xvi->num_planes; c++)
-			for(j = 0; j < s->xvi->height; j++)
-				for(i = 0; i < s->xvi->width; i++)
-					s->xvi->data[s->xvi->offsets[c] +
-						s->xvi->pitches[c] * (c == 0 ? j : j / 2) +
+		for(c = 0; c < fb->xvi->num_planes; c++)
+			for(j = 0; j < fb->xvi->height; j++)
+				for(i = 0; i < fb->xvi->width; i++)
+					fb->xvi->data[fb->xvi->offsets[c] +
+						fb->xvi->pitches[c] * (c == 0 ? j : j / 2) +
 						(c == 0 ? i : i / 2)] = (j + seed) * (i + seed);
 	}
 }
 
 
-int doTest(int id, char *name)
+static int doTest(int id, char *name)
 {
 	int iter = 0, i, retval = 0;
 	double elapsed = 0., t;
@@ -166,7 +166,7 @@ int doTest(int id, char *name)
 }
 
 
-int doInteractiveTest(Display *dpy, int id, char *name)
+static int doInteractiveTest(int id, char *name)
 {
 	int iter = 0, retval = 0;
 	printf("Interactive test, %s format (ID=0x%.8x) %s...\n", name, id,
@@ -206,7 +206,8 @@ int doInteractiveTest(Display *dpy, int id, char *name)
 				case ClientMessage:
 				{
 					XClientMessageEvent *cme = (XClientMessageEvent *)&event;
-					if(cme->message_type == protoAtom && cme->data.l[0] == deleteAtom)
+					if(cme->message_type == protoAtom
+						&& cme->data.l[0] == (long)deleteAtom)
 						return 0;
 				}
 			}
@@ -226,7 +227,7 @@ int doInteractiveTest(Display *dpy, int id, char *name)
 }
 
 
-void usage(char **argv)
+static void usage(char **argv)
 {
 	fprintf(stderr, "\nUSAGE: %s [options]\n\n", argv[0]);
 	fprintf(stderr, "Options:\n");
@@ -331,7 +332,7 @@ int main(int argc, char **argv)
 
 	if(interactive)
 	{
-		if(doInteractiveTest(dpy, I420_PLANAR, "I420 Planar") < 0)
+		if(doInteractiveTest(I420_PLANAR, "I420 Planar") < 0)
 		{
 			retval = -1;  goto bailout;
 		}

@@ -31,9 +31,6 @@ static const int trans2pf[RRTRANS_FORMATOPT] =
 };
 
 
-#define IS_RIGHT(drawBuf) \
-	(drawBuf == GL_RIGHT || drawBuf == GL_FRONT_RIGHT \
-		|| drawBuf == GL_BACK_RIGHT)
 #define LEYE(buf) \
 	(buf == GL_BACK ? GL_BACK_LEFT : (buf == GL_FRONT ? GL_FRONT_LEFT : buf))
 #define REYE(buf) \
@@ -42,13 +39,6 @@ static const int trans2pf[RRTRANS_FORMATOPT] =
 	(mode >= RRSTEREO_REDCYAN && mode <= RRSTEREO_BLUEYELLOW)
 #define IS_PASSIVE(mode) \
 	(mode >= RRSTEREO_INTERLEAVED && mode <= RRSTEREO_SIDEBYSIDE)
-
-static INLINE int DrawingToRight(void)
-{
-	GLint drawBuf = GL_LEFT;
-	_glGetIntegerv(GL_DRAW_BUFFER, &drawBuf);
-	return IS_RIGHT(drawBuf);
-}
 
 
 // This class encapsulates the 3D off-screen drawable, its most recent
@@ -336,8 +326,8 @@ void VirtualWin::readback(GLint drawBuf, bool spoilLast, bool sync)
 					strlen(fconfig.client) > 0 ? fconfig.client : DisplayString(dpy),
 					fconfig.port);
 			}
-			sendVGL(drawBuf, spoilLast, doStereo, stereoMode, (int)compress,
-				fconfig.qual, fconfig.subsamp);
+			sendVGL(drawBuf, spoilLast, doStereo, stereoMode, compress, fconfig.qual,
+				fconfig.subsamp);
 			break;
 		#ifdef USEXV
 		case RRCOMP_XV:
