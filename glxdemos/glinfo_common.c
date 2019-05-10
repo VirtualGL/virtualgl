@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1999-2014  Brian Paul   All Rights Reserved.
  * Copyright (C) 2005  Sun Microsystems, Inc.   All Rights Reserved.
- * Copyright (C) 2014, 2018  D. R. Commander   All Rights Reserved.
+ * Copyright (C) 2014, 2018-2019  D. R. Commander   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -972,6 +972,7 @@ parse_args(int argc, char *argv[], struct options *options)
    options->singleLine = GL_FALSE;
    options->displayName = NULL;
    options->allowDirect = GL_TRUE;
+   options->fbConfigs = GL_FALSE;
 
    for (i = 1; i < argc; i++) {
 #ifndef _WIN32
