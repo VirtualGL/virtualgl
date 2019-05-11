@@ -131,7 +131,7 @@ int main(int argc, char **argv)
 				WhitePixel(dpy, DefaultScreen(dpy)),
 				BlackPixel(dpy, DefaultScreen(dpy)))) == 0)
 				THROW("Could not create window");
-			printf("Creating window %lu\n", (unsigned long)win);
+			printf("Creating window %lu\n", win);
 			ERRIFNOT(XMapRaised(dpy, win));
 			XSync(dpy, False);
 			if(strlen(fconfig.client) == 0)

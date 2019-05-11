@@ -1,5 +1,5 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
- * Copyright (C)2013-2014 D. R. Commander
+ * Copyright (C)2013-2014, 2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -19,7 +19,7 @@
 #define MAXCPUS  4
 
 
-void collect(void)
+static void collect(void)
 {
 	static long long usrJifs[MAXCPUS + 1], niceJifs[MAXCPUS + 1],
 		sysJifs[MAXCPUS + 1], totalJifs[MAXCPUS + 1];

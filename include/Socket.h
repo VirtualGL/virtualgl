@@ -42,8 +42,8 @@ namespace vglutil
 
 			#ifdef _WIN32
 
-			SockError(const char *method, int line) :
-				Error(method, (char *)NULL, line)
+			SockError(const char *method_, int line) :
+				Error(method_, (char *)NULL, line)
 			{
 				if(!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, WSAGetLastError(),
 					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), message, MLEN, NULL))
@@ -52,8 +52,8 @@ namespace vglutil
 
 			#else
 
-			SockError(const char *method, int line) :
-				Error(method, strerror(errno), line) {}
+			SockError(const char *method_, int line) :
+				Error(method_, strerror(errno), line) {}
 
 			#endif
 	};
@@ -70,15 +70,15 @@ namespace vglutil
 	{
 		public:
 
-			SSLError(const char *method, int line) :
-				Error(method, (char *)NULL, line)
+			SSLError(const char *method_, int line) :
+				Error(method_, (char *)NULL, line)
 			{
 				ERR_error_string_n(ERR_get_error(), &message[strlen(message)],
 					MLEN - strlen(message));
 			}
 
-			SSLError(const char *method, SSL *ssl, int ret) :
-				Error(method, (char *)NULL)
+			SSLError(const char *method_, SSL *ssl, int ret) :
+				Error(method_, (char *)NULL)
 			{
 				const char *errorString = NULL;
 

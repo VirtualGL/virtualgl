@@ -95,7 +95,7 @@ void VGLTrans::sendHeader(rrframeheader h, bool eof)
 			{
 				rrversion v;
 				version.id[0] = reply;
-				recv((char *)&version.id[1], sizeof_rrversion - 1);
+				recv(&version.id[1], sizeof_rrversion - 1);
 				if(strncmp(version.id, "VGL", 3) || version.major < 1)
 					THROW("Error reading client version");
 				v = version;

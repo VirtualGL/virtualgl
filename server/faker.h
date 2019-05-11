@@ -21,16 +21,17 @@
 #include "Mutex.h"
 #include <GL/glx.h>
 #include "fakerconfig.h"
-#include "faker-sym.h"
 #include "Timer.h"
 
 
 namespace vglfaker
 {
 	extern Display *dpy3D;
+	extern bool deadYet;
+
+	extern void init(void);
 	extern Display *init3D(void);
 	extern void safeExit(int);
-	extern bool deadYet;
 
 	extern long getTraceLevel(void);
 	extern void setTraceLevel(long level);
@@ -48,6 +49,9 @@ namespace vglfaker
 	extern void setAutotestDisplay(Display *dpy);
 	extern long getAutotestDrawable();
 	extern void setAutotestDrawable(long d);
+
+	void *loadSymbol(const char *name, bool optional = false);
+	void unloadSymbols(void);
 
 	extern bool isDisplayStringExcluded(char *name);
 
@@ -103,22 +107,6 @@ namespace vglfaker
 		|| drawbuf == GL_BACK_RIGHT)
 
 
-static INLINE int DrawingToFront(void)
-{
-	GLint drawbuf = GL_BACK;
-	_glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
-	return IS_FRONT(drawbuf);
-}
-
-
-static INLINE int DrawingToRight(void)
-{
-	GLint drawbuf = GL_LEFT;
-	_glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
-	return IS_RIGHT(drawbuf);
-}
-
-
 #define DIE(f, m) \
 { \
 	if(!vglfaker::deadYet) \
@@ -139,7 +127,7 @@ static INLINE int DrawingToRight(void)
 
 #define PRARGS(a)  vglout.print("%s=%s ", #a, a ? a : "NULL")
 
-#define PRARGX(a)  vglout.print("%s=0x%.8lx ", #a, (unsigned long)a)
+#define PRARGX(a)  vglout.print("%s=0x%.8lx ", #a, a)
 
 #define PRARGIX(a)  vglout.print("%s=%d(0x%.lx) ", #a, (unsigned long)a, \
 	(unsigned long)a)

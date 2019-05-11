@@ -62,28 +62,28 @@ void clickToContinue(Display *dpy)
 #define PRERROR1(m, a1) \
 { \
 	char tempErrStr[256]; \
-	snprintf(tempErrStr, 255, m, a1); \
+	snprintf(tempErrStr, 256, m, a1); \
 	throw(Error(__FUNCTION__, tempErrStr, 0)); \
 }
 
 #define PRERROR2(m, a1, a2) \
 { \
 	char tempErrStr[256]; \
-	snprintf(tempErrStr, 255, m, a1, a2); \
+	snprintf(tempErrStr, 256, m, a1, a2); \
 	throw(Error(__FUNCTION__, tempErrStr, 0)); \
 }
 
 #define PRERROR3(m, a1, a2, a3) \
 { \
 	char tempErrStr[256]; \
-	snprintf(tempErrStr, 255, m, a1, a2, a3); \
+	snprintf(tempErrStr, 256, m, a1, a2, a3); \
 	throw(Error(__FUNCTION__, tempErrStr, 0)); \
 }
 
 #define PRERROR5(m, a1, a2, a3, a4, a5) \
 { \
 	char tempErrStr[256]; \
-	snprintf(tempErrStr, 255, m, a1, a2, a3, a4, a5); \
+	snprintf(tempErrStr, 256, m, a1, a2, a3, a4, a5); \
 	throw(Error(__FUNCTION__, tempErrStr, 0)); \
 }
 
@@ -2403,13 +2403,13 @@ int subWinTest(void)
 
 
 int x11Error = -1, x11MinorCode = -1;
-char x11ErrorString[256] = { 0 };
+char x11ErrorString[174] = { 0 };
 
 int xhandler(Display *dpy, XErrorEvent *xe)
 {
 	x11Error = xe->error_code;
 	x11MinorCode = xe->minor_code;
-	XGetErrorText(dpy, x11Error, x11ErrorString, 255);
+	XGetErrorText(dpy, x11Error, x11ErrorString, 174);
 	return 0;
 }
 

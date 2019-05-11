@@ -279,7 +279,7 @@ void Socket::connect(char *serverName, unsigned short port)
 		if((sd = socket(addr->ai_family, SOCK_STREAM,
 			IPPROTO_TCP)) == INVALID_SOCKET)
 			THROW_SOCK();
-		TRY_SOCK(::connect(sd, addr->ai_addr, (SOCKLEN_T)addr->ai_addrlen));
+		TRY_SOCK(::connect(sd, addr->ai_addr, addr->ai_addrlen));
 		TRY_SOCK(setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (char *)&m,
 			sizeof(int)));
 		freeaddrinfo(addr);
@@ -295,7 +295,7 @@ void Socket::connect(char *serverName, unsigned short port)
 	{
 		if((sslctx = SSL_CTX_new(SSLv23_client_method())) == NULL) THROW_SSL();
 		if((ssl = SSL_new(sslctx)) == NULL) THROW_SSL();
-		if(!SSL_set_fd(ssl, (int)sd)) THROW_SSL();
+		if(!SSL_set_fd(ssl, sd)) THROW_SSL();
 		int ret = SSL_connect(ssl);
 		if(ret != 1) throw(SSLError("Socket::connect", ssl, ret));
 		SSL_set_connect_state(ssl);
@@ -418,7 +418,7 @@ Socket *Socket::accept(void)
 	if(doSSL)
 	{
 		if(!(tempssl = SSL_new(sslctx))) THROW_SSL();
-		if(!(SSL_set_fd(tempssl, (int)clientsd))) THROW_SSL();
+		if(!(SSL_set_fd(tempssl, clientsd))) THROW_SSL();
 		int ret = SSL_accept(tempssl);
 		if(ret != 1) throw(SSLError("Socket::accept", tempssl, ret));
 		SSL_set_accept_state(tempssl);

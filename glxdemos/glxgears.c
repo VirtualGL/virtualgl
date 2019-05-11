@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 1999-2001  Brian Paul   All Rights Reserved.
- * Copyright (C) 2013  D. R. Commander   All Rights Reserved.
+ * Copyright (C) 2013, 2019  D. R. Commander   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -100,7 +100,7 @@ current_time(void)
 
 static GLfloat view_rotx = 20.0, view_roty = 30.0, view_rotz = 0.0;
 static GLint gear1, gear2, gear3;
-static GLfloat angle = 0.0;
+static GLfloat gear_angle = 0.0;
 
 static GLboolean fullscreen = GL_FALSE; /* Create a single fullscreen window */
 static GLboolean stereo = GL_FALSE;     /* Enable stereo.  */
@@ -265,19 +265,19 @@ draw(void)
 
    glPushMatrix();
    glTranslatef(-3.0, -2.0, 0.0);
-   glRotatef(angle, 0.0, 0.0, 1.0);
+   glRotatef(gear_angle, 0.0, 0.0, 1.0);
    glCallList(gear1);
    glPopMatrix();
 
    glPushMatrix();
    glTranslatef(3.1, -2.0, 0.0);
-   glRotatef(-2.0 * angle - 9.0, 0.0, 0.0, 1.0);
+   glRotatef(-2.0 * gear_angle - 9.0, 0.0, 0.0, 1.0);
    glCallList(gear2);
    glPopMatrix();
 
    glPushMatrix();
    glTranslatef(-3.1, 4.2, 0.0);
-   glRotatef(-2.0 * angle - 25.0, 0.0, 0.0, 1.0);
+   glRotatef(-2.0 * gear_angle - 25.0, 0.0, 0.0, 1.0);
    glCallList(gear3);
    glPopMatrix();
 
@@ -338,9 +338,9 @@ draw_frame(Display *dpy, Window win)
 
    if (animate) {
       /* advance rotation for next frame */
-      angle += 70.0 * dt;  /* 70 degrees per second */
-      if (angle > 3600.0)
-         angle -= 3600.0;
+      gear_angle += 70.0 * dt;  /* 70 degrees per second */
+      if (gear_angle > 3600.0)
+         gear_angle -= 3600.0;
    }
 
    draw_gears();

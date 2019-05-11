@@ -47,7 +47,7 @@
 # define BOOST_BYTE_ORDER __BYTE_ORDER
 
 #elif defined(__NetBSD__) || defined(__FreeBSD__) || \
-    defined(__OpenBSD__) || (__DragonFly__)
+    defined(__OpenBSD__) || defined(__DragonFly__)
 //
 // BSD has endian.h, see https://svn.boost.org/trac/boost/ticket/6013
 #  if defined(__OpenBSD__)

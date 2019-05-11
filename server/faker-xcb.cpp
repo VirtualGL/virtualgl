@@ -139,19 +139,19 @@ xcb_glx_query_version_reply_t *
 // resizes, key presses (to pop up the VGL configuration dialog), and window
 // delete events from the window manager.
 
-static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *e)
+static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *ev)
 {
 	VirtualWin *vw = NULL;
 
-	if(!e || vglfaker::deadYet || !fconfig.fakeXCB
+	if(!ev || vglfaker::deadYet || !fconfig.fakeXCB
 		|| vglfaker::getFakerLevel() > 0)
 		return;
 
-	switch(e->response_type & ~0x80)
+	switch(ev->response_type & ~0x80)
 	{
 		case XCB_CONFIGURE_NOTIFY:
 		{
-			xcb_configure_notify_event_t *cne = (xcb_configure_notify_event_t *)e;
+			xcb_configure_notify_event_t *cne = (xcb_configure_notify_event_t *)ev;
 			Display *dpy = xcbconnhash.getX11Display(conn);
 
 			if(!dpy || vglfaker::isDisplayExcluded(dpy)) break;
@@ -170,7 +170,7 @@ static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *e)
 		}
 		case XCB_KEY_PRESS:
 		{
-			xcb_key_press_event_t *kpe = (xcb_key_press_event_t *)e;
+			xcb_key_press_event_t *kpe = (xcb_key_press_event_t *)ev;
 			Display *dpy = xcbconnhash.getX11Display(conn);
 
 			if(!dpy || !fconfig.gui || vglfaker::isDisplayExcluded(dpy)) break;
@@ -197,7 +197,7 @@ static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *e)
 		}
 		case XCB_CLIENT_MESSAGE:
 		{
-			xcb_client_message_event_t *cme = (xcb_client_message_event_t *)e;
+			xcb_client_message_event_t *cme = (xcb_client_message_event_t *)ev;
 			xcb_atom_t protoAtom = 0, deleteAtom = 0;
 
 			Display *dpy = xcbconnhash.getX11Display(conn);
@@ -221,46 +221,46 @@ static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *e)
 
 xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *conn)
 {
-	xcb_generic_event_t *e = NULL;
+	xcb_generic_event_t *ev = NULL;
 
 	TRY();
 
-	if((e = _xcb_poll_for_event(conn)) != NULL)
-		handleXCBEvent(conn, e);
+	if((ev = _xcb_poll_for_event(conn)) != NULL)
+		handleXCBEvent(conn, ev);
 
 	CATCH();
 
-	return e;
+	return ev;
 }
 
 
 xcb_generic_event_t *xcb_poll_for_queued_event(xcb_connection_t *conn)
 {
-	xcb_generic_event_t *e = NULL;
+	xcb_generic_event_t *ev = NULL;
 
 	TRY();
 
-	if((e = _xcb_poll_for_queued_event(conn)) != NULL)
-		handleXCBEvent(conn, e);
+	if((ev = _xcb_poll_for_queued_event(conn)) != NULL)
+		handleXCBEvent(conn, ev);
 
 	CATCH();
 
-	return e;
+	return ev;
 }
 
 
 xcb_generic_event_t *xcb_wait_for_event(xcb_connection_t *conn)
 {
-	xcb_generic_event_t *e = NULL;
+	xcb_generic_event_t *ev = NULL;
 
 	TRY();
 
-	if((e = _xcb_wait_for_event(conn)) != NULL)
-		handleXCBEvent(conn, e);
+	if((ev = _xcb_wait_for_event(conn)) != NULL)
+		handleXCBEvent(conn, ev);
 
 	CATCH();
 
-	return e;
+	return ev;
 }
 
 

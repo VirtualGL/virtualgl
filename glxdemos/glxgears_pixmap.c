@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 1999-2001  Brian Paul   All Rights Reserved.
  * Copyright (C) 2008  Red Hat, Inc   All Rights Reserved.
+ * Copyright (C) 2019  D. R. Commander   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -91,7 +92,7 @@ current_time(void)
 
 static GLfloat view_rotx = 20.0, view_roty = 30.0, view_rotz = 0.0;
 static GLint gear1, gear2, gear3;
-static GLfloat angle = 0.0;
+static GLfloat gear_angle = 0.0;
 
 
 /*
@@ -245,19 +246,19 @@ draw(void)
 
    glPushMatrix();
    glTranslatef(-3.0, -2.0, 0.0);
-   glRotatef(angle, 0.0, 0.0, 1.0);
+   glRotatef(gear_angle, 0.0, 0.0, 1.0);
    glCallList(gear1);
    glPopMatrix();
 
    glPushMatrix();
    glTranslatef(3.1, -2.0, 0.0);
-   glRotatef(-2.0 * angle - 9.0, 0.0, 0.0, 1.0);
+   glRotatef(-2.0 * gear_angle - 9.0, 0.0, 0.0, 1.0);
    glCallList(gear2);
    glPopMatrix();
 
    glPushMatrix();
    glTranslatef(-3.1, 4.2, 0.0);
-   glRotatef(-2.0 * angle - 25.0, 0.0, 0.0, 1.0);
+   glRotatef(-2.0 * gear_angle - 25.0, 0.0, 0.0, 1.0);
    glCallList(gear3);
    glPopMatrix();
 
@@ -463,7 +464,7 @@ event_loop(Display *dpy, struct gears *gears)
       }
 
       /* next frame */
-      angle += 2.0;
+      gear_angle += 2.0;
 
       draw();
       glFinish();

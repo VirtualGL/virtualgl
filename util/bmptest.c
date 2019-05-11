@@ -33,8 +33,8 @@
 }
 
 
-void initBuf(unsigned char *buf, int width, int pitch, int height, PF *pf,
-	int orientation)
+static void initBuf(unsigned char *buf, int width, int pitch, int height,
+	PF *pf, int orientation)
 {
 	int i, j;
 
@@ -57,7 +57,7 @@ void initBuf(unsigned char *buf, int width, int pitch, int height, PF *pf,
 }
 
 
-int cmpBuf(unsigned char *buf, int width, int pitch, int height, PF *pf,
+static int cmpBuf(unsigned char *buf, int width, int pitch, int height, PF *pf,
 	int orientation)
 {
 	int i, j, retval = 1;
@@ -82,7 +82,7 @@ int cmpBuf(unsigned char *buf, int width, int pitch, int height, PF *pf,
 }
 
 
-int doTest(const char *ext, int width, int align, int height, PF *pf,
+static int doTest(const char *ext, int width, int align, int height, PF *pf,
 	enum BMPORN orientation)
 {
 	char filename[80], *md5sum, md5buf[65];

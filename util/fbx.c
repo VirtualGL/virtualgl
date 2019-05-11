@@ -21,8 +21,10 @@
 #include "vglutil.h"
 
 
+#ifdef _WIN32
 #define MINWIDTH  160
 #define MINHEIGHT  24
+#endif
 
 
 static int errorLine = -1;
@@ -143,8 +145,8 @@ void fbx_printwarnings(FILE *stream)
 
 int fbx_init(fbx_struct *fb, fbx_wh wh, int width_, int height_, int useShm)
 {
-	int width, height;
-	int rmask, gmask, bmask, ps, i;
+	int width, height, ps, i;
+	unsigned int rmask, gmask, bmask;
 	#ifdef _WIN32
 	BMINFO bminfo;  HBITMAP hmembmp = 0;  RECT rect;  HDC hdc = NULL;
 	#else
@@ -325,11 +327,11 @@ int fbx_init(fbx_struct *fb, fbx_wh wh, int width_, int height_, int useShm)
 			char *env = getenv("FBX_USESHMPIXMAPS");
 			if(env && !strcmp(env, "1"))
 			{
-				static int alreadyWarned = 0;
-				if(!alreadyWarned && warningFile)
+				static int alreadyWarned2 = 0;
+				if(!alreadyWarned2 && warningFile)
 				{
 					fprintf(warningFile, "[FBX] Using MIT-SHM pixmaps\n");
-					alreadyWarned = 1;
+					alreadyWarned2 = 1;
 				}
 				fb->pm = XShmCreatePixmap(fb->wh.dpy, fb->wh.d, fb->shminfo.shmaddr,
 					&fb->shminfo, width, height, xwa.depth);

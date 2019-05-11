@@ -17,9 +17,6 @@ To enable ''MIT-SHM'' in Cygwin/X:
 	#. From a Windows (not Cygwin) administrator command prompt, run
 		''net start cygserver''
 
-	#. Add ''server'' to the ''CYGWIN'' system environment variable (create this
-		environment variable if it doesn't already exist)
-
 	#. Start or re-start Cygwin/X
 
 	#. Run ''xdpyinfo'' and verify that ''MIT-SHM'' appears in the list of

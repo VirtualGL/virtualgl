@@ -69,7 +69,7 @@ void *gldllhnd = NULL;
 	if(err) THROW(err) \
 	else if(!_##s) THROW("Could not load symbol " #s)
 
-int loadSymbols1(char *prefix)
+static int loadSymbols1(char *prefix)
 {
 	const char *err = NULL;
 	int retval = 0;
@@ -97,7 +97,7 @@ int loadSymbols1(char *prefix)
 	return retval;
 }
 
-void unloadSymbols1(void)
+static void unloadSymbols1(void)
 {
 	if(gldllhnd) dlclose(gldllhnd);
 }
@@ -107,7 +107,7 @@ void unloadSymbols1(void)
 	_##s = (_##s##Type)_glXGetProcAddressARB((const GLubyte *)#s); \
 	if(!_##s) THROW("Could not load symbol " #s)
 
-int loadSymbols2(void)
+static int loadSymbols2(void)
 {
 	const char *err = NULL;
 	int retval = 0;
@@ -132,7 +132,7 @@ int loadSymbols2(void)
 typedef void (*_myTestFunctionType)(void);
 _myTestFunctionType _myTestFunction = NULL;
 
-int nameMatchTest(void)
+static int nameMatchTest(void)
 {
 	const char *err = NULL;
 	int retval = 0;
@@ -162,7 +162,7 @@ int nameMatchTest(void)
 typedef void (*_testType)(const char *);
 _testType _test = NULL;
 
-int deepBindTest(void)
+static int deepBindTest(void)
 {
 	const char *err = NULL;
 	int retval = 0;

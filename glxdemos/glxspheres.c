@@ -87,36 +87,36 @@ unsigned int transPixel = 0;
 int width = DEF_WIDTH, height = DEF_HEIGHT;
 
 
-int setColorScheme(Colormap cmap, int nColors, int bpc, int scheme)
+static int setColorScheme(Colormap cmap, int colors, int bits, int scheme)
 {
-	XColor xc[1024];  int i, maxColors = (1 << bpc), retval = 0;
+	XColor xc[1024];  int i, maxColors = (1 << bits), retval = 0;
 
-	if(!nColors || !cmap) THROW("Color map not allocated");
+	if(!colors || !cmap) THROW("Color map not allocated");
 	if(scheme < 0 || scheme > NSCHEMES - 1 || !cmap) THROW("Invalid argument");
 
-	for(i = 0; i < nColors; i++)
+	for(i = 0; i < colors; i++)
 	{
 		xc[i].flags = DoRed | DoGreen | DoBlue;
 		xc[i].pixel = (i << rshift) | (i << gshift) | (i << bshift);
 		xc[i].red = xc[i].green = xc[i].blue = 0;
 		if(scheme == GRAY || scheme == RED || scheme == YELLOW
 			|| scheme == MAGENTA)
-			xc[i].red = (i * (maxColors / nColors)) << (16 - bpc);
+			xc[i].red = (i * (maxColors / colors)) << (16 - bits);
 		if(scheme == GRAY || scheme == GREEN || scheme == YELLOW
 			|| scheme == CYAN)
-			xc[i].green = (i * (maxColors / nColors)) << (16 - bpc);
+			xc[i].green = (i * (maxColors / colors)) << (16 - bits);
 		if(scheme == GRAY || scheme == BLUE || scheme == MAGENTA
 			|| scheme == CYAN)
-			xc[i].blue = (i * (maxColors / nColors)) << (16 - bpc);
+			xc[i].blue = (i * (maxColors / colors)) << (16 - bits);
 	}
-	XStoreColors(dpy, cmap, xc, nColors);
+	XStoreColors(dpy, cmap, xc, colors);
 
 	bailout:
 	return retval;
 }
 
 
-void reshape(int newWidth, int newHeight)
+static void reshape(int newWidth, int newHeight)
 {
 	if(newWidth <= 0) newWidth = 1;
 	if(newHeight <= 0) newHeight = 1;
@@ -124,7 +124,7 @@ void reshape(int newWidth, int newHeight)
 }
 
 
-void setSphereColor(GLfloat color)
+static void setSphereColor(GLfloat color)
 {
 	if(useDC)
 	{
@@ -146,7 +146,7 @@ void setSphereColor(GLfloat color)
 }
 
 
-void renderSpheres(int buf)
+static void renderSpheres(int buf)
 {
 	int i;
 	GLfloat xAspect, yAspect;
@@ -234,12 +234,12 @@ void renderSpheres(int buf)
 }
 
 
-int display(int advance)
+static int display(int advance)
 {
 	static int first = 1;
 	static double start = 0., elapsed = 0., mpixels = 0.;
 	static unsigned long frames = 0;
-	static char temps[256];
+	static char temps[700];
 	XFontStruct *fontInfo = NULL;  int minChar, maxChar;
 	GLfloat xAspect, yAspect;
 	int retval = 0;
@@ -294,7 +294,7 @@ int display(int advance)
 		glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
 			fontListBase + minChar);
 		XFreeFont(dpy, fontInfo);  fontInfo = NULL;
-		snprintf(temps, 255, "Measuring performance ...");
+		snprintf(temps, 700, "Measuring performance ...");
 
 		first = 0;
 	}
@@ -347,7 +347,7 @@ int display(int advance)
 		mpixels += (double)width * (double)height / 1000000.;
 		if(elapsed > benchTime || (maxFrames && totalFrames > maxFrames))
 		{
-			snprintf(temps, 255, "%f frames/sec - %f Mpixels/sec",
+			snprintf(temps, 700, "%f frames/sec - %f Mpixels/sec",
 				(double)frames / elapsed, mpixels / elapsed);
 			printf("%s\n", temps);
 			elapsed = mpixels = 0.;  frames = 0;
@@ -370,7 +370,7 @@ int display(int advance)
 Atom protoAtom = 0, deleteAtom = 0;
 
 
-int eventLoop(Display *dpy)
+static int eventLoop(void)
 {
 	int retval = 0;
 
@@ -412,7 +412,8 @@ int eventLoop(Display *dpy)
 				case ClientMessage:
 				{
 					XClientMessageEvent *cme = (XClientMessageEvent *)&event;
-					if(cme->message_type == protoAtom && cme->data.l[0] == deleteAtom)
+					if(cme->message_type == protoAtom
+						&& cme->data.l[0] == (long)deleteAtom)
 						return 0;
 				}
 			}
@@ -433,7 +434,7 @@ int eventLoop(Display *dpy)
 }
 
 
-void usage(char **argv)
+static void usage(char **argv)
 {
 	printf("\nUSAGE: %s [options]\n\n", argv[0]);
 	printf("Options:\n");
@@ -474,6 +475,7 @@ int main(int argc, char **argv)
 	XSetWindowAttributes swa;  Window root;
 	int fullScreen = 0;  unsigned long mask = 0;
 	int screen = -1, pps;
+	int fbcid = -1, red = -1, green = -1, blue = -1, alpha = -1;
 
 	if(argc > 1) for(i = 1; i < argc; i++)
 	{
@@ -574,7 +576,6 @@ int main(int argc, char **argv)
 		THROW("Could not obtain RGB visual with requested properties");
 	if((v = glXGetVisualFromFBConfig(dpy, c[0])) == NULL)
 		THROW("Could not obtain RGB visual with requested properties");
-	int fbcid = -1, red = -1, green = -1, blue = -1, alpha = -1;
 	glXGetFBConfigAttrib(dpy, c[0], GLX_FBCONFIG_ID, &fbcid);
 	glXGetFBConfigAttrib(dpy, c[0], GLX_RED_SIZE, &red);
 	glXGetFBConfigAttrib(dpy, c[0], GLX_GREEN_SIZE, &green);
@@ -638,7 +639,7 @@ int main(int argc, char **argv)
 
 	fprintf(stderr, "OpenGL Renderer: %s\n", glGetString(GL_RENDERER));
 
-	CATCH(eventLoop(dpy));
+	CATCH(eventLoop());
 
 	bailout:
 	if(v) XFree(v);

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1999-2014  Brian Paul   All Rights Reserved.
  * Copyright (C) 2005  Sun Microsystems, Inc.   All Rights Reserved.
- * Copyright (C) 2014, 2018  D. R. Commander   All Rights Reserved.
+ * Copyright (C) 2014, 2018-2019  D. R. Commander   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -788,7 +788,7 @@ print_limits(const char *extensions, const char *oglstring, int version,
    }
 
    if (extension_supported("GL_ARB_texture_compression", extensions)) {
-      GLint i, n;
+      GLint n;
       GLint *formats;
       printf("  GL_ARB_texture_compression:\n");
       glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &n);
@@ -803,7 +803,7 @@ print_limits(const char *extensions, const char *oglstring, int version,
 
 #if defined(GL_VERSION_4_3)
    if (version >= 43) {
-      GLint i, n = 0;
+      GLint n = 0;
       printf("  4.3:\n");
       glGetIntegerv(GL_NUM_SHADING_LANGUAGE_VERSIONS, &n);
       printf("    GL_NUM_SHADING_LANGUAGE_VERSIONS = %d\n", n);
@@ -933,6 +933,7 @@ parse_args(int argc, char *argv[], struct options *options)
    options->singleLine = GL_FALSE;
    options->displayName = NULL;
    options->allowDirect = GL_TRUE;
+   options->fbConfigs = GL_FALSE;
 
    for (i = 1; i < argc; i++) {
 #ifndef _WIN32

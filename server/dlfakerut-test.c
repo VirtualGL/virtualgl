@@ -15,6 +15,9 @@
 #include <dlfcn.h>
 
 
+int test(const char *testName);
+
+
 static int checkWindowColor(Display *dpy, Window win, unsigned int color)
 {
 	int fakerColor, retval = 0;
