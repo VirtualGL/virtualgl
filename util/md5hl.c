@@ -86,7 +86,7 @@ char *MD5FileChunk(const char *filename, char *buf, off_t ofs, off_t len)
   MD5_CTX ctx;
   struct stat stbuf;
   int f, i, e;
-  size_t n;
+  off_t n;
 
   MD5Init(&ctx);
 #ifdef _WIN32
@@ -107,7 +107,7 @@ char *MD5FileChunk(const char *filename, char *buf, off_t ofs, off_t len)
   n = len;
   i = 0;
   while (n > 0) {
-    if (n > sizeof(buffer))
+    if (n > (off_t)sizeof(buffer))
       i = read(f, buffer, sizeof(buffer));
     else
       i = read(f, buffer, n);
