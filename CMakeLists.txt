@@ -316,9 +316,9 @@ if(APPLE)
 		set(CMAKE_SHARED_LINKER_FLAGS
 			"${CMAKE_SHARED_LINKER_FLAGS} -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib")
 	endif()
-	set(X11_X11_INCLUDE_PATH /usr/X11R6/include)
-	set(OPENGL_gl_LIBRARY /usr/X11R6/lib/libGL.dylib)
-	set(OPENGL_glu_LIBRARY /usr/X11R6/lib/libGLU.dylib)
+	set(X11_X11_INCLUDE_PATH /usr/X11/include)
+	set(OPENGL_gl_LIBRARY /usr/X11/lib/libGL.dylib)
+	set(OPENGL_glu_LIBRARY /usr/X11/lib/libGLU.dylib)
 endif()
 
 # Not all OpenGL installations include all of the prototypes and constants in
