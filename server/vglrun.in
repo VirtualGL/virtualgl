@@ -2,7 +2,7 @@
 
 # Copyright (C)2004 Landmark Graphics Corporation
 # Copyright (C)2005 Sun Microsystems, Inc.
-# Copyright (C)2009-2016, 2018-2019 D. R. Commander
+# Copyright (C)2009-2016, 2018 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
 # the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -206,19 +206,7 @@ if [ -z "$DISPLAY" ]; then
 	fi
 else
 	DISPLAYHOST=`echo $DISPLAY | cut -d: -f1`
-	SSH_X11FORWARDING=0
 	if [ "$DISPLAYHOST" = "localhost" -o "$DISPLAYHOST" = "`hostname`" ]; then
-		SSH_X11FORWARDING=1
-	else
-		if [ "`uname -s`" = "Linux" ]; then
-			for ip in `hostname -I`; do
-				if [ "$DISPLAYHOST" = "$ip" ]; then
-					SSH_X11FORWARDING=1
-				fi
-			done
-		fi
-	fi
-	if [ "$SSH_X11FORWARDING" = "1" ]; then
 		if [ ! -z "$SSH_IP" -a -z "$VGL_CLIENT" -a -z "$RRCLIENT" ]; then
 			VGL_CLIENT=$SSH_IP
 			export VGL_CLIENT

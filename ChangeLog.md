@@ -44,9 +44,6 @@ spec.  More specifically, when erroneous arguments are passed to interposed GLX
 functions, the faker now sends GLX errors through the X11 error handler rather
 than throwing fatal exceptions.
 
-11. The `vglrun` script now works properly with SSH X11 forwarding on Linux
-servers in which the `X11UseLocalhost` option has been disabled in sshd_config.
-
 
 2.6.1
 =====
