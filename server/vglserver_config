@@ -645,6 +645,7 @@ EOF
 	fi
 
 	for file in /etc/gdm/custom.conf \
+		/etc/X11/gdm/custom.conf \
 		/etc/gdm3/custom.conf \
 		/etc/gdm3/daemon.conf; do
 		if [ -f $file -a ! -h $file ]; then
@@ -846,6 +847,7 @@ EOF
 	fi
 
 	for file in /etc/gdm/custom.conf \
+		/etc/X11/gdm/custom.conf \
 		/etc/gdm3/custom.conf \
 		/etc/gdm3/daemon.conf; do
 		if [ -f $file -a ! -h $file -a $WAYLAND = 1 ]; then
