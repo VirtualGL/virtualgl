@@ -124,6 +124,10 @@ if [ "$PREFIX" = "@CMAKE_INSTALL_DEFAULT_PREFIX@" ]; then
 fi
 install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
 osacompile -t APPL -a i386 -o "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/uninstall.applescript
+if [ "$OSX_APP_CERT_NAME" != "" ]; then
+	codesign -s "$OSX_APP_CERT_NAME" --timestamp "$TMPDIR/Uninstall $PROJECT.app"
+	codesign -vv "$TMPDIR/Uninstall $PROJECT.app"
+fi
 cp -RX "$TMPDIR/Uninstall $PROJECT.app" "$PKGROOT/Applications/$PROJECT/"
 
 mkdir $TMPDIR/dmg
