@@ -1,3 +1,12 @@
+2.6.3
+=====
+
+### Significant changes relative to 2.6.2:
+
+1. VirtualGL now enables the `GLX_EXT_create_context_es2_profile` extension
+if the underlying OpenGL library and 3D X server support it.
+
+
 2.6.2
 =====
 

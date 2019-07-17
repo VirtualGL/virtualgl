@@ -1122,6 +1122,11 @@ static const char *getGLXExtensions(void)
 		strncat(glxextensions, " GLX_ARB_fbconfig_float",
 			1023 - strlen(glxextensions));
 
+	if(strstr(realGLXExtensions, "GLX_EXT_create_context_es2_profile")
+		&& !strstr(glxextensions, "GLX_EXT_create_context_es2_profile"))
+		strncat(glxextensions, " GLX_EXT_create_context_es2_profile",
+			1023 - strlen(glxextensions));
+
 	if(strstr(realGLXExtensions, "GLX_EXT_fbconfig_packed_float")
 		&& !strstr(glxextensions, "GLX_EXT_fbconfig_packed_float"))
 		strncat(glxextensions, " GLX_EXT_fbconfig_packed_float",
