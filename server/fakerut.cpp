@@ -1239,9 +1239,11 @@ int visTest(void)
 		{
 			for(i = 0; i < n; i++)
 			{
-				int level = 0;
+				int level = 0, useGL = 1;
 				glXGetConfig(dpy, &vis0[i], GLX_LEVEL, &level);
 				if(level) continue;
+				glXGetConfig(dpy, &vis0[i], GLX_USE_GL, &useGL);
+				if(!useGL) continue;
 
 				if(!(config = getFBConfigFromVisual(dpy, &vis0[i])))
 					PRERROR1("No matching CFG for X Visual 0x%.2x",
