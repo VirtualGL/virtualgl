@@ -28,6 +28,7 @@ namespace vglfaker
 {
 	extern Display *dpy3D;
 	extern bool deadYet;
+	extern char *glExtensions;
 
 	extern void init(void);
 	extern Display *init3D(void);

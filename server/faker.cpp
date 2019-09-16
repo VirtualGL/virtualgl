@@ -38,6 +38,7 @@ namespace vglfaker {
 
 Display *dpy3D = NULL;
 bool deadYet = false;
+char *glExtensions = NULL;
 VGL_THREAD_LOCAL(TraceLevel, long, 0)
 VGL_THREAD_LOCAL(FakerLevel, long, 0)
 VGL_THREAD_LOCAL(ExcludeCurrent, bool, false)
@@ -58,6 +59,7 @@ static void cleanup(void)
 	if(GLXDrawableHash::isAlloc()) glxdhash.kill();
 	if(WindowHash::isAlloc()) winhash.kill();
 	if(DisplayHash::isAlloc()) dpyhash.kill();
+	if(glExtensions) free(glExtensions);
 	unloadSymbols();
 }
 

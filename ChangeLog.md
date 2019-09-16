@@ -6,6 +6,17 @@
 1. VirtualGL now enables the `GLX_EXT_create_context_es2_profile` extension
 if the underlying OpenGL library and 3D X server support it.
 
+2. The VirtualGL Faker now ensures that the `GL_EXT_x11_sync_object` extension
+is not exposed to 3D applications, even if the underlying OpenGL library
+supports it.  `GL_EXT_x11_sync_object` allows `glWaitSync()` and
+`glClientWaitSync()` to block on X11 Synchronization Fence (XSyncFence)
+objects, but since XSyncFence objects live on the 2D X server, this extension
+does not currently work with VirtualGL.  Emulating the extension would be
+difficult and would have similar drawbacks to those of the existing `VGL_SYNC`
+option.  Preventing `GL_EXT_x11_sync_object` from being exposed to 3D
+applications fixes numerous OpenGL errors that occurred when attempting to run
+GNOME 3 with VirtualGL using nVidia's proprietary drivers.
+
 
 2.6.2
 =====

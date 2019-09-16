@@ -101,6 +101,8 @@
 		/* OpenGL */
 		glFinish;
 		glFlush;
+		glGetString;
+		glGetStringi;
 		glViewport;
 		glDrawBuffer;
 		glPopAttrib;

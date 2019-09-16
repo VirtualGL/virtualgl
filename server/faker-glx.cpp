@@ -1674,8 +1674,17 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 	}
 	if(!retval)
 	{
-		if(fconfig.trace) vglout.print("[passed through]");
-		retval = _glXGetProcAddress(procName);
+		// GL_EXT_x11_sync_object does not currently work with VirtualGL.
+		if(!strcmp((char *)procName, "glImportSyncEXT"))
+		{
+			if(fconfig.trace) vglout.print("[NOT IMPLEMENTED]");
+			retval = NULL;
+		}
+		else
+		{
+			if(fconfig.trace) vglout.print("[passed through]");
+			retval = _glXGetProcAddress(procName);
+		}
 	}
 
 		STOPTRACE();  CLOSETRACE();
