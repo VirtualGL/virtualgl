@@ -515,6 +515,11 @@ VFUNCDEF0(glFinish, glFinish);
 
 VFUNCDEF0(glFlush, glFlush);
 
+FUNCDEF1(const GLubyte *, glGetString, GLenum, name, glGetString);
+
+FUNCDEF2(const GLubyte *, glGetStringi, GLenum, name, GLuint, index,
+	glGetStringi);
+
 VFUNCDEF4(glViewport, GLint, x, GLint, y, GLsizei, width, GLsizei, height,
 	glViewport);
 
@@ -666,8 +671,6 @@ FUNCDEF0(GLenum, glGetError, NULL);
 VFUNCDEF2(glGetFloatv, GLenum, pname, GLfloat *, params, NULL);
 
 VFUNCDEF2(glGetIntegerv, GLenum, pname, GLint *, params, NULL);
-
-FUNCDEF1(const GLubyte *, glGetString, GLenum, name, NULL);
 
 VFUNCDEF0(glLoadIdentity, NULL);
 

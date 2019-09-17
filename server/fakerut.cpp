@@ -2442,6 +2442,7 @@ int extensionQueryTest(void)
 	XVisualInfo *vis = NULL;
 	GLXContext ctx = 0;
 	Pixmap pm = 0;
+	GLXPixmap glxpm = 0;
 
 	printf("Extension query and error handling test:\n\n");
 
@@ -2500,10 +2501,48 @@ int extensionQueryTest(void)
 			glXQueryExtensionsString(dpy, DefaultScreen(dpy))))
 			THROW("glXQueryServerString(..., GLX_EXTENSIONS)");
 
+		// Make sure that GL_EXT_x11_sync_object isn't exposed.  Since that
+		// extension allows OpenGL functions (which live on the 3D X server) to
+		// operate on XSyncFence objects (which live on the 2D X server), the
+		// extension does not currently work with the VirtualGL Faker.
+
+		int vattribs[] = { GLX_RGBA, None };
+		if(!(vis = glXChooseVisual(dpy, DefaultScreen(dpy), vattribs)))
+			THROW("Could not find visual");
+		if(!(ctx = glXCreateContext(dpy, vis, NULL, True)))
+			THROW("Could not create context");
+		if(!(pm = XCreatePixmap(dpy, DefaultRootWindow(dpy), 10, 10,
+			DefaultDepth(dpy, DefaultScreen(dpy)))))
+			THROW("Could not create Pixmap");
+		if(!(glxpm = glXCreateGLXPixmap(dpy, vis, pm)))
+			THROW("Could not create GLX Pixmap");
+		if(!glXMakeCurrent(dpy, glxpm, ctx))
+			THROW("Could not make context current");
+
+		char *exts = (char *)glGetString(GL_EXTENSIONS);
+		if(!exts) THROW("Could not get OpenGL extensions");
+		if(strstr(exts, "GL_EXT_x11_sync_object"))
+			THROW("GL_EXT_x11_sync_object is exposed by glGetString()");
+		glGetIntegerv(GL_NUM_EXTENSIONS, &n);
+		for(int i = 0; i < n; i++)
+		{
+			char *ext = (char *)glGetStringi(GL_EXTENSIONS, i);
+			if(!ext) THROW("Could not get OpenGL extension");
+			if(!strcmp(ext, "GL_EXT_x11_sync_object"))
+				THROW("GL_EXT_x11_sync_object is exposed by glGetStringi()");
+		}
+
+		glXMakeCurrent(dpy, 0, 0);
+		glXDestroyGLXPixmap(dpy, glxpm);  glxpm = 0;
+		XFreePixmap(dpy, pm);  pm = 0;
+		glXDestroyContext(dpy, ctx);  ctx = 0;
+		XFree(vis);  vis = NULL;
+		if(glXGetProcAddress((const GLubyte *)"glImportSyncEXT"))
+			THROW("glImportSyncExt() is exposed but shouldn't be");
+
 		// Test whether particular GLX functions trigger the errors that the spec
 		// says they should
 
-		int vattribs[] = { GLX_RGBA, None };
 		if(!(vis = glXChooseVisual(dpy, DefaultScreen(dpy), vattribs)))
 			THROW("Could not find visual");
 
@@ -2849,6 +2888,7 @@ int extensionQueryTest(void)
 		printf("Failed! (%s)\n", e.what());  retval = 0;
 	}
 	fflush(stdout);
+	if(glxpm) glXDestroyGLXPixmap(dpy, glxpm);
 	if(pm) XFreePixmap(dpy, pm);
 	if(vis) XFree(vis);
 	if(ctx) glXDestroyContext(dpy, ctx);

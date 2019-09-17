@@ -19,6 +19,7 @@
 #include "WindowHash.h"
 #include "faker.h"
 
+using namespace vglfaker;
 using namespace vglserver;
 
 
@@ -146,6 +147,73 @@ void glDrawBuffer(GLenum mode)
 		CLOSETRACE();
 
 	CATCH();
+}
+
+
+const GLubyte *glGetString(GLenum name)
+{
+	char *string;
+
+	if(vglfaker::getExcludeCurrent()) { return _glGetString(name); }
+
+	TRY();
+
+		OPENTRACE(glGetString);  PRARGX(name);  STARTTRACE();
+
+	string = (char *)_glGetString(name);
+	if(name == GL_EXTENSIONS && string
+		&& strstr(string, "GL_EXT_x11_sync_object") != NULL)
+	{
+		if(!glExtensions)
+		{
+			GlobalCriticalSection::SafeLock l(globalMutex);
+			if(!glExtensions)
+			{
+				glExtensions = strdup(string);
+				if(!glExtensions) THROW("strdup() failed");
+				char *ptr = strstr((char *)glExtensions, "GL_EXT_x11_sync_object");
+				if(ptr)
+				{
+					if(ptr[22] == ' ') memmove(ptr, &ptr[23], strlen(&ptr[23]) + 1);
+					else *ptr = 0;
+				}
+			}
+		}
+		string = glExtensions;
+	}
+
+		STOPTRACE();  PRARGS((char *)string);  CLOSETRACE();
+
+	CATCH();
+
+	return (GLubyte *)string;
+}
+
+
+const GLubyte *glGetStringi(GLenum name, GLuint index)
+{
+	const GLubyte *string;
+
+	if(vglfaker::getExcludeCurrent()) { return _glGetStringi(name, index); }
+
+	TRY();
+
+		OPENTRACE(glGetStringi);  PRARGX(name);  PRARGI(index);  STARTTRACE();
+
+	string = _glGetStringi(name, index);
+	if(name == GL_EXTENSIONS && string
+		&& !strcmp((char *)string, "GL_EXT_x11_sync_object"))
+	{
+		// This is a hack to avoid interposing the various flavors of
+		// glGetInteger*() and modifying the value returned for GL_NUM_EXTENSIONS.
+		string = (const GLubyte *)"";
+	}
+
+		STOPTRACE();  PRARGS((char *)string);  CLOSETRACE();
+
+	CATCH();
+
+	return string;
 }
 
 
