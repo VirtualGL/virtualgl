@@ -153,13 +153,11 @@ void glDrawBuffer(GLenum mode)
 
 const GLubyte *glGetString(GLenum name)
 {
-	char *string;
+	char *string = NULL;
 
 	if(vglfaker::getExcludeCurrent()) { return _glGetString(name); }
 
 	TRY();
-
-		OPENTRACE(glGetString);  PRARGX(name);  STARTTRACE();
 
 	string = (char *)_glGetString(name);
 	if(name == GL_EXTENSIONS && string
@@ -183,8 +181,6 @@ const GLubyte *glGetString(GLenum name)
 		string = glExtensions;
 	}
 
-		STOPTRACE();  PRARGS((char *)string);  CLOSETRACE();
-
 	CATCH();
 
 	return (GLubyte *)string;
@@ -193,13 +189,11 @@ const GLubyte *glGetString(GLenum name)
 
 const GLubyte *glGetStringi(GLenum name, GLuint index)
 {
-	const GLubyte *string;
+	const GLubyte *string = NULL;
 
 	if(vglfaker::getExcludeCurrent()) { return _glGetStringi(name, index); }
 
 	TRY();
-
-		OPENTRACE(glGetStringi);  PRARGX(name);  PRARGI(index);  STARTTRACE();
 
 	string = _glGetStringi(name, index);
 	if(name == GL_EXTENSIONS && string
@@ -209,8 +203,6 @@ const GLubyte *glGetStringi(GLenum name, GLuint index)
 		// glGetInteger*() and modifying the value returned for GL_NUM_EXTENSIONS.
 		string = (const GLubyte *)"";
 	}
-
-		STOPTRACE();  PRARGS((char *)string);  CLOSETRACE();
 
 	CATCH();
 
