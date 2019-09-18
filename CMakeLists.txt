@@ -332,7 +332,7 @@ if(VGL_SYSTEMGLX)
 	add_definitions(-DSYSGLXHEADERS)
 endif()
 
-include_directories(${X11_X11_INCLUDE_PATH})
+include_directories(${X11_X11_INCLUDE_PATH} ${OPENGL_INCLUDE_DIR})
 
 option(VGL_USEXV "Enable X Video support" TRUE)
 boolean_number(VGL_USEXV)
