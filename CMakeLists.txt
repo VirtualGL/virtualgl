@@ -321,7 +321,7 @@ if(APPLE)
 	set(OPENGL_glu_LIBRARY /usr/X11/lib/libGLU.dylib)
 endif()
 
-include_directories(${X11_X11_INCLUDE_PATH})
+include_directories(${X11_X11_INCLUDE_PATH} ${OPENGL_INCLUDE_DIR})
 
 option(VGL_USEXV "Enable X Video support" TRUE)
 boolean_number(VGL_USEXV)
