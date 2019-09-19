@@ -18,8 +18,23 @@ endif()
 configure_file(fakerconfig.h.in fakerconfig.h)
 configure_file(vendor.h.in vendor.h)
 
+set(DEFAULT_VGL_FAKEOPENCL 0)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+	set(DEFAULT_VGL_FAKEOPENCL 1)
+endif()
+option(VGL_FAKEOPENCL "Interpose enough of the OpenCL API to make OpenCL/OpenGL interoperability work"
+	${DEFAULT_VGL_FAKEOPENCL})
+if(VGL_FAKEOPENCL)
+	cmake_minimum_required(VERSION 3.1)
+	include(FindOpenCL)
+	add_definitions(-DFAKEOPENCL)
+else()
+	set(OpenCL_INCLUDE_DIRS "")
+	set(OpenCL_LIBRARIES "")
+endif()
+
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
-	../common)
+	../common ${OpenCL_INCLUDE_DIRS})
 
 set(FBXFAKERLIB fbx-faker)
 if(VGL_USEXV)
@@ -77,6 +92,9 @@ set(FAKER_SOURCES
 if(VGL_USEXV)
 	set(FAKER_SOURCES ${FAKER_SOURCES};XVTrans.cpp)
 endif()
+if(VGL_FAKEOPENCL)
+	set(FAKER_SOURCES ${FAKER_SOURCES};faker-ocl.cpp)
+endif()
 
 foreach(fakerlib ${VGL_FAKER_NAME} ${VGL_FAKER_NAME}-nodl)
 	add_library(${fakerlib} SHARED ${FAKER_SOURCES})
@@ -102,7 +120,7 @@ foreach(fakerlib ${VGL_FAKER_NAME} ${VGL_FAKER_NAME}-nodl)
 	target_link_libraries(${fakerlib} vglcommon ${FBXFAKERLIB} vglsocket m
 		${LIBDL})
 	if(${fakerlib} STREQUAL ${VGL_FAKER_NAME})
-		target_link_libraries(${fakerlib} ${OPENGL_gl_LIBRARY})
+		target_link_libraries(${fakerlib} ${OPENGL_gl_LIBRARY} ${OpenCL_LIBRARIES})
 	endif()
 	if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND GNUCXX)
 		# For some reason, on SunOS/GCC CMake tries to use the C compiler to link
@@ -171,7 +189,7 @@ add_library(GLdlfakerut SHARED libGLdlfakerut.c)
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	add_library(deepbindtest SHARED libdeepbindtest.c)
 	target_link_libraries(deepbindtest ${X11_X11_LIB} ${OPENGL_gl_LIBRARY}
-		${LIBDL})
+		${OpenCL_LIBRARIES} ${LIBDL})
 	set_target_properties(deepbindtest PROPERTIES LINK_FLAGS "${MINUSZ}defs")
 endif()
 

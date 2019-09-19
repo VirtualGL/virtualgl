@@ -16,7 +16,7 @@
 		the [[http://sourceforge.net/projects/virtualgl/files][Files area]] of the
 		[[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
 		Packages are provided for RPM-based and Debian-based Linux distributions
-		that contain GLIBC 2.5 or later.
+		that contain GLIBC 2.12 or later.
 		{nl}
 		!!! If you want to run both 32-bit and 64-bit OpenGL applications with
 		VirtualGL on 64-bit x86 Linux systems, then you will need to install both

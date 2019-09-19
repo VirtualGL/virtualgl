@@ -430,6 +430,21 @@ previous method:
 	!!! When using the VGL Transport, multithreaded compression is affected by
 	the [[#VGL_TILESIZE][''VGL_TILESIZE'']] option
 
+| Environment Variable | {pcode: VGL_OCLLIB = __{l}__ } |
+| Summary | __''{l}''__ = the location of an alternate OpenCL library |
+| Image Transports | All |
+#OPT: hiCol=first
+
+	Description :: Normally VirtualGL will use the OpenCL library against which
+	it was linked (usually {file: libOpenCL.so.1}, in the system library path) to
+	load any	"real" OpenCL functions that it needs to call ("real" as opposed to
+	the "fake", or "interposed", versions of those functions that VirtualGL
+	provides, which modify the arguments before calling the "real" functions.)
+	You can use the ''VGL_OCLLIB'' environment variable to specify the path of a
+	dynamic library from which VirtualGL should load "real" OpenCL functions.
+	{nl}{nl}
+	You shouldn't need to change this unless something doesn't work.
+
 | Environment Variable | {pcode: VGL_PORT = __{p}__ } |
 | ''vglrun'' argument | {pcode: -p __{p}__ } |
 | Summary | __''{p}''__ = the TCP port to use when connecting to the \

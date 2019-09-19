@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2019-09-19T19:52:44">
+<meta name="date" content="2019-09-19T23:49:28">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.6.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -747,7 +747,7 @@ If you are installing VirtualGL onto a fresh server, and you also intend to inst
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
         SourceForge project page</a></span><a name="idx0019"></a>. Packages are 
         provided for RPM-based and Debian-based Linux distributions that contain 
-        GLIBC 2.5 or later. <br />
+        GLIBC 2.12 or later. <br />
         <div class="important"><p class="important">
         If you want to run both 32-bit and 64-bit OpenGL applications with VirtualGL on 64-bit x86 Linux systems, then you will need to install both <strong class="filename">VirtualGL-2.6.3.x86_64.rpm</strong> and <strong class="filename">VirtualGL-2.6.3.i386.rpm</strong>, or both <strong class="filename">virtualgl_2.6.3_amd64.deb</strong> and <strong class="filename">virtualgl32_2.6.3_amd64.deb</strong>. (<strong class="filename">virtualgl32_2.6.3_amd64.deb</strong> is a supplementary package that contains only the 32-bit server components.)
         </p></div>
@@ -3702,6 +3702,41 @@ Image transport plugins are free to handle or ignore any configuration option as
         <div class="important"><p class="important">
         When using the VGL Transport, multithreaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0040"></a> option
         </p></div>
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VGL_OCLLIB = <em>{l}</em></code></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard"><em><code>{l}</code></em> = the location of an alternate OpenCL library</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Image Transports</td>
+    <td class="standard">All</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        Normally VirtualGL will use the OpenCL library against which it was 
+        linked (usually <strong class="filename">libOpenCL.so.1</strong>, in the 
+        system library path) to load any	&ldquo;real&rdquo; OpenCL functions 
+        that it needs to call (&ldquo;real&rdquo; as opposed to the 
+        &ldquo;fake&rdquo;, or &ldquo;interposed&rdquo;, versions of those 
+        functions that VirtualGL provides, which modify the arguments before 
+        calling the &ldquo;real&rdquo; functions.) You can use the 
+        <code>VGL_OCLLIB</code> environment variable to specify the path of a 
+        dynamic library from which VirtualGL should load &ldquo;real&rdquo; 
+        OpenCL functions. <br /><br /> You shouldn&rsquo;t need to change this 
+        unless something doesn&rsquo;t work.
     </dd>
 </dl>
 
