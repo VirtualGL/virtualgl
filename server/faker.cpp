@@ -16,7 +16,6 @@
 #include "Mutex.h"
 #include "ConfigHash.h"
 #include "ContextHash.h"
-#include "DisplayHash.h"
 #include "GLXDrawableHash.h"
 #include "GlobalCriticalSection.h"
 #include "PixmapHash.h"

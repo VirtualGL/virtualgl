@@ -14,7 +14,6 @@
 
 #include "WindowHash.h"
 #include "XCBConnHash.h"
-#include "DisplayHash.h"
 #include "faker.h"
 #include "vglconfigLauncher.h"
 

@@ -24,7 +24,6 @@
 #include "ReverseConfigHash.h"
 #include "VisualHash.h"
 #include "WindowHash.h"
-#include "DisplayHash.h"
 #include "rr.h"
 #include "faker.h"
 #include "glxvisual.h"

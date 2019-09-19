@@ -22,6 +22,7 @@
 #include "glx.h"
 #include "fakerconfig.h"
 #include "Timer.h"
+#include "DisplayHash.h"
 
 
 namespace vglfaker

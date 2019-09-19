@@ -12,7 +12,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // wxWindows Library License for more details.
 
-#include "DisplayHash.h"
 #include "PixmapHash.h"
 #include "VisualHash.h"
 #include "WindowHash.h"
