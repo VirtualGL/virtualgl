@@ -76,7 +76,8 @@ makedeb()
 		mv $TMPDIR/glxspheres* $TMPDIR/$BINDIR/
 
 		SIZE=`du -s $TMPDIR | cut -f1`
-		cat pkgscripts/deb-control | sed s/i386/$DEBARCH/g \
+		cat pkgscripts/deb-control \
+			| sed "s/Architecture: i386/Architecture: $DEBARCH/g" \
 			| sed s/$DIRNAME/$PKGNAME/g | sed s/{__SIZE}/$SIZE/g \
 			> $TMPDIR/DEBIAN/control
 
