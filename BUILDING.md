@@ -45,9 +45,6 @@ Build Requirements
   * GCC and G++
   * X11 and OpenGL development libraries (see above)
   * libturbojpeg-devel
-    (Both Cygwin and Cygwin64 provide the TurboJPEG API DLL for libjpeg-turbo,
-    so you can optionally build against this rather than the official
-    libjpeg-turbo SDK.)
 
 
 32-bit VirtualGL Builds on x86-64 Linux Distributions
