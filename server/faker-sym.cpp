@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011, 2013-2016 D. R. Commander
+// Copyright (C)2009, 2011, 2013-2016, 2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -21,6 +21,10 @@
 
 static void *gldllhnd = NULL;
 static void *loadGLSymbol(const char *, bool);
+#ifdef FAKEOPENCL
+static void *ocldllhnd = NULL;
+static void *loadOCLSymbol(const char *, bool);
+#endif
 static void *x11dllhnd = NULL;
 static void *loadX11Symbol(const char *, bool);
 #ifdef FAKEXCB
@@ -64,6 +68,10 @@ void *loadSymbol(const char *name, bool optional)
 	}
 	if(!strncmp(name, "gl", 2))
 		return loadGLSymbol(name, optional);
+	#ifdef FAKEOPENCL
+	else if(!strncmp(name, "cl", 2))
+		return loadOCLSymbol(name, optional);
+	#endif
 	#ifdef FAKEXCB
 	else if(!strcmp(name, "XGetXCBConnection")
 		|| !strcmp(name, "XSetEventQueueOwner"))
@@ -165,6 +173,49 @@ static void *loadGLSymbol(const char *name, bool optional)
 	}
 	return sym;
 }
+
+
+#ifdef FAKEOPENCL
+
+static void *loadOCLSymbol(const char *name, bool optional)
+{
+	char *err = NULL;
+
+	if(!ocldllhnd)
+	{
+		if(strlen(fconfig.ocllib) > 0)
+		{
+			dlerror();  // Clear error state
+			void *dllhnd = _vgl_dlopen(fconfig.ocllib, RTLD_LAZY);
+			err = dlerror();
+			if(!dllhnd)
+			{
+				vglout.print("[VGL] ERROR: Could not open %s\n", fconfig.ocllib);
+				if(err) vglout.print("[VGL]    %s\n", err);
+				return NULL;
+			}
+			ocldllhnd = dllhnd;
+		}
+		else ocldllhnd = RTLD_NEXT;
+	}
+
+	dlerror();  // Clear error state
+	void *sym = dlsym(ocldllhnd, (char *)name);
+	err = dlerror();
+
+	if(!sym && (fconfig.verbose || !optional))
+	{
+		vglout.print("[VGL] %s: Could not load function \"%s\"",
+			optional ? "WARNING" : "ERROR", name);
+		if(strlen(fconfig.ocllib) > 0)
+			vglout.print(" from %s", fconfig.ocllib);
+		vglout.print("\n");
+		if(err) vglout.print("[VGL]    %s\n", err);
+	}
+	return sym;
+}
+
+#endif
 
 
 static void *loadX11Symbol(const char *name, bool optional)
@@ -287,6 +338,9 @@ namespace vglfaker {
 void unloadSymbols(void)
 {
 	if(gldllhnd && gldllhnd != RTLD_NEXT) dlclose(gldllhnd);
+	#ifdef FAKEOPENCL
+	if(ocldllhnd && ocldllhnd != RTLD_NEXT) dlclose(ocldllhnd);
+	#endif
 	if(x11dllhnd && x11dllhnd != RTLD_NEXT) dlclose(x11dllhnd);
 	#ifdef FAKEXCB
 	if(xcbdllhnd) dlclose(xcbdllhnd);

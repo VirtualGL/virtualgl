@@ -19,6 +19,9 @@
 #define GL_GLEXT_PROTOTYPES
 #define GLX_GLXEXT_PROTOTYPES
 #include <GL/glx.h>
+#ifdef FAKEOPENCL
+#include <CL/opencl.h>
+#endif
 #include "Log.h"
 #include "GlobalCriticalSection.h"
 #include "vglinline.h"
@@ -526,6 +529,19 @@ VFUNCDEF4(glViewport, GLint, x, GLint, y, GLsizei, width, GLsizei, height,
 VFUNCDEF1(glDrawBuffer, GLenum, drawbuf, glDrawBuffer);
 
 VFUNCDEF0(glPopAttrib, glPopAttrib);
+
+
+#ifdef FAKEOPENCL
+
+// OpenCL functions
+
+typedef void (*pfn_notifyType)(const char *, const void *, size_t, void *);
+FUNCDEF6(cl_context, clCreateContext,
+	const cl_context_properties *, properties, cl_uint, num_devices,
+	const cl_device_id *, devices, pfn_notifyType, pfn_notify, void *, user_data,
+	cl_int *, errcode_ret, clCreateContext);
+
+#endif
 
 
 // X11 functions

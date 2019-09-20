@@ -96,6 +96,11 @@
 		glDrawBuffer;
 		glPopAttrib;
 
+		/* OpenCL */
+		#ifdef FAKEOPENCL
+		clCreateContext;
+		#endif
+
 		/* X11 */
 		XCheckMaskEvent;
 		XCheckTypedEvent;

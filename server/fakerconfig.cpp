@@ -410,6 +410,9 @@ void fconfig_reloadenv(void)
 	FETCHENV_STR("VGL_LOG", log);
 	FETCHENV_BOOL("VGL_LOGO", logo);
 	FETCHENV_INT("VGL_NPROCS", np, 1, min(NumProcs(), MAXPROCS));
+	#ifdef FAKEOPENCL
+	FETCHENV_STR("VGL_OCLLIB", ocllib);
+	#endif
 	FETCHENV_INT("VGL_PORT", port, 0, 65535);
 	FETCHENV_BOOL("VGL_PROBEGLX", probeglx);
 	FETCHENV_INT("VGL_QUAL", qual, 1, 100);
@@ -615,6 +618,9 @@ void fconfig_print(FakerConfig &fc)
 	PRCONF_STR(log);
 	PRCONF_INT(logo);
 	PRCONF_INT(np);
+	#ifdef FAKEOPENCL
+	PRCONF_STR(ocllib);
+	#endif
 	PRCONF_INT(port);
 	PRCONF_INT(qual);
 	PRCONF_INT(readback);
