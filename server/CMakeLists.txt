@@ -25,12 +25,19 @@ endif()
 option(VGL_FAKEOPENCL "Interpose enough of the OpenCL API to make OpenCL/OpenGL interoperability work"
 	${DEFAULT_VGL_FAKEOPENCL})
 if(VGL_FAKEOPENCL)
-	cmake_minimum_required(VERSION 3.1)
-	include(FindOpenCL)
 	add_definitions(-DFAKEOPENCL)
+	set(VGL_DEFAULTSYSTEMOCL 0)
+	option(VGL_SYSTEMOCL
+		"Compile against system-supplied versions of the OpenCL headers instead of the in-tree versions."
+			${VGL_DEFAULTSYSTEMOCL})
+	if(VGL_SYSTEMOCL)
+		cmake_minimum_required(VERSION 3.1)
+		include(FindOpenCL)
+	else()
+		set(OpenCL_INCLUDE_DIRS ocl_headers)
+	endif()
 else()
 	set(OpenCL_INCLUDE_DIRS "")
-	set(OpenCL_LIBRARIES "")
 endif()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
@@ -120,7 +127,7 @@ foreach(fakerlib ${VGL_FAKER_NAME} ${VGL_FAKER_NAME}-nodl)
 	target_link_libraries(${fakerlib} vglcommon ${FBXFAKERLIB} vglsocket m
 		${LIBDL})
 	if(${fakerlib} STREQUAL ${VGL_FAKER_NAME})
-		target_link_libraries(${fakerlib} ${OPENGL_gl_LIBRARY} ${OpenCL_LIBRARIES})
+		target_link_libraries(${fakerlib} ${OPENGL_gl_LIBRARY})
 	endif()
 	if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND GNUCXX)
 		# For some reason, on SunOS/GCC CMake tries to use the C compiler to link
@@ -189,7 +196,7 @@ add_library(GLdlfakerut SHARED libGLdlfakerut.c)
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	add_library(deepbindtest SHARED libdeepbindtest.c)
 	target_link_libraries(deepbindtest ${X11_X11_LIB} ${OPENGL_gl_LIBRARY}
-		${OpenCL_LIBRARIES} ${LIBDL})
+		${LIBDL})
 	set_target_properties(deepbindtest PROPERTIES LINK_FLAGS "${MINUSZ}defs")
 endif()
 

@@ -21,7 +21,9 @@ GNOME 3 with VirtualGL using nVidia's proprietary drivers.
 in order to replace the value of the `CL_GLX_DISPLAY_KHR` property (if
 specified) with the X11 Display handle for the 3D X server connection.  This
 prevents 3D applications from crashing when attempting to use OpenCL/OpenGL
-interoperability functions with VirtualGL.
+interoperability functions with VirtualGL.  Note that 3D applications must link
+directly with libOpenCL (as opposed to using `dlopen()` to load OpenCL
+functions) in order to take advantage of this fix.
 
 
 2.6.2

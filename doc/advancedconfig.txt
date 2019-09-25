@@ -433,15 +433,14 @@ previous method:
 | Environment Variable | {pcode: VGL_OCLLIB = __{l}__ } |
 | Summary | __''{l}''__ = the location of an alternate OpenCL library |
 | Image Transports | All |
+| Default Value | {file: libOpenCL.so.1} in the system library path |
 #OPT: hiCol=first
 
-	Description :: Normally VirtualGL will use the OpenCL library against which
-	it was linked (usually {file: libOpenCL.so.1}, in the system library path) to
-	load any	"real" OpenCL functions that it needs to call ("real" as opposed to
-	the "fake", or "interposed", versions of those functions that VirtualGL
-	provides, which modify the arguments before calling the "real" functions.)
-	You can use the ''VGL_OCLLIB'' environment variable to specify the path of a
-	dynamic library from which VirtualGL should load "real" OpenCL functions.
+	Description :: Specifies the path of a dynamic library from which VirtualGL
+	should load any	"real" OpenCL functions that it needs to call ("real" as
+	opposed to the "fake", or "interposed", versions of those functions that
+	VirtualGL provides, which modify the arguments before calling the "real"
+	functions.)
 	{nl}{nl}
 	You shouldn't need to change this unless something doesn't work.
 

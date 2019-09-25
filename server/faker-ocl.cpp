@@ -24,22 +24,31 @@ cl_context clCreateContext(const cl_context_properties *properties,
 	void pfn_notify(const char *errinfo, const void *private_info, size_t cb,
 		void *user_data), void *user_data, cl_int *errcode_ret)
 {
+	cl_context_properties oclprops[257],
+		*props = (cl_context_properties *)properties;
+	int j = 0;
+
 	if(properties)
 	{
-		for(int i = 0; properties[i] != 0; i += 2)
+		memset(oclprops, 0, sizeof(cl_context_properties) * 257);
+		for(int i = 0; properties[i] != 0 && i <= 254; i += 2)
 		{
+			oclprops[j++] = properties[i];
 			if(properties[i] == CL_GLX_DISPLAY_KHR)
 			{
 				Display *dpy = (Display *)properties[i + 1];
 				if(dpy && !IS_EXCLUDED(dpy))
-					*(cl_context_properties *)&properties[i + 1] =
-						(cl_context_properties)(DPY3D);
+				{
+					oclprops[j++] = (cl_context_properties)(DPY3D);
+					props = oclprops;
+				}
 			}
+			else oclprops[j++] = properties[i + 1];
 		}
 	}
 
-	return _clCreateContext(properties, num_devices, devices, pfn_notify,
-		user_data, errcode_ret);
+	return _clCreateContext(props, num_devices, devices, pfn_notify, user_data,
+		errcode_ret);
 }
 
 
