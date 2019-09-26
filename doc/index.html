@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2019-09-20T00:17:58">
+<meta name="date" content="2019-09-26T14:20:51">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3552,6 +3552,10 @@ Image transport plugins are free to handle or ignore any configuration option as
     <td class="high standard">Image Transports</td>
     <td class="standard">All</td>
   </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard"><strong class="filename">libOpenCL.so.1</strong> in the system library path</td>
+  </tr>
 </table>
 </div>
 
@@ -3559,17 +3563,13 @@ Image transport plugins are free to handle or ignore any configuration option as
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        Normally VirtualGL will use the OpenCL library against which it was 
-        linked (usually <strong class="filename">libOpenCL.so.1</strong>, in the 
-        system library path) to load any	&ldquo;real&rdquo; OpenCL functions 
-        that it needs to call (&ldquo;real&rdquo; as opposed to the 
-        &ldquo;fake&rdquo;, or &ldquo;interposed&rdquo;, versions of those 
-        functions that VirtualGL provides, which modify the arguments before 
-        calling the &ldquo;real&rdquo; functions.) You can use the 
-        <code>VGL_OCLLIB</code> environment variable to specify the path of a 
-        dynamic library from which VirtualGL should load &ldquo;real&rdquo; 
-        OpenCL functions. <br /><br /> You shouldn&rsquo;t need to change this 
-        unless something doesn&rsquo;t work.
+        Specifies the path of a dynamic library from which VirtualGL should load 
+        any	&ldquo;real&rdquo; OpenCL functions that it needs to call 
+        (&ldquo;real&rdquo; as opposed to the &ldquo;fake&rdquo;, or 
+        &ldquo;interposed&rdquo;, versions of those functions that VirtualGL 
+        provides, which modify the arguments before calling the 
+        &ldquo;real&rdquo; functions.) <br /><br /> You shouldn&rsquo;t need to 
+        change this unless something doesn&rsquo;t work.
     </dd>
 </dl>
 

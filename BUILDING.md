@@ -9,9 +9,6 @@ Build Requirements
 ### All Systems
 
 - [CMake](http://www.cmake.org) v2.8.11 or later
-  * CMake v3.1 or later required if building the VirtualGL server components
-    with the OpenCL interposer enabled (this is the default on Linux and
-    FreeBSD but can be changed using the `VGL_FAKEOPENCL` CMake variable)
 
 - If building SSL support:
   * [OpenSSL](http://www.OpenSSL.org) -- see "Building SSL Support" below
@@ -44,8 +41,6 @@ Build Requirements
   * The OpenGL and GLX headers must be reasonably modern (generally Mesa 9 or
     later, or the equivalent.)
 
-- OpenCL development libraries [if building the VirtualGL server components
-  with the OpenCL interposer enabled]
 
 ### Windows
 
@@ -74,7 +69,7 @@ Instructions for installing these on specific distributions:
 
 - Execute the following command as root:
 
-        yum install libXv-devel.i686 libXext-devel.i686 libXtst-devel.i686 libX11-devel.i686 libxcb-devel.i686 xcb-util-keysyms-devel.i686 mesa-libGLU-devel.i686 mesa-libGL-devel.i686 glibc-devel.i686 libstdc++-devel.i686 libstdc++-static.i686 ocl-icd-devel.i686
+        yum install libXv-devel.i686 libXext-devel.i686 libXtst-devel.i686 libX11-devel.i686 libxcb-devel.i686 xcb-util-keysyms-devel.i686 mesa-libGLU-devel.i686 mesa-libGL-devel.i686 glibc-devel.i686 libstdc++-devel.i686 libstdc++-static.i686
 
   (Replace `yum` with `dnf` on Fedora 23+ or RHEL 8+.)
 
@@ -82,7 +77,7 @@ Instructions for installing these on specific distributions:
 
 - Execute the following command as root:
 
-        apt-get install g++-multilib libxv-dev:i386 libxtst-dev:i386 libxcb-keysyms1-dev:i386 libglu1-mesa-dev:i386 ocl-icd-opencl-dev:i386
+        apt-get install g++-multilib libxv-dev:i386 libxtst-dev:i386 libxcb-keysyms1-dev:i386 libglu1-mesa-dev:i386
 
 
 Out-of-Tree Builds
