@@ -231,7 +231,8 @@ int fbx_init(fbx_struct *fb, fbx_wh wh, int width_, int height_, int useShm)
 			&& ps == pf->size)
 			fb->pf = pf;
 	}
-	if(fb->pf->size == 0) THROW("Display has unsupported pixel format");
+	if(!fb->pf || fb->pf->size == 0)
+		THROW("Display has unsupported pixel format");
 
 	bminfo.bmi.bmiHeader.biHeight = -bminfo.bmi.bmiHeader.biHeight;
 	/* (our convention is top-down) */
@@ -402,7 +403,8 @@ int fbx_init(fbx_struct *fb, fbx_wh wh, int width_, int height_, int useShm)
 			&& ps == pf->size)
 			fb->pf = pf;
 	}
-	if(fb->pf->size == 0) THROW("Display has unsupported pixel format");
+	if(!fb->pf || fb->pf->size == 0)
+		THROW("Display has unsupported pixel format");
 
 	fb->bits = fb->xi->data;
 	fb->pixmap = pixmap;
