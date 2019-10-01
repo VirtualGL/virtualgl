@@ -15,7 +15,7 @@
 #include <dlfcn.h>
 
 
-int test(const char *testName);
+int test(const char *testName, int testOpenCL);
 
 
 static int checkWindowColor(Display *dpy, Window win, unsigned int color)
@@ -69,7 +69,7 @@ static int checkFrame(Display *dpy, Window win, int desiredReadbacks,
 }
 
 
-int test(const char *testName)
+int test(const char *testName, int testOpenCL)
 {
 	Display *dpy = NULL;  Window win = 0, root;
 	int dpyw, dpyh, lastFrame = 0, retval = 0;
@@ -77,6 +77,13 @@ int test(const char *testName)
 		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None, None };
 	XVisualInfo *v = NULL;  GLXContext ctx = 0;
 	XSetWindowAttributes swa;
+	#ifdef FAKEOPENCL
+	cl_uint nPlatforms = 0, pi, nDevices = 0, di;
+	cl_context oclctx = 0;
+	cl_platform_id *platforms = NULL;
+	cl_device_id *devices = NULL;
+	cl_int oclerr;
+	#endif
 
 	fprintf(stderr, "%s:\n", testName);
 
@@ -108,15 +115,96 @@ int test(const char *testName)
 	_glXSwapBuffers(dpy, win);
 	TRY(checkFrame(dpy, win, 1, &lastFrame));
 	TRY(checkWindowColor(dpy, win, 0x0000ff));
+
+	#ifdef FAKEOPENCL
+
+	if(testOpenCL)
+	{
+		if((oclerr = _clGetPlatformIDs(0, NULL, &nPlatforms)) != CL_SUCCESS
+			&& oclerr != CL_PLATFORM_NOT_FOUND_KHR)
+			THROW("Could not get OpenCL platforms");
+		if(nPlatforms)
+		{
+			if((platforms =
+				(cl_platform_id *)malloc(sizeof(cl_platform_id) * nPlatforms)) == NULL)
+				THROW("Memory allocation error");
+			if(_clGetPlatformIDs(nPlatforms, platforms, NULL) != CL_SUCCESS)
+				THROW("Could not get OpenCL platforms");
+
+			for(pi = 0; pi < nPlatforms; pi++)
+			{
+				char name[256];
+
+				if(_clGetPlatformInfo(platforms[pi], CL_PLATFORM_NAME, 255, name,
+					NULL) != CL_SUCCESS)
+					THROW("Could not get OpenCL platform info");
+				printf("OpenCL platform:  %s\n", name);
+
+				if((oclerr = _clGetDeviceIDs(platforms[pi], CL_DEVICE_TYPE_GPU, 0,
+					NULL, &nDevices)) != CL_SUCCESS && oclerr != CL_DEVICE_NOT_FOUND)
+					THROW("Could not get OpenCL devices");
+				if(nDevices)
+				{
+					if((devices =
+						(cl_device_id *)malloc(sizeof(cl_device_id) * nDevices)) == NULL)
+							THROW("Memory allocation error");
+					if(_clGetDeviceIDs(platforms[pi], CL_DEVICE_TYPE_GPU, nDevices,
+						devices, NULL) != CL_SUCCESS)
+						THROW("Could not get OpenCL devices");
+
+					for(di = 0; di < nDevices; di++)
+					{
+						cl_context_properties properties[] = { CL_GL_CONTEXT_KHR, 0,
+							CL_GLX_DISPLAY_KHR, 0, CL_CONTEXT_PLATFORM, 0, 0 };
+
+						if(_clGetDeviceInfo(devices[di], CL_DEVICE_NAME, 255, name,
+							NULL) != CL_SUCCESS)
+							THROW("Could not get OpenCL device info");
+						printf("  Device:  %s\n", name);
+
+						properties[1] = (cl_context_properties)ctx;
+						properties[3] = (cl_context_properties)dpy;
+						properties[5] = (cl_context_properties)platforms[pi];
+						if((oclctx = _clCreateContext(properties, 1, &devices[di], NULL,
+							NULL, NULL)) == NULL)
+							THROW("Could not create OpenCL context");
+						properties[3] = 0;
+						if(_clGetContextInfo(oclctx, CL_CONTEXT_PROPERTIES,
+							sizeof(cl_context_properties) * 7, properties,
+							NULL) != CL_SUCCESS)
+							THROW("Could not get OpenCL context properties");
+						if(!properties[3] || properties[3] == (cl_context_properties)dpy)
+							THROW("clCreateContext() not correctly interposed");
+
+						_clReleaseContext(oclctx);  oclctx = 0;
+					}
+
+					free(devices);  devices = NULL;
+				}
+				else printf("  NO GPU DEVICES\n");
+			}
+
+			free(platforms);  platforms = NULL;
+		}
+		else printf("No OpenCL platforms\n");
+	}
+
+	#endif
+
 	printf("SUCCESS\n");
 
 	bailout:
+	#ifdef FAKEOPENCL
+	if(oclctx) _clReleaseContext(oclctx);
+	if(devices) free(devices);
+	if(platforms) free(platforms);
+	#endif
 	if(ctx && dpy)
 	{
-		_glXMakeCurrent(dpy, 0, 0);  _glXDestroyContext(dpy, ctx);  ctx = 0;
+		_glXMakeCurrent(dpy, 0, 0);  _glXDestroyContext(dpy, ctx);
 	}
-	if(win && dpy) { XDestroyWindow(dpy, win);  win = 0; }
-	if(v) { XFree(v);  v = NULL; }
-	if(dpy) { XCloseDisplay(dpy);  dpy = NULL; }
+	if(win && dpy) XDestroyWindow(dpy, win);
+	if(v) XFree(v);
+	if(dpy) XCloseDisplay(dpy);
 	return retval;
 }

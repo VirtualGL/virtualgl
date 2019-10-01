@@ -60,10 +60,10 @@ static void setDLFakerLevel(int value)
 }
 
 
-/* If an application uses dlopen()/dlsym() to load functions from libGL or
-   libX11, this bypasses the LD_PRELOAD mechanism.  Thus, VirtualGL has to
-   intercept dlopen() and return a handle to itself rather than a handle to
-   libGL or libX11.
+/* If an application uses dlopen()/dlsym() to load functions from libGL,
+   libOpenCL, or libX11, this bypasses the LD_PRELOAD mechanism.  Thus,
+   VirtualGL has to intercept dlopen() and return a handle to itself rather
+   than a handle to libGL, libOpenCL, or libX11.
 
    NOTE: If the application tries to use dlopen() to obtain a handle to libdl,
    we similarly replace the handle with a handle to libdlfaker.  This works
@@ -74,6 +74,9 @@ void *dlopen(const char *filename, int flag)
 {
 	char *env = NULL, *env2 = NULL;  const char *envname = "FAKERLIB32";
 	int verbose = 0, trace = 0;
+	#ifdef FAKEOPENCL
+	int fakeOpenCL = 0;
+	#endif
 	void *retval = NULL;
 	FILE *file = stderr;
 
@@ -91,6 +94,10 @@ void *dlopen(const char *filename, int flag)
 		&& !strncmp(env2, "1", 1)) verbose = 1;
 	if((env2 = getenv("VGL_TRACE")) != NULL && strlen(env2) > 0
 		&& !strncmp(env2, "1", 1)) trace = 1;
+	#ifdef FAKEOPENCL
+	if((env2 = getenv("VGL_FAKEOPENCL")) != NULL && strlen(env2) > 0
+		&& !strncmp(env2, "1", 1)) fakeOpenCL = 1;
+	#endif
 	if((env2 = getenv("VGL_LOG")) != NULL && strlen(env2) > 0
 		&& !strcasecmp(env2, "stdout")) file = stdout;
 
@@ -105,9 +112,19 @@ void *dlopen(const char *filename, int flag)
 	#endif
 
 	if((env = getenv(envname)) == NULL || strlen(env) < 1)
+	{
+		#ifdef FAKEOPENCL
+		if(fakeOpenCL) env = "lib"VGL_FAKER_NAME"-opencl.so";
+		else
+		#endif
 		env = "lib"VGL_FAKER_NAME".so";
+	}
 	if(filename
 		&& (!strncmp(filename, "libGL.", 6) || strstr(filename, "/libGL.")
+			#ifdef FAKEOPENCL
+			|| !strncmp(filename, "libOpenCL.", 10)
+				|| strstr(filename, "/libOpenCL.")
+			#endif
 			|| !strncmp(filename, "libX11.", 7) || strstr(filename, "/libX11.")
 			|| (flag & RTLD_LAZY
 					&& (!strncmp(filename, "libopengl.", 10)

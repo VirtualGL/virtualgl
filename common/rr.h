@@ -186,9 +186,6 @@ typedef struct _FakerConfig
   char log[MAXSTR];
   char logo;
   int np;
-  #ifdef FAKEOPENCL
-  char ocllib[MAXSTR];
-  #endif
   int port;
   char probeglx;
   int qual;
@@ -217,6 +214,7 @@ typedef struct _FakerConfig
   char xcbkeysymslib[MAXSTR];
   char xcbx11lib[MAXSTR];
   char excludeddpys[MAXSTR];
+  char ocllib[MAXSTR];
 } FakerConfig;
 
 #if !defined(__SUNPRO_CC) && !defined(__SUNPRO_C)

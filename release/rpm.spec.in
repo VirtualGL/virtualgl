@@ -2,6 +2,7 @@
 # libnvidia-tls.so.1 if it was built on a system that has the NVidia
 # drivers installed.  The custom find-requires script is created during
 # install and removed during clean
+%define _use_internal_dependency_generator 0
 %define __find_requires %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 
 # Path under which VirtualGL should be installed
@@ -43,6 +44,8 @@
 
 # Path under which docs should be installed
 %define docdir %{_defaultdocdir}/%{name}-%{version}
+
+%define fakeopencl @VGL_FAKEOPENCL@
 
 Summary: A toolkit for displaying OpenGL applications to thin clients
 Name: @PKGNAME@
@@ -94,7 +97,8 @@ Ertl 2000.)
 #-->  -DCMAKE_INSTALL_DOCDIR=%{docdir} -DCMAKE_INSTALL_INCLUDEDIR=%{incdir} \
 #-->  -DCMAKE_INSTALL_LIBDIR=%{libdir} -DCMAKE_INSTALL_PREFIX=%{prefix} \
 #-->  -DVGL_BUILDSERVER=@VGL_BUILDSERVER@ -DVGL_SYSTEMFLTK=@VGL_SYSTEMFLTK@ \
-#-->  -DVGL_USESSL=@VGL_USESSL@ -DVGL_USEXV=@VGL_USEXV@
+#-->  -DVGL_USESSL=@VGL_USESSL@ -DVGL_USEXV=@VGL_USEXV@ \
+#-->  -DVGL_FAKEOPENCL=@VGL_FAKEOPENCL@
 #-->export NUMCPUS=`grep -c '^processor' /proc/cpuinfo`
 #-->make -j$NUMCPUS --load-average=$NUMCPUS
 
@@ -169,7 +173,7 @@ fi
 	ln -fs %{docdir} $RPM_BUILD_ROOT/%{prefix}/doc
 %endif
 
-echo '/usr/lib/rpm/find-requires|grep -v libGLcore|grep -v libnvidia-tls' >%{_tmppath}/%{name}-%{version}-%{release}-find-requires
+echo '/usr/lib/rpm/find-requires|grep -v libGLcore|grep -v libnvidia-tls|grep -v libOpenCL' >%{_tmppath}/%{name}-%{version}-%{release}-find-requires
 chmod 755 %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 
 %clean
@@ -234,6 +238,9 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %endif
 %{libdir}/lib@VGL_FAKER_NAME@.so
 %{libdir}/lib@VGL_FAKER_NAME@-nodl.so
+%if %{fakeopencl}
+	%{libdir}/lib@VGL_FAKER_NAME@-opencl.so
+%endif
 %{libdir}/lib@VGL_DLFAKER_NAME@.so
 %{libdir}/lib@VGL_GEFAKER_NAME@.so
 

@@ -28,6 +28,8 @@ cl_context clCreateContext(const cl_context_properties *properties,
 		*props = (cl_context_properties *)properties;
 	int j = 0;
 
+	TRY();
+
 	if(properties)
 	{
 		memset(oclprops, 0, sizeof(cl_context_properties) * 257);
@@ -46,6 +48,8 @@ cl_context clCreateContext(const cl_context_properties *properties,
 			else oclprops[j++] = properties[i + 1];
 		}
 	}
+
+	CATCH();
 
 	return _clCreateContext(props, num_devices, devices, pfn_notify, user_data,
 		errcode_ret);
