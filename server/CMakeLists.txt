@@ -49,6 +49,8 @@ if(VGL_USEXV)
 endif()
 
 option(VGL_FAKEXCB "Interpose enough of the XCB API to make Qt 5 work" ON)
+boolean_number(VGL_FAKEXCB)
+report_option(VGL_FAKEXCB "XCB interposer")
 if(VGL_FAKEXCB)
 	add_definitions(-DFAKEXCB)
 	set(FAKER_XCB_SOURCES faker-xcb.cpp XCBConnHash.cpp)
