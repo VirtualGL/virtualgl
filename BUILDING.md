@@ -41,6 +41,9 @@ Build Requirements
   * The OpenGL and GLX headers must be reasonably modern (generally Mesa 9 or
     later, or the equivalent.)
 
+- Some requisite development libraries are located in the CRB (Code Ready
+  Builder) repository on Red Hat Enterprise Linux 8 and in the PowerTools
+  repository on CentOS 8, which is not enabled by default.
 
 ### Windows
 
