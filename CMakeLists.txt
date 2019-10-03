@@ -19,9 +19,9 @@ set(DOCVERSION 2.6.3)
 
 macro(boolean_number var)
 	if(${var})
-		set(${var} 1)
+		set(${var} 1 ${ARGN})
 	else()
-		set(${var} 0)
+		set(${var} 0 ${ARGN})
 	endif()
 endmacro()
 

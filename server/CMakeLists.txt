@@ -6,6 +6,7 @@ set(VGL_DEFAULTSYSTEMFLTK 0)
 option(VGL_SYSTEMFLTK
 	"Link against a system-supplied version of FLTK instead of the in-tree version."
 	${VGL_DEFAULTSYSTEMFLTK})
+boolean_number(VGL_SYSTEMFLTK PARENT_SCOPE)
 if(VGL_SYSTEMFLTK)
 	find_package(FLTK)
 else()
