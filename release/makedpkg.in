@@ -88,6 +88,9 @@ makedeb()
 			mkdir -p $TMPDIR/usr/lib/i386-linux-gnu
 			ln -fs /usr/lib32/lib@VGL_FAKER_NAME@.so $TMPDIR/usr/lib/i386-linux-gnu/lib@VGL_FAKER_NAME@.so
 			ln -fs /usr/lib32/lib@VGL_FAKER_NAME@-nodl.so $TMPDIR/usr/lib/i386-linux-gnu/lib@VGL_FAKER_NAME@-nodl.so
+			if [ "$FAKEOPENCL" = "1" ]; then
+				ln -fs /usr/lib32/lib@VGL_FAKER_NAME@-opencl.so $TMPDIR/usr/lib/i386-linux-gnu/lib@VGL_FAKER_NAME@-opencl.so
+			fi
 			ln -fs /usr/lib32/lib@VGL_DLFAKER_NAME@.so $TMPDIR/usr/lib/i386-linux-gnu/lib@VGL_DLFAKER_NAME@.so
 			ln -fs /usr/lib32/lib@VGL_GEFAKER_NAME@.so $TMPDIR/usr/lib/i386-linux-gnu/lib@VGL_GEFAKER_NAME@.so
 		fi
@@ -143,6 +146,7 @@ DOCDIR=@CMAKE_INSTALL_FULL_DOCDIR@
 INCDIR=@CMAKE_INSTALL_FULL_INCLUDEDIR@
 INCSYMLINKS=@VGL_INCSYMLINKS@
 LIBDIR=@CMAKE_INSTALL_FULL_LIBDIR@
+FAKEOPENCL=@VGL_FAKEOPENCL@
 
 if [ ! `uid` -eq 0 ]; then
 	SUDO=sudo

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2019-09-26T14:20:51">
+<meta name="date" content="2019-10-03T08:33:07">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3048,16 +3048,54 @@ Image transport plugins are free to handle or ignore any configuration option as
         thread, which displays the final rendered result from all of the 
         workers. <br /><br /> The <code>VGL_EXCLUDE</code> environment variable 
         specifies a list of X display names (for instance, <code>:0.1</code>) 
-        for which VirtualGL should not interpose any X11, GLX, OpenGL, or XCB 
-        calls.  In other words, VirtualGL treats these displays as 3D X servers 
-        instead of 2D X servers and does not attempt to redirect 3D rendering 
-        away from them.  When an X display connection is opened using 
+        for which VirtualGL should not interpose any X11, GLX, OpenGL, XCB, or 
+        OpenCL calls.  In other words, VirtualGL treats these displays as 3D X 
+        servers instead of 2D X servers and does not attempt to redirect 3D 
+        rendering away from them.  When an X display connection is opened using 
         <code>XOpenDisplay()</code>, VirtualGL checks if the display name 
         appears in the exclude list, and if so, all subsequent X11, GLX, OpenGL, 
         and XCB calls intended for that display are allowed to pass through 
         unimpeded.  This variable is re-checked every time 
         <code>XOpenDisplay()</code> is called, so it can be set dynamically from 
         within a 3D application.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VGL_FAKEOPENCL = <em>0 | 1</em></code></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard"><code>vglrun</code> argument</td>
+    <td class="standard"><code>-ocl</code> / <code>+ocl</code></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Disable/enable OpenCL interposer</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Image Transports</td>
+    <td class="standard">All</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Disabled</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        In order to support applications that use OpenCL/OpenGL interoperability 
+        functions, VirtualGL has to interpose the <code>clCreateContext()</code> 
+        function and modify its arguments before passing them to the 
+        &ldquo;real&rdquo; <code>clCreateContext()</code> function in libOpenCL.  
+        Since libOpenCL is not available on all platforms that VirtualGL 
+        supports, the OpenCL interposer is disabled by default.
     </dd>
 </dl>
 

@@ -2,7 +2,7 @@
 
 # Copyright (C)2004 Landmark Graphics Corporation
 # Copyright (C)2005 Sun Microsystems, Inc.
-# Copyright (C)2009-2016, 2018 D. R. Commander
+# Copyright (C)2009-2016, 2018-2019 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
 # the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -13,26 +13,6 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # wxWindows Library License for more details.
-
-# The interpreter to use (if this script is submitted to N1 Grid Engine):
-#$ -S /bin/sh
-#
-# This allocates a graphics device and passes it in the VGL_DISPLAY
-# environment:
-#$ -l gfx=1
-#
-# Specify other environment variables that N1GE should pass to this script:
-#$ -v DISPLAY
-#$ -v SSH_CLIENT
-#$ -v VGL_CLIENT
-#$ -v VGL_COMPRESS
-#$ -v VGL_PORT
-#$ -v VGL_SSL
-#$ -v VGL_GLLIB
-#$ -v VGL_X11LIB
-#$ -v VGL_GAMMA
-#$ -v VGL_PROGRESSIVE
-#$ -v VGL_NPROCS
 
 usage()
 {
@@ -72,6 +52,8 @@ usage()
 	echo "            (<s> = 0 forces multisampling to be disabled)"
 	echo
 	echo "-np <n>   : Use <n> threads to perform image compression [default = 1]"
+	echo
+	echo "+ocl/-ocl : Enable/disable OpenCL interposer [default = disabled]"
 	echo
 	echo "+/-pr     : Enable/disable performance profiling output [default = disabled]"
 	echo
@@ -143,8 +125,6 @@ do
 	-sa*)       VGL_SUBSAMP=$2    ; export VGL_SUBSAMP  ; shift     ;;
 	-s*)        VGL_SSL=0         ; export VGL_SSL      ;;
 	+s*)        VGL_SSL=1         ; export VGL_SSL      ;;
-	-prog*)     VGL_PROGRESSIVE=0 ; export VGL_PROGRESSIVE  ;;
-	+prog*)     VGL_PROGRESSIVE=1 ; export VGL_PROGRESSIVE  ;;
 	-pr*)       VGL_PROFILE=0     ; export VGL_PROFILE  ;;
 	+pr*)       VGL_PROFILE=1     ; export VGL_PROFILE  ;;
 	-q*)        VGL_QUAL=$2       ; export VGL_QUAL     ; shift     ;;
@@ -169,6 +149,8 @@ do
 	-ms)        VGL_SAMPLES=$2    ; export VGL_SAMPLES  ; shift     ;;
 	+wm)        VGL_WM=1          ; export VGL_WM       ;;
 	-wm)        VGL_WM=0          ; export VGL_WM       ;;
+	+ocl)       VGL_FAKEOPENCL=1  ; export VGL_FAKEOPENCL  ;;
+	-ocl)       VGL_FAKEOPENCL=0  ; export VGL_FAKEOPENCL  ;;
 	+xcb)       VGL_FAKEXCB=1     ; export VGL_FAKEXCB  ;;
 	-xcb)       VGL_FAKEXCB=0     ; export VGL_FAKEXCB  ;;
 	-ld)        VGL_LIBRARY_PATH=$2 ; shift ;;
@@ -241,6 +223,9 @@ export VGL_ISACTIVE
 SUFFIX=
 if [ $__VGL_DL -eq 0 ]; then
 	SUFFIX=-nodl
+fi
+if [ "$SUFFIX" = "" -a "$VGL_FAKEOPENCL" = "1" ]; then
+	SUFFIX=-opencl
 fi
 if [ -z "$LD_PRELOAD" ]; then
 	LD_PRELOAD=lib@VGL_FAKER_NAME@$SUFFIX.so

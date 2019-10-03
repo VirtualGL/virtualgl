@@ -139,14 +139,28 @@ previous method:
 	{nl}{nl}
 	The ''VGL_EXCLUDE'' environment variable specifies a list of X display
 	names (for instance, '':0.1'') for which VirtualGL should not interpose any
-	X11, GLX, OpenGL, or XCB calls.  In other words, VirtualGL treats these
-	displays as 3D X servers instead of 2D X servers and does not attempt to
-	redirect 3D rendering away from them.  When an X display connection is opened
-	using ''XOpenDisplay()'', VirtualGL checks if the display name appears in the
-	exclude list, and if so, all subsequent X11, GLX, OpenGL, and XCB calls
-	intended for that display are allowed to pass through unimpeded.  This
+	X11, GLX, OpenGL, XCB, or OpenCL calls.  In other words, VirtualGL treats
+	these displays as 3D X servers instead of 2D X servers and does not attempt
+	to redirect 3D rendering away from them.  When an X display connection is
+	opened using ''XOpenDisplay()'', VirtualGL checks if the display name appears
+	in the exclude list, and if so, all subsequent X11, GLX, OpenGL, and XCB
+	calls intended for that display are allowed to pass through unimpeded.  This
 	variable is re-checked every time ''XOpenDisplay()'' is called, so it can be
 	set dynamically from within a 3D application.
+
+| Environment Variable | {pcode: VGL_FAKEOPENCL = __0 \| 1__ } |
+| ''vglrun'' argument | ''-ocl'' / ''+ocl'' |
+| Summary | Disable/enable OpenCL interposer |
+| Image Transports | All |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: In order to support applications that use OpenCL/OpenGL
+	interoperability functions, VirtualGL has to interpose the
+	''clCreateContext()'' function and modify its arguments before passing them
+	to the "real" ''clCreateContext()'' function in libOpenCL.  Since libOpenCL
+	is not available on all platforms that VirtualGL supports, the OpenCL
+	interposer is disabled by default.
 
 | Environment Variable | {pcode: VGL_FAKEXCB = __0 \| 1__ } |
 | ''vglrun'' argument | ''-xcb'' / ''+xcb'' |

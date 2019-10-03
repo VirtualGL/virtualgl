@@ -13,6 +13,9 @@
  */
 
 #include <GL/glx.h>
+#ifdef FAKEOPENCL
+#include <CL/opencl.h>
+#endif
 #include <X11/Xlib.h>
 #include <dlfcn.h>
 #include <string.h>
@@ -60,11 +63,46 @@ _glClearType _glClear = NULL;
 typedef void (*_glClearColorType)(GLclampf, GLclampf, GLclampf, GLclampf);
 _glClearColorType _glClearColor = NULL;
 
-void *gldllhnd = NULL;
+#ifdef FAKEOPENCL
 
-#define LSYM(s) \
+typedef cl_context (*_clCreateContextType)(cl_context_properties *, cl_uint,
+	const cl_device_id *, void (*)(const char *, const void *, size_t, void *),
+	void *, cl_int *);
+_clCreateContextType _clCreateContext = NULL;
+
+typedef cl_int (*_clGetContextInfoType)(cl_context, cl_context_info, size_t,
+	void *, size_t *);
+_clGetContextInfoType _clGetContextInfo = NULL;
+
+typedef cl_int (*_clGetDeviceIDsType)(cl_platform_id, cl_device_type, cl_uint,
+	cl_device_id *, cl_uint *);
+_clGetDeviceIDsType _clGetDeviceIDs = NULL;
+
+typedef cl_int (*_clGetDeviceInfoType)(cl_device_id, cl_device_info, size_t,
+	void *, size_t *);
+_clGetDeviceInfoType _clGetDeviceInfo = NULL;
+
+typedef cl_int (*_clGetPlatformIDsType)(cl_uint, cl_platform_id *, cl_uint *);
+_clGetPlatformIDsType _clGetPlatformIDs = NULL;
+
+typedef cl_int (*_clGetPlatformInfoType)(cl_platform_id, cl_platform_info,
+	size_t, void *, size_t *);
+_clGetPlatformInfoType _clGetPlatformInfo = NULL;
+
+typedef cl_int (*_clReleaseContextType)(cl_context);
+_clReleaseContextType _clReleaseContext = NULL;
+
+#endif
+
+void *gldllhnd = NULL;
+#ifdef FAKEOPENCL
+void *ocldllhnd = NULL;
+#endif
+int fakeOpenCL = 0;
+
+#define LSYM(dllhnd, s) \
 	dlerror(); \
-	_##s = (_##s##Type)dlsym(gldllhnd, #s); \
+	_##s = (_##s##Type)dlsym(dllhnd, #s); \
 	err = dlerror(); \
 	if(err) THROW(err) \
 	else if(!_##s) THROW("Could not load symbol " #s)
@@ -85,13 +123,39 @@ static int loadSymbols1(char *prefix)
 	if(err) THROW(err)
 	else if(!gldllhnd) THROW("Could not open libGL")
 
-	LSYM(glXChooseVisual);
-	LSYM(glXCreateContext);
-	LSYM(glXDestroyContext);
-	LSYM(glXMakeCurrent);
-	LSYM(glXSwapBuffers);
-	LSYM(glClear);
-	LSYM(glClearColor);
+	LSYM(gldllhnd, glXChooseVisual);
+	LSYM(gldllhnd, glXCreateContext);
+	LSYM(gldllhnd, glXDestroyContext);
+	LSYM(gldllhnd, glXMakeCurrent);
+	LSYM(gldllhnd, glXSwapBuffers);
+	LSYM(gldllhnd, glClear);
+	LSYM(gldllhnd, glClearColor);
+
+	#ifdef FAKEOPENCL
+
+	if(fakeOpenCL)
+	{
+		if(prefix)
+		{
+			char temps[256];
+			snprintf(temps, 255, "%s/libOpenCL.so", prefix);
+			ocldllhnd = dlopen(temps, RTLD_NOW);
+		}
+		else ocldllhnd = dlopen("libOpenCL.so", RTLD_NOW);
+		err = dlerror();
+		if(err) THROW(err)
+		else if(!ocldllhnd) THROW("Could not open libOpenCL")
+
+		LSYM(ocldllhnd, clCreateContext);
+		LSYM(ocldllhnd, clGetContextInfo);
+		LSYM(ocldllhnd, clGetDeviceIDs);
+		LSYM(ocldllhnd, clGetDeviceInfo);
+		LSYM(ocldllhnd, clGetPlatformIDs);
+		LSYM(ocldllhnd, clGetPlatformInfo);
+		LSYM(ocldllhnd, clReleaseContext);
+	}
+
+	#endif
 
 	bailout:
 	return retval;
@@ -100,6 +164,9 @@ static int loadSymbols1(char *prefix)
 static void unloadSymbols1(void)
 {
 	if(gldllhnd) dlclose(gldllhnd);
+	#ifdef FAKEOPENCL
+	if(ocldllhnd) dlclose(ocldllhnd);
+	#endif
 }
 
 
@@ -112,7 +179,7 @@ static int loadSymbols2(void)
 	const char *err = NULL;
 	int retval = 0;
 
-	LSYM(glXGetProcAddressARB);
+	LSYM(gldllhnd, glXGetProcAddressARB);
 	LSYM2(glXChooseVisual);
 	LSYM2(glXCreateContext);
 	LSYM2(glXDestroyContext);
@@ -143,7 +210,7 @@ static int nameMatchTest(void)
 	if(err) THROW(err)
 	else if(!gldllhnd) THROW("Could not open libGLdlfakerut")
 
-	LSYM(myTestFunction);
+	LSYM(gldllhnd, myTestFunction);
 	_myTestFunction();
 	dlclose(gldllhnd);
 	gldllhnd = NULL;
@@ -159,7 +226,7 @@ static int nameMatchTest(void)
 #ifdef RTLD_DEEPBIND
 /* Test whether libdlfaker.so properly circumvents RTLD_DEEPBIND */
 
-typedef void (*_testType)(const char *);
+typedef void (*_testType)(const char *, int);
 _testType _test = NULL;
 
 static int deepBindTest(void)
@@ -172,8 +239,8 @@ static int deepBindTest(void)
 	if(err) THROW(err)
 	else if(!gldllhnd) THROW("Could not open libdlfakerut")
 
-	LSYM(test);
-	_test("RTLD_DEEPBIND test");
+	LSYM(gldllhnd, test);
+	_test("RTLD_DEEPBIND test", fakeOpenCL);
 	dlclose(gldllhnd);
 	gldllhnd = NULL;
 
@@ -206,19 +273,26 @@ int main(int argc, char **argv)
 	env = getenv("LD_PRELOAD_64");
 	fprintf(stderr, "LD_PRELOAD_64 = %s\n", env ? env : "(NULL)");
 	#endif
+	#ifdef FAKEOPENCL
+	if((env = getenv("VGL_FAKEOPENCL")) != NULL && strlen(env) > 0
+		&& !strncmp(env, "1", 1)) fakeOpenCL = 1;
+	#endif
 
 	fprintf(stderr, "\n");
 	TRY(nameMatchTest());
 
 	TRY(loadSymbols1(prefix));
-	TRY(test("dlopen() test"));
+	fprintf(stderr, "\n");
+	TRY(test("dlopen() test", fakeOpenCL));
 
 	TRY(loadSymbols2());
-	TRY(test("glXGetProcAddressARB() test"));
+	fprintf(stderr, "\n");
+	TRY(test("glXGetProcAddressARB() test", fakeOpenCL));
 
 	unloadSymbols1();
 
 	#ifdef RTLD_DEEPBIND
+	fprintf(stderr, "\n");
 	TRY(deepBindTest());
 	#endif
 

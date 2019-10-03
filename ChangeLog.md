@@ -47,13 +47,13 @@ option.  Preventing `GL_EXT_x11_sync_object` from being exposed to 3D
 applications fixes numerous OpenGL errors that occurred when attempting to run
 GNOME 3 with VirtualGL using nVidia's proprietary drivers.
 
-3. The VirtualGL Faker now interposes the `clCreateContext()` OpenCL function
-in order to replace the value of the `CL_GLX_DISPLAY_KHR` property (if
+3. The VirtualGL Faker now optionally interposes the `clCreateContext()` OpenCL
+function in order to replace the value of the `CL_GLX_DISPLAY_KHR` property (if
 specified) with the X11 Display handle for the 3D X server connection.  This
 prevents 3D applications from crashing when attempting to use OpenCL/OpenGL
-interoperability functions with VirtualGL.  Note that 3D applications must link
-directly with libOpenCL (as opposed to using `dlopen()` to load OpenCL
-functions) in order to take advantage of this fix.
+interoperability functions with VirtualGL.  The new OpenCL interposer is
+enabled by passing `+ocl` to `vglrun` or by setting the `VGL_FAKEOPENCL`
+environment variable to `1`.
 
 4. VirtualGL no longer provides in-tree GLX headers.  Traditionally, these were
 provided because, since VirtualGL is a GLX emulator, it has the ability to
@@ -67,6 +67,8 @@ provided because, since VirtualGL is an XCB emulator, it has the ability to
 support certain newer XCB features that aren't available in the underlying
 libxcb implementation.  However, the operating systems that lack these XCB
 features are, for the most part, EOL.
+
+6. `vglserver_config` now works properly with FreeBSD systems running GDM v3.
 
 
 2.6.2

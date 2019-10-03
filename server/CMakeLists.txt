@@ -6,6 +6,7 @@ set(VGL_DEFAULTSYSTEMFLTK 0)
 option(VGL_SYSTEMFLTK
 	"Link against a system-supplied version of FLTK instead of the in-tree version."
 	${VGL_DEFAULTSYSTEMFLTK})
+boolean_number(VGL_SYSTEMFLTK PARENT_SCOPE)
 if(VGL_SYSTEMFLTK)
 	find_package(FLTK)
 else()
@@ -18,30 +19,8 @@ endif()
 configure_file(fakerconfig.h.in fakerconfig.h)
 configure_file(vendor.h.in vendor.h)
 
-set(DEFAULT_VGL_FAKEOPENCL 0)
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
-	set(DEFAULT_VGL_FAKEOPENCL 1)
-endif()
-option(VGL_FAKEOPENCL "Interpose enough of the OpenCL API to make OpenCL/OpenGL interoperability work"
-	${DEFAULT_VGL_FAKEOPENCL})
-if(VGL_FAKEOPENCL)
-	add_definitions(-DFAKEOPENCL)
-	set(VGL_DEFAULTSYSTEMOCL 0)
-	option(VGL_SYSTEMOCL
-		"Compile against system-supplied versions of the OpenCL headers instead of the in-tree versions."
-			${VGL_DEFAULTSYSTEMOCL})
-	if(VGL_SYSTEMOCL)
-		cmake_minimum_required(VERSION 3.1)
-		include(FindOpenCL)
-	else()
-		set(OpenCL_INCLUDE_DIRS ocl_headers)
-	endif()
-else()
-	set(OpenCL_INCLUDE_DIRS "")
-endif()
-
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
-	../common ${OpenCL_INCLUDE_DIRS})
+	../common)
 
 set(FBXFAKERLIB fbx-faker)
 if(VGL_USEXV)
@@ -49,15 +28,35 @@ if(VGL_USEXV)
 endif()
 
 option(VGL_FAKEXCB "Interpose enough of the XCB API to make Qt 5 work" ON)
+boolean_number(VGL_FAKEXCB)
+report_option(VGL_FAKEXCB "XCB interposer")
 if(VGL_FAKEXCB)
 	add_definitions(-DFAKEXCB)
 	set(FAKER_XCB_SOURCES faker-xcb.cpp XCBConnHash.cpp)
+endif()
+
+set(DEFAULT_VGL_FAKEOPENCL 0)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+	set(DEFAULT_VGL_FAKEOPENCL 1)
+endif()
+option(VGL_FAKEOPENCL "Interpose enough of the OpenCL API to make OpenCL/OpenGL interoperability work"
+	${DEFAULT_VGL_FAKEOPENCL})
+boolean_number(VGL_FAKEOPENCL)
+boolean_number(VGL_FAKEOPENCL PARENT_SCOPE)
+report_option(VGL_FAKEOPENCL "OpenCL interposer")
+if(VGL_FAKEOPENCL)
+	cmake_minimum_required(VERSION 3.1)
+	include(FindOpenCL)
+	include_directories(${OpenCL_INCLUDE_DIRS})
 endif()
 
 get_directory_property(DEFS_PROP COMPILE_DEFINITIONS)
 foreach(def ${DEFS_PROP})
 	set(DEFINES ${DEFINES};-D${def})
 endforeach()
+if(VGL_FAKEOPENCL)
+	set(DEFINES ${DEFINES};-DFAKEOPENCL)
+endif()
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile
 	COMMAND ${CMAKE_C_COMPILER} ${DEFINES} -E
 		${CMAKE_CURRENT_SOURCE_DIR}/faker-mapfile.c
@@ -89,12 +88,18 @@ set(FAKER_SOURCES
 if(VGL_USEXV)
 	set(FAKER_SOURCES ${FAKER_SOURCES};XVTrans.cpp)
 endif()
-if(VGL_FAKEOPENCL)
-	set(FAKER_SOURCES ${FAKER_SOURCES};faker-ocl.cpp)
-endif()
 
-foreach(fakerlib ${VGL_FAKER_NAME} ${VGL_FAKER_NAME}-nodl)
-	add_library(${fakerlib} SHARED ${FAKER_SOURCES})
+set(FAKERLIBS ${VGL_FAKER_NAME};${VGL_FAKER_NAME}-nodl)
+if(VGL_FAKEOPENCL)
+	set(FAKERLIBS ${FAKERLIBS};${VGL_FAKER_NAME}-opencl)
+endif()
+foreach(fakerlib ${FAKERLIBS})
+	if(${fakerlib} STREQUAL ${VGL_FAKER_NAME}-opencl)
+		add_library(${fakerlib} SHARED ${FAKER_SOURCES} faker-ocl.cpp)
+		target_compile_definitions(${fakerlib} PUBLIC -DFAKEOPENCL)
+	else()
+		add_library(${fakerlib} SHARED ${FAKER_SOURCES})
+	endif()
 	if(${fakerlib} STREQUAL ${VGL_FAKER_NAME} AND
 		CMAKE_SYSTEM_NAME MATCHES "Linux")
 		# GCC 4.6 and later on Linux apparently passes --as-needed to the linker,
@@ -119,6 +124,9 @@ foreach(fakerlib ${VGL_FAKER_NAME} ${VGL_FAKER_NAME}-nodl)
 	if(${fakerlib} STREQUAL ${VGL_FAKER_NAME})
 		target_link_libraries(${fakerlib} ${OPENGL_gl_LIBRARY})
 	endif()
+	if(${fakerlib} STREQUAL ${VGL_FAKER_NAME}-opencl)
+		target_link_libraries(${fakerlib} ${OPENGL_gl_LIBRARY} ${OpenCL_LIBRARIES})
+	endif()
 	if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND GNUCXX)
 		# For some reason, on SunOS/GCC CMake tries to use the C compiler to link
 		# C++ shared libs.  Grrr...  (NOTE: This was fixed in CMake v3.4, so we
@@ -129,6 +137,9 @@ foreach(fakerlib ${VGL_FAKER_NAME} ${VGL_FAKER_NAME}-nodl)
 endforeach()
 
 add_library(${VGL_DLFAKER_NAME} SHARED dlfaker.c)
+if(VGL_FAKEOPENCL)
+	target_compile_definitions(${VGL_DLFAKER_NAME} PUBLIC -DFAKEOPENCL)
+endif()
 target_link_libraries(${VGL_DLFAKER_NAME} ${LIBDL})
 install(TARGETS ${VGL_DLFAKER_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
@@ -179,12 +190,19 @@ target_link_libraries(vgltransut vglcommon ${FBXLIB} vglsocket
 	${TJPEG_LIBRARY})
 
 add_executable(dlfakerut dlfakerut.c)
+if(VGL_FAKEOPENCL)
+	target_compile_definitions(dlfakerut PUBLIC -DFAKEOPENCL)
+endif()
 target_link_libraries(dlfakerut ${X11_X11_LIB} ${LIBDL})
 
 add_library(GLdlfakerut SHARED libGLdlfakerut.c)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	add_library(deepbindtest SHARED libdeepbindtest.c)
+	if(VGL_FAKEOPENCL)
+		target_compile_definitions(deepbindtest PUBLIC -DFAKEOPENCL)
+		target_link_libraries(deepbindtest ${OpenCL_LIBRARIES})
+	endif()
 	target_link_libraries(deepbindtest ${X11_X11_LIB} ${OPENGL_gl_LIBRARY}
 		${LIBDL})
 	set_target_properties(deepbindtest PROPERTIES LINK_FLAGS "${MINUSZ}defs")

@@ -27,6 +27,7 @@ onexit()
 BIN=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
 LIB=@CMAKE_LIBRARY_OUTPUT_DIRECTORY@
 SSL=@VGL_USESSL@
+FAKEOPENCL=@VGL_FAKEOPENCL@
 
 NODL=
 FAKERUTARGS=
@@ -79,6 +80,9 @@ echo Xvfb $XVFBARGS started as process $PID
 sleep 2
 
 DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut
+if [ "$FAKEOPENCL" = "1" ]; then
+	DISPLAY=:42 $BIN/vglrun +ocl $BIN/dlfakerut
+fi
 echo
 
 for SCREEN in 0 1; do

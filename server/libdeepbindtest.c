@@ -15,6 +15,9 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <GL/glx.h>
+#ifdef FAKEOPENCL
+#include <CL/opencl.h>
+#endif
 
 
 #define THROW(m) \
@@ -38,4 +41,13 @@
 #define _glXDestroyContext  glXDestroyContext
 #define _glXMakeCurrent  glXMakeCurrent
 #define _glXSwapBuffers  glXSwapBuffers
+#ifdef FAKEOPENCL
+#define _clCreateContext  clCreateContext
+#define _clGetContextInfo  clGetContextInfo
+#define _clGetDeviceIDs  clGetDeviceIDs
+#define _clGetDeviceInfo  clGetDeviceInfo
+#define _clGetPlatformIDs  clGetPlatformIDs
+#define _clGetPlatformInfo  clGetPlatformInfo
+#define _clReleaseContext  clReleaseContext
+#endif
 #include "dlfakerut-test.c"
