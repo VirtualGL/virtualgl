@@ -282,14 +282,17 @@ int main(int argc, char **argv)
 	TRY(nameMatchTest());
 
 	TRY(loadSymbols1(prefix));
+	fprintf(stderr, "\n");
 	TRY(test("dlopen() test", fakeOpenCL));
 
 	TRY(loadSymbols2());
+	fprintf(stderr, "\n");
 	TRY(test("glXGetProcAddressARB() test", fakeOpenCL));
 
 	unloadSymbols1();
 
 	#ifdef RTLD_DEEPBIND
+	fprintf(stderr, "\n");
 	TRY(deepBindTest());
 	#endif
 

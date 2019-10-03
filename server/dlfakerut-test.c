@@ -138,7 +138,7 @@ int test(const char *testName, int testOpenCL)
 				if(_clGetPlatformInfo(platforms[pi], CL_PLATFORM_NAME, 255, name,
 					NULL) != CL_SUCCESS)
 					THROW("Could not get OpenCL platform info");
-				printf("OpenCL platform:  %s\n", name);
+				fprintf(stderr, "OpenCL platform:  %s\n", name);
 
 				if((oclerr = _clGetDeviceIDs(platforms[pi], CL_DEVICE_TYPE_GPU, 0,
 					NULL, &nDevices)) != CL_SUCCESS && oclerr != CL_DEVICE_NOT_FOUND)
@@ -160,7 +160,7 @@ int test(const char *testName, int testOpenCL)
 						if(_clGetDeviceInfo(devices[di], CL_DEVICE_NAME, 255, name,
 							NULL) != CL_SUCCESS)
 							THROW("Could not get OpenCL device info");
-						printf("  Device:  %s\n", name);
+						fprintf(stderr, "  Device:  %s\n", name);
 
 						properties[1] = (cl_context_properties)ctx;
 						properties[3] = (cl_context_properties)dpy;
@@ -181,17 +181,17 @@ int test(const char *testName, int testOpenCL)
 
 					free(devices);  devices = NULL;
 				}
-				else printf("  NO GPU DEVICES\n");
+				else fprintf(stderr, "  NO GPU DEVICES\n");
 			}
 
 			free(platforms);  platforms = NULL;
 		}
-		else printf("No OpenCL platforms\n");
+		else fprintf(stderr, "No OpenCL platforms\n");
 	}
 
 	#endif
 
-	printf("SUCCESS\n");
+	fprintf(stderr, "SUCCESS\n");
 
 	bailout:
 	#ifdef FAKEOPENCL
