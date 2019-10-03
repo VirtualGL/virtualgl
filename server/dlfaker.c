@@ -122,8 +122,8 @@ void *dlopen(const char *filename, int flag)
 	if(filename
 		&& (!strncmp(filename, "libGL.", 6) || strstr(filename, "/libGL.")
 			#ifdef FAKEOPENCL
-			|| !strncmp(filename, "libOpenCL.", 10)
-				|| strstr(filename, "/libOpenCL.")
+			|| (!strncmp(filename, "libOpenCL.", 10) && fakeOpenCL)
+				|| (strstr(filename, "/libOpenCL.") && fakeOpenCL)
 			#endif
 			|| !strncmp(filename, "libX11.", 7) || strstr(filename, "/libX11.")
 			|| (flag & RTLD_LAZY
