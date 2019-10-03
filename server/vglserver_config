@@ -639,10 +639,13 @@ EOF
 		removeline /etc/lightdm/lightdm.conf display-setup-script
 		removeline /etc/lightdm/lightdm.conf greeter-setup-script
 	fi
-	if [ -f /usr/share/gdm/greeter/autostart/virtualgl.desktop ]; then
-		echo "... Removing /usr/share/gdm/greeter/autostart/virtualgl.desktop ..."
-		rm /usr/share/gdm/greeter/autostart/virtualgl.desktop
-	fi
+	for dir in /usr/share/gdm/greeter/autostart \
+		/usr/local/share/gdm/greeter/autostart; do
+		if [ -f $dir/virtualgl.desktop ]; then
+			echo "... Removing $dir/virtualgl.desktop ..."
+			rm $dir/virtualgl.desktop
+		fi
+	done
 
 	for file in /etc/gdm/custom.conf \
 		/etc/X11/gdm/custom.conf \
@@ -828,23 +831,26 @@ EOF
 		echo [SeatDefaults] >/etc/lightdm/lightdm.conf
 		addvglgenkey_lightdm /etc/lightdm/lightdm.conf
 	fi
-	if [ -d /usr/share/gdm/greeter/autostart ]; then
-		echo ... Creating /usr/share/gdm/greeter/autostart/virtualgl.desktop ...
-		if [ "$VGLUSERSONLY" = "1" ]; then
-			cat >/usr/share/gdm/greeter/autostart/virtualgl.desktop <<EOF
+	for dir in /usr/share/gdm/greeter/autostart \
+		/usr/local/share/gdm/greeter/autostart; do
+		if [ -d $dir ]; then
+			echo ... Creating $dir/virtualgl.desktop ...
+			if [ "$VGLUSERSONLY" = "1" ]; then
+				cat >$dir/virtualgl.desktop <<EOF
 [Desktop Entry]
 Type=Application
 Exec=$VGLGENKEY
 EOF
-		else
-			cat >/usr/share/gdm/greeter/autostart/virtualgl.desktop <<EOF
+			else
+				cat >$dir/virtualgl.desktop <<EOF
 [Desktop Entry]
 Type=Application
 Exec=xhost +LOCAL:
 EOF
+			fi
+			chmod 644 $dir/virtualgl.desktop
 		fi
-		chmod 644 /usr/share/gdm/greeter/autostart/virtualgl.desktop
-	fi
+	done
 
 	for file in /etc/gdm/custom.conf \
 		/etc/X11/gdm/custom.conf \

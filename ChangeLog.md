@@ -38,6 +38,8 @@ support certain newer XCB features that aren't available in the underlying
 libxcb implementation.  However, the operating systems that lack these XCB
 features are, for the most part, EOL.
 
+6. `vglserver_config` now works properly with FreeBSD systems running GDM v3.
+
 
 2.6.2
 =====
