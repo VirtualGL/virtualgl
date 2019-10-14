@@ -2,7 +2,6 @@
 # libnvidia-tls.so.1 if it was built on a system that has the NVidia
 # drivers installed.  The custom find-requires script is created during
 # install and removed during clean
-%define _use_internal_dependency_generator 0
 %define __find_requires %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 
 # Path under which VirtualGL should be installed
@@ -173,8 +172,14 @@ fi
 	ln -fs %{docdir} $RPM_BUILD_ROOT/%{prefix}/doc
 %endif
 
-echo '/usr/lib/rpm/find-requires|grep -v libGLcore|grep -v libnvidia-tls|grep -v libOpenCL' >%{_tmppath}/%{name}-%{version}-%{release}-find-requires
+echo '/usr/lib/rpm/find-requires|grep -v libGLcore|grep -v libnvidia-tls' >%{_tmppath}/%{name}-%{version}-%{release}-find-requires
 chmod 755 %{_tmppath}/%{name}-%{version}-%{release}-find-requires
+
+# This prevents the RPM from requiring libOpenCL.
+%if %{fakeopencl}
+	find $RPM_BUILD_ROOT
+	chmod 644 $RPM_BUILD_ROOT/%{libdir}/lib@VGL_FAKER_NAME@-opencl.so
+%endif
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -239,7 +244,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %{libdir}/lib@VGL_FAKER_NAME@.so
 %{libdir}/lib@VGL_FAKER_NAME@-nodl.so
 %if %{fakeopencl}
-	%{libdir}/lib@VGL_FAKER_NAME@-opencl.so
+	%attr(755, -, -) %{libdir}/lib@VGL_FAKER_NAME@-opencl.so
 %endif
 %{libdir}/lib@VGL_DLFAKER_NAME@.so
 %{libdir}/lib@VGL_GEFAKER_NAME@.so
