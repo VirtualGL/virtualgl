@@ -227,6 +227,15 @@ fi
 if [ "$SUFFIX" = "" -a "$VGL_FAKEOPENCL" = "1" ]; then
 	SUFFIX=-opencl
 fi
+if [ ! -z "$LD_PRELOAD" ]; then
+	# Remove any existing VGL fakers from LD_PRELOAD.  This is necessary in order
+	# to prevent a faker mismatch (and subsequent application crash) if vglrun is
+	# executed from within a window manager or other process that was itself
+	# launched using vglrun with different -nodl or +ocl options.
+	LD_PRELOAD=$(echo "$LD_PRELOAD" | sed "s/lib@VGL_DLFAKER_NAME@\.so\:*//g" | \
+		sed "s/lib@VGL_GEFAKER_NAME@\.so\:*//g" | \
+		sed "s/lib@VGL_FAKER_NAME@[^\.]*\.so\:*//g")
+fi
 if [ -z "$LD_PRELOAD" ]; then
 	LD_PRELOAD=lib@VGL_FAKER_NAME@$SUFFIX.so
 else
