@@ -545,17 +545,19 @@ VFUNCDEF0(glFinish, glFinish);
 
 VFUNCDEF0(glFlush, glFlush);
 
+VFUNCDEF1(glDrawBuffer, GLenum, drawbuf, glDrawBuffer);
+
+VFUNCDEF2(glDrawBuffers, GLsizei, n, const GLenum *, bufs, glDrawBuffers);
+
 FUNCDEF1(const GLubyte *, glGetString, GLenum, name, glGetString);
 
 FUNCDEF2(const GLubyte *, glGetStringi, GLenum, name, GLuint, index,
 	glGetStringi);
 
+VFUNCDEF0(glPopAttrib, glPopAttrib);
+
 VFUNCDEF4(glViewport, GLint, x, GLint, y, GLsizei, width, GLsizei, height,
 	glViewport);
-
-VFUNCDEF1(glDrawBuffer, GLenum, drawbuf, glDrawBuffer);
-
-VFUNCDEF0(glPopAttrib, glPopAttrib);
 
 
 #ifdef FAKEOPENCL

@@ -453,7 +453,8 @@ int readbackTest(bool stereo)
 			glReadBuffer(GL_BACK);
 			glFinish();  glFinish();
 			checkFrame(dpy, win1, 1, lastFrame1);
-			glDrawBuffer(GL_FRONT);  glFinish();
+			GLenum buf = GL_FRONT_LEFT;
+			glDrawBuffers(1, &buf);  glFinish();
 			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);
 			checkFrame(dpy, win1, 1, lastFrame1);
 			checkWindowColor(dpy, win1, clr.bits(-2));
@@ -603,7 +604,12 @@ int readbackTest(bool stereo)
 		try
 		{
 			printf("glFinish() [f&b]:              ");
-			clr.clear(GL_FRONT_AND_BACK);  if(stereo) sclr.clear(GL_RIGHT);
+			GLenum bufs[] = { GL_FRONT_LEFT, GL_BACK_LEFT };
+			glDrawBuffers(2, bufs);
+			glClearColor(clr.r(), clr.g(), clr.b(), 0.);
+			glClear(GL_COLOR_BUFFER_BIT);
+			clr.next();
+			if(stereo) sclr.clear(GL_RIGHT);
 			glReadBuffer(GL_BACK);
 			glFinish();  glFinish();
 			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);

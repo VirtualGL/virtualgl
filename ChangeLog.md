@@ -1,3 +1,12 @@
+2.6.4
+=====
+
+### Significant changes relative to 2.6.3:
+
+1. VirtualGL now works properly with 3D applications that use the
+`glDrawBuffers()` function and render to the front buffer.
+
+
 2.6.3
 =====
 
