@@ -206,7 +206,7 @@ extern "C" {
 
 int deletePrivate(XExtData *extData)
 {
-	if(extData && extData->private_data) delete extData->private_data;
+	if(extData) delete extData->private_data;
 	return 0;
 }
 

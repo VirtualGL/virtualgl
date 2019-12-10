@@ -115,7 +115,7 @@ void VGLTransReceiver::listen(unsigned short port_)
 	}
 	catch(...)
 	{
-		if(listenSocket) { delete listenSocket;  listenSocket = NULL; }
+		delete listenSocket;  listenSocket = NULL;
 		throw;
 	}
 	thread->start();
@@ -142,15 +142,15 @@ void VGLTransReceiver::run(void)
 			if(!deadYet)
 			{
 				vglout.println("%s-- %s", GET_METHOD(e), e.what());
-				if(listener) delete listener;
-				if(socket) delete socket;
+				delete listener;
+				delete socket;
 				continue;
 			}
 		}
 	}
 	vglout.println("Listener exiting ...");
 	listenMutex.lock();
-	if(listenSocket) { delete listenSocket;  listenSocket = NULL; }
+	delete listenSocket;  listenSocket = NULL;
 	listenMutex.unlock();
 }
 
@@ -255,7 +255,7 @@ void VGLTransReceiver::Listener::run(void)
 	{
 		vglout.println("%s-- %s", GET_METHOD(e), e.what());
 	}
-	if(thread) { thread->detach();  delete thread; }
+	if(thread) { thread->detach();  delete thread;  thread = NULL; }
 	delete this;
 }
 

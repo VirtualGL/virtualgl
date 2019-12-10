@@ -150,6 +150,46 @@ void glDrawBuffer(GLenum mode)
 }
 
 
+void glDrawBuffers(GLsizei n, const GLenum *bufs)
+{
+	if(vglfaker::getExcludeCurrent()) { _glDrawBuffers(n, bufs);  return; }
+
+	TRY();
+
+		OPENTRACE(glDrawBuffers);  PRARGI(n);
+		if(n && bufs)
+		{
+			for(GLsizei i = 0; i < n; i++) PRARGX(bufs[i]);
+		}
+		STARTTRACE();
+
+	VirtualWin *vw = NULL;
+	int before = -1, after = -1, rbefore = -1, rafter = -1;
+	GLXDrawable drawable = _glXGetCurrentDrawable();
+
+	if(drawable && (vw = winhash.find(NULL, drawable)) != NULL)
+	{
+		before = DrawingToFront();
+		rbefore = DrawingToRight();
+		_glDrawBuffers(n, bufs);
+		after = DrawingToFront();
+		rafter = DrawingToRight();
+		if(before && !after) vw->dirty = true;
+		if(rbefore && !rafter && vw->isStereo()) vw->rdirty = true;
+	}
+	else _glDrawBuffers(n, bufs);
+
+		STOPTRACE();
+		if(drawable && vw)
+		{
+			PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
+		}
+		CLOSETRACE();
+
+	CATCH();
+}
+
+
 const GLubyte *glGetString(GLenum name)
 {
 	char *string = NULL;

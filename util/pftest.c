@@ -17,7 +17,6 @@
 #include <sys/types.h>
 #include "pf.h"
 #include "vglutil.h"
-#include "Timer.h"
 
 
 #define BENCHTIME  2.0

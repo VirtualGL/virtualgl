@@ -503,9 +503,9 @@ class FrameTest
 			if(blitter) blitter->shutdown();
 			if(decompressor) decompressor->shutdown();
 			if(compressor) compressor->shutdown();
-			if(blitter) { delete blitter;  blitter = NULL; }
-			if(decompressor) { delete decompressor;  decompressor = NULL; }
-			if(compressor) { delete compressor;  compressor = NULL; }
+			delete blitter;  blitter = NULL;
+			delete decompressor;  decompressor = NULL;
+			delete compressor;  compressor = NULL;
 		}
 
 		Display *dpy;  Window win;

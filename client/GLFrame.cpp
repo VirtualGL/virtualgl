@@ -106,10 +106,7 @@ GLFrame::~GLFrame(void)
 	{
 		tjDestroy(tjhnd);  tjhnd = NULL;
 	}
-	if(rbits)
-	{
-		delete [] rbits;  rbits = NULL;
-	}
+	delete [] rbits;  rbits = NULL;
 }
 
 

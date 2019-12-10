@@ -24,8 +24,6 @@
 #include "vglinline.h"
 
 
-#ifdef __cplusplus
-
 namespace vglutil
 {
 	class Timer
@@ -85,32 +83,5 @@ namespace vglutil
 			double t1;
 	};
 }
-
-#endif  // __cplusplus
-
-
-#ifdef _WIN32
-
-INLINE double GetTime(void)
-{
-	LARGE_INTEGER frequency, time;
-	if(QueryPerformanceFrequency(&frequency) != 0)
-	{
-		QueryPerformanceCounter(&time);
-		return (double)time.QuadPart / (double)frequency.QuadPart;
-	}
-	else return (double)GetTickCount() * 0.001;
-}
-
-#else
-
-static INLINE double GetTime(void)
-{
-	struct timeval tv;
-	gettimeofday(&tv, (struct timezone *)NULL);
-	return (double)tv.tv_sec + (double)tv.tv_usec * 0.000001;
-}
-
-#endif  // _WIN32
 
 #endif  // __TIMER_H__

@@ -63,7 +63,8 @@ GLXPbuffer pbuffer = 0;
 Timer timer;
 bool useWindow = false, usePixmap = false, useFBO = false, useRTT = false,
 	useAlpha = false, usePBO = false;
-int visualID = 0, loops = 1;
+unsigned int visualID;
+int loops = 1;
 #ifdef USEIFR
 bool useIFR = false;
 NvIFRAPI ifr;

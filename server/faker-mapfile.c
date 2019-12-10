@@ -90,11 +90,12 @@
 		/* OpenGL */
 		glFinish;
 		glFlush;
+		glDrawBuffer;
+		glDrawBuffers;
 		glGetString;
 		glGetStringi;
-		glViewport;
-		glDrawBuffer;
 		glPopAttrib;
+		glViewport;
 
 		/* OpenCL */
 		#ifdef FAKEOPENCL

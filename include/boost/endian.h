@@ -1,8 +1,9 @@
-// Copyright 2005 Caleb Epstein
-// Copyright 2006 John Maddock
-// Copyright 2010 Rene Rivera
-// Distributed under the Boost Software License, Version 1.0. (See accompany-
-// ing file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+/* Copyright 2005 Caleb Epstein
+ * Copyright 2006 John Maddock
+ * Copyright 2010 Rene Rivera
+ * Distributed under the Boost Software License, Version 1.0. (See accompany-
+ * ing file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+ */
 
 /*
  * Copyright (c) 1997
@@ -28,12 +29,13 @@
 #ifndef BOOST_DETAIL_ENDIAN_HPP
 #define BOOST_DETAIL_ENDIAN_HPP
 
-//
-// Special cases come first:
-//
+/*
+ * Special cases come first:
+ */
 #if defined (__GLIBC__)
-// GNU libc offers the helpful header <endian.h> which defines
-// __BYTE_ORDER
+/* GNU libc offers the helpful header <endian.h> which defines
+ * __BYTE_ORDER
+ */
 # include <endian.h>
 # if (__BYTE_ORDER == __LITTLE_ENDIAN)
 #  define BOOST_LITTLE_ENDIAN
@@ -48,8 +50,9 @@
 
 #elif defined(__NetBSD__) || defined(__FreeBSD__) || \
     defined(__OpenBSD__) || defined(__DragonFly__)
-//
-// BSD has endian.h, see https://svn.boost.org/trac/boost/ticket/6013
+/*
+ * BSD has endian.h, see https://svn.boost.org/trac/boost/ticket/6013
+ */
 #  if defined(__OpenBSD__)
 #  include <machine/endian.h>
 #  else
@@ -67,9 +70,10 @@
 # define BOOST_BYTE_ORDER _BYTE_ORDER
 
 #elif defined( __ANDROID__ )
-// Adroid specific code, see: https://svn.boost.org/trac/boost/ticket/7528
-// Here we can use machine/_types.h, see:
-// http://stackoverflow.com/questions/6212951/endianness-of-android-ndk
+/* Adroid specific code, see: https://svn.boost.org/trac/boost/ticket/7528
+ * Here we can use machine/_types.h, see:
+ * http://stackoverflow.com/questions/6212951/endianness-of-android-ndk
+ */
 # include "machine/_types.h"
 # ifdef __ARMEB__
 #  define BOOST_BIG_ENDIAN
@@ -77,12 +81,12 @@
 # else
 #  define BOOST_LITTLE_ENDIAN
 #  define BOOST_BYTE_ORDER 1234
-# endif // __ARMEB__
+# endif /* __ARMEB */
 
 #elif defined( _XBOX )
-//
-// XBox is always big endian??
-//
+/*
+ * XBox is always big endian??
+ */
 # define BOOST_BIG_ENDIAN
 # define BOOST_BYTE_ORDER 4321
 
@@ -113,7 +117,7 @@
    || defined(__x86_64) || defined(__x86_64__) \
    || defined(_M_X64) || defined(__bfin__) \
    || defined(__ARMEL__) || defined(__aarch64__) \
-   || (defined(_WIN32) && defined(__ARM__) && defined(_MSC_VER)) // ARM Windows CE don't define anything reasonably unique, but there are no big-endian Windows versions
+   || (defined(_WIN32) && defined(__ARM__) && defined(_MSC_VER)) /* ARM Windows CE don't define anything reasonably unique, but there are no big-endian Windows versions */
 
 # define BOOST_LITTLE_ENDIAN
 # define BOOST_BYTE_ORDER 1234

@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "fbxv.h"
-#include "Timer.h"
+#include "vglutil.h"
 
 
 #define WIDTH  1241

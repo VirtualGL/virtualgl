@@ -32,7 +32,7 @@ VirtualPixmap::VirtualPixmap(Display *dpy_, Visual *visual, Pixmap pm) :
 VirtualPixmap::~VirtualPixmap()
 {
 	CriticalSection::SafeLock l(mutex);
-	if(frame) { delete frame;  frame = NULL; }
+	delete frame;  frame = NULL;
 }
 
 

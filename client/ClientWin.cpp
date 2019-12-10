@@ -52,7 +52,7 @@ ClientWin::~ClientWin(void)
 	deadYet = true;
 	q.release();
 	if(thread) thread->stop();
-	if(fb) delete fb;
+	delete fb;  fb = NULL;
 	#ifdef USEXV
 	for(int i = 0; i < NFRAMES; i++)
 	{
@@ -63,7 +63,7 @@ ClientWin::~ClientWin(void)
 	}
 	#endif
 	for(int i = 0; i < NFRAMES; i++) cframes[i].signalComplete();
-	if(thread) { delete thread;  thread = NULL; }
+	delete thread;  thread = NULL;
 }
 
 
@@ -84,7 +84,7 @@ void ClientWin::initGL(void)
 		catch(std::exception &e)
 		{
 			vglout.println("OpenGL error-- %s\nUsing X11 drawing instead", e.what());
-			if(newfb) { delete newfb;  newfb = NULL; }
+			delete newfb;  newfb = NULL;
 			drawMethod = RR_DRAWX11;
 			vglout.PRINTLN("Stereo requires OpenGL drawing.  Disabling stereo.");
 			stereo = false;
@@ -119,7 +119,7 @@ void ClientWin::initX11(void)
 		}
 		catch(...)
 		{
-			if(newfb) { delete newfb;  newfb = NULL; }
+			delete newfb;  newfb = NULL;
 			throw;
 		}
 	}

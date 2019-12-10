@@ -21,7 +21,7 @@
 #include "Mutex.h"
 #include <GL/glx.h>
 #include "fakerconfig.h"
-#include "Timer.h"
+#include "vglutil.h"
 
 
 namespace vglfaker

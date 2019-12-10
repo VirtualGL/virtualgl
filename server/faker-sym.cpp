@@ -326,7 +326,7 @@ static void *load##ID##Symbol(const char *name, bool optional) \
 }
 
 LOAD_XCB_SYMBOL(XCB, xcb, xcb, 1, 1)
-LOAD_XCB_SYMBOL(XCBGLX, xcbglx, xcb-glx, 0, 0);
+LOAD_XCB_SYMBOL(XCBGLX, xcbglx, xcb-glx, 0, 0)
 LOAD_XCB_SYMBOL(XCBKeysyms, xcbkeysyms, xcb-keysyms, 0, 1)
 LOAD_XCB_SYMBOL(XCBX11, xcbx11, X11-xcb, 1, 1)
 

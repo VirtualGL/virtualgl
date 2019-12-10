@@ -21,6 +21,7 @@
 	#define sleep(t)  Sleep((t) * 1000)
 	#define usleep(t)  Sleep((t) / 1000)
 #else
+	#include <sys/time.h>
 	#include <unistd.h>
 	#define stricmp  strcasecmp
 	#define strnicmp  strncasecmp
@@ -92,5 +93,29 @@ static INLINE int LittleEndian(void)
 	if(ptr[0] == 1 && ptr[3] == 0) return 1;
 	else return 0;
 }
+
+#ifdef _WIN32
+
+static INLINE double GetTime(void)
+{
+	LARGE_INTEGER frequency, time;
+	if(QueryPerformanceFrequency(&frequency) != 0)
+	{
+		QueryPerformanceCounter(&time);
+		return (double)time.QuadPart / (double)frequency.QuadPart;
+	}
+	else return (double)GetTickCount() * 0.001;
+}
+
+#else
+
+static INLINE double GetTime(void)
+{
+	struct timeval tv;
+	gettimeofday(&tv, (struct timezone *)NULL);
+	return (double)tv.tv_sec + (double)tv.tv_usec * 0.000001;
+}
+
+#endif  /* _WIN32 */
 
 #endif  /* __VGLUTIL_H__ */
