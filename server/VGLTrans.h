@@ -35,7 +35,7 @@ namespace vglserver
 			{
 				deadYet = true;  q.release();
 				if(thread) { thread->stop();  delete thread;  thread = NULL; }
-				if(socket) { delete socket;  socket = NULL; }
+				delete socket;  socket = NULL;
 			}
 
 			vglcommon::Frame *getFrame(int, int, int, int, bool stereo);

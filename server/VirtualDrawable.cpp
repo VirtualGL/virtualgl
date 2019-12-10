@@ -209,7 +209,7 @@ VirtualDrawable::VirtualDrawable(Display *dpy_, Drawable x11Draw_)
 VirtualDrawable::~VirtualDrawable(void)
 {
 	mutex.lock(false);
-	if(oglDraw) { delete oglDraw;  oglDraw = NULL; }
+	delete oglDraw;  oglDraw = NULL;
 	if(ctx) { _glXDestroyContext(DPY3D, ctx);  ctx = 0; }
 	mutex.unlock(false);
 }

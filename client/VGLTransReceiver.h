@@ -69,13 +69,13 @@ namespace vglclient
 					winMutex.lock(false);
 					for(i = 0; i < nwin; i++)
 					{
-						if(windows[i]) { delete windows[i];  windows[i] = NULL; }
+						delete windows[i];  windows[i] = NULL;
 					}
 					nwin = 0;
 					winMutex.unlock(false);
 					if(!remoteName) vglout.PRINTLN("-- Disconnecting\n");
 					else vglout.PRINTLN("-- Disconnecting %s", remoteName);
-					if(socket) { delete socket;  socket = NULL; }
+					delete socket;  socket = NULL;
 				}
 
 				void send(char *buf, int len);

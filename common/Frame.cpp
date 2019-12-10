@@ -54,12 +54,9 @@ Frame::~Frame(void)
 
 void Frame::deInit(void)
 {
-	if(bits && primary)
+	if(primary)
 	{
 		delete [] bits;  bits = NULL;
-	}
-	if(rbits && primary)
-	{
 		delete [] rbits;  rbits = NULL;
 	}
 }
@@ -77,7 +74,7 @@ void Frame::init(rrframeheader &h, int pixelFormat, int flags_, bool stereo_)
 	if(h.framew != hdr.framew || h.frameh != hdr.frameh
 		|| newpf->size != pf->size || !bits)
 	{
-		if(bits) delete [] bits;
+		delete [] bits;
 		NEWCHECK(bits = new unsigned char[h.framew * h.frameh * newpf->size + 1]);
 	}
 	if(stereo_)
@@ -85,17 +82,14 @@ void Frame::init(rrframeheader &h, int pixelFormat, int flags_, bool stereo_)
 		if(h.framew != hdr.framew || h.frameh != hdr.frameh
 			|| newpf->size != pf->size || !rbits)
 		{
-			if(rbits) delete [] rbits;
+			delete [] rbits;
 			NEWCHECK(rbits =
 				new unsigned char[h.framew * h.frameh * newpf->size + 1]);
 		}
 	}
 	else
 	{
-		if(rbits)
-		{
-			delete [] rbits;  rbits = NULL;
-		}
+		delete [] rbits;  rbits = NULL;
 	}
 	pf = newpf;  pitch = pf->size * h.framew;  stereo = stereo_;  hdr = h;
 }
@@ -524,7 +518,7 @@ void CompressedFrame::init(rrframeheader &h, int buffer)
 		case RR_LEFT:
 			if(h.width != hdr.width || h.height != hdr.height || !bits)
 			{
-				if(bits) delete [] bits;
+				delete [] bits;
 				NEWCHECK(bits = new unsigned char[tjBufSize(h.width, h.height,
 					h.subsamp)]);
 			}
@@ -533,7 +527,7 @@ void CompressedFrame::init(rrframeheader &h, int buffer)
 		case RR_RIGHT:
 			if(h.width != rhdr.width || h.height != rhdr.height || !rbits)
 			{
-				if(rbits) delete [] rbits;
+				delete [] rbits;
 				NEWCHECK(rbits = new unsigned char[tjBufSize(h.width, h.height,
 					h.subsamp)]);
 			}
@@ -542,7 +536,7 @@ void CompressedFrame::init(rrframeheader &h, int buffer)
 		default:
 			if(h.width != hdr.width || h.height != hdr.height || !bits)
 			{
-				if(bits) delete [] bits;
+				delete [] bits;
 				NEWCHECK(bits = new unsigned char[tjBufSize(h.width, h.height,
 					h.subsamp)]);
 			}

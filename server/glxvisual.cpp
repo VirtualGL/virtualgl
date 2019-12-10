@@ -58,7 +58,7 @@ static bool buildVisAttribTable(Display *dpy, int screen)
 			|| nVisuals == 0)
 			THROW("No visuals found on display");
 
-		if(va) { delete [] va;  va = NULL; }
+		delete [] va;
 		NEWCHECK(va = new VisAttrib[nVisuals]);
 		vaEntries = nVisuals;
 		memset(va, 0, sizeof(VisAttrib) * nVisuals);
@@ -138,7 +138,7 @@ static bool buildVisAttribTable(Display *dpy, int screen)
 	catch(...)
 	{
 		if(visuals) XFree(visuals);
-		if(va) { delete [] va;  va = NULL; }
+		delete [] va;  va = NULL;
 		vaDisplay = NULL;  vaScreen = -1;  vaEntries = 0;
 		return false;
 	}

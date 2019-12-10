@@ -1408,11 +1408,11 @@ int multiThreadTest(int nThreads)
 
 	for(i = 0; i < nThreads; i++)
 	{
-		if(threads[i]) { delete threads[i];  threads[i] = NULL; }
+		delete threads[i];  threads[i] = NULL;
 	}
 	for(i = 0; i < nThreads; i++)
 	{
-		if(testThreads[i]) { delete testThreads[i];  testThreads[i] = NULL; }
+		delete testThreads[i];  testThreads[i] = NULL;
 	}
 	if(vis) { XFree(vis);  vis = NULL; }
 	for(i = 0; i < nThreads; i++)

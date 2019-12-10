@@ -548,9 +548,9 @@ int start(char *displayname)
 		retval = -1;
 	}
 
-	if(receiver) { delete receiver;  receiver = NULL; }
+	delete receiver;  receiver = NULL;
 	#ifdef USESSL
-	if(sslReceiver) { delete sslReceiver;  sslReceiver = NULL; }
+	delete sslReceiver;  sslReceiver = NULL;
 	if(maindpy && sslPortAtom != None)
 	{
 		XDeleteProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),

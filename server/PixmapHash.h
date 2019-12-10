@@ -80,8 +80,11 @@ namespace vglserver
 
 			void detach(HashEntry *entry)
 			{
-				if(entry && entry->key1) free(entry->key1);
-				if(entry && entry->value) delete entry->value;
+				if(entry)
+				{
+					if(entry->key1) free(entry->key1);
+					delete entry->value;
+				}
 			}
 
 			bool compare(char *key1, Pixmap key2, HashEntry *entry)

@@ -97,7 +97,7 @@ namespace vglserver
 			void detach(HashEntry *entry)
 			{
 				ContextAttribs *attribs = entry ? entry->value : NULL;
-				if(attribs) delete attribs;
+				delete attribs;
 			}
 
 			bool compare(GLXContext key1, void *key2, HashEntry *entry)

@@ -86,17 +86,17 @@ VirtualWin::VirtualWin(Display *dpy_, Window win) :
 VirtualWin::~VirtualWin(void)
 {
 	mutex.lock(false);
-	if(oldDraw) { delete oldDraw;  oldDraw = NULL; }
-	if(x11trans) { delete x11trans;  x11trans = NULL; }
-	if(vglconn) { delete vglconn;  vglconn = NULL; }
+	delete oldDraw;  oldDraw = NULL;
+	delete x11trans;  x11trans = NULL;
+	delete vglconn;  vglconn = NULL;
 	#ifdef USEXV
-	if(xvtrans) { delete xvtrans;  xvtrans = NULL; }
+	delete xvtrans;  xvtrans = NULL;
 	#endif
 	if(plugin)
 	{
 		try
 		{
-			delete plugin;
+			delete plugin;  plugin = NULL;
 		}
 		catch(Error &e)
 		{
@@ -161,7 +161,7 @@ void VirtualWin::cleanup(void)
 {
 	CriticalSection::SafeLock l(mutex);
 	if(doWMDelete) THROW("Window has been deleted by window manager");
-	if(oldDraw) { delete oldDraw;  oldDraw = NULL; }
+	delete oldDraw;  oldDraw = NULL;
 }
 
 

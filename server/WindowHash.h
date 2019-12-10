@@ -147,9 +147,11 @@ namespace vglserver
 
 			void detach(HashEntry *entry)
 			{
-				VirtualWin *vw = entry->value;
-				if(entry && entry->key1) free(entry->key1);
-				if(entry && vw && vw != (VirtualWin *)-1) delete vw;
+				if(entry)
+				{
+					if(entry->key1) free(entry->key1);
+					if(entry->value != (VirtualWin *)-1) delete entry->value;
+				}
 			}
 
 			bool compare(char *key1, Window key2, HashEntry *entry)

@@ -36,8 +36,7 @@ namespace vglserver
 				if(thread) { thread->stop();  delete thread;  thread = NULL; }
 				for(int i = 0; i < NFRAMES; i++)
 				{
-					if(frames[i]) delete frames[i];
-					frames[i] = NULL;
+					delete frames[i];  frames[i] = NULL;
 				}
 			}
 
