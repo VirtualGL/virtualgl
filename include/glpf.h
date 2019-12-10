@@ -1,4 +1,4 @@
-/* Copyright (C)2017 D. R. Commander
+/* Copyright (C)2017, 2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -15,7 +15,7 @@
 #define __GLPF_H__
 
 #include "pf.h"
-#include "boost/endian.hpp"
+#include "boost/endian.h"
 #include <GL/gl.h>
 
 
