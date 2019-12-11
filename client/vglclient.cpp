@@ -119,11 +119,11 @@ void killproc(bool userOnly)
 				kill(pid, SIGTERM);
 			}
 		}
-		free(buf);  buf = NULL;
+		delete [] buf;  buf = NULL;
 	}
 	catch(...)
 	{
-		if(buf) free(buf);
+		delete [] buf;
 		throw;
 	}
 
