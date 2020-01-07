@@ -283,7 +283,7 @@ static bool buildVisAttribTable(Display *dpy, int screen)
 	catch(...)
 	{
 		if(visuals) XFree(visuals);
-		if(va) free(va);
+		free(va);
 		return false;
 	}
 	return true;
@@ -463,7 +463,7 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 	catch(...)
 	{
 		if(glxConfigs) XFree(glxConfigs);
-		if(ca) free(ca);
+		free(ca);
 		throw;
 	}
 }

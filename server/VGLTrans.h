@@ -82,7 +82,7 @@ namespace vglserver
 				virtual ~Compressor(void)
 				{
 					shutdown();
-					if(cframes) { free(cframes);  cframes = NULL; }
+					free(cframes);  cframes = NULL;
 				}
 
 				void run(void)

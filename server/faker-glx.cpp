@@ -97,7 +97,7 @@ void setWMAtom(Display *dpy, Window win, VirtualWin *vw)
 
 	bailout:
 	if(protocols) XFree(protocols);
-	if(newProtocols) free(newProtocols);
+	free(newProtocols);
 	static bool alreadyWarned = false;
 	if(!alreadyWarned)
 	{

@@ -113,7 +113,7 @@ namespace vglserver
 			{
 				if(entry)
 				{
-					if(entry->key1) free(entry->key1);
+					free(entry->key1);
 					delete entry->value;
 				}
 			}

@@ -165,7 +165,7 @@ static int ppm_load(int *fd, unsigned char **buf, int *width, int align,
 
 	finally:
 	if(file) { fclose(file);  *fd = -1; }
-	if(tempbuf) free(tempbuf);
+	free(tempbuf);
 	return ret;
 }
 
@@ -262,7 +262,7 @@ int bmp_load(char *filename, unsigned char **buf, int *width, int align,
 		dstPitch, pf, srcOrientation != orientation);
 
 	finally:
-	if(tempbuf) free(tempbuf);
+	free(tempbuf);
 	if(fd != -1) close(fd);
 	return ret;
 }
@@ -289,7 +289,7 @@ static int ppm_save(char *filename, unsigned char *buf, int width, int pitch,
 		THROW("Write error");
 
 	finally:
-	if(tempbuf) free(tempbuf);
+	free(tempbuf);
 	if(file) fclose(file);
 	return ret;
 }
@@ -380,7 +380,7 @@ int bmp_save(char *filename, unsigned char *buf, int width, int pitch,
 		THROW(strerror(errno));
 
 	finally:
-	if(tempbuf) free(tempbuf);
+	free(tempbuf);
 	if(fd != -1) close(fd);
 	return ret;
 }

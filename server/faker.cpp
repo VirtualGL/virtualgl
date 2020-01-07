@@ -53,7 +53,7 @@ static void cleanup(void)
 	if(ContextHash::isAlloc()) ctxhash.kill();
 	if(GLXDrawableHash::isAlloc()) glxdhash.kill();
 	if(WindowHash::isAlloc()) winhash.kill();
-	if(glExtensions) free(glExtensions);
+	free(glExtensions);
 	unloadSymbols();
 }
 

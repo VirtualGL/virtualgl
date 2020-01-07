@@ -345,7 +345,7 @@ void clearFB(void)
 			fprintf(stderr, "Buffer was not cleared\n");  break;
 		}
 	}
-	if(buf) free(buf);
+	free(buf);
 }
 
 
@@ -392,7 +392,7 @@ int writeTest(int format)
 		fprintf(stderr, "%s\n", e.what());  retval = -1;
 	}
 
-	if(rgbaBuffer) free(rgbaBuffer);
+	free(rgbaBuffer);
 	return retval;
 }
 
@@ -555,7 +555,7 @@ int readTest(int format)
 		fprintf(stderr, "%s\n", e.what());  retval = -1;
 	}
 
-	if(rgbaBuffer) free(rgbaBuffer);
+	free(rgbaBuffer);
 	if(usePBO && bufferID > 0)
 	{
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, 0);

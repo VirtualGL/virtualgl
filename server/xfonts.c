@@ -339,8 +339,8 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
       if (pixmap && dpy) XFreePixmap(dpy, pixmap);
       if (image) XDestroyImage(image);
       if (win && dpy && newwin) _XDestroyWindow(dpy, win);
-      if (bm) free(bm);
-      if (ci) free(ci);
+      free(bm);
+      free(ci);
       throw;
    }
 }

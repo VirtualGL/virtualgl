@@ -40,7 +40,7 @@ Profiler::Profiler(const char *name_, double interval_) : interval(interval_),
 
 Profiler::~Profiler(void)
 {
-	if(name && freestr) free(name);
+	if(freestr) free(name);
 }
 
 

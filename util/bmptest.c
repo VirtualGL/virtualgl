@@ -121,7 +121,7 @@ static int doTest(const char *ext, int width, int align, int height, PF *pf,
 	unlink(filename);
 
 	bailout:
-	if(buf) free(buf);
+	free(buf);
 	return retval;
 }
 

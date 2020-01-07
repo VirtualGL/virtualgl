@@ -560,7 +560,7 @@ int fbx_flip(fbx_struct *fb, int x_, int y_, int width_, int height_)
 	return 0;
 
 	finally:
-	if(tmpbuf) free(tmpbuf);
+	free(tmpbuf);
 	return -1;
 }
 

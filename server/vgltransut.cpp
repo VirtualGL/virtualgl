@@ -232,8 +232,8 @@ int main(int argc, char **argv)
 
 	if(win) XDestroyWindow(dpy, win);
 	if(dpy) XCloseDisplay(dpy);
-	if(buf) free(buf);
-	if(buf2) free(buf2);
-	if(buf3) free(buf3);
+	free(buf);
+	free(buf2);
+	free(buf3);
 	return retval;
 }
