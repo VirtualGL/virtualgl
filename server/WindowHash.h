@@ -149,7 +149,7 @@ namespace vglserver
 			{
 				if(entry)
 				{
-					if(entry->key1) free(entry->key1);
+					free(entry->key1);
 					if(entry->value != (VirtualWin *)-1) delete entry->value;
 				}
 			}

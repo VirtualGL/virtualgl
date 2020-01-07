@@ -79,7 +79,7 @@ namespace vglserver
 
 			void detach(HashEntry *h)
 			{
-				if(h && h->key1) free(h->key1);
+				if(h) free(h->key1);
 			}
 
 			static ReverseConfigHash *instance;

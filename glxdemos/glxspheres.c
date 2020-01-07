@@ -284,7 +284,7 @@ static int renderOverlay(void)
 	glCallLists(24, GL_UNSIGNED_BYTE, "GLX Spheres Overlay Test");
 
 	bailout:
-	if(buf) free(buf);
+	free(buf);
 	return retval;
 }
 

@@ -178,8 +178,8 @@ static int doTest(int width, int height, PF *srcpf, PF *dstpf)
 		(double)(width * height) / 1000000. * (double)iter / elapsed);
 
 	bailout:
-	if(srcBuf) free(srcBuf);
-	if(dstBuf) free(dstBuf);
+	free(srcBuf);
+	free(dstBuf);
 	return retval;
 }
 

@@ -58,7 +58,7 @@ static void cleanup(void)
 	if(GLXDrawableHash::isAlloc()) glxdhash.kill();
 	if(WindowHash::isAlloc()) winhash.kill();
 	if(DisplayHash::isAlloc()) dpyhash.kill();
-	if(glExtensions) free(glExtensions);
+	free(glExtensions);
 	unloadSymbols();
 }
 

@@ -88,7 +88,7 @@ namespace vglserver
 
 			void detach(HashEntry *entry)
 			{
-				if(entry && entry->key1) free(entry->key1);
+				if(entry) free(entry->key1);
 				if(entry && entry->value) XFree(entry->value);
 			}
 

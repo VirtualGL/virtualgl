@@ -196,8 +196,8 @@ int test(const char *testName, int testOpenCL)
 	bailout:
 	#ifdef FAKEOPENCL
 	if(oclctx) _clReleaseContext(oclctx);
-	if(devices) free(devices);
-	if(platforms) free(platforms);
+	free(devices);
+	free(platforms);
 	#endif
 	if(ctx && dpy)
 	{
