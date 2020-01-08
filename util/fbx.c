@@ -655,7 +655,7 @@ int fbx_term(fbx_struct *fb)
 	}
 	if(fb->xi)
 	{
-		if(fb->xi->data && !fb->shm)
+		if(!fb->shm)
 		{
 			free(fb->xi->data);  fb->xi->data = NULL;
 		}

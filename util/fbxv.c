@@ -271,12 +271,9 @@ int fbxv_write(fbxv_struct *fb, int srcX_, int srcY_, int srcWidth_,
 int fbxv_term(fbxv_struct *fb)
 {
 	if(!fb) THROW("Invalid argument");
-	if(fb->xvi)
+	if(fb->xvi && !fb->shm)
 	{
-		if(fb->xvi->data && !fb->shm)
-		{
-			free(fb->xvi->data);  fb->xvi->data = NULL;
-		}
+		free(fb->xvi->data);  fb->xvi->data = NULL;
 	}
 
 	#ifdef USESHM
