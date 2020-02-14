@@ -36,6 +36,8 @@ that feature is now very limited.
 1. VirtualGL now works properly with 3D applications that use the
 `glDrawBuffers()` function and render to the front buffer.
 
+2. VirtualGL can now be built using the GLX headers from Mesa 19.3.0 and later.
+
 
 2.6.3
 =====
