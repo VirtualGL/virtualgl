@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011-2019 D. R. Commander
+// Copyright (C)2009, 2011-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -2192,11 +2192,18 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 	CATCH();
 }
 
+#if defined(GLX_GLXEXT_VERSION) && GLX_GLXEXT_VERSION >= 20190000
+void glXQueryGLXPbufferSGIX(Display *dpy, GLXPbuffer pbuf, int attribute,
+	unsigned int *value)
+#else
 int glXQueryGLXPbufferSGIX(Display *dpy, GLXPbuffer pbuf, int attribute,
 	unsigned int *value)
+#endif
 {
 	glXQueryDrawable(dpy, pbuf, attribute, value);
+	#if !defined(GLX_GLXEXT_VERSION) || GLX_GLXEXT_VERSION < 20190000
 	return 0;
+	#endif
 }
 
 
@@ -2358,8 +2365,13 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
 
 // Returns the transparent index from the overlay visual on the 2D X server
 
+#if defined(GLX_GLXEXT_VERSION) && GLX_GLXEXT_VERSION >= 20190000
+int glXGetTransparentIndexSUN(Display *dpy, Window overlay, Window underlay,
+	unsigned long *transparentIndex)
+#else
 int glXGetTransparentIndexSUN(Display *dpy, Window overlay, Window underlay,
 	long *transparentIndex)
+#endif
 {
 	int retval = False;
 	XWindowAttributes xwa;
