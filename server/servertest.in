@@ -80,8 +80,10 @@ echo Xvfb $XVFBARGS started as process $PID
 sleep 2
 
 DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut
+DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut --prefix test
 if [ "$FAKEOPENCL" = "1" ]; then
 	DISPLAY=:42 $BIN/vglrun +ocl $BIN/dlfakerut
+	DISPLAY=:42 $BIN/vglrun +ocl $BIN/dlfakerut --prefix test
 fi
 echo
 
