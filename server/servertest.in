@@ -36,6 +36,7 @@ IPV6=1
 WRAP=
 XVFBARGS=
 VGLTRANS=1
+GLVND=0
 while [ $# -gt 0 ]; do
 	case "$1" in
 	-nodl)
@@ -59,6 +60,10 @@ while [ $# -gt 0 ]; do
 	-wrap)
 		WRAP=$2; shift
 		;;
+	-glvnd)
+		echo "Testing with GLVND"
+		GLVND=1
+		;;
 	*)
 		break;
 		;;
@@ -81,6 +86,10 @@ sleep 2
 
 DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut
 DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut --prefix test
+if [ "$GLVND" = "1" ]; then
+	DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut --glvnd
+	DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut --prefix test --glvnd
+fi
 if [ "$FAKEOPENCL" = "1" ]; then
 	DISPLAY=:42 $BIN/vglrun +ocl $BIN/dlfakerut
 	DISPLAY=:42 $BIN/vglrun +ocl $BIN/dlfakerut --prefix test

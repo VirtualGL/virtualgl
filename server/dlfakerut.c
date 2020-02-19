@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2014-2015, 2017, 2019 D. R. Commander
+ * Copyright (C)2009, 2014-2015, 2017, 2019-2020 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -94,11 +94,13 @@ _clReleaseContextType _clReleaseContext = NULL;
 
 #endif
 
+void *glxdllhnd = NULL;
 void *gldllhnd = NULL;
 #ifdef FAKEOPENCL
 void *ocldllhnd = NULL;
 #endif
 int fakeOpenCL = 0;
+const char *libGLX = "libGL.so", *libOpenGL = "libGL.so";
 
 #define LSYM(dllhnd, s) \
 	dlerror(); \
@@ -115,19 +117,31 @@ static int loadSymbols1(char *prefix)
 	if(prefix)
 	{
 		char temps[256];
-		snprintf(temps, 255, "%s/libGL.so", prefix);
-		gldllhnd = dlopen(temps, RTLD_NOW);
+		snprintf(temps, 255, "%s/%s", prefix, libGLX);
+		glxdllhnd = dlopen(temps, RTLD_NOW);
 	}
-	else gldllhnd = dlopen("libGL.so", RTLD_NOW);
+	else glxdllhnd = dlopen(libGLX, RTLD_NOW);
 	err = dlerror();
 	if(err) THROW(err)
-	else if(!gldllhnd) THROW("Could not open libGL")
+	else if(!glxdllhnd) THROW("Could not open GLX library")
 
-	LSYM(gldllhnd, glXChooseVisual);
-	LSYM(gldllhnd, glXCreateContext);
-	LSYM(gldllhnd, glXDestroyContext);
-	LSYM(gldllhnd, glXMakeCurrent);
-	LSYM(gldllhnd, glXSwapBuffers);
+	LSYM(glxdllhnd, glXChooseVisual);
+	LSYM(glxdllhnd, glXCreateContext);
+	LSYM(glxdllhnd, glXDestroyContext);
+	LSYM(glxdllhnd, glXMakeCurrent);
+	LSYM(glxdllhnd, glXSwapBuffers);
+
+	if(prefix)
+	{
+		char temps[256];
+		snprintf(temps, 255, "%s/%s", prefix, libOpenGL);
+		gldllhnd = dlopen(temps, RTLD_NOW);
+	}
+	else gldllhnd = dlopen(libOpenGL, RTLD_NOW);
+	err = dlerror();
+	if(err) THROW(err)
+	else if(!gldllhnd) THROW("Could not open OpenGL library")
+
 	LSYM(gldllhnd, glClear);
 	LSYM(gldllhnd, glClearColor);
 
@@ -163,6 +177,7 @@ static int loadSymbols1(char *prefix)
 
 static void unloadSymbols1(void)
 {
+	if(glxdllhnd) dlclose(glxdllhnd);
 	if(gldllhnd) dlclose(gldllhnd);
 	#ifdef FAKEOPENCL
 	if(ocldllhnd) dlclose(ocldllhnd);
@@ -179,7 +194,7 @@ static int loadSymbols2(void)
 	const char *err = NULL;
 	int retval = 0;
 
-	LSYM(gldllhnd, glXGetProcAddressARB);
+	LSYM(glxdllhnd, glXGetProcAddressARB);
 	LSYM2(glXChooseVisual);
 	LSYM2(glXCreateContext);
 	LSYM2(glXDestroyContext);
@@ -253,13 +268,26 @@ static int deepBindTest(void)
 int main(int argc, char **argv)
 {
 	char *env, *prefix = NULL;
-	int retval = 0;
+	int i, retval = 0;
 
-	if(argc > 2 && !strcasecmp(argv[1], "--prefix"))
+	if(argc > 1)
 	{
-		prefix = argv[2];
-		fprintf(stderr, "prefix = %s\n", prefix);
+		for(i = 1; i < argc; i++)
+		{
+			if(!strcasecmp(argv[i], "--prefix") && i < argc - 1)
+				prefix = argv[++i];
+			else if(!strcasecmp(argv[i], "--glvnd"))
+			{
+				libGLX = "libGLX.so";
+				libOpenGL = "libOpenGL.so";
+			}
+		}
 	}
+
+	fprintf(stderr, "GLX library = %s%s%s\n", prefix ? prefix : "",
+		prefix ? "/" : "", libGLX);
+	fprintf(stderr, "OpenGL library = %s%s%s\n", prefix ? prefix : "",
+		prefix ? "/" : "", libOpenGL);
 
 	if(putenv((char *)"VGL_AUTOTEST=1") == -1
 		|| putenv((char *)"VGL_SPOIL=0") == -1)
