@@ -38,6 +38,9 @@ that feature is now very limited.
 
 2. VirtualGL can now be built using the GLX headers from Mesa 19.3.0 and later.
 
+3. VirtualGL now works properly with 3D applications that use `dlopen()` to
+load libGLX or libOpenGL rather than libGL.
+
 
 2.6.3
 =====

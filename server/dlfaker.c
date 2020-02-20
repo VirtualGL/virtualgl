@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2012, 2015, 2017-2019 D. R. Commander
+ * Copyright (C)2009, 2012, 2015, 2017-2020 D. R. Commander
  * Copyright (C)2015 Open Text SA and/or Open Text ULC (in Canada)
  *
  * This library is free software and may be redistributed and/or modified under
@@ -121,6 +121,9 @@ void *dlopen(const char *filename, int flag)
 	}
 	if(filename
 		&& (!strncmp(filename, "libGL.", 6) || strstr(filename, "/libGL.")
+			|| !strncmp(filename, "libGLX.", 7) || strstr(filename, "/libGLX.")
+			|| !strncmp(filename, "libOpenGL.", 10)
+			|| strstr(filename, "/libOpenGL.")
 			#ifdef FAKEOPENCL
 			|| (!strncmp(filename, "libOpenCL.", 10) && fakeOpenCL)
 				|| (strstr(filename, "/libOpenCL.") && fakeOpenCL)
