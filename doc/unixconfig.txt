@@ -28,7 +28,7 @@ distributions.
 4. Accelerated OpenGL is working properly in the 3D X server.
 	* If the 3D X server is not headless, then this can be verified by logging
 	into the X server locally and running ''glxinfo''.
-	* If the 3D X server is headless, then proceed with the	instructions below,
+	* If the 3D X server is headless, then proceed with the instructions below,
 	and the [[#Sanity_Check][Sanity Check]] section will provide you with an
 	opportunity to verify that the 3D X server is using accelerated OpenGL.
 

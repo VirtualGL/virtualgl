@@ -286,7 +286,7 @@ previous method:
 	calls, so for those applications, using ''glFlush()'' as a frame trigger is a
 	waste of resources and can sometimes create visual artifacts (for instance,
 	if the application clears the front buffer with a particular color, calls
-	''glFlush()'', then clears it again	with another color.  We wouldn't mention
+	''glFlush()'', then clears it again with another color.  We wouldn't mention
 	it if it hadn't happened before.)  For such applications, setting
 	''VGL_GLFLUSHTRIGGER'' to ''0'' should make them display properly with
 	VirtualGL.  See [[#Application_Recipes][Application Recipes]] for a list of
@@ -399,7 +399,7 @@ previous method:
 #OPT: hiCol=first
 
 	Description :: Specifies the path of a dynamic library from which VirtualGL
-	should load any	"real" OpenCL functions that it needs to call ("real" as
+	should load any "real" OpenCL functions that it needs to call ("real" as
 	opposed to the "fake", or "interposed", versions of those functions that
 	VirtualGL provides, which modify the arguments before calling the "real"
 	functions.)
@@ -463,7 +463,7 @@ previous method:
 	cannot detect it.  The threshold quality level at which JPEG
 	compression becomes perceptually lossless is different for each image, but
 	experiments with various visual difference benchmarks (such as
-	[[http://www.mpi-inf.mpg.de/resources/hdr/vdp/][HDR-VDP]]) suggest that	a
+	[[http://www.mpi-inf.mpg.de/resources/hdr/vdp/][HDR-VDP]]) suggest that a
 	JPEG quality of 95 is sufficient to guarantee perceptual losslessness for the
 	types of 3D applications (volume visualization applications, in particular)
 	in which image quality is critical.  As with any benchmarks, Your Mileage May
@@ -592,7 +592,7 @@ previous method:
 
 	Description :: In remote display environments, the mouse movement is
 	generally sampled 40-60 times per second.  3D applications generally render a
-	new frame for every mouse motion event, so if the image transport and	(if
+	new frame for every mouse motion event, so if the image transport and (if
 	applicable) the client cannot process the frames quickly enough, the server's
 	TCP buffers will fill up, causing delays in the delivery of each frame.
 	Effectively, unless the remote display software is able to transport at least
@@ -934,12 +934,12 @@ previous method:
 
 	Description :: Normally VirtualGL will use the X11 library against which
 	it was linked (usually {file: libX11.so.6}, in the system library path) to
-	load any	"real" X11 functions that it needs to call ("real" as opposed to
-	the "fake", or "interposed", versions of those functions that VirtualGL
-	provides, which often modify the arguments or perform other operations before
-	calling the "real" functions.)  You can use the ''VGL_X11LIB'' environment
-	variable to specify the path of a dynamic library from which VirtualGL should
-	load "real" X11 functions.
+	load any "real" X11 functions that it needs to call ("real" as opposed to the
+	"fake", or "interposed", versions of those functions that VirtualGL provides,
+	which often modify the arguments or perform other operations before calling
+	the "real" functions.)  You can use the ''VGL_X11LIB'' environment variable
+	to specify the path of a dynamic library from which VirtualGL should load
+	"real" X11 functions.
 	{nl}{nl}
 	You shouldn't need to change this unless something doesn't work.  However,
 	setting this environment variable is potentially useful if one wishes to
@@ -1002,7 +1002,7 @@ previous method:
 	particular value, which the application (sometimes erroneously) uses as an
 	indicator of whether it is being displayed to an X server on the same machine
 	or a different machine.  This setting allows you to fool such applications
-	into thinking that they are being	displayed to an X server on the same
+	into thinking that they are being displayed to an X server on the same
 	machine.
 
 ** Client Settings

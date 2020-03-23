@@ -31,7 +31,7 @@
 		into it.  This may be true for other versions of Abaqus as well. \
 	|
 | Cadence Allegro | v16.5 | Linux \
-	| ''vglrun +sync allegro''  \
+	| ''vglrun +sync allegro'' \
 	| Allegro relies on mixed X11/OpenGL rendering, and thus certain features \
 		(specifically the ''pcb_cursor_infinite'' cursor style) do not work \
 		properly unless ''VGL_SYNC'' is enabled.  If ''VGL_SYNC'' is not enabled, \
@@ -202,6 +202,6 @@
 	| When running Tecplot 360 with VirtualGL in a high-performance X proxy, \
 		flashing artifacts will be produced when the user zooms/pans/rotates the \
 		scene, unless VirtualGL is instructed not to use ''glFlush()'' as a \
-		frame trigger.  This has been fixed in Tecplot 2012 and later. 	See \
+		frame trigger.  This has been fixed in Tecplot 2012 and later.  See \
 		{ref prefix="Section ": VGL_GLFLUSHTRIGGER} for further information. \
 	|

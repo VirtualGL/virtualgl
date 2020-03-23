@@ -75,7 +75,7 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 	JPEG (VGL Transport), the chrominance subsampling to 4X, and the JPEG image
 	quality to 30.
 	{nl}{nl} \
-	__Medium Qual__ : Sets the image compression type to JPEG	(VGL Transport),
+	__Medium Qual__ : Sets the image compression type to JPEG (VGL Transport),
 	the chrominance subsampling to 2X, and the JPEG image quality to 80.
 	{nl}{nl} \
 	__High Qual (High-Bandwidth Network)__ : Sets the image compression type to

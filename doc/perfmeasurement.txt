@@ -249,7 +249,7 @@ features:
 	models how such applications might perform when displayed remotely without
 	VirtualGL.
 
-	Interactive mode (''glxspheres -i'') ::	In interactive mode, GLXSpheres will
+	Interactive mode (''glxspheres -i'') :: In interactive mode, GLXSpheres will
 	wait to render a frame until it receives a mouse event.  Continuously
 	dragging the mouse in the window should produce a steady frame rate, and this
 	frame rate is a reasonable model of the frame rate that you can achieve when

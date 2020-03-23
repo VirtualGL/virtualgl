@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2019-10-03T08:33:07">
+<meta name="date" content="2020-03-23T18:08:11">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -909,7 +909,7 @@ On Wayland-enabled Linux machines running GDM, configuring the machine as a Virt
         into the X server locally and running <code>glxinfo</code>.
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        If the 3D X server is headless, then proceed with the	instructions 
+        If the 3D X server is headless, then proceed with the instructions 
         below, and the <a href="#Sanity_Check">Sanity 
         Check</a><a name="idx0024"></a> section will provide you with an 
         opportunity to verify that the 3D X server is using accelerated OpenGL.
@@ -2128,7 +2128,7 @@ procedures:</p>
     <td class="standard">2011 and earlier</td>
     <td class="standard">Linux</td>
     <td class="standard">Set the <code>VGL_GLFLUSHTRIGGER</code> environment variable to <code>0</code> prior to launching the application with <code>vglrun</code></td>
-    <td class="standard">When running Tecplot 360 with VirtualGL in a high-performance X proxy, flashing artifacts will be produced when the user zooms/pans/rotates the scene, unless VirtualGL is instructed not to use <code>glFlush()</code> as a frame trigger.  This has been fixed in Tecplot 2012 and later. 	See Section <a href="#VGL_GLFLUSHTRIGGER" class="ref">19.1</a> for further information.</td>
+    <td class="standard">When running Tecplot 360 with VirtualGL in a high-performance X proxy, flashing artifacts will be produced when the user zooms/pans/rotates the scene, unless VirtualGL is instructed not to use <code>glFlush()</code> as a frame trigger.  This has been fixed in Tecplot 2012 and later.  See Section <a href="#VGL_GLFLUSHTRIGGER" class="ref">19.1</a> for further information.</td>
   </tr>
 </table>
 </div>
@@ -2707,7 +2707,7 @@ VirtualGL.</p>
         Qual (Low-Bandwidth Network)</em> : Sets the image compression type to 
         JPEG (VGL Transport), the chrominance subsampling to 4X, and the JPEG 
         image quality to 30. <br /><br /> <em>Medium Qual</em> : Sets the image 
-        compression type to JPEG	(VGL Transport), the chrominance subsampling to 
+        compression type to JPEG (VGL Transport), the chrominance subsampling to 
         2X, and the JPEG image quality to 80. <br /><br /> <em>High Qual 
         (High-Bandwidth Network)</em> : Sets the image compression type to JPEG 
         (VGL Transport), the chrominance subsampling to 1X, and the JPEG image 
@@ -3338,7 +3338,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         <code>glFlush()</code> as a frame trigger is a waste of resources and 
         can sometimes create visual artifacts (for instance, if the application 
         clears the front buffer with a particular color, calls 
-        <code>glFlush()</code>, then clears it again	with another color.  We 
+        <code>glFlush()</code>, then clears it again with another color.  We 
         wouldn&rsquo;t mention it if it hadn&rsquo;t happened before.)  For such 
         applications, setting <code>VGL_GLFLUSHTRIGGER</code> to <code>0</code> 
         should make them display properly with VirtualGL.  See 
@@ -3602,7 +3602,7 @@ Image transport plugins are free to handle or ignore any configuration option as
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
         Specifies the path of a dynamic library from which VirtualGL should load 
-        any	&ldquo;real&rdquo; OpenCL functions that it needs to call 
+        any &ldquo;real&rdquo; OpenCL functions that it needs to call 
         (&ldquo;real&rdquo; as opposed to the &ldquo;fake&rdquo;, or 
         &ldquo;interposed&rdquo;, versions of those functions that VirtualGL 
         provides, which modify the arguments before calling the 
@@ -3739,7 +3739,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         different for each image, but experiments with various visual difference 
         benchmarks (such as 
         <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0038"></a>) 
-        suggest that	a JPEG quality of 95 is sufficient to guarantee perceptual 
+        suggest that a JPEG quality of 95 is sufficient to guarantee perceptual 
         losslessness for the types of 3D applications (volume visualization 
         applications, in particular) in which image quality is critical.  As 
         with any benchmarks, Your Mileage May Vary.  Those who are particularly 
@@ -3961,7 +3961,7 @@ Image transport plugins are free to handle or ignore any configuration option as
     <dd class="Description-1 Description">
         In remote display environments, the mouse movement is generally sampled 
         40-60 times per second.  3D applications generally render a new frame 
-        for every mouse motion event, so if the image transport and	(if 
+        for every mouse motion event, so if the image transport and (if 
         applicable) the client cannot process the frames quickly enough, the 
         server&rsquo;s TCP buffers will fill up, causing delays in the delivery 
         of each frame. Effectively, unless the remote display software is able 
@@ -4557,7 +4557,7 @@ Image transport plugins are free to handle or ignore any configuration option as
     <dd class="Description-1 Description">
         Normally VirtualGL will use the X11 library against which it was linked 
         (usually <strong class="filename">libX11.so.6</strong>, in the system 
-        library path) to load any	&ldquo;real&rdquo; X11 functions that it needs 
+        library path) to load any &ldquo;real&rdquo; X11 functions that it needs 
         to call (&ldquo;real&rdquo; as opposed to the &ldquo;fake&rdquo;, or 
         &ldquo;interposed&rdquo;, versions of those functions that VirtualGL 
         provides, which often modify the arguments or perform other operations 
@@ -4746,7 +4746,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         particular value, which the application (sometimes erroneously) uses as 
         an indicator of whether it is being displayed to an X server on the same 
         machine or a different machine.  This setting allows you to fool such 
-        applications into thinking that they are being	displayed to an X server 
+        applications into thinking that they are being displayed to an X server 
         on the same machine.
     </dd>
 </dl>
