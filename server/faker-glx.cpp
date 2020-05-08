@@ -1211,6 +1211,8 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 
 	vglfaker::init();
 
+	if(vglfaker::getExcludeCurrent()) return _glXGetProcAddressARB(procName);
+
 		OPENTRACE(glXGetProcAddressARB);  PRARGS((char *)procName);  STARTTRACE();
 
 	if(procName)

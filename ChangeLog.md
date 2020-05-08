@@ -41,6 +41,10 @@ that feature is now very limited.
 3. VirtualGL now works properly with 3D applications that use `dlopen()` to
 load libGLX or libOpenGL rather than libGL.
 
+4. Fixed an issue whereby the VirtualGL Faker unintentionally interposed GLX,
+OpenGL, X11, and XCB functions called from within image transport plugins,
+resulting in deadlocks or other unexpected behavior.
+
 
 2.6.3
 =====
