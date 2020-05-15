@@ -1,4 +1,4 @@
-// Copyright (C)2009-2010, 2014, 2017-2019 D. R. Commander
+// Copyright (C)2009-2010, 2014, 2017-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -30,8 +30,8 @@ static Window win = 0;
 
 static const int pf2trans[PIXELFORMATS] =
 {
-	RRTRANS_RGB, RRTRANS_RGBA, RRTRANS_BGR, RRTRANS_BGRA, RRTRANS_ABGR,
-	RRTRANS_ARGB, RRTRANS_RGB
+	RRTRANS_RGB, RRTRANS_RGBA, -1, RRTRANS_BGR, RRTRANS_BGRA, -1, RRTRANS_ABGR,
+	-1, RRTRANS_ARGB, -1, -1
 };
 
 
@@ -86,6 +86,7 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		frame->pitch = f->pitch;
 		frame->bits = f->bits;
 		frame->format = pf2trans[f->pf->id];
+		if(frame->format < 0) THROW("Unsupported pixel format");
 		return frame;
 	}
 	catch(Error &e)
