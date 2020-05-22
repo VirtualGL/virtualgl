@@ -15,6 +15,12 @@ load libGLX or libOpenGL rather than libGL.
 OpenGL, X11, and XCB functions called from within image transport plugins,
 resulting in deadlocks or other unexpected behavior.
 
+5. Extended the image transport plugin API to accommodate GPU-based
+post-processing and compression of rendered frames as well as alternative
+methods of framebuffer readback.  See the descriptions of `RRTransGetFrame()`
+and `RRTransSendFrame()` in [server/rrtransport.h](server/rrtransport.h) for
+more details.
+
 
 2.6.3
 =====

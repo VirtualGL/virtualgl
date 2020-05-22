@@ -1,5 +1,5 @@
 /* Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2011, 2018 D. R. Commander
+ * Copyright (C)2009-2011, 2018, 2020 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -126,7 +126,11 @@ int RRTransConnect(void *handle, char *receiver_name, int port);
 /*
    Retrieve a frame buffer of the requested dimensions from the transport
    plugin's buffer pool.  If no frame buffers are available in the pool, then
-   this function waits until one is available.
+   this function waits until one is available.  Note that, if the plugin
+   returns an RRFrame structure with "bits" set to NULL, then the VirtualGL
+   Faker will not read back the rendered frame from the GPU.  This allows the
+   plugin to optionally implement its own readback mechanism in
+   RRTransSendFrame().
 
    PARAMETERS:
    handle (IN) = instance handle (returned from a previous call to
@@ -190,7 +194,11 @@ int RRTransSynchronize(void *handle);
 
 /*
    Send the contents of a frame buffer to the receiver (or queue it for
-   transmission)
+   transmission.)  Note that the VirtualGL Faker creates a temporary OpenGL
+   context, suitable for reading back the rendered frame from the GPU, prior to
+   calling this function.  That allows the plugin to optionally implement its
+   own readback mechanism or to use the GPU for post-processing and compression
+   of the rendered frame.
 
    PARAMETERS:
    handle (IN) = instance handle (returned from a previous call to
