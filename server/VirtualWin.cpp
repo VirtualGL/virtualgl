@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009-2015, 2017-2019 D. R. Commander
+// Copyright (C)2009-2015, 2017-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -19,6 +19,7 @@
 #include "fakerconfig.h"
 #include "glxvisual.h"
 #include "vglutil.h"
+#include "TempContext.h"
 
 using namespace vglutil;
 using namespace vglcommon;
@@ -365,44 +366,69 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 
 	rrframe = plugin->getFrame(w, h, desiredFormat,
 		doStereo && stereoMode == RRSTEREO_QUADBUF);
-	f.init(rrframe->bits, rrframe->w, rrframe->pitch, rrframe->h,
-		trans2pf[rrframe->format], FRAME_BOTTOMUP);
+	if(rrframe->bits)
+	{
+		f.init(rrframe->bits, rrframe->w, rrframe->pitch, rrframe->h,
+			trans2pf[rrframe->format], FRAME_BOTTOMUP);
 
-	if(doStereo && stereoMode == RRSTEREO_QUADBUF && rrframe->rbits == NULL)
-	{
-		static bool message = false;
-		if(!message)
+		if(doStereo && stereoMode == RRSTEREO_QUADBUF && rrframe->rbits == NULL)
 		{
-			vglout.println("[VGL] NOTICE: Quad-buffered stereo is not supported by the plugin.");
-			vglout.println("[VGL]    Using anaglyphic stereo instead.");
-			message = true;
+			static bool message = false;
+			if(!message)
+			{
+				vglout.println("[VGL] NOTICE: Quad-buffered stereo is not supported by the plugin.");
+				vglout.println("[VGL]    Using anaglyphic stereo instead.");
+				message = true;
+			}
+			stereoMode = RRSTEREO_REDCYAN;
 		}
-		stereoMode = RRSTEREO_REDCYAN;
-	}
-	if(doStereo && IS_ANAGLYPHIC(stereoMode))
-	{
-		stereoFrame.deInit();
-		makeAnaglyph(&f, drawBuf, stereoMode);
-	}
-	else if(doStereo && IS_PASSIVE(stereoMode))
-	{
-		rFrame.deInit();  gFrame.deInit();  bFrame.deInit();
-		makePassive(&f, drawBuf, GL_NONE, stereoMode);
-	}
-	else
-	{
-		rFrame.deInit();  gFrame.deInit();  bFrame.deInit();  stereoFrame.deInit();
-		GLint readBuf = drawBuf;
-		if(doStereo || stereoMode == RRSTEREO_LEYE) readBuf = LEYE(drawBuf);
-		if(stereoMode == RRSTEREO_REYE) readBuf = REYE(drawBuf);
-		readPixels(0, 0, rrframe->w, rrframe->pitch, rrframe->h, GL_NONE, f.pf,
-			rrframe->bits, readBuf, doStereo);
-		if(doStereo && rrframe->rbits)
+		if(doStereo && IS_ANAGLYPHIC(stereoMode))
+		{
+			stereoFrame.deInit();
+			makeAnaglyph(&f, drawBuf, stereoMode);
+		}
+		else if(doStereo && IS_PASSIVE(stereoMode))
+		{
+			rFrame.deInit();  gFrame.deInit();  bFrame.deInit();
+			makePassive(&f, drawBuf, GL_NONE, stereoMode);
+		}
+		else
+		{
+			rFrame.deInit();  gFrame.deInit();  bFrame.deInit();
+			stereoFrame.deInit();
+			GLint readBuf = drawBuf;
+			if(doStereo || stereoMode == RRSTEREO_LEYE) readBuf = LEYE(drawBuf);
+			if(stereoMode == RRSTEREO_REYE) readBuf = REYE(drawBuf);
 			readPixels(0, 0, rrframe->w, rrframe->pitch, rrframe->h, GL_NONE, f.pf,
-				rrframe->rbits, REYE(drawBuf), doStereo);
+				rrframe->bits, readBuf, doStereo);
+			if(doStereo && rrframe->rbits)
+				readPixels(0, 0, rrframe->w, rrframe->pitch, rrframe->h, GL_NONE, f.pf,
+					rrframe->rbits, REYE(drawBuf), doStereo);
+		}
+		if(!syncdpy) { XSync(dpy, False);  syncdpy = true; }
+		if(fconfig.logo) f.addLogo();
 	}
-	if(!syncdpy) { XSync(dpy, False);  syncdpy = true; }
-	if(fconfig.logo) f.addLogo();
+
+	// This code is largely copied from VirtualDrawable::readPixels().  It
+	// establishes a temporary OpenGL context suitable for reading back the
+	// rendered frame in RRTransSendFrame(), should a plugin choose to do so.
+	GLXDrawable read = _glXGetCurrentDrawable();
+	GLXDrawable draw = _glXGetCurrentDrawable();
+	if(read == 0 || drawBuf == GL_BACK) read = getGLXDrawable();
+	if(draw == 0 || drawBuf == GL_BACK) draw = getGLXDrawable();
+
+	if(!ctx)
+	{
+		if(!isInit())
+			THROW("VirtualDrawable instance has not been fully initialized");
+		if((ctx = _glXCreateNewContext(DPY3D, config, GLX_RGBA_TYPE, NULL,
+			direct)) == 0)
+			THROW("Could not create OpenGL context for readback");
+	}
+	TempContext tc(DPY3D, draw, read, ctx, config, GLX_RGBA_TYPE);
+
+	_glReadBuffer(drawBuf);
+
 	plugin->sendFrame(rrframe, sync);
 }
 
