@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011-2012, 2015, 2018-2019 D. R. Commander
+// Copyright (C)2009, 2011-2012, 2015, 2018-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -309,7 +309,7 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 	Display *dpy = _glXGetCurrentDisplay();
 	GLXDrawable newRead = 0, newDraw = 0;
 
-	if(dpy && (draw || read) && ctx)
+	if(dpy && (draw || read) && ctx && ctxhash.findConfig(ctx))
 	{
 		newRead = read, newDraw = draw;
 		VirtualWin *drawVW = NULL, *readVW = NULL;
