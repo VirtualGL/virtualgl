@@ -67,6 +67,7 @@ VirtualWin::VirtualWin(Display *dpy_, Window win) :
 	doVGLWMDelete = false;
 	newConfig = false;
 	swapInterval = 0;
+	alreadyWarnedPluginRenderMode = false;
 	XWindowAttributes xwa;
 	if(!XGetWindowAttributes(dpy, win, &xwa) || !xwa.visual)
 		throw(vglutil::Error(__FUNCTION__, "Invalid window", -1));
@@ -416,6 +417,20 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 	GLXDrawable draw = _glXGetCurrentDrawable();
 	if(read == 0 || drawBuf == GL_BACK) read = getGLXDrawable();
 	if(draw == 0 || drawBuf == GL_BACK) draw = getGLXDrawable();
+
+	int renderMode = 0;
+	_glGetIntegerv(GL_RENDER_MODE, &renderMode);
+	if(renderMode != GL_RENDER && renderMode != 0)
+	{
+		if(!alreadyWarnedPluginRenderMode && fconfig.verbose)
+		{
+			vglout.print("[VGL] WARNING: RRTransSendFrame() temporary context skipped one or more times\n");
+			vglout.print("[VGL]    because render mode != GL_RENDER.\n");
+			alreadyWarnedPluginRenderMode = true;
+		}
+		plugin->sendFrame(rrframe, sync);
+		return;
+	}
 
 	if(!ctx)
 	{
