@@ -21,6 +21,11 @@ methods of framebuffer readback.  See the descriptions of `RRTransGetFrame()`
 and `RRTransSendFrame()` in [server/rrtransport.h](server/rrtransport.h) for
 more details.
 
+6. The shared memory segment created by the VirtualGL Faker for use by
+vglconfig (the application responsible for displaying the VirtualGL
+Configuration dialog) is now automatically removed on FreeBSD systems if the 3D
+application exits prematurely.
+
 
 2.6.3
 =====
