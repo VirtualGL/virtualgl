@@ -90,7 +90,7 @@ Instructions for installing these on specific distributions:
 
 - Execute the following command as root:
 
-        apt-get install g++-multilib libxv-dev:i386 libxtst-dev:i386 libxcb-keysyms1-dev:i386 libglu1-mesa-dev:i386
+        apt-get install g++-multilib libxv-dev:i386 libxtst-dev:i386 libx11-xcb-dev:i386 libxcb-keysyms1-dev:i386 libglu1-mesa-dev:i386
 
   * Add `ocl-icd-opencl-dev:i386` to the command line if building the VirtualGL
     Faker with the OpenCL interposer enabled.
