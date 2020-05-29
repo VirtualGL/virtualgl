@@ -2032,7 +2032,7 @@ int contextMismatchTest(void)
 				major = minor = mask = flags = -20;
 				glGetIntegerv(GL_MAJOR_VERSION, &major);
 				glGetIntegerv(GL_MINOR_VERSION, &minor);
-				if(major != 3 || minor < 2 || minor > 3)
+				if(major < 3 || (major == 3 && minor < 2))
 					PRERROR2("Incorrect context version %d.%d", major, minor);
 				glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &mask);
 				if(mask != attribs[7])
