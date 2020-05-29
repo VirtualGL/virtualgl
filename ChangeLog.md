@@ -26,6 +26,14 @@ vglconfig (the application responsible for displaying the VirtualGL
 Configuration dialog) is now automatically removed on FreeBSD systems if the 3D
 application exits prematurely.
 
+7. Fixed an issue whereby the VirtualGL Faker incorrectly attempted to read
+back the current drawable rather than the specified GLX Pixmap when
+synchronizing the GLX Pixmap with its corresponding 2D Pixmap in the body of
+the interposed `glXDestroyGLXPixmap()` and `glXDestroyPixmap()` functions.
+This caused various errors if the current drawable had already been destroyed
+or if the current drawable and the specified GLX Pixmap were created with
+incompatible visuals/FB configs.
+
 
 2.6.3
 =====

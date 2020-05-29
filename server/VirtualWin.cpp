@@ -413,11 +413,6 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 	// This code is largely copied from VirtualDrawable::readPixels().  It
 	// establishes a temporary OpenGL context suitable for reading back the
 	// rendered frame in RRTransSendFrame(), should a plugin choose to do so.
-	GLXDrawable read = _glXGetCurrentDrawable();
-	GLXDrawable draw = _glXGetCurrentDrawable();
-	if(read == 0 || drawBuf == GL_BACK) read = getGLXDrawable();
-	if(draw == 0 || drawBuf == GL_BACK) draw = getGLXDrawable();
-
 	int renderMode = 0;
 	_glGetIntegerv(GL_RENDER_MODE, &renderMode);
 	if(renderMode != GL_RENDER && renderMode != 0)
@@ -440,7 +435,8 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 			direct)) == 0)
 			THROW("Could not create OpenGL context for readback");
 	}
-	TempContext tc(DPY3D, draw, read, ctx, config, GLX_RGBA_TYPE);
+	TempContext tc(DPY3D, getGLXDrawable(), getGLXDrawable(), ctx, config,
+		GLX_RGBA_TYPE);
 
 	_glReadBuffer(drawBuf);
 

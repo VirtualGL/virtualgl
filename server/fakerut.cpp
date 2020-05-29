@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2010-2015, 2017-2019 D. R. Commander
+// Copyright (C)2010-2015, 2017-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -1472,10 +1472,11 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 	int dpyw, dpyh, lastFrame = 0, retval = 1;
 	int glxattribs[] = { GLX_DOUBLEBUFFER, 1, GLX_RENDER_TYPE, GLX_RGBA_BIT,
 		GLX_DRAWABLE_TYPE, GLX_PIXMAP_BIT | GLX_PBUFFER_BIT | GLX_WINDOW_BIT,
-		GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None };
+		GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, GLX_STENCIL_SIZE, 0,
+		None };
 	XVisualInfo *vis = NULL;  GLXFBConfig config = 0, *configs = NULL;
 	int n = 0;
-	GLXContext ctx = 0;
+	GLXContext ctx = 0, ctx2 = 0;
 	XSetWindowAttributes swa;
 	XFontStruct *fontInfo = NULL;  int minChar, maxChar;
 	int fontListBase = 0;
@@ -1844,6 +1845,45 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 				dpyw / 2, dpyh / 2, 0, 0);
 			checkFrame(dpy, pm0, 1, lastFrame);
 			checkWindowColor(dpy, pm0, clr.bits(-1), false);
+
+			// VirtualGL 2.6.3 and prior incorrectly read back the current drawable
+			// instead of the specified GLXPixmap if glXDestroy[GLX]Pixmap() was
+			// called while a drawable other than the specified GLXPixmap was
+			// current.  This caused a [GLX]BadDrawable error if the current drawable
+			// had already been deleted, and it caused other errors (including
+			// TempContext exceptions) on some systems if the current drawable and
+			// the specified GLXPixmap were created with incompatible GLXFBConfigs.
+			glXDestroyGLXPixmap(dpy, glxpm1);  glxpm1 = 0;
+			glxattribs[1] = 0;  glxattribs[13] = 8;
+			if((configs = glXChooseFBConfig(dpy, DefaultScreen(dpy), glxattribs,
+				&n)) == NULL || n == 0)
+				THROW("Could not find a suitable FB config");
+			config = configs[0];
+			XFree(configs);  configs = NULL;
+			if((glxpm1 = glXCreatePixmap(dpy, config, pm1, NULL)) == 0)
+				THROW("Could not create GLX pixmap");
+			if(!(ctx2 = glXCreateNewContext(dpy, config, GLX_RGBA_TYPE, NULL, True)))
+				THROW("Could not create context");
+			if(!glXMakeContextCurrent(dpy, glxpm1, glxpm1, ctx2))
+				THROW("Could not make context current");
+			checkCurrent(dpy, glxpm1, glxpm1, ctx2);
+			clr.clear(GL_FRONT);
+			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "PM1");
+			if(dbPixmap)
+			{
+				clr.clear(GL_BACK);
+				VERIFY_BUF_COLOR(GL_BACK, clr.bits(-1), "PM1");
+			}
+			if(!glXMakeContextCurrent(dpy, pb, pb, ctx))
+				THROW("Could not make context current");
+			checkCurrent(dpy, pb, pb, ctx);
+			clr.clear(GL_FRONT);
+			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "PB");
+			clr.clear(GL_BACK);
+			VERIFY_BUF_COLOR(GL_BACK, clr.bits(-1), "PB");
+			glXDestroyPixmap(dpy, glxpm1);  glxpm1 = 0;
+			checkWindowColor(dpy, pm1, clr.bits(-3), false);
+
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)
@@ -1867,6 +1907,11 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 	{
 		glXMakeContextCurrent(dpy, 0, 0, 0);
 		glXDestroyContext(dpy, ctx);  ctx = 0;
+	}
+	if(ctx2 && dpy)
+	{
+		glXMakeContextCurrent(dpy, 0, 0, 0);
+		glXDestroyContext(dpy, ctx2);  ctx2 = 0;
 	}
 	if(fontInfo && dpy) { XFreeFont(dpy, fontInfo);  fontInfo = NULL; }
 	if(pb && dpy) { glXDestroyPbuffer(dpy, pb);  pb = 0; }
