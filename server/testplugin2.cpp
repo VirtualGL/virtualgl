@@ -72,11 +72,11 @@ int RRTransConnect(void *handle, char *receiver_name, int port)
 RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 	int stereo)
 {
+	RRFrame *frame = NULL;
 	try
 	{
 		X11Trans *trans = (X11Trans *)handle;
 		if(!trans) THROW("Invalid handle");
-		RRFrame *frame;
 		NEWCHECK(frame = new RRFrame);
 		memset(frame, 0, sizeof(RRFrame));
 		FBXFrame *f = trans->getFrame(dpy, win, width, height);
@@ -94,6 +94,7 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 	{
 		snprintf(errStr, MAXSTR + 14, "Error in %s -- %s", e.getMethod(),
 			e.getMessage());
+		delete frame;
 		return NULL;
 	}
 }

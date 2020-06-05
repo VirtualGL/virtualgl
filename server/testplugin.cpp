@@ -88,11 +88,11 @@ int RRTransConnect(void *handle, char *receiverName, int port)
 RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 	int stereo)
 {
+	RRFrame *frame = NULL;
 	try
 	{
 		VGLTrans *vglconn = (VGLTrans *)handle;
 		if(!vglconn) THROW("Invalid handle");
-		RRFrame *frame;
 		NEWCHECK(frame = new RRFrame);
 		memset(frame, 0, sizeof(RRFrame));
 		int compress = fconfig->compress;
@@ -118,6 +118,7 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 	{
 		snprintf(errStr, MAXSTR + 14, "Error in %s -- %s", e.getMethod(),
 			e.getMessage());
+		delete frame;
 		return NULL;
 	}
 }
