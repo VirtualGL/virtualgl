@@ -75,6 +75,12 @@ extern "C" {
 #endif
 
 /*
+   NOTE: Transport plugins can optionally call the global functions
+   _vgl_disableFaker() and _vgl_enableFaker() to disable/re-enable the
+   VirtualGL Faker on a per-thread basis.
+*/
+
+/*
    Initialize an instance of the transport plugin
 
    dpy (IN) = a handle to the 2D X server display connection.  The plugin can

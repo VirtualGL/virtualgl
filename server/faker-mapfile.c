@@ -146,6 +146,8 @@
 		_vgl_dlopen;
 		_vgl_getAutotestColor;
 		_vgl_getAutotestFrame;
+		_vgl_disableFaker;
+		_vgl_enableFaker;
 
 		/* XCB */
 		#ifdef FAKEXCB
