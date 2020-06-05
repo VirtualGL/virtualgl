@@ -19,7 +19,6 @@
 #include "fakerconfig.h"
 #include "glxvisual.h"
 #include "vglutil.h"
-#include "TempContext.h"
 
 using namespace vglutil;
 using namespace vglcommon;
@@ -339,108 +338,129 @@ void VirtualWin::readback(GLint drawBuf, bool spoilLast, bool sync)
 }
 
 
-void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
-	bool doStereo, int stereoMode)
+TempContext *VirtualWin::setupPluginTempContext(GLint drawBuf)
 {
-	Frame f;
-	int w = oglDraw->getWidth(), h = oglDraw->getHeight();
-	RRFrame *rrframe = NULL;
-
-	if(!plugin)
-	{
-		NEWCHECK(plugin = new TransPlugin(dpy, x11Draw, fconfig.transport));
-		plugin->connect(
-			strlen(fconfig.client) > 0 ? fconfig.client : DisplayString(dpy),
-			fconfig.port);
-	}
-
-	if(spoilLast && fconfig.spoil && !plugin->ready())
-		return;
-	if(!fconfig.spoil) plugin->synchronize();
-
-	if(oglDraw->getRGBSize() != 24)
-		THROW("Transport plugins require 8 bits per component");
-	int desiredFormat = RRTRANS_RGB;
-	if(oglDraw->getFormat() == GL_BGR) desiredFormat = RRTRANS_BGR;
-	else if(oglDraw->getFormat() == GL_BGRA) desiredFormat = RRTRANS_BGRA;
-	else if(oglDraw->getFormat() == GL_RGBA) desiredFormat = RRTRANS_RGBA;
-
-	rrframe = plugin->getFrame(w, h, desiredFormat,
-		doStereo && stereoMode == RRSTEREO_QUADBUF);
-	if(rrframe->bits)
-	{
-		f.init(rrframe->bits, rrframe->w, rrframe->pitch, rrframe->h,
-			trans2pf[rrframe->format], FRAME_BOTTOMUP);
-
-		if(doStereo && stereoMode == RRSTEREO_QUADBUF && rrframe->rbits == NULL)
-		{
-			static bool message = false;
-			if(!message)
-			{
-				vglout.println("[VGL] NOTICE: Quad-buffered stereo is not supported by the plugin.");
-				vglout.println("[VGL]    Using anaglyphic stereo instead.");
-				message = true;
-			}
-			stereoMode = RRSTEREO_REDCYAN;
-		}
-		if(doStereo && IS_ANAGLYPHIC(stereoMode))
-		{
-			stereoFrame.deInit();
-			makeAnaglyph(&f, drawBuf, stereoMode);
-		}
-		else if(doStereo && IS_PASSIVE(stereoMode))
-		{
-			rFrame.deInit();  gFrame.deInit();  bFrame.deInit();
-			makePassive(&f, drawBuf, GL_NONE, stereoMode);
-		}
-		else
-		{
-			rFrame.deInit();  gFrame.deInit();  bFrame.deInit();
-			stereoFrame.deInit();
-			GLint readBuf = drawBuf;
-			if(doStereo || stereoMode == RRSTEREO_LEYE) readBuf = LEYE(drawBuf);
-			if(stereoMode == RRSTEREO_REYE) readBuf = REYE(drawBuf);
-			readPixels(0, 0, rrframe->w, rrframe->pitch, rrframe->h, GL_NONE, f.pf,
-				rrframe->bits, readBuf, doStereo);
-			if(doStereo && rrframe->rbits)
-				readPixels(0, 0, rrframe->w, rrframe->pitch, rrframe->h, GL_NONE, f.pf,
-					rrframe->rbits, REYE(drawBuf), doStereo);
-		}
-		if(!syncdpy) { XSync(dpy, False);  syncdpy = true; }
-		if(fconfig.logo) f.addLogo();
-	}
-
 	// This code is largely copied from VirtualDrawable::readPixels().  It
-	// establishes a temporary OpenGL context suitable for reading back the
-	// rendered frame in RRTransSendFrame(), should a plugin choose to do so.
+	// establishes a temporary OpenGL context suitable for creating GPU-based
+	// buffer objects in RRTransGetFrame() and reading back the rendered frame in
+	// RRTransSendFrame(), should a plugin choose to do so.
+	TempContext *tc = NULL;
+
 	int renderMode = 0;
 	_glGetIntegerv(GL_RENDER_MODE, &renderMode);
 	if(renderMode != GL_RENDER && renderMode != 0)
 	{
 		if(!alreadyWarnedPluginRenderMode && fconfig.verbose)
 		{
-			vglout.print("[VGL] WARNING: RRTransSendFrame() temporary context skipped one or more times\n");
-			vglout.print("[VGL]    because render mode != GL_RENDER.\n");
+			vglout.print("[VGL] WARNING: Failed to establish temporary OpenGL context for image\n");
+			vglout.print("[VGL]    transport plugin one or more times because render mode != GL_RENDER.\n");
 			alreadyWarnedPluginRenderMode = true;
 		}
-		plugin->sendFrame(rrframe, sync);
-		return;
 	}
-
-	if(!ctx)
+	else
 	{
-		if(!isInit())
-			THROW("VirtualDrawable instance has not been fully initialized");
-		if((ctx = _glXCreateNewContext(DPY3D, config, GLX_RGBA_TYPE, NULL,
-			direct)) == 0)
-			THROW("Could not create OpenGL context for readback");
+		if(!ctx)
+		{
+			if(!isInit())
+				THROW("VirtualDrawable instance has not been fully initialized");
+			if((ctx = _glXCreateNewContext(DPY3D, config, GLX_RGBA_TYPE, NULL,
+				direct)) == 0)
+				THROW("Could not create OpenGL context for readback");
+		}
+		tc = new TempContext(DPY3D, getGLXDrawable(), getGLXDrawable(), ctx,
+			config, GLX_RGBA_TYPE);
+		_glReadBuffer(drawBuf);
 	}
-	TempContext tc(DPY3D, getGLXDrawable(), getGLXDrawable(), ctx, config,
-		GLX_RGBA_TYPE);
 
-	_glReadBuffer(drawBuf);
+	return tc;
+}
 
-	plugin->sendFrame(rrframe, sync);
+
+void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
+	bool doStereo, int stereoMode)
+{
+	Frame f;
+	int w = oglDraw->getWidth(), h = oglDraw->getHeight();
+	RRFrame *rrframe = NULL;
+	TempContext *tc = NULL;
+
+	try
+	{
+		if(!plugin)
+		{
+			tc = setupPluginTempContext(drawBuf);
+			NEWCHECK(plugin = new TransPlugin(dpy, x11Draw, fconfig.transport));
+			plugin->connect(
+				strlen(fconfig.client) > 0 ? fconfig.client : DisplayString(dpy),
+				fconfig.port);
+		}
+
+		if(spoilLast && fconfig.spoil && !plugin->ready())
+		{
+			delete tc;  return;
+		}
+		if(!tc) tc = setupPluginTempContext(drawBuf);
+		if(!fconfig.spoil) plugin->synchronize();
+
+		if(oglDraw->getRGBSize() != 24)
+			THROW("Transport plugins require 8 bits per component");
+		int desiredFormat = RRTRANS_RGB;
+		if(oglDraw->getFormat() == GL_BGR) desiredFormat = RRTRANS_BGR;
+		else if(oglDraw->getFormat() == GL_BGRA) desiredFormat = RRTRANS_BGRA;
+		else if(oglDraw->getFormat() == GL_RGBA) desiredFormat = RRTRANS_RGBA;
+
+		rrframe = plugin->getFrame(w, h, desiredFormat,
+			doStereo && stereoMode == RRSTEREO_QUADBUF);
+		if(rrframe->bits)
+		{
+			f.init(rrframe->bits, rrframe->w, rrframe->pitch, rrframe->h,
+				trans2pf[rrframe->format], FRAME_BOTTOMUP);
+
+			if(doStereo && stereoMode == RRSTEREO_QUADBUF && rrframe->rbits == NULL)
+			{
+				static bool message = false;
+				if(!message)
+				{
+					vglout.println("[VGL] NOTICE: Quad-buffered stereo is not supported by the plugin.");
+					vglout.println("[VGL]    Using anaglyphic stereo instead.");
+					message = true;
+				}
+				stereoMode = RRSTEREO_REDCYAN;
+			}
+			if(doStereo && IS_ANAGLYPHIC(stereoMode))
+			{
+				stereoFrame.deInit();
+				makeAnaglyph(&f, drawBuf, stereoMode);
+			}
+			else if(doStereo && IS_PASSIVE(stereoMode))
+			{
+				rFrame.deInit();  gFrame.deInit();  bFrame.deInit();
+				makePassive(&f, drawBuf, GL_NONE, stereoMode);
+			}
+			else
+			{
+				rFrame.deInit();  gFrame.deInit();  bFrame.deInit();
+				stereoFrame.deInit();
+				GLint readBuf = drawBuf;
+				if(doStereo || stereoMode == RRSTEREO_LEYE) readBuf = LEYE(drawBuf);
+				if(stereoMode == RRSTEREO_REYE) readBuf = REYE(drawBuf);
+				readPixels(0, 0, rrframe->w, rrframe->pitch, rrframe->h, GL_NONE, f.pf,
+					rrframe->bits, readBuf, doStereo);
+				if(doStereo && rrframe->rbits)
+					readPixels(0, 0, rrframe->w, rrframe->pitch, rrframe->h, GL_NONE,
+						f.pf, rrframe->rbits, REYE(drawBuf), doStereo);
+			}
+			if(!syncdpy) { XSync(dpy, False);  syncdpy = true; }
+			if(fconfig.logo) f.addLogo();
+		}
+		plugin->sendFrame(rrframe, sync);
+	}
+	catch(...)
+	{
+		delete tc;
+		throw;
+	}
+	delete tc;
 }
 
 

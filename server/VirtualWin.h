@@ -21,6 +21,7 @@
 #include "XVTrans.h"
 #endif
 #include "TransPlugin.h"
+#include "TempContext.h"
 
 
 namespace vglserver
@@ -67,6 +68,7 @@ namespace vglserver
 			void sendXV(GLint drawBuf, bool spoilLast, bool sync, bool doStereo,
 				int stereoMode);
 			#endif
+			TempContext *setupPluginTempContext(GLint drawBuf);
 
 			Display *eventdpy;
 			OGLDrawable *oldDraw;
