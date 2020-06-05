@@ -21,12 +21,11 @@ using namespace vglcommon;
 using namespace vglserver;
 
 
-static Error err;
-char errStr[MAXSTR + 14];
+static __thread char errStr[MAXSTR + 14];
 
 static FakerConfig *fconfig = NULL;
-static Display *dpy = NULL;
-static Window win = 0;
+static __thread Display *dpy = NULL;
+static __thread Window win = 0;
 
 static const int pf2trans[PIXELFORMATS] =
 {
@@ -56,7 +55,9 @@ void *RRTransInit(Display *dpy_, Window win_, FakerConfig *fconfig_)
 	}
 	catch(Error &e)
 	{
-		err = e;  return NULL;
+		snprintf(errStr, MAXSTR + 14, "Error in %s -- %s", e.getMethod(),
+			e.getMessage());
+		return NULL;
 	}
 	return handle;
 }
@@ -91,7 +92,9 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 	}
 	catch(Error &e)
 	{
-		err = e;  return NULL;
+		snprintf(errStr, MAXSTR + 14, "Error in %s -- %s", e.getMethod(),
+			e.getMessage());
+		return NULL;
 	}
 }
 
@@ -107,7 +110,9 @@ int RRTransReady(void *handle)
 	}
 	catch(Error &e)
 	{
-		err = e;  return -1;
+		snprintf(errStr, MAXSTR + 14, "Error in %s -- %s", e.getMethod(),
+			e.getMessage());
+		return -1;
 	}
 	return ret;
 }
@@ -124,7 +129,9 @@ int RRTransSynchronize(void *handle)
 	}
 	catch(Error &e)
 	{
-		err = e;  return -1;
+		snprintf(errStr, MAXSTR + 14, "Error in %s -- %s", e.getMethod(),
+			e.getMessage());
+		return -1;
 	}
 	return ret;
 }
@@ -145,7 +152,9 @@ int RRTransSendFrame(void *handle, RRFrame *frame, int sync)
 	}
 	catch(Error &e)
 	{
-		err = e;  return -1;
+		snprintf(errStr, MAXSTR + 14, "Error in %s -- %s", e.getMethod(),
+			e.getMessage());
+		return -1;
 	}
 	return ret;
 }
@@ -162,7 +171,9 @@ int RRTransDestroy(void *handle)
 	}
 	catch(Error &e)
 	{
-		err = e;  return -1;
+		snprintf(errStr, MAXSTR + 14, "Error in %s -- %s", e.getMethod(),
+			e.getMessage());
+		return -1;
 	}
 	return ret;
 }
@@ -170,8 +181,6 @@ int RRTransDestroy(void *handle)
 
 const char *RRTransGetError(void)
 {
-	snprintf(errStr, MAXSTR + 14, "Error in %s -- %s",
-		err.getMethod(), err.getMessage());
 	return errStr;
 }
 
