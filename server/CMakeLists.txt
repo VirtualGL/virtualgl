@@ -216,10 +216,19 @@ target_link_libraries(fakerut "${MINUSZ}now ${OPENGL_gl_LIBRARY}"
 	${OPENGL_glu_LIBRARY} "${MINUSZ}now ${X11_X11_LIB}" ${LIBDL} vglutil)
 
 add_library(vgltrans_test SHARED testplugin.cpp VGLTrans.cpp)
+unset(VGLTRANS_TEST_LINK_FLAGS)
+if(MAPFLAG)
+	set(VGLTRANS_TEST_LINK_FLAGS
+		"${VGLTRANS_TEST_LINK_FLAGS} ${MAPFLAG}${CMAKE_CURRENT_SOURCE_DIR}/testplugin-mapfile")
+endif()
 if(VGL_USESSL AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	# Work around this issue:
 	# http://rt.openssl.org/Ticket/Display.html?user=guest&pass=guest&id=1521
-	set_target_properties(vgltrans_test PROPERTIES LINK_FLAGS "-Wl,-Bsymbolic")
+	set(VGLTRANS_TEST_LINK_FLAGS "${VGLTRANS_TEST_LINK_FLAGS} -Wl,-Bsymbolic")
+endif()
+if(VGLTRANS_TEST_LINK_FLAGS)
+	set_target_properties(vgltrans_test PROPERTIES LINK_FLAGS
+		"${VGLTRANS_TEST_LINK_FLAGS}")
 endif()
 target_link_libraries(vgltrans_test vglcommon ${FBXFAKERLIB} ${TJPEG_LIBRARY}
 	vglsocket)
@@ -228,6 +237,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND GNUCXX)
 endif()
 
 add_library(vgltrans_test2 SHARED testplugin2.cpp X11Trans.cpp)
+if(MAPFLAG)
+	set_target_properties(vgltrans_test2 PROPERTIES
+		LINK_FLAGS "${MAPFLAG}${CMAKE_CURRENT_SOURCE_DIR}/testplugin-mapfile")
+endif()
 target_link_libraries(vgltrans_test2 vglcommon ${FBXFAKERLIB} ${TJPEG_LIBRARY})
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND GNUCXX)
 	target_link_libraries(vgltrans_test2 stdc++)
