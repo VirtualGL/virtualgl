@@ -35,7 +35,7 @@ maximize performance.
 
 	#. Start the 2D X server if it isn't started already.
 
-		Mac clients :: Start the Mac X11 application or XQuartz.
+		Mac clients :: Start XQuartz.
 
 		Cygwin clients :: Start Cygwin/X.
 

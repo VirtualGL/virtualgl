@@ -30,6 +30,9 @@ This caused various errors if the current drawable had already been destroyed
 or if the current drawable and the specified GLX Pixmap were created with
 incompatible visuals/FB configs.
 
+7. Fixed an error (`dyld: Library not loaded: /usr/X11/lib/libGL.1.dylib`) that
+occurred when attempting to run the VirtualGL Client on macOS Catalina.
+
 
 2.6.3
 =====

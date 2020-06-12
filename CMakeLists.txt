@@ -316,9 +316,9 @@ if(APPLE)
 		set(CMAKE_SHARED_LINKER_FLAGS
 			"${CMAKE_SHARED_LINKER_FLAGS} -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib")
 	endif()
-	set(X11_X11_INCLUDE_PATH /usr/X11/include)
-	set(OPENGL_gl_LIBRARY /usr/X11/lib/libGL.dylib)
-	set(OPENGL_glu_LIBRARY /usr/X11/lib/libGLU.dylib)
+	set(X11_X11_INCLUDE_PATH /opt/X11/include)
+	set(OPENGL_gl_LIBRARY /opt/X11/lib/libGL.dylib)
+	set(OPENGL_glu_LIBRARY /opt/X11/lib/libGLU.dylib)
 endif()
 
 include_directories(${X11_X11_INCLUDE_PATH} ${OPENGL_INCLUDE_DIR})
