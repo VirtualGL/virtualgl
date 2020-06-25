@@ -41,8 +41,8 @@ maximize performance.
 
 	#. Open a new terminal window.
 
-		Mac clients :: In the X11 application or XQuartz, start a new xterm
-			[Command-N] if one isn't already started.
+		Mac clients :: In XQuartz, start a new xterm [Command-N] if one isn't
+			already started.
 
 		Cygwin clients :: Start a new xterm if one isn't already started
 			(right-click on the Cygwin/X taskbar icon, then select
