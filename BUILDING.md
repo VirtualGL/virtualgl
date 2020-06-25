@@ -20,15 +20,15 @@ Build Requirements
   * The libjpeg-turbo SDK binary packages can be downloaded from the "Files"
     area of <http://sourceforge.net/projects/libjpeg-turbo>.
   * The VirtualGL build system will search for the TurboJPEG header and
-    library under **/opt/libjpeg-turbo** on Un*x (including Cygwin), but you
-    can override this by setting the `TJPEG_INCLUDE_DIR` CMake variable to the
-    directory containing turbojpeg.h and the `TJPEG_LIBRARY` CMake variable to
-    either the full path of the TurboJPEG library against which you want to
-    link or a set of link flags needed to link with the TurboJPEG library (for
-    instance, `-DTJPEG_LIBRARY="-L/opt/libjpeg-turbo/lib64 -lturbojpeg"`.)
+    library under **/opt/libjpeg-turbo** on Un*x, but you can override this by
+    setting the `TJPEG_INCLUDE_DIR` CMake variable to the directory containing
+    turbojpeg.h and the `TJPEG_LIBRARY` CMake variable to either the full path
+    of the TurboJPEG library against which you want to link or a set of link
+    flags needed to link with the TurboJPEG library (for instance,
+    `-DTJPEG_LIBRARY="-L/opt/libjpeg-turbo/lib64 -lturbojpeg"`.)
 
 
-### Un*x Platforms (including Linux, Mac, FreeBSD, Solaris, and Cygwin)
+### Un*x Platforms (including Linux, Mac, FreeBSD, and Solaris)
 
 - GCC and G++
   * On Mac platforms, these can be obtained from
@@ -52,13 +52,6 @@ Build Requirements
 - Some requisite development libraries are located in the CRB (Code Ready
   Builder) repository on Red Hat Enterprise Linux 8 and in the PowerTools
   repository on CentOS 8, which is not enabled by default.
-
-### Windows
-
-- Cygwin or Cygwin64 with the following packages:
-  * GCC and G++
-  * X11 and OpenGL development libraries (see above)
-  * libturbojpeg-devel
 
 
 32-bit VirtualGL Builds on x86-64 Linux Distributions
@@ -208,15 +201,6 @@ to the CMake command line to statically link VirtualGL with OpenSSL:
       -DOPENSSL_CRYPTO_LIBRARY=/opt/csw/lib/libcrypto.a
 
 
-### Windows (Cygwin)
-
-Add the following to the CMake command line to statically link VirtualGL with
-OpenSSL:
-
-    -DVGL_USESSL=1 -DOPENSSL_SSL_LIBRARY=/usr/lib/libssl.a \
-      -DOPENSSL_CRYPTO_LIBRARY=/usr/lib/libcrypto.a;/usr/lib/libz.a
-
-
 Build Recipes
 -------------
 
@@ -348,11 +332,3 @@ Once the primary build has been built, run `make udmg` from the build
 directory.  The packaging system will build the sub-build, use lipo to combine
 it with the primary build into a single set of universal binaries, then package
 the universal binaries in the same manner as `make dmg`.
-
-
-Cygwin
-------
-
-    make cygwinpkg
-
-Build a Cygwin binary package.
