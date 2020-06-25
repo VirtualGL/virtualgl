@@ -53,10 +53,10 @@
 
 || || Client (if using the VGL Transport) ||
 | Recommended CPU \
-	| Any Intel-based Mac \
+	| Any 64-bit Intel-based Mac \
 	|
 | O/S \
-	| OS X 10.6 ("Snow Leopard") or later \
+	| OS X 10.7 "Lion" or later \
 	|
 | Other Software \
 	| [[http://xquartz.macosforge.org][XQuartz]] \

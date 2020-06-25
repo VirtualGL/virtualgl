@@ -205,7 +205,7 @@ Build Recipes
 -------------
 
 
-### 32-bit Build on 64-bit Linux/Unix (including Mac)
+### 32-bit Build on 64-bit Linux/Unix
 
 Use export/setenv to set the following environment variables before running
 CMake:
@@ -316,19 +316,4 @@ Mac
     make dmg
 
 Create Mac package/disk image.  This requires pkgbuild and productbuild, which
-are installed by default on OS X 10.7 and later and which can be obtained by
-installing Xcode 3.2.6 (with the "Unix Development" option) on OS X 10.6.
-Packages built in this manner can be installed on OS X 10.5 and later, but they
-must be built on OS X 10.6 or later.
-
-    make udmg
-
-This creates a Mac package/disk image that contains universal x86-64/i386
-binaries.  You should first use CMake to configure a 32-bit sub-build of
-VirtualGL (see "Build Recipes" above) in a build directory specified by the
-`OSX_32BIT_BUILD` CMake variable (default: *{source_directory}*/osxx86).  Next,
-configure the primary build of VirtualGL as an out-of-tree build, and build it.
-Once the primary build has been built, run `make udmg` from the build
-directory.  The packaging system will build the sub-build, use lipo to combine
-it with the primary build into a single set of universal binaries, then package
-the universal binaries in the same manner as `make dmg`.
+are installed by default on OS X 10.7 and later.
