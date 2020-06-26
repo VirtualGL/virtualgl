@@ -4,6 +4,6 @@ Using the vglrun script on a Linux or Unix server, the VirtualGL Faker library i
 
 VirtualGL can be used to give hardware-accelerated 3D rendering capabilities to VNC and other X proxies that either lack OpenGL support or provide it through a software renderer.  In a LAN environment, VGL can also be used with its built-in high-performance image transport (the VGL Transport), which sends the rendered frames to the VirtualGL Client application for compositing on a client-side 2D X server.
 
-This package includes the VirtualGL Client application (vglclient) for Intel-based Macs and the vglconnect script.  It is not necessary to install this package when using VirtualGL with VNC and other X proxies.  The Mac X11 application (which is not installed by default but which can be installed from the OS X distribution discs) or XQuartz must be installed prior to using the VirtualGL Client.
+This package includes the VirtualGL Client application (vglclient) for Intel-based Macs and the vglconnect script.  It is not necessary to install this package when using VirtualGL with VNC and other X proxies.  XQuartz must be installed prior to using the VirtualGL Client.
 
 Refer to the VirtualGL User's Guide (a link to which is provided in the Applications folder) for usage information.

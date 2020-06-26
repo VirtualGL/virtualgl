@@ -75,7 +75,18 @@ extern "C" {
 #endif
 
 /*
-   Initialize an instance of the transport plugin
+   NOTE: Transport plugins can optionally call the global functions
+   _vgl_disableFaker() and _vgl_enableFaker() to disable/re-enable the
+   VirtualGL Faker on a per-thread basis.
+*/
+
+/*
+   Initialize an instance of the transport plugin.  Note that the VirtualGL
+   Faker creates a temporary OpenGL context, suitable for reading back the
+   rendered frame from the GPU, prior to calling this and other transport
+   plugin functions.  That allows the plugin to optionally implement its own
+   readback mechanism or to use the GPU for post-processing and compression of
+   the rendered frame.
 
    dpy (IN) = a handle to the 2D X server display connection.  The plugin can
               use this handle to transport the rendered frame to the 2D X
@@ -194,11 +205,7 @@ int RRTransSynchronize(void *handle);
 
 /*
    Send the contents of a frame buffer to the receiver (or queue it for
-   transmission.)  Note that the VirtualGL Faker creates a temporary OpenGL
-   context, suitable for reading back the rendered frame from the GPU, prior to
-   calling this function.  That allows the plugin to optionally implement its
-   own readback mechanism or to use the GPU for post-processing and compression
-   of the rendered frame.
+   transmission)
 
    PARAMETERS:
    handle (IN) = instance handle (returned from a previous call to

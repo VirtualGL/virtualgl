@@ -1,0 +1,14 @@
+{
+	global:
+		RRTransInit;
+		RRTransConnect;
+		RRTransGetFrame;
+		RRTransReady;
+		RRTransSynchronize;
+		RRTransSendFrame;
+		RRTransDestroy;
+		RRTransGetError;
+
+	local:
+		*;
+};

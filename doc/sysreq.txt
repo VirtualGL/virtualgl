@@ -53,15 +53,13 @@
 
 || || Client (if using the VGL Transport) ||
 | Recommended CPU \
-	| Any Intel-based Mac \
+	| Any 64-bit Intel-based Mac \
 	|
 | O/S \
-	| OS X 10.5 ("Leopard") or later \
+	| OS X 10.7 "Lion" or later \
 	|
 | Other Software \
-	| Mac X11 application (in the {file: Optional Installs} package on the OS X \
-		10.7 and earlier install discs) or \
-		[[http://xquartz.macosforge.org][XQuartz]] \
+	| [[http://xquartz.macosforge.org][XQuartz]] \
 	|
 #OPT: hiCol=first
 

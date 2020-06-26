@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011, 2013-2016, 2019 D. R. Commander
+// Copyright (C)2009, 2011, 2013-2016, 2019-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -261,6 +261,20 @@ int _vgl_getAutotestFrame(Display *dpy, Drawable d)
 		return vglfaker::getAutotestFrame();
 
 	return -1;
+}
+
+// These functions allow image transport plugins or applications to temporarily
+// disable/re-enable the faker on a per-thread basis.
+void _vgl_disableFaker(void)
+{
+	vglfaker::setFakerLevel(vglfaker::getFakerLevel() + 1);
+	vglfaker::setExcludeCurrent(true);
+}
+
+void _vgl_enableFaker(void)
+{
+	vglfaker::setFakerLevel(vglfaker::getFakerLevel() - 1);
+	vglfaker::setExcludeCurrent(false);
 }
 
 }

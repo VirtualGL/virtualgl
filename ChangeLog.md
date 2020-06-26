@@ -41,15 +41,27 @@ that feature is now very limited.
 3. VirtualGL now works properly with 3D applications that use `dlopen()` to
 load libGLX or libOpenGL rather than libGL.
 
-4. Fixed an issue whereby the VirtualGL Faker unintentionally interposed GLX,
-OpenGL, X11, and XCB functions called from within image transport plugins,
-resulting in deadlocks or other unexpected behavior.
-
-5. Extended the image transport plugin API to accommodate GPU-based
+4. Extended the image transport plugin API to accommodate GPU-based
 post-processing and compression of rendered frames as well as alternative
-methods of framebuffer readback.  See the descriptions of `RRTransGetFrame()`
-and `RRTransSendFrame()` in [server/rrtransport.h](server/rrtransport.h) for
+methods of framebuffer readback.  See the descriptions of `RRTransInit()`
+and `RRTransGetFrame()` in [server/rrtransport.h](server/rrtransport.h) for
 more details.
+
+5. The shared memory segment created by the VirtualGL Faker for use by
+vglconfig (the application responsible for displaying the VirtualGL
+Configuration dialog) is now automatically removed on FreeBSD systems if the 3D
+application exits prematurely.
+
+6. Fixed an issue whereby the VirtualGL Faker incorrectly attempted to read
+back the current drawable rather than the specified GLX Pixmap when
+synchronizing the GLX Pixmap with its corresponding 2D Pixmap in the body of
+the interposed `glXDestroyGLXPixmap()` and `glXDestroyPixmap()` functions.
+This caused various errors if the current drawable had already been destroyed
+or if the current drawable and the specified GLX Pixmap were created with
+incompatible visuals/FB configs.
+
+7. Fixed an error (`dyld: Library not loaded: /usr/X11/lib/libGL.1.dylib`) that
+occurred when attempting to run the VirtualGL Client on macOS Catalina.
 
 
 2.6.3

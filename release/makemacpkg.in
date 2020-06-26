@@ -41,14 +41,6 @@ safedirmove ()
 	return 0
 }
 
-usage()
-{
-	echo "$0 [universal]"
-	exit 1
-}
-
-UNIVERSAL=0
-
 PKGNAME=@PKGNAME@
 PROJECT=@CMAKE_PROJECT_NAME@
 VERSION=@VERSION@
@@ -62,12 +54,6 @@ PREFIX=@CMAKE_INSTALL_PREFIX@
 BINDIR=@CMAKE_INSTALL_FULL_BINDIR@
 DOCDIR=@CMAKE_INSTALL_FULL_DOCDIR@
 
-if [ $# -gt 0 ]; then
-	if [ "$1" = "universal" ]; then
-		UNIVERSAL=1
-	fi
-fi
-
 if [ -f $PKGNAME-$VERSION.dmg ]; then
 	rm -f $PKGNAME-$VERSION.dmg
 fi
@@ -78,36 +64,6 @@ PKGROOT=$TMPDIR/pkg/Package_Root
 mkdir -p $PKGROOT
 
 make install DESTDIR=$PKGROOT
-
-if [ $UNIVERSAL = 1 ]; then
-	if [ ! -d $BUILDDIR32 ]; then
-		echo ERROR: 32-bit build directory $BUILDDIR32 does not exist
-		exit 1
-	fi
-	if [ ! -f $BUILDDIR32/Makefile ]; then
-		echo ERROR: 32-bit build directory $BUILDDIR32 is not configured
-		exit 1
-	fi
-	pushd $BUILDDIR32
-	make
-	popd
-	lipo -create -arch i386 $BUILDDIR32/bin/vglclient \
-		-arch x86_64 $PKGROOT$BINDIR/vglclient \
-		-output $PKGROOT$BINDIR/vglclient
-	chmod 755 $PKGROOT$BINDIR/vglclient
-	lipo -create -arch i386 $BUILDDIR32/bin/tcbench \
-		-arch x86_64 $PKGROOT$BINDIR/tcbench \
-		-output $PKGROOT$BINDIR/tcbench
-	chmod 755 $PKGROOT$BINDIR/tcbench
-	lipo -create -arch i386 $BUILDDIR32/bin/nettest \
-		-arch x86_64 $PKGROOT$BINDIR/nettest \
-		-output $PKGROOT$BINDIR/nettest
-	chmod 755 $PKGROOT$BINDIR/nettest
-	lipo -create -arch i386 $BUILDDIR32/bin/glxinfo \
-		-arch x86_64 $PKGROOT$BINDIR/glxinfo \
-		-output $PKGROOT$BINDIR/glxinfo
-	chmod 755 $PKGROOT$BINDIR/glxinfo
-fi
 
 mkdir -p $PKGROOT/Library/Documentation
 safedirmove $PKGROOT$DOCDIR $PKGROOT/Library/Documentation/$PKGNAME $TMPDIR/__tmpdoc
@@ -123,7 +79,7 @@ if [ "$PREFIX" = "@CMAKE_INSTALL_DEFAULT_PREFIX@" ]; then
 	ln -fs /Library/Documentation/$PKGNAME $PKGROOT/$PREFIX/doc
 fi
 install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
-osacompile -t APPL -a i386 -o "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/uninstall.applescript
+osacompile -t APPL -a x86_64 -o "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/uninstall.applescript
 if [ "$OSX_APP_CERT_NAME" != "" ]; then
 	codesign -s "$OSX_APP_CERT_NAME" --timestamp "$TMPDIR/Uninstall $PROJECT.app"
 	codesign -vv "$TMPDIR/Uninstall $PROJECT.app"

@@ -16,16 +16,18 @@
 #include "rrtransport.h"
 #include "VGLTrans.h"
 
+extern "C" void _vgl_disableFaker(void);
+extern "C" void _vgl_enableFaker(void);
+
 using namespace vglutil;
 using namespace vglcommon;
 using namespace vglserver;
 
 
-static Error err;
-char errStr[MAXSTR + 14];
+static __thread char errStr[MAXSTR + 14];
 
 static FakerConfig *fconfig = NULL;
-static Window win = 0;
+static __thread Window win = 0;
 
 static const int trans2pf[RRTRANS_FORMATOPT] =
 {
@@ -50,6 +52,8 @@ extern "C" {
 
 void *RRTransInit(Display *dpy, Window win_, FakerConfig *fconfig_)
 {
+	_vgl_disableFaker();
+
 	void *handle = NULL;
 	try
 	{
@@ -59,14 +63,21 @@ void *RRTransInit(Display *dpy, Window win_, FakerConfig *fconfig_)
 	}
 	catch(std::exception &e)
 	{
-		err = e;  return NULL;
+		snprintf(errStr, MAXSTR + 14, "Error in %s -- %s", GET_METHOD(e),
+			e.what());
+		handle = NULL;
 	}
+
+	_vgl_enableFaker();
+
 	return handle;
 }
 
 
 int RRTransConnect(void *handle, char *receiverName, int port)
 {
+	_vgl_disableFaker();
+
 	int ret = 0;
 	try
 	{
@@ -76,8 +87,13 @@ int RRTransConnect(void *handle, char *receiverName, int port)
 	}
 	catch(std::exception &e)
 	{
-		err = e;  return -1;
+		snprintf(errStr, MAXSTR + 14, "Error in %s -- %s", GET_METHOD(e),
+			e.what());
+		ret = -1;
 	}
+
+	_vgl_enableFaker();
+
 	return ret;
 }
 
@@ -85,11 +101,13 @@ int RRTransConnect(void *handle, char *receiverName, int port)
 RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 	int stereo)
 {
+	_vgl_disableFaker();
+
+	RRFrame *frame = NULL;
 	try
 	{
 		VGLTrans *vglconn = (VGLTrans *)handle;
 		if(!vglconn) THROW("Invalid handle");
-		RRFrame *frame;
 		frame = new RRFrame;
 		memset(frame, 0, sizeof(RRFrame));
 		int compress = fconfig->compress;
@@ -109,17 +127,25 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		frame->rbits = f->rbits;
 		frame->format = pf2trans[f->pf->id];
 		if(frame->format < 0) THROW("Unsupported pixel format");
-		return frame;
 	}
 	catch(std::exception &e)
 	{
-		err = e;  return NULL;
+		snprintf(errStr, MAXSTR + 14, "Error in %s -- %s", GET_METHOD(e),
+			e.what());
+		delete frame;
+		frame = NULL;
 	}
+
+	_vgl_enableFaker();
+
+	return frame;
 }
 
 
 int RRTransReady(void *handle)
 {
+	_vgl_disableFaker();
+
 	int ret = -1;
 	try
 	{
@@ -129,14 +155,21 @@ int RRTransReady(void *handle)
 	}
 	catch(std::exception &e)
 	{
-		err = e;  return -1;
+		snprintf(errStr, MAXSTR + 14, "Error in %s -- %s", GET_METHOD(e),
+			e.what());
+		ret = -1;
 	}
+
+	_vgl_enableFaker();
+
 	return ret;
 }
 
 
 int RRTransSynchronize(void *handle)
 {
+	_vgl_disableFaker();
+
 	int ret = 0;
 	try
 	{
@@ -146,14 +179,21 @@ int RRTransSynchronize(void *handle)
 	}
 	catch(std::exception &e)
 	{
-		err = e;  return -1;
+		snprintf(errStr, MAXSTR + 14, "Error in %s -- %s", GET_METHOD(e),
+			e.what());
+		ret = -1;
 	}
+
+	_vgl_enableFaker();
+
 	return ret;
 }
 
 
 int RRTransSendFrame(void *handle, RRFrame *frame, int sync)
 {
+	_vgl_disableFaker();
+
 	int ret = 0;
 	try
 	{
@@ -170,14 +210,21 @@ int RRTransSendFrame(void *handle, RRFrame *frame, int sync)
 	}
 	catch(std::exception &e)
 	{
-		err = e;  return -1;
+		snprintf(errStr, MAXSTR + 14, "Error in %s -- %s", GET_METHOD(e),
+			e.what());
+		ret = -1;
 	}
+
+	_vgl_enableFaker();
+
 	return ret;
 }
 
 
 int RRTransDestroy(void *handle)
 {
+	_vgl_disableFaker();
+
 	int ret = 0;
 	try
 	{
@@ -187,16 +234,19 @@ int RRTransDestroy(void *handle)
 	}
 	catch(std::exception &e)
 	{
-		err = e;  return -1;
+		snprintf(errStr, MAXSTR + 14, "Error in %s -- %s", GET_METHOD(e),
+			e.what());
+		ret = -1;
 	}
+
+	_vgl_enableFaker();
+
 	return ret;
 }
 
 
 const char *RRTransGetError(void)
 {
-	snprintf(errStr, MAXSTR + 14, "Error in %s -- %s",
-		err.getMethod(), err.what());
 	return errStr;
 }
 

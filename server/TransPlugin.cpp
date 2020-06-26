@@ -1,4 +1,4 @@
-// Copyright (C)2009-2011, 2014, 2019-2020 D. R. Commander
+// Copyright (C)2009-2011, 2014, 2019 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -15,7 +15,6 @@
 #include <dlfcn.h>
 #include <string.h>
 #include "Error.h"
-#include "faker.h"
 
 using namespace vglutil;
 using namespace vglserver;
@@ -23,16 +22,6 @@ using namespace vglserver;
 
 #undef THROW
 #define THROW(m)  throw(Error("transport plugin", m, -1))
-#define DISABLE_FAKER() \
-{ \
-	vglfaker::setFakerLevel(vglfaker::getFakerLevel() + 1); \
-	vglfaker::setExcludeCurrent(true); \
-}
-#define ENABLE_FAKER() \
-{ \
-	vglfaker::setFakerLevel(vglfaker::getFakerLevel() - 1); \
-	vglfaker::setExcludeCurrent(false); \
-}
 
 
 static void *loadsym(void *dllhnd, const char *symbol)
@@ -74,11 +63,7 @@ TransPlugin::TransPlugin(Display *dpy, Window win, char *name)
 		(_RRTransSendFrameType)loadsym(dllhnd, "RRTransSendFrame");
 	_RRTransDestroy = (_RRTransDestroyType)loadsym(dllhnd, "RRTransDestroy");
 	_RRTransGetError = (_RRTransGetErrorType)loadsym(dllhnd, "RRTransGetError");
-
-	DISABLE_FAKER();
-	handle = _RRTransInit(dpy, win, &fconfig);
-	if(!handle) THROW(_RRTransGetError());
-	ENABLE_FAKER();
+	if(!(handle = _RRTransInit(dpy, win, &fconfig))) THROW(_RRTransGetError());
 }
 
 
@@ -93,9 +78,7 @@ TransPlugin::~TransPlugin(void)
 void TransPlugin::connect(char *receiverName, int port)
 {
 	CriticalSection::SafeLock l(mutex);
-	DISABLE_FAKER();
 	int ret = _RRTransConnect(handle, receiverName, port);
-	ENABLE_FAKER();
 	if(ret < 0) THROW(_RRTransGetError());
 }
 
@@ -103,9 +86,7 @@ void TransPlugin::connect(char *receiverName, int port)
 void TransPlugin::destroy(void)
 {
 	CriticalSection::SafeLock l(mutex);
-	DISABLE_FAKER();
 	int ret = _RRTransDestroy(handle);
-	ENABLE_FAKER();
 	if(ret < 0) THROW(_RRTransGetError());
 }
 
@@ -113,9 +94,7 @@ void TransPlugin::destroy(void)
 int TransPlugin::ready(void)
 {
 	CriticalSection::SafeLock l(mutex);
-	DISABLE_FAKER();
 	int ret = _RRTransReady(handle);
-	ENABLE_FAKER();
 	if(ret < 0) THROW(_RRTransGetError());
 	return ret;
 }
@@ -124,9 +103,7 @@ int TransPlugin::ready(void)
 void TransPlugin::synchronize(void)
 {
 	CriticalSection::SafeLock l(mutex);
-	DISABLE_FAKER();
 	int ret = _RRTransSynchronize(handle);
-	ENABLE_FAKER();
 	if(ret < 0) THROW(_RRTransGetError());
 }
 
@@ -134,9 +111,7 @@ void TransPlugin::synchronize(void)
 RRFrame *TransPlugin::getFrame(int width, int height, int format, bool stereo)
 {
 	CriticalSection::SafeLock l(mutex);
-	DISABLE_FAKER();
 	RRFrame *ret = _RRTransGetFrame(handle, width, height, format, stereo);
-	ENABLE_FAKER();
 	if(!ret) THROW(_RRTransGetError());
 	return ret;
 }
@@ -145,8 +120,6 @@ RRFrame *TransPlugin::getFrame(int width, int height, int format, bool stereo)
 void TransPlugin::sendFrame(RRFrame *frame, bool sync)
 {
 	CriticalSection::SafeLock l(mutex);
-	DISABLE_FAKER();
 	int ret = _RRTransSendFrame(handle, frame, sync);
-	ENABLE_FAKER();
 	if(ret < 0) THROW(_RRTransGetError());
 }

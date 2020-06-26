@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009-2015, 2017-2019 D. R. Commander
+// Copyright (C)2009-2015, 2017-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -335,11 +335,6 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	}
 	lastFormat = currentFormat;
 
-	GLXDrawable read = _glXGetCurrentDrawable();
-	GLXDrawable draw = _glXGetCurrentDrawable();
-	if(read == 0 || readBuf == GL_BACK) read = getGLXDrawable();
-	if(draw == 0 || readBuf == GL_BACK) draw = getGLXDrawable();
-
 	// VirtualGL has to create a temporary context when performing pixel
 	// readback, because the current context may not be using the same drawable
 	// for rendering and readback, and the values of certain parameters within
@@ -374,7 +369,8 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 			direct)) == 0)
 			THROW("Could not create OpenGL context for readback");
 	}
-	TempContext tc(DPY3D, draw, read, ctx, config, GLX_RGBA_TYPE);
+	TempContext tc(DPY3D, getGLXDrawable(), getGLXDrawable(), ctx, config,
+		GLX_RGBA_TYPE);
 
 	_glReadBuffer(readBuf);
 

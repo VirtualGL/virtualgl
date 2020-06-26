@@ -20,15 +20,15 @@ Build Requirements
   * The libjpeg-turbo SDK binary packages can be downloaded from the "Files"
     area of <http://sourceforge.net/projects/libjpeg-turbo>.
   * The VirtualGL build system will search for the TurboJPEG header and
-    library under **/opt/libjpeg-turbo** on Un*x (including Cygwin), but you
-    can override this by setting the `TJPEG_INCLUDE_DIR` CMake variable to the
-    directory containing turbojpeg.h and the `TJPEG_LIBRARY` CMake variable to
-    either the full path of the TurboJPEG library against which you want to
-    link or a set of link flags needed to link with the TurboJPEG library (for
-    instance, `-DTJPEG_LIBRARY="-L/opt/libjpeg-turbo/lib64 -lturbojpeg"`.)
+    library under **/opt/libjpeg-turbo** on Un*x, but you can override this by
+    setting the `TJPEG_INCLUDE_DIR` CMake variable to the directory containing
+    turbojpeg.h and the `TJPEG_LIBRARY` CMake variable to either the full path
+    of the TurboJPEG library against which you want to link or a set of link
+    flags needed to link with the TurboJPEG library (for instance,
+    `-DTJPEG_LIBRARY="-L/opt/libjpeg-turbo/lib64 -lturbojpeg"`.)
 
 
-### Un*x Platforms (including Linux, Mac, FreeBSD, Solaris, and Cygwin)
+### Un*x Platforms (including Linux, Mac, FreeBSD, and Solaris)
 
 - GCC and G++
   * On Mac platforms, these can be obtained from
@@ -52,13 +52,6 @@ Build Requirements
 - Some requisite development libraries are located in the CRB (Code Ready
   Builder) repository on Red Hat Enterprise Linux 8 and in the PowerTools
   repository on CentOS 8, which is not enabled by default.
-
-### Windows
-
-- Cygwin or Cygwin64 with the following packages:
-  * GCC and G++
-  * X11 and OpenGL development libraries (see above)
-  * libturbojpeg-devel
 
 
 32-bit VirtualGL Builds on x86-64 Linux Distributions
@@ -90,7 +83,7 @@ Instructions for installing these on specific distributions:
 
 - Execute the following command as root:
 
-        apt-get install g++-multilib libxv-dev:i386 libxtst-dev:i386 libxcb-keysyms1-dev:i386 libglu1-mesa-dev:i386
+        apt-get install g++-multilib libxv-dev:i386 libxtst-dev:i386 libx11-xcb-dev:i386 libxcb-keysyms1-dev:i386 libglu1-mesa-dev:i386
 
   * Add `ocl-icd-opencl-dev:i386` to the command line if building the VirtualGL
     Faker with the OpenCL interposer enabled.
@@ -208,20 +201,11 @@ to the CMake command line to statically link VirtualGL with OpenSSL:
       -DOPENSSL_CRYPTO_LIBRARY=/opt/csw/lib/libcrypto.a
 
 
-### Windows (Cygwin)
-
-Add the following to the CMake command line to statically link VirtualGL with
-OpenSSL:
-
-    -DVGL_USESSL=1 -DOPENSSL_SSL_LIBRARY=/usr/lib/libssl.a \
-      -DOPENSSL_CRYPTO_LIBRARY=/usr/lib/libcrypto.a;/usr/lib/libz.a
-
-
 Build Recipes
 -------------
 
 
-### 32-bit Build on 64-bit Linux/Unix (including Mac)
+### 32-bit Build on 64-bit Linux/Unix
 
 Use export/setenv to set the following environment variables before running
 CMake:
@@ -332,27 +316,4 @@ Mac
     make dmg
 
 Create Mac package/disk image.  This requires pkgbuild and productbuild, which
-are installed by default on OS X 10.7 and later and which can be obtained by
-installing Xcode 3.2.6 (with the "Unix Development" option) on OS X 10.6.
-Packages built in this manner can be installed on OS X 10.5 and later, but they
-must be built on OS X 10.6 or later.
-
-    make udmg
-
-This creates a Mac package/disk image that contains universal x86-64/i386
-binaries.  You should first use CMake to configure a 32-bit sub-build of
-VirtualGL (see "Build Recipes" above) in a build directory specified by the
-`OSX_32BIT_BUILD` CMake variable (default: *{source_directory}*/osxx86).  Next,
-configure the primary build of VirtualGL as an out-of-tree build, and build it.
-Once the primary build has been built, run `make udmg` from the build
-directory.  The packaging system will build the sub-build, use lipo to combine
-it with the primary build into a single set of universal binaries, then package
-the universal binaries in the same manner as `make dmg`.
-
-
-Cygwin
-------
-
-    make cygwinpkg
-
-Build a Cygwin binary package.
+are installed by default on OS X 10.7 and later.
