@@ -1,7 +1,7 @@
 3.0 pre-beta
 ============
 
-### Significant changes relative to 2.6.2:
+### Significant changes relative to 2.6.4:
 
 1. Support for transparent overlay visuals has been retired in this version of
 VirtualGL.  That feature will continue to be maintained in the 2.6.x branch on
