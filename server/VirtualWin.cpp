@@ -80,7 +80,7 @@ VirtualWin::VirtualWin(Display *dpy_, Window win) :
 			vglout.println("[VGL] Selecting structure notify events in window 0x%.8x",
 				win);
 	}
-	stereoVisual = glxvisual::visAttrib2D(dpy, DefaultScreen(dpy),
+	stereoVisual = glxvisual::visAttrib(dpy, DefaultScreen(dpy),
 		xwa.visual->visualid, GLX_STEREO);
 }
 
@@ -364,12 +364,11 @@ TempContext *VirtualWin::setupPluginTempContext(GLint drawBuf)
 		{
 			if(!isInit())
 				THROW("VirtualDrawable instance has not been fully initialized");
-			if((ctx = _glXCreateNewContext(DPY3D, GLXFBC(config), GLX_RGBA_TYPE,
-				NULL, direct)) == 0)
+			if((ctx = VGLCreateContext(DPY3D, config, NULL, direct, NULL)) == 0)
 				THROW("Could not create OpenGL context for readback");
 		}
-		tc = new TempContext(getGLXDrawable(), getGLXDrawable(), ctx);
-		_glReadBuffer(drawBuf);
+		tc = new TempContext(dpy, getGLXDrawable(), getGLXDrawable(), ctx);
+		VGLReadBuffer(drawBuf);
 	}
 
 	return tc;

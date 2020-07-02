@@ -20,10 +20,19 @@
 #include "Hash.h"
 
 
-#define HASH  Hash<GLXDrawable, void *, Display *>
+typedef struct
+{
+	Display *dpy;
+	unsigned long eventMask;
+} GLXDrawableAttribs;
 
-// This maps a GLXDrawable instance to a (remote) Display handle.
-// Used primarily to make glXGetCurrentDisplay() work properly :/
+
+#define HASH  Hash<GLXDrawable, void *, GLXDrawableAttribs *>
+
+// This maps a GLXDrawable handle to a 2D X server Display handle and GLX event
+// mask.  It is used to make glXGetCurrentDisplay(), glXSelectEvent(), and
+// glXGetSelectedEvent() work properly and to distinguish Pbuffers from other
+// GLX drawables.
 
 namespace vglfaker
 {
@@ -46,13 +55,33 @@ namespace vglfaker
 			void add(GLXDrawable draw, Display *dpy)
 			{
 				if(!draw || !dpy) THROW("Invalid argument");
-				HASH::add(draw, NULL, dpy);
+				GLXDrawableAttribs *attribs = new GLXDrawableAttribs;
+				attribs->dpy = dpy;
+				attribs->eventMask = 0;
+				HASH::add(draw, NULL, attribs);
 			}
 
 			Display *getCurrentDisplay(GLXDrawable draw)
 			{
 				if(!draw) THROW("Invalid argument");
-				return HASH::find(draw, NULL);
+				GLXDrawableAttribs *attribs = HASH::find(draw, NULL);
+				if(attribs) return attribs->dpy;
+				return NULL;
+			}
+
+			void setEventMask(GLXDrawable draw, unsigned long eventMask)
+			{
+				if(!draw) THROW("Invalid argument");
+				GLXDrawableAttribs *attribs = HASH::find(draw, NULL);
+				if(attribs) attribs->eventMask = eventMask;
+			}
+
+			unsigned long getEventMask(GLXDrawable draw)
+			{
+				if(!draw) THROW("Invalid argument");
+				GLXDrawableAttribs *attribs = HASH::find(draw, NULL);
+				if(attribs) return attribs->eventMask;
+				return 0;
 			}
 
 			void remove(GLXDrawable draw)
@@ -68,14 +97,18 @@ namespace vglfaker
 				HASH::kill();
 			}
 
-			Display *attach(GLXDrawable key1, void *key2) { return NULL; }
+			GLXDrawableAttribs *attach(GLXDrawable key1, void *key2) { return NULL; }
 
 			bool compare(GLXDrawable key1, void *key2, HashEntry *entry)
 			{
 				return false;
 			}
 
-			void detach(HashEntry *entry) {}
+			void detach(HashEntry *entry)
+			{
+				GLXDrawableAttribs *attribs = entry ? entry->value : NULL;
+				delete attribs;
+			}
 
 			static GLXDrawableHash *instance;
 			static vglutil::CriticalSection instanceMutex;

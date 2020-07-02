@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2014, 2019 D. R. Commander
+// Copyright (C)2014, 2019-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -16,15 +16,36 @@
 #define __GLXVISUAL_H__
 
 #include "faker-sym.h"
+#ifdef EGLBACKEND
+#include "EGLRBOContext.h"
+#endif
 
+
+typedef struct
+{
+	int doubleBuffer, stereo, redSize, greenSize, blueSize, alphaSize, depthSize,
+		stencilSize, samples;
+} GLXAttrib;
 
 typedef struct _VGLFBConfig
 {
 	int id, screen, nConfigs;
-	int alphaSize, stencilSize, samples;
-	bool stereo;
-	GLXFBConfig glxConfig;
 	VisualID visualID;
+	GLXAttrib attr;
+	union
+	{
+		// GLX back end only
+		GLXFBConfig glx;
+		#ifdef EGLBACKEND
+		// EGL back end only
+		EGLConfig egl;
+		#endif
+	} cfg;
+	int c_class, depth;
+	int bufSize;  // For sorting purposes only
+	#ifdef EGLBACKEND
+	EGLRBOContext *rboCtx;
+	#endif
 } *VGLFBConfig;
 
 
@@ -40,24 +61,26 @@ namespace glxvisual
 	// attributes are read from the 2D X server and cached on first access, so
 	// only the first call to any of these will result in a round trip to the
 	// 2D X server.)
-	int visAttrib2D(Display *dpy, int screen, VisualID vid, int attribute);
+	int visAttrib(Display *dpy, int screen, VisualID vid, int attribute);
 
-	// Simple helper function that obtains an attribute for a GLXFBConfig on the
-	// 3D X server.
-	int visAttrib3D(GLXFBConfig config, int attribute);
-
-	// Simple helper function that obtains an attribute for a VGLFBConfig.
-	int visAttrib3D(VGLFBConfig config, int attribute);
+	// This just wraps VGLGetFBConfigAttrib() to allow an FB config attribute to
+	// be obtained with a one-liner.
+	int INLINE getFBConfigAttrib(Display *dpy, VGLFBConfig config, int attribute)
+	{
+		int value = 0;
+		VGLGetFBConfigAttrib(dpy, config, attribute, &value);
+		return value;
+	}
 
 	// This is just a convenience wrapper for XGetVisualInfo()
 	XVisualInfo *visualFromID(Display *dpy, int screen, VisualID vid);
 
-	// This function : VGLFBConfig :: glXGetFBConfigs() : GLXFBConfig
-	VGLFBConfig *getFBConfigs(Display *dpy, int screen, int &nElements);
-
 	// This function : VGLFBConfig :: glXChooseFBConfig() : GLXFBConfig
 	VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
 		int &nElements);
+
+	// This function : VGLFBConfig :: glXGetFBConfigs() : GLXFBConfig
+	VGLFBConfig *getFBConfigs(Display *dpy, int screen, int &nElements);
 
 	// This function returns the default FB config attached to a given visual ID
 	// in the visual attribute table.
@@ -65,7 +88,10 @@ namespace glxvisual
 }
 
 
-#define GLXFBC(c)  ((c) ? (c)->glxConfig : 0)
+#define GLXFBC(c)  ((c) ? (c)->cfg.glx : 0)
+#ifdef EGLBACKEND
+#define EGLFBC(c)  ((c) ? (c)->cfg.egl : 0)
+#endif
 #define FBCID(c)  ((c) ? (c)->id : 0)
 
 #endif  // __GLXVISUAL_H__

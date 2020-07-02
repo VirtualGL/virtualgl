@@ -37,7 +37,7 @@ Build Requirements
 
 - X11 and OpenGL development libraries:
   * libX11, libXext, libXtst, libGL, and libGLU
-      - libxcb and libxcb-keysyms (if building the VirtualGL Faker)
+      - libEGL, libxcb, and libxcb-keysyms (if building the VirtualGL Faker)
       - libXv (if building VirtualGL with X Video support)
   * On Mac platforms, these are distributed with
     [XQuartz](http://xquartz.macosforge.org).
@@ -73,7 +73,7 @@ Instructions for installing these on specific distributions:
 
 - Execute the following command as root:
 
-        yum install libXv-devel.i686 libXext-devel.i686 libXtst-devel.i686 libX11-devel.i686 libxcb-devel.i686 xcb-util-keysyms-devel.i686 mesa-libGLU-devel.i686 mesa-libGL-devel.i686 glibc-devel.i686 libstdc++-devel.i686 libstdc++-static.i686
+        yum install libXv-devel.i686 libXext-devel.i686 libXtst-devel.i686 libX11-devel.i686 libxcb-devel.i686 xcb-util-keysyms-devel.i686 mesa-libGLU-devel.i686 mesa-libGL-devel.i686 mesa-libEGL-devel.i686 glibc-devel.i686 libstdc++-devel.i686 libstdc++-static.i686
 
   * Replace `yum` with `dnf` on Fedora 23+ or RHEL 8+.
   * Add `ocl-icd-devel.i686` to the command line if building the VirtualGL
@@ -83,7 +83,7 @@ Instructions for installing these on specific distributions:
 
 - Execute the following command as root:
 
-        apt-get install g++-multilib libxv-dev:i386 libxtst-dev:i386 libx11-xcb-dev:i386 libxcb-keysyms1-dev:i386 libglu1-mesa-dev:i386
+        apt-get install g++-multilib libxv-dev:i386 libxtst-dev:i386 libx11-xcb-dev:i386 libxcb-keysyms1-dev:i386 libegl1-mesa-dev:i386 libglu1-mesa-dev:i386
 
   * Add `ocl-icd-opencl-dev:i386` to the command line if building the VirtualGL
     Faker with the OpenCL interposer enabled.

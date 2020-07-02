@@ -50,6 +50,21 @@ if(VGL_FAKEOPENCL)
 	include_directories(${OpenCL_INCLUDE_DIRS})
 endif()
 
+set(DEFAULT_VGL_EGLBACKEND 0)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+	set(DEFAULT_VGL_EGLBACKEND 1)
+endif()
+option(VGL_EGLBACKEND "Include the EGL back end, which allows the VirtualGL Faker to be used without a 3D X server"
+	${DEFAULT_VGL_EGLBACKEND})
+boolean_number(VGL_EGLBACKEND)
+boolean_number(VGL_EGLBACKEND PARENT_SCOPE)
+report_option(VGL_EGLBACKEND "EGL back end")
+if(VGL_EGLBACKEND)
+	cmake_minimum_required(VERSION 3.10)
+	set(EGL_LIBRARY ${OPENGL_egl_LIBRARY})
+	add_definitions(-DEGLBACKEND)
+endif()
+
 get_directory_property(DEFS_PROP COMPILE_DEFINITIONS)
 foreach(def ${DEFS_PROP})
 	set(DEFINES ${DEFINES};-D${def})
@@ -84,9 +99,14 @@ set(FAKER_SOURCES
 	WindowHash.cpp
 	X11Trans.cpp
 	vglconfigLauncher.cpp
-	VGLTrans.cpp)
+	VGLTrans.cpp
+	vglwrap.cpp)
 if(VGL_USEXV)
 	set(FAKER_SOURCES ${FAKER_SOURCES};XVTrans.cpp)
+endif()
+if(VGL_EGLBACKEND)
+	set(FAKER_SOURCES
+		${FAKER_SOURCES};EGLConfigHash.cpp;EGLContextHash.cpp;EGLPbufferHash.cpp;VGLPbuffer.cpp)
 endif()
 
 set(FAKERLIBS ${VGL_FAKER_NAME};${VGL_FAKER_NAME}-nodl)
@@ -122,10 +142,10 @@ foreach(fakerlib ${FAKERLIBS})
 	target_link_libraries(${fakerlib} vglcommon ${FBXFAKERLIB} vglsocket m
 		${LIBDL})
 	if(${fakerlib} STREQUAL ${VGL_FAKER_NAME})
-		target_link_libraries(${fakerlib} ${OPENGL_gl_LIBRARY})
+		target_link_libraries(${fakerlib} ${OPENGL_gl_LIBRARY} ${EGL_LIBRARY})
 	endif()
 	if(${fakerlib} STREQUAL ${VGL_FAKER_NAME}-opencl)
-		target_link_libraries(${fakerlib} ${OPENGL_gl_LIBRARY} ${OpenCL_LIBRARIES})
+		target_link_libraries(${fakerlib} ${OPENGL_gl_LIBRARY} ${EGL_LIBRARY} ${OpenCL_LIBRARIES})
 	endif()
 	if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND GNUCXX)
 		# For some reason, on SunOS/GCC CMake tries to use the C compiler to link

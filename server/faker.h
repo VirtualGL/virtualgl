@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011, 2013-2016, 2018-2019 D. R. Commander
+// Copyright (C)2009, 2011, 2013-2016, 2018-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -15,13 +15,14 @@
 #ifndef __FAKER_H__
 #define __FAKER_H__
 
+#include <X11/Xmd.h>
 #include <X11/Xlib.h>
 #include "Error.h"
 #include "Log.h"
 #include "Mutex.h"
-#include <GL/glx.h>
 #include "fakerconfig.h"
 #include "vglutil.h"
+#include "vglwrap.h"
 
 
 namespace vglfaker
@@ -63,7 +64,7 @@ namespace vglfaker
 
 		if(!dpy) return false;
 		// The 3D X server may have its own extensions that conflict with ours.
-		if(dpy == dpy3D) return true;
+		if(!fconfig.egl && dpy == dpy3D) return true;
 		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 1);
 		ERRIFNOT(extData);
 		ERRIFNOT(extData->private_data);
@@ -79,7 +80,7 @@ namespace vglfaker
 		XExtData *extData;
 
 		// The 3D X server may have its own extensions that conflict with ours.
-		if(dpy == dpy3D)
+		if(!fconfig.egl && dpy == dpy3D)
 			THROW("vglfaker::getDisplayCS() called with 3D X server handle (this should never happen)");
 		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 2);
 		ERRIFNOT(extData);
@@ -88,11 +89,12 @@ namespace vglfaker
 		return *(vglutil::CriticalSection *)extData->private_data;
 	}
 
-	extern void sendGLXError(unsigned short minorCode, unsigned char errorCode,
+	extern void sendGLXError(Display *dpy, CARD16 minorCode, CARD8 errorCode,
 		bool x11Error);
 }
 
 #define DPY3D  vglfaker::init3D()
+#define EDPY  ((EGLDisplay)vglfaker::init3D())
 
 #define IS_EXCLUDED(dpy) \
 	(vglfaker::deadYet || vglfaker::getFakerLevel() > 0 \
@@ -108,6 +110,22 @@ namespace vglfaker
 		|| drawbuf == GL_BACK_RIGHT)
 
 
+static INLINE int DrawingToFront(void)
+{
+	GLint drawbuf = GL_BACK;
+	VGLGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
+	return IS_FRONT(drawbuf);
+}
+
+
+static INLINE int DrawingToRight(void)
+{
+	GLint drawbuf = GL_LEFT;
+	VGLGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
+	return IS_RIGHT(drawbuf);
+}
+
+
 #define DIE(f, m) \
 { \
 	if(!vglfaker::deadYet) \
@@ -119,6 +137,30 @@ namespace vglfaker
 #define TRY()  try {
 #define CATCH()  } \
 	catch(std::exception &e) { DIE(GET_METHOD(e), e.what()); }
+
+
+// Clear any pending OpenGL errors.
+#define TRY_GL() \
+{ \
+	int e; \
+	do { e = _glGetError(); } while(e != GL_NO_ERROR); \
+}
+
+// Catch any OpenGL errors that occurred since TRY_GL() was invoked.
+#define CATCH_GL(m) \
+{ \
+	int e;  bool doThrow = false; \
+	do \
+	{ \
+		e = _glGetError(); \
+		if(e != GL_NO_ERROR) \
+		{ \
+			vglout.print("[VGL] ERROR: OpenGL error 0x%.4x\n", e); \
+			doThrow = true; \
+		} \
+	} while(e != GL_NO_ERROR); \
+	if(doThrow) THROW(m); \
+}
 
 
 // Tracing stuff

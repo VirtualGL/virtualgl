@@ -20,6 +20,9 @@
 #include "Mutex.h"
 #include "faker.h"
 #include "vglutil.h"
+#ifdef EGLBACKEND
+#include "EGLConfigHash.h"
+#endif
 
 using namespace vglutil;
 
@@ -28,16 +31,11 @@ namespace glxvisual {
 
 typedef struct
 {
-	int doubleBuffer, alphaSize, depthSize, stencilSize, samples;
-} OGLAttrib;
-
-typedef struct
-{
 	VisualID visualID;
 	VGLFBConfig config;
 	int depth, c_class, bpc, nVisuals;
 	int isStereo, isDB, isGL;
-	OGLAttrib ogl;
+	GLXAttrib glx;
 } VisAttrib;
 
 
@@ -142,14 +140,15 @@ static void assignDefaultFBConfigAttribs(Display *dpy, int screen,
 		minSamples = INT_MAX, maxSamples = 0;
 	for(int i = 0; i < caEntries; i++)
 	{
-		if(ca[i].alphaSize < 0 || ca[i].stencilSize < 0 || ca[i].samples < 0)
+		if(ca[i].attr.alphaSize < 0 || ca[i].attr.stencilSize < 0
+			|| ca[i].attr.samples < 0)
 			continue;
-		minAlpha = min(minAlpha, ca[i].alphaSize);
-		maxAlpha = max(maxAlpha, ca[i].alphaSize);
-		minStencil = min(minStencil, ca[i].stencilSize);
-		maxStencil = max(maxStencil, ca[i].stencilSize);
-		minSamples = min(minSamples, ca[i].samples);
-		maxSamples = max(maxSamples, ca[i].samples);
+		minAlpha = min(minAlpha, ca[i].attr.alphaSize);
+		maxAlpha = max(maxAlpha, ca[i].attr.alphaSize);
+		minStencil = min(minStencil, ca[i].attr.stencilSize);
+		maxStencil = max(maxStencil, ca[i].attr.stencilSize);
+		minSamples = min(minSamples, ca[i].attr.samples);
+		maxSamples = max(maxSamples, ca[i].attr.samples);
 	}
 	if(minAlpha < 0) minAlpha = 0;
 	minAlpha = !!minAlpha;  maxAlpha = !!maxAlpha;
@@ -184,11 +183,11 @@ static void assignDefaultFBConfigAttribs(Display *dpy, int screen,
 						{
 							i++;  if(i >= nVisuals) return;
 						}
-						va[i].ogl.doubleBuffer = db;
-						va[i].ogl.alphaSize = alpha;
-						va[i].ogl.depthSize = depth;
-						va[i].ogl.stencilSize = stencil;
-						va[i++].ogl.samples = samples;
+						va[i].glx.doubleBuffer = db;
+						va[i].glx.alphaSize = alpha;
+						va[i].glx.depthSize = depth;
+						va[i].glx.stencilSize = stencil;
+						va[i++].glx.samples = samples;
 						if(i >= nVisuals) return;
 					}
 				}
@@ -208,7 +207,7 @@ static bool buildVisAttribTable(Display *dpy, int screen)
 	XExtData *extData;
 	obj.screen = XScreenOfDisplay(dpy, screen);
 
-	if(dpy == vglfaker::dpy3D)
+	if(!fconfig.egl && dpy == vglfaker::dpy3D)
 		THROW("glxvisual::buildVisAttribTable() called with 3D X server handle (this should never happen)");
 
 	try
@@ -244,8 +243,8 @@ static bool buildVisAttribTable(Display *dpy, int screen)
 				_glXGetConfig(dpy, &visuals[i], GLX_USE_GL, &va[i].isGL);
 				_glXGetConfig(dpy, &visuals[i], GLX_STEREO, &va[i].isStereo);
 			}
-			va[i].ogl.alphaSize = va[i].ogl.depthSize = va[i].ogl.stencilSize =
-				va[i].ogl.samples = -1;
+			va[i].glx.alphaSize = va[i].glx.depthSize = va[i].glx.stencilSize =
+				va[i].glx.samples = -1;
 		}
 
 		int nDepths, *depths = XListDepths(dpy, screen, &nDepths);
@@ -368,31 +367,50 @@ static VisualID matchVisual2D(Display *dpy, int screen, VGLFBConfig config)
 			return va[i].visualID;
 	}
 
-	XVisualInfo *vis = _glXGetVisualFromFBConfig(DPY3D, config->glxConfig);
-	if(vis)
+	int depth, c_class, bpc;
+	#ifdef EGLBACKEND
+	if(fconfig.egl)
 	{
-		if(vis->depth >= 24
-			&& (vis->c_class == TrueColor || vis->c_class == DirectColor))
-		{
-			// We first try to match the FB config with a 2D X Server visual that has
-			// the same class, depth, and stereo properties.
-			vid = matchVisual2D(dpy, screen, vis->depth, vis->c_class,
-				vis->bits_per_rgb, config->stereo, true);
-			if(!vid)
-				vid = matchVisual2D(dpy, screen, vis->depth, vis->c_class,
-					vis->bits_per_rgb, config->stereo, false);
-			// Failing that, we try to find a mono visual.
-			if(!vid && config->stereo)
-				vid = matchVisual2D(dpy, screen, vis->depth, vis->c_class,
-					vis->bits_per_rgb, 0, true);
-			if(!vid && config->stereo)
-				vid = matchVisual2D(dpy, screen, vis->depth, vis->c_class,
-					vis->bits_per_rgb, 0, false);
-		}
+		depth = config->depth;
+		c_class = config->c_class;
+		bpc = config->attr.redSize;
+	}
+	else
+	#endif
+	{
+		XVisualInfo *vis = _glXGetVisualFromFBConfig(DPY3D, config->cfg.glx);
+		if(!vis) return 0;
+		depth = vis->depth;
+		c_class = vis->c_class;
+		bpc = vis->bits_per_rgb;
 		_XFree(vis);
 	}
 
+	if(depth >= 24 && (c_class == TrueColor || c_class == DirectColor))
+	{
+		// We first try to match the FB config with a 2D X Server visual that
+		// has the same class, depth, and stereo properties.
+		vid = matchVisual2D(dpy, screen, depth, c_class, bpc, config->attr.stereo,
+			true);
+		if(!vid)
+			vid = matchVisual2D(dpy, screen, depth, c_class, bpc,
+				config->attr.stereo, false);
+		// Failing that, we try to find a mono visual.
+		if(!vid && config->attr.stereo)
+			vid = matchVisual2D(dpy, screen, depth, c_class, bpc, 0, true);
+		if(!vid && config->attr.stereo)
+			vid = matchVisual2D(dpy, screen, depth, c_class, bpc, 0, false);
+	}
+
 	return vid;
+}
+
+
+static INLINE int getGLXFBConfigAttrib(GLXFBConfig config, int attribute)
+{
+	int value = 0;
+	_glXGetFBConfigAttrib(DPY3D, config, attribute, &value);
+	return value;
 }
 
 
@@ -405,7 +423,7 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 	XExtData *extData;
 	obj.screen = XScreenOfDisplay(dpy, screen);
 
-	if(dpy == vglfaker::dpy3D)
+	if(!fconfig.egl && dpy == vglfaker::dpy3D)
 		THROW("glxvisual::buildCfgAttribTable() called with 3D X server handle (this should never happen)");
 
 	try
@@ -415,33 +433,124 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 4);
 		if(extData && extData->private_data) return;
 
-		if(!(glxConfigs = _glXGetFBConfigs(DPY3D, DefaultScreen(DPY3D),
-			&nConfigs)))
-			THROW("No FB configs found");
-
-		if(!(ca =
-			(struct _VGLFBConfig *)calloc(nConfigs, sizeof(struct _VGLFBConfig))))
-			THROW("Memory allocation error");
-
-		for(int i = 0; i < nConfigs; i++)
+		#ifdef EGLBACKEND
+		if(fconfig.egl)
 		{
-			ca[i].id = visAttrib3D(glxConfigs[i], GLX_FBCONFIG_ID);
-			ca[i].screen = screen;
-			ca[i].nConfigs = nConfigs;
-			int drawableType = visAttrib3D(glxConfigs[i], GLX_DRAWABLE_TYPE);
-			if((drawableType & (GLX_PBUFFER_BIT | GLX_WINDOW_BIT))
-				== (GLX_PBUFFER_BIT | GLX_WINDOW_BIT))
+			int i = 0;
+			int defaultDepth = DefaultDepth(dpy, screen);
+			int nbpcs = defaultDepth == 30 ? 2 : 1;
+			int bpcs[] = { defaultDepth == 30 ? 10 : 8, defaultDepth == 30 ? 8 : 0 };
+
+			nConfigs = 2 *  // visual classes
+				2 *  // stereo options
+				2 *  // alpha channel options
+				2 *  // double buffering options
+				3 *  // stencil & depth buffer options
+				7 *  // multisampling options (0, 2, 4, 8, 16, 32, 64)
+				2 *  // visual depths
+				nbpcs;  // bits-per-component options
+
+			if(!(ca =
+				(struct _VGLFBConfig *)calloc(nConfigs, sizeof(struct _VGLFBConfig))))
+				THROW("Memory allocation error");
+
+			int attribs[] = { EGL_CONFIG_CAVEAT, EGL_NONE,
+				EGL_RED_SIZE, 1, EGL_GREEN_SIZE, 1, EGL_BLUE_SIZE, 1,
+				EGL_CONFORMANT, EGL_OPENGL_BIT, EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
+				EGL_SURFACE_TYPE, EGL_PBUFFER_BIT, EGL_NONE };
+			EGLConfig config;  int n;
+			if(!_eglBindAPI(EGL_OPENGL_API))
+				THROW("Could not enable OpenGL API");
+			if(!_eglChooseConfig((EGLDisplay)DPY3D, attribs, &config, 1, &n))
+				THROW("Could not obtain EGL config");
+
+			for(int bpcIndex = 0; bpcIndex < nbpcs; bpcIndex++)
 			{
-				ca[i].alphaSize = visAttrib3D(glxConfigs[i], GLX_ALPHA_SIZE);
-				ca[i].stencilSize = visAttrib3D(glxConfigs[i], GLX_STENCIL_SIZE);
-				ca[i].samples = visAttrib3D(glxConfigs[i], GLX_SAMPLES);
+				int bpc = bpcs[bpcIndex];
+				for(int depth = bpc * 3; depth <= 32; depth += 32 - bpc * 3)
+				{
+					for(int samples = 0; samples <= 64;
+						samples = (samples ? samples * 2 : 2))
+					{
+						for(int depthBuffer = 1; depthBuffer >= 0; depthBuffer--)
+						{
+							for(int stencil = depthBuffer ? 1 : 0; stencil >= 0; stencil--)
+							{
+								for(int doubleBuffer = 1; doubleBuffer >= 0; doubleBuffer--)
+								{
+									for(int alpha = 0; alpha <= 1; alpha++)
+									{
+										for(int stereo = 0; stereo <= 1; stereo++)
+										{
+											for(int c_class = TrueColor; c_class <= DirectColor;
+												c_class++)
+											{
+												ca[i].id = i + 1;
+												ca[i].screen = screen;
+												ca[i].nConfigs = nConfigs;
+
+												ca[i].attr.doubleBuffer = doubleBuffer;
+												ca[i].attr.stereo = stereo;
+												ca[i].attr.redSize = ca[i].attr.greenSize =
+													ca[i].attr.blueSize = bpc;
+												ca[i].attr.alphaSize = alpha * (32 - bpc * 3);
+												ca[i].attr.depthSize = depthBuffer * 24;
+												ca[i].attr.stencilSize = stencil * 8;
+												ca[i].attr.samples = samples;
+
+												ca[i].cfg.egl = config;
+												ca[i].c_class = c_class;
+												ca[i].depth = depth;
+
+												ca[i].rboCtx = ecfghash.getRBOContext(config);
+
+												i++;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 			}
-			else
+		}
+		else  // fconfig.egl
+		#endif
+		{
+			if(!(glxConfigs = _glXGetFBConfigs(DPY3D, DefaultScreen(DPY3D),
+				&nConfigs)))
+				THROW("No FB configs found");
+
+			if(!(ca =
+				(struct _VGLFBConfig *)calloc(nConfigs, sizeof(struct _VGLFBConfig))))
+				THROW("Memory allocation error");
+
+			for(int i = 0; i < nConfigs; i++)
 			{
-				ca[i].alphaSize = ca[i].stencilSize = ca[i].samples = -1;
+				ca[i].id = getGLXFBConfigAttrib(glxConfigs[i], GLX_FBCONFIG_ID);
+				ca[i].screen = screen;
+				ca[i].nConfigs = nConfigs;
+				ca[i].attr.stereo = getGLXFBConfigAttrib(glxConfigs[i], GLX_STEREO);
+				int drawableType =
+					getGLXFBConfigAttrib(glxConfigs[i], GLX_DRAWABLE_TYPE);
+				if((drawableType & (GLX_PBUFFER_BIT | GLX_WINDOW_BIT))
+					== (GLX_PBUFFER_BIT | GLX_WINDOW_BIT))
+				{
+					ca[i].attr.alphaSize =
+						getGLXFBConfigAttrib(glxConfigs[i], GLX_ALPHA_SIZE);
+					ca[i].attr.stencilSize =
+						getGLXFBConfigAttrib(glxConfigs[i], GLX_STENCIL_SIZE);
+					ca[i].attr.samples =
+						getGLXFBConfigAttrib(glxConfigs[i], GLX_SAMPLES);
+				}
+				else
+				{
+					ca[i].attr.alphaSize = ca[i].attr.stencilSize = ca[i].attr.samples =
+						-1;
+				}
+				ca[i].cfg.glx = glxConfigs[i];
 			}
-			ca[i].stereo = visAttrib3D(glxConfigs[i], GLX_STEREO);
-			ca[i].glxConfig = glxConfigs[i];
 		}
 
 		if(!(extData = (XExtData *)calloc(1, sizeof(XExtData))))
@@ -573,10 +682,7 @@ VGLFBConfig *configsFromVisAttribs(Display *dpy, int screen,
 	if(drawableType >= 0 && drawableType & GLX_WINDOW_BIT)
 	{
 		drawableType &= ~GLX_WINDOW_BIT;
-		if(fconfig.drawable == RRDRAWABLE_PIXMAP)
-			drawableType |= GLX_PIXMAP_BIT | GLX_WINDOW_BIT;
-		else
-			drawableType |= GLX_PBUFFER_BIT;
+		drawableType |= GLX_PBUFFER_BIT;
 		if(visualType >= 0)
 			drawableType |= GLX_WINDOW_BIT;
 		if(samples >= 0) drawableType &= ~GLX_PIXMAP_BIT;
@@ -602,7 +708,7 @@ VGLFBConfig *configsFromVisAttribs(Display *dpy, int screen,
 }
 
 
-int visAttrib2D(Display *dpy, int screen, VisualID vid, int attribute)
+int visAttrib(Display *dpy, int screen, VisualID vid, int attribute)
 {
 	if(!buildVisAttribTable(dpy, screen)) return 0;
 	GET_VA_TABLE()
@@ -619,20 +725,6 @@ int visAttrib2D(Display *dpy, int screen, VisualID vid, int attribute)
 		}
 	}
 	return 0;
-}
-
-
-int visAttrib3D(GLXFBConfig config, int attribute)
-{
-	int value = 0;
-	_glXGetFBConfigAttrib(DPY3D, config, attribute, &value);
-	return value;
-}
-
-
-int visAttrib3D(VGLFBConfig config, int attribute)
-{
-	return visAttrib3D(GLXFBC(config), attribute);
 }
 
 
@@ -665,6 +757,58 @@ VGLFBConfig *getFBConfigs(Display *dpy, int screen, int &nElements)
 }
 
 
+#ifdef EGLBACKEND
+
+static int compareFBConfig(const void *arg1, const void *arg2)
+{
+	VGLFBConfig *_c1 = (VGLFBConfig *)arg1, *_c2 = (VGLFBConfig *)arg2,
+		c1 = *_c1, c2 = *_c2;
+
+	// Prefer larger RGBA size
+	if(c1->bufSize != c2->bufSize)
+		return c2->bufSize - c1->bufSize;
+
+	// Prefer smaller sample count
+	if(c1->attr.samples != c2->attr.samples)
+		return c1->attr.samples - c2->attr.samples;
+
+	// Prefer larger depth buffer
+	if(c1->attr.depthSize != c2->attr.depthSize)
+		return c2->attr.depthSize - c1->attr.depthSize;
+
+	// Prefer smaller stencil buffer
+	if(c1->attr.stencilSize != c2->attr.stencilSize)
+		return c1->attr.stencilSize - c2->attr.stencilSize;
+
+	return 0;
+}
+
+static int compareFBConfigNoDepth(const void *arg1, const void *arg2)
+{
+	VGLFBConfig *_c1 = (VGLFBConfig *)arg1, *_c2 = (VGLFBConfig *)arg2,
+		c1 = *_c1, c2 = *_c2;
+
+	// Prefer smaller depth buffer
+	if(c1->attr.depthSize != c2->attr.depthSize)
+		return c1->attr.depthSize - c2->attr.depthSize;
+
+	return compareFBConfig(arg1, arg2);
+}
+
+#define PARSE_ATTRIB(name, var, min, max) \
+	case name: \
+		var = attribs[++i]; \
+		if(var < min || var > max) goto bailout; \
+		break;
+
+#define PARSE_ATTRIB_DC(name, var, min, max) \
+	case name: \
+		var = attribs[++i]; \
+		if(var != (int)GLX_DONT_CARE && (var < min || var > max)) goto bailout; \
+		break;
+
+#endif
+
 VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
 	int &nElements)
 {
@@ -673,24 +817,142 @@ VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
 
 	if(!dpy || screen < 0) return NULL;
 
-	glxConfigs = _glXChooseFBConfig(DPY3D, DefaultScreen(DPY3D), attribs,
-		&nElements);
-	if(!glxConfigs) goto bailout;
-
-	buildCfgAttribTable(dpy, screen);
-	GET_CA_TABLE()
-
-	configs = (VGLFBConfig *)calloc(nElements, sizeof(VGLFBConfig));
-	if(!configs) goto bailout;
-
-	for(int i = 0; i < nElements; i++)
+	#ifdef EGLBACKEND
+	if(fconfig.egl)
 	{
-		for(int j = 0; j < caEntries; j++)
+		int fbConfigID = GLX_DONT_CARE, doubleBuffer = GLX_DONT_CARE, redSize = 0,
+			greenSize = 0, blueSize = 0, alphaSize = 0, depthSize = 0,
+			stencilSize = 0, samples = 0, drawableType = GLX_WINDOW_BIT,
+			xRenderable = GLX_DONT_CARE, visualType = GLX_DONT_CARE, stereo = 0;
+
+		if(!attribs) return getFBConfigs(dpy, screen, nElements);
+
+		buildCfgAttribTable(dpy, screen);
+		GET_CA_TABLE()
+
+		for(int i = 0; attribs[i] != None; i++)
 		{
-			if(ca[j].glxConfig == glxConfigs[i])
+			switch(attribs[i])
 			{
-				configs[i] = &ca[j];
-				break;
+				PARSE_ATTRIB_DC(GLX_FBCONFIG_ID, fbConfigID, 1, caEntries)
+				PARSE_ATTRIB_DC(GLX_DOUBLEBUFFER, doubleBuffer, 0, 1)
+				PARSE_ATTRIB(GLX_STEREO, stereo, 0, 1)
+				PARSE_ATTRIB_DC(GLX_RED_SIZE, redSize, 0, 10)
+				PARSE_ATTRIB_DC(GLX_GREEN_SIZE, greenSize, 0, 10)
+				PARSE_ATTRIB_DC(GLX_BLUE_SIZE, blueSize, 0, 10)
+				PARSE_ATTRIB_DC(GLX_ALPHA_SIZE, alphaSize, 0, 8)
+				PARSE_ATTRIB(GLX_DEPTH_SIZE, depthSize, 0, 24)
+				PARSE_ATTRIB(GLX_STENCIL_SIZE, stencilSize, 0, 8)
+				PARSE_ATTRIB(GLX_SAMPLES, samples, 0, 64)
+				case GLX_DRAWABLE_TYPE:
+					drawableType = attribs[++i];
+					if(drawableType &
+						~(GLX_WINDOW_BIT | GLX_PIXMAP_BIT | GLX_PBUFFER_BIT))
+						goto bailout;
+					break;
+				PARSE_ATTRIB_DC(GLX_X_RENDERABLE, xRenderable, 0, 1)
+				PARSE_ATTRIB_DC(GLX_X_VISUAL_TYPE, visualType, GLX_TRUE_COLOR,
+					GLX_DIRECT_COLOR)
+
+				case GLX_LEVEL:
+				case GLX_AUX_BUFFERS:
+				case GLX_ACCUM_RED_SIZE:
+				case GLX_ACCUM_GREEN_SIZE:
+				case GLX_ACCUM_BLUE_SIZE:
+				case GLX_ACCUM_ALPHA_SIZE:
+					if(attribs[++i] != 0) goto bailout;
+					break;
+				case GLX_RENDER_TYPE:
+					if(attribs[++i] != GLX_RGBA_BIT) goto bailout;
+					break;
+				case GLX_CONFIG_CAVEAT:
+				case GLX_TRANSPARENT_TYPE:
+					if(attribs[++i] != GLX_NONE) goto bailout;
+					break;
+				default:
+					i++;
+			}
+		}
+
+		configs = (VGLFBConfig *)calloc(caEntries, sizeof(VGLFBConfig));
+		if(!configs) goto bailout;
+
+		nElements = 0;
+		for(int i = 0; i < caEntries; i++)
+		{
+			if(fbConfigID != (int)GLX_DONT_CARE && ca[i].id != fbConfigID)
+				continue;
+			if(doubleBuffer != (int)GLX_DONT_CARE
+				&& ca[i].attr.doubleBuffer != doubleBuffer)
+				continue;
+			if(ca[i].attr.stereo != stereo)
+				continue;
+			if(redSize && redSize != (int)GLX_DONT_CARE
+				&& ca[i].attr.redSize < redSize)
+				continue;
+			if(greenSize && greenSize != (int)GLX_DONT_CARE
+				&& ca[i].attr.greenSize < greenSize)
+				continue;
+			if(blueSize && blueSize != (int)GLX_DONT_CARE
+				&& ca[i].attr.blueSize < blueSize)
+				continue;
+			if(alphaSize && alphaSize != (int)GLX_DONT_CARE
+				&& ca[i].attr.alphaSize < alphaSize)
+				continue;
+			if(ca[i].attr.depthSize < depthSize)
+				continue;
+			if(ca[i].attr.stencilSize < stencilSize)
+				continue;
+			if(ca[i].attr.samples < samples)
+				continue;
+			if((drawableType & (GLX_PIXMAP_BIT | GLX_WINDOW_BIT)) && !ca[i].visualID)
+				continue;
+			if(xRenderable != (int)GLX_DONT_CARE
+				&& !!xRenderable != !!ca[i].visualID)
+				continue;
+			if(visualType != (int)GLX_DONT_CARE
+				&& ((visualType == GLX_TRUE_COLOR && ca[i].c_class != TrueColor)
+					|| (visualType == GLX_DIRECT_COLOR && ca[i].c_class != DirectColor)))
+				continue;
+
+			configs[nElements] = &ca[i];
+			configs[nElements++]->bufSize = ca[i].attr.redSize +
+				ca[i].attr.greenSize + ca[i].attr.blueSize +
+				(alphaSize && alphaSize != (int)GLX_DONT_CARE ?
+					ca[i].attr.alphaSize : 0);
+		}
+		if(!nElements)
+		{
+			_XFree(configs);  return NULL;
+		}
+
+		configs = (VGLFBConfig *)realloc(configs, nElements * sizeof(VGLFBConfig));
+		if(!configs) goto bailout;
+		qsort(configs, nElements, sizeof(VGLFBConfig),
+			depthSize == 0 ? compareFBConfigNoDepth : compareFBConfig);
+	}
+	else  // fconfig.egl
+	#endif
+	{
+		glxConfigs = _glXChooseFBConfig(DPY3D, DefaultScreen(DPY3D), attribs,
+			&nElements);
+		if(!glxConfigs) goto bailout;
+
+		buildCfgAttribTable(dpy, screen);
+		GET_CA_TABLE()
+
+		configs = (VGLFBConfig *)calloc(nElements, sizeof(VGLFBConfig));
+		if(!configs) goto bailout;
+
+		for(int i = 0; i < nElements; i++)
+		{
+			for(int j = 0; j < caEntries; j++)
+			{
+				if(ca[j].cfg.glx == glxConfigs[i])
+				{
+					configs[i] = &ca[j];
+					break;
+				}
 			}
 		}
 	}
@@ -712,22 +974,22 @@ VGLFBConfig getDefaultFBConfig(Display *dpy, int screen, VisualID vid)
 		{
 			if(va[i].config) return va[i].config;
 
-			if(va[i].ogl.doubleBuffer < 0 || va[i].ogl.alphaSize < 0
-				|| va[i].ogl.depthSize < 0 || va[i].ogl.stencilSize < 0
-				|| va[i].ogl.samples < 0)
+			if(va[i].glx.doubleBuffer < 0 || va[i].glx.alphaSize < 0
+				|| va[i].glx.depthSize < 0 || va[i].glx.stencilSize < 0
+				|| va[i].glx.samples < 0)
 				return NULL;
 
-			int glxattribs[] = { GLX_DOUBLEBUFFER, va[i].ogl.doubleBuffer,
+			int glxattribs[] = { GLX_DOUBLEBUFFER, va[i].glx.doubleBuffer,
 				GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8,
-				GLX_ALPHA_SIZE, va[i].ogl.alphaSize, GLX_RENDER_TYPE, GLX_RGBA_BIT,
+				GLX_ALPHA_SIZE, va[i].glx.alphaSize, GLX_RENDER_TYPE, GLX_RGBA_BIT,
 				GLX_STEREO, va[i].isStereo,
 				GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT |
-					(va[i].ogl.samples ? 0 : GLX_PIXMAP_BIT) | GLX_WINDOW_BIT,
+					(va[i].glx.samples ? 0 : GLX_PIXMAP_BIT) | GLX_WINDOW_BIT,
 				GLX_X_VISUAL_TYPE,
 				va[i].c_class == DirectColor ? GLX_DIRECT_COLOR : GLX_TRUE_COLOR,
-				GLX_DEPTH_SIZE, va[i].ogl.depthSize,
-				GLX_STENCIL_SIZE, va[i].ogl.stencilSize,
-				GLX_SAMPLES, va[i].ogl.samples, None };
+				GLX_DEPTH_SIZE, va[i].glx.depthSize,
+				GLX_STENCIL_SIZE, va[i].glx.stencilSize,
+				GLX_SAMPLES, va[i].glx.samples, None };
 			if(va[i].depth == 30 || (va[i].depth == 32 && va[i].bpc == 10))
 			{
 				glxattribs[3] = glxattribs[5] = glxattribs[7] = 10;
@@ -740,17 +1002,17 @@ VGLFBConfig getDefaultFBConfig(Display *dpy, int screen, VisualID vid)
 				// Make sure that the FB config actually has the requested
 				// attributes, i.e. that its attributes are unique among the
 				// list of visuals.  Otherwise, skip it.
-				int actualDB = visAttrib3D(configs[0], GLX_DOUBLEBUFFER);
-				int actualDepth = visAttrib3D(configs[0], GLX_DEPTH_SIZE);
+				int actualDB = getFBConfigAttrib(dpy, configs[0], GLX_DOUBLEBUFFER);
+				int actualDepth = getFBConfigAttrib(dpy, configs[0], GLX_DEPTH_SIZE);
 
-				if(configs[0]->alphaSize >= 0
-					&& !!configs[0]->alphaSize == !!va[i].ogl.alphaSize
-					&& !!actualDB == !!va[i].ogl.doubleBuffer
-					&& configs[0]->stencilSize >= 0
-					&& !!configs[0]->stencilSize == !!va[i].ogl.stencilSize
-					&& !!actualDepth == !!va[i].ogl.depthSize
-					&& configs[0]->samples >= 0
-					&& configs[0]->samples == va[i].ogl.samples)
+				if(configs[0]->attr.alphaSize >= 0
+					&& !!configs[0]->attr.alphaSize == !!va[i].glx.alphaSize
+					&& !!actualDB == !!va[i].glx.doubleBuffer
+					&& configs[0]->attr.stencilSize >= 0
+					&& !!configs[0]->attr.stencilSize == !!va[i].glx.stencilSize
+					&& !!actualDepth == !!va[i].glx.depthSize
+					&& configs[0]->attr.samples >= 0
+					&& configs[0]->attr.samples == va[i].glx.samples)
 				{
 					if(fconfig.trace)
 						vglout.println("[VGL] Visual 0x%.2x has default FB config 0x%.2x",

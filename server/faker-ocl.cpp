@@ -39,6 +39,8 @@ cl_context clCreateContext(const cl_context_properties *properties,
 				Display *dpy = (Display *)properties[i + 1];
 				if(dpy && !IS_EXCLUDED(dpy))
 				{
+					if(fconfig.egl)
+						THROW("OpenCL/OpenGL interoperability requires the GLX back end");
 					oclprops[j++] = (cl_context_properties)(DPY3D);
 					props = oclprops;
 				}

@@ -29,21 +29,23 @@ namespace vglfaker
 	{
 		public:
 
-			TempContext(GLXDrawable draw, GLXDrawable read, GLXContext ctx) :
-				oldctx(_glXGetCurrentContext()), oldread(_glXGetCurrentReadDrawable()),
-				olddraw(_glXGetCurrentDrawable()), ctxChanged(false)
+			TempContext(Display *dpy_, GLXDrawable draw, GLXDrawable read,
+				GLXContext ctx) : dpy(dpy_), oldctx(VGLGetCurrentContext()),
+				oldread(VGLGetCurrentReadDrawable()), olddraw(VGLGetCurrentDrawable()),
+				ctxChanged(false)
 			{
 				if(!ctx) THROW("Invalid argument");
 				if((read || draw)
 					&& (oldread != read  || olddraw != draw || oldctx != ctx))
 				{
-					if(!_glXMakeContextCurrent(DPY3D, draw, read, ctx))
+					if(!VGLMakeCurrent(dpy, draw, read, ctx))
 						THROW("Could not bind OpenGL context to window (window may have disappeared)");
 					// If oldctx has already been destroyed, then we don't want to
 					// restore it.  This can happen if the application is rendering to
 					// the front buffer and glXDestroyContext() is called to destroy the
 					// active context before glXMake*Current*() is called to switch it.
-					if(oldctx && ctxhash.findConfig(oldctx))
+					if((oldctx && ctxhash.findConfig(oldctx))
+						|| (!oldread && !olddraw && !oldctx))
 						ctxChanged = true;
 				}
 			}
@@ -52,13 +54,14 @@ namespace vglfaker
 			{
 				if(ctxChanged)
 				{
-					_glXMakeContextCurrent(DPY3D, olddraw, oldread, oldctx);
+					VGLMakeCurrent(dpy, olddraw, oldread, oldctx);
 					ctxChanged = false;
 				}
 			}
 
 		private:
 
+			Display *dpy;
 			GLXContext oldctx;
 			GLXDrawable oldread, olddraw;
 			bool ctxChanged;

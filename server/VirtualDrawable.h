@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2009-2015, 2017-2018, 2020 D. R. Commander
+// Copyright (C)2009-2015, 2017-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -41,6 +41,8 @@ namespace vglfaker
 			int getWidth(void) { return oglDraw ? oglDraw->getWidth() : -1; }
 			int getHeight(void) { return oglDraw ? oglDraw->getHeight() : -1; }
 			bool isInit(void) { return direct == True || direct == False; }
+			void setEventMask(unsigned long mask) { eventMask = mask; }
+			unsigned long getEventMask(void) { return eventMask; }
 
 		protected:
 
@@ -49,7 +51,7 @@ namespace vglfaker
 			{
 				public:
 
-					OGLDrawable(int width, int height, VGLFBConfig config);
+					OGLDrawable(Display *dpy, int width, int height, VGLFBConfig config);
 					OGLDrawable(int width, int height, int depth, VGLFBConfig config,
 						const int *attribs);
 					~OGLDrawable(void);
@@ -65,12 +67,11 @@ namespace vglfaker
 					int getHeight(void) { return height; }
 					int getDepth(void) { return depth; }
 					int getRGBSize(void) { return rgbSize; }
-					VGLFBConfig getConfig(void) { return config; }
+					VGLFBConfig getFBConfig(void) { return config; }
 					void clear(void);
 					void swap(void);
 					bool isStereo(void) { return stereo; }
 					GLenum getFormat(void) { return glFormat; }
-					XVisualInfo *getVisual(void);
 
 				private:
 
@@ -78,6 +79,7 @@ namespace vglfaker
 
 					bool cleared, stereo;
 					GLXDrawable glxDraw;
+					Display *dpy;
 					int width, height, depth, rgbSize;
 					VGLFBConfig config;
 					GLenum glFormat;
@@ -103,6 +105,7 @@ namespace vglfaker
 			bool usePBO;
 			bool alreadyPrinted, alreadyWarned, alreadyWarnedRenderMode;
 			const char *ext;
+			unsigned long eventMask;
 	};
 }
 

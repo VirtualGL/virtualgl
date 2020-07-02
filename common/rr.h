@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005-2007 Sun Microsystems, Inc.
- * Copyright (C)2009-2013, 2015-2019 D. R. Commander
+ * Copyright (C)2009-2013, 2015-2020 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -138,10 +138,6 @@ enum rrstereo
   RRSTEREO_TOPBOTTOM, RRSTEREO_SIDEBYSIDE
 };
 
-/* 3D drawable options */
-#define RR_DRAWABLEOPT  2
-enum rrdrawable { RRDRAWABLE_PBUFFER = 0, RRDRAWABLE_PIXMAP };
-
 /* Other */
 #define RR_DEFAULTPORT  4242
 #ifdef USESSL
@@ -167,7 +163,10 @@ typedef struct _FakerConfig
   char config[MAXSTR];
   char defaultfbconfig[MAXSTR];
   char dlsymloader;
-  char drawable;
+  char egl;
+  #ifdef EGLBACKEND
+  char egllib[MAXSTR];
+  #endif
   double flushdelay;
   int forcealpha;
   double fps;

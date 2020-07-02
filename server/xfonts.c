@@ -130,7 +130,7 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
 
    try {
 
-   GLXDrawable draw = _glXGetCurrentDrawable();
+   GLXDrawable draw = VGLGetCurrentDrawable();
    if (!draw) return;
    if ((pbw = winhash.find(NULL, draw)) != NULL) {
       /* Current drawable is a virtualized Window */
@@ -174,7 +174,7 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
 
    fs = XQueryFont(dpy, font);
    if (!fs) {
-      vglfaker::sendGLXError(X_GLXUseXFont, BadFont, true);
+      vglfaker::sendGLXError(dpy, X_GLXUseXFont, BadFont, true);
       return;
    }
 

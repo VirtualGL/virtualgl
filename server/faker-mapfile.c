@@ -8,6 +8,7 @@
 		glXDestroyContext;
 		glXDestroyGLXPixmap;
 		glXGetConfig;
+		glXGetCurrentContext;
 		glXGetCurrentDrawable;
 		glXIsDirect;
 		glXMakeCurrent;
@@ -88,13 +89,21 @@
 		glXSelectEventSGIX;
 
 		/* OpenGL */
+		glBindFramebuffer;
+		glBindFramebufferEXT;
 		glFinish;
 		glFlush;
 		glDrawBuffer;
 		glDrawBuffers;
+		glGetBooleanv;
+		glGetDoublev;
+		glGetFloatv;
+		glGetIntegerv;
+		glGetInteger64v;
 		glGetString;
 		glGetStringi;
 		glPopAttrib;
+		glReadBuffer;
 		glViewport;
 
 		/* OpenCL */

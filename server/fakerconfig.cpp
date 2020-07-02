@@ -192,6 +192,7 @@ static void fconfig_init(void)
 	fconfig.transpixel = -1;
 	fconfig_reloadenv();
 	#ifdef USEHELGRIND
+	ANNOTATE_BENIGN_RACE_SIZED(&fconfig.egl, sizeof(bool), );
 	ANNOTATE_BENIGN_RACE_SIZED(&fconfig.flushdelay, sizeof(double), );
 	#endif
 }
@@ -330,22 +331,13 @@ void fconfig_reloadenv(void)
 			strncpy(fconfig.localdpystring, env, MAXSTR - 1);
 			strncpy(fconfig_env.localdpystring, env, MAXSTR - 1);
 		}
+		if((env[0] == '/' || !strnicmp(env, "EGL", 3)))
+			fconfig.egl = true;
 	}
 	FETCHENV_BOOL("VGL_DLSYM", dlsymloader);
-	if((env = getenv("VGL_DRAWABLE")) != NULL && strlen(env) > 0)
-	{
-		int drawable = -1;
-		if(!strnicmp(env, "PB", 2)) drawable = RRDRAWABLE_PBUFFER;
-		else if(!strnicmp(env, "PI", 2)) drawable = RRDRAWABLE_PIXMAP;
-		else
-		{
-			char *t = NULL;  int itemp = strtol(env, &t, 10);
-			if(t && t != env && itemp >= 0 && itemp < RR_DRAWABLEOPT)
-				drawable = itemp;
-		}
-		if(drawable >= 0 && (!fconfig_envset || fconfig_env.drawable != drawable))
-			fconfig.drawable = fconfig_env.drawable = drawable;
-	}
+	#ifdef EGLBACKEND
+	FETCHENV_STR("VGL_EGLLIB", egllib);
+	#endif
 	FETCHENV_STR("VGL_EXCLUDE", excludeddpys);
 	#ifdef FAKEXCB
 	FETCHENV_BOOL("VGL_FAKEXCB", fakeXCB);
@@ -606,7 +598,10 @@ void fconfig_print(FakerConfig &fc)
 	PRCONF_STR(config);
 	PRCONF_STR(defaultfbconfig);
 	PRCONF_INT(dlsymloader);
-	PRCONF_INT(drawable);
+	#ifdef EGLBACKEND
+	PRCONF_INT(egl);
+	PRCONF_STR(egllib);
+	#endif
 	PRCONF_STR(excludeddpys);
 	PRCONF_DBL(fps);
 	PRCONF_DBL(flushdelay);

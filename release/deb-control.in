@@ -7,7 +7,7 @@ Essential: no
 Maintainer: @PKGVENDOR@ <@PKGEMAIL@>
 Homepage: @PKGURL@
 Installed-Size: {__SIZE}
-Depends: libxtst6:@DEBARCH@, libxv1:@DEBARCH@, libglu1-mesa:@DEBARCH@
+Depends: libxtst6:@DEBARCH@, libxv1:@DEBARCH@, libglu1-mesa:@DEBARCH@@EGLDEPENDS@
 Description: A toolkit for displaying OpenGL applications to thin clients
  VirtualGL is a toolkit that allows most Linux/Unix OpenGL applications to be
  remotely displayed with 3D hardware acceleration to thin clients, regardless

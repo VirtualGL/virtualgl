@@ -253,6 +253,56 @@ bool stereoTest(void)
 }
 
 
+#define GLGET_TEST(param) \
+{ \
+	GLenum err; \
+	GLint ival = -1; \
+	glGetIntegerv(param, &ival); \
+	if(glGetError() != GL_NO_ERROR) \
+		THROW("OpenGL error in glGetIntegerv()\n"); \
+	\
+	GLboolean bval = -1; \
+	glGetBooleanv(param, &bval); \
+	if((err = glGetError()) != GL_NO_ERROR) \
+		PRERROR1("OpenGL error 0x%.4x in glGetBooleanv()\n", err); \
+	if(bval != (ival == 0 ? GL_FALSE : GL_TRUE)) \
+		PRERROR3("glGetBooleanv(0x%.4x) %d != %d", param, bval, ival); \
+	\
+	GLdouble dval = -1; \
+	glGetDoublev(param, &dval); \
+	if((err = glGetError()) != GL_NO_ERROR) \
+		PRERROR1("OpenGL error 0x%.4x in glGetDoublev()\n", err); \
+	if(dval != (GLdouble)ival) \
+		PRERROR3("glGetDoublev(0x%.4x) %f != %f", param, dval, (GLdouble)ival); \
+	\
+	GLfloat fval = -1; \
+	glGetFloatv(param, &fval); \
+	if((err = glGetError()) != GL_NO_ERROR) \
+		PRERROR1("OpenGL error 0x%.4x in glGetFloatv()\n", err); \
+	if(fval != (GLfloat)ival) \
+		PRERROR3("glGetFloatv(0x%.4x) %f != %f\n", param, fval, (GLfloat)ival); \
+	\
+	GLint64 ival64 = -1; \
+	glGetInteger64v(param, &ival64); \
+	if((err = glGetError()) != GL_NO_ERROR) \
+		PRERROR1("OpenGL error 0x%.4x in glGetInteger64v()\n", err); \
+	if(ival64 != (GLint64)ival) \
+		PRERROR3("glGetInteger64v(0x%.4x) %ld != %d\n", param, ival64, ival); \
+}
+
+void glGetTest(void)
+{
+	GLGET_TEST(GL_DOUBLEBUFFER);
+	GLGET_TEST(GL_DRAW_BUFFER);
+	GLGET_TEST(GL_DRAW_BUFFER0);
+	GLGET_TEST(GL_DRAW_FRAMEBUFFER_BINDING);
+	GLGET_TEST(GL_MAX_DRAW_BUFFERS);
+	GLGET_TEST(GL_READ_BUFFER);
+	GLGET_TEST(GL_READ_FRAMEBUFFER_BINDING);
+	GLGET_TEST(GL_STEREO);
+}
+
+
 typedef struct
 {
 	GLfloat r, g, b;
@@ -374,6 +424,7 @@ int readbackTest(bool stereo)
 		}
 		if(!doubleBufferTest())
 			THROW("Double buffering appears to be broken");
+		glGetTest();
 		glReadBuffer(GL_BACK);
 
 		if(!glXMakeContextCurrent(dpy, win1, win0, ctx1))
@@ -1061,6 +1112,7 @@ int visTest(void)
 											rgbattrib13[23] = accum;
 										rgbattrib[15] = rgbattrib[17] = rgbattrib[19] = accum;
 										if(alpha) { rgbattrib13[25] = rgbattrib[21] = accum; }
+										else { rgbattrib13[25] = rgbattrib[21] = 0; }
 
 										for(int samples = 0; samples <= 16;
 											samples == 0 ? samples = 1 : samples *= 2)
@@ -2994,6 +3046,7 @@ int procAddrTest(void)
 		TEST_PROC_SYM(glXDestroyContext)
 		TEST_PROC_SYM(glXDestroyGLXPixmap)
 		TEST_PROC_SYM(glXGetConfig)
+		TEST_PROC_SYM(glXGetCurrentContext)
 		TEST_PROC_SYM(glXGetCurrentDrawable)
 		TEST_PROC_SYM(glXIsDirect)
 		TEST_PROC_SYM(glXMakeCurrent)
@@ -3037,13 +3090,21 @@ int procAddrTest(void)
 		TEST_PROC_SYM(glXGetProcAddressARB)
 
 		// OpenGL
+		TEST_PROC_SYM(glBindFramebuffer)
+		TEST_PROC_SYM(glBindFramebufferEXT)
 		TEST_PROC_SYM(glFinish)
 		TEST_PROC_SYM(glFlush)
 		TEST_PROC_SYM(glDrawBuffer)
 		TEST_PROC_SYM(glDrawBuffers)
+		TEST_PROC_SYM(glGetBooleanv)
+		TEST_PROC_SYM(glGetDoublev)
+		TEST_PROC_SYM(glGetFloatv)
+		TEST_PROC_SYM(glGetIntegerv)
+		TEST_PROC_SYM(glGetInteger64v)
 		TEST_PROC_SYM(glGetString)
 		TEST_PROC_SYM(glGetStringi)
 		TEST_PROC_SYM(glPopAttrib)
+		TEST_PROC_SYM(glReadBuffer)
 		TEST_PROC_SYM(glViewport)
 
 		printf("SUCCESS!\n");

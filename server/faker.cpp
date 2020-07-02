@@ -15,6 +15,11 @@
 #include <unistd.h>
 #include "Mutex.h"
 #include "ContextHash.h"
+#ifdef EGLBACKEND
+#include "EGLConfigHash.h"
+#include "EGLContextHash.h"
+#include "EGLPbufferHash.h"
+#endif
 #include "GLXDrawableHash.h"
 #include "GlobalCriticalSection.h"
 #include "PixmapHash.h"
@@ -49,6 +54,11 @@ static void cleanup(void)
 	if(ContextHash::isAlloc()) ctxhash.kill();
 	if(GLXDrawableHash::isAlloc()) glxdhash.kill();
 	if(WindowHash::isAlloc()) winhash.kill();
+	#ifdef EGLBACKEND
+	if(EGLPbufferHash::isAlloc()) epbhash.kill();
+	if(EGLContextHash::isAlloc()) ectxhash.kill();
+	if(EGLConfigHash::isAlloc()) ecfghash.kill();
+	#endif
 	free(glExtensions);
 	unloadSymbols();
 }
@@ -103,25 +113,27 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 }
 
 
-void sendGLXError(unsigned short minorCode, unsigned char errorCode,
+void sendGLXError(Display *dpy, CARD16 minorCode, CARD8 errorCode,
 	bool x11Error)
 {
 	xError error;
 	int majorCode, errorBase, dummy;
 
-	ERRIFNOT(_XQueryExtension(DPY3D, "GLX", &majorCode, &dummy, &errorBase));
+	ERRIFNOT(VGLQueryExtension(dpy, &majorCode, &dummy, &errorBase));
 
-	LockDisplay(dpy3D);
+	if(!fconfig.egl) dpy = DPY3D;
+
+	LockDisplay(dpy);
 
 	error.type = X_Error;
 	error.errorCode = x11Error ? errorCode : errorBase + errorCode;
-	error.sequenceNumber = dpy3D->request;
+	error.sequenceNumber = dpy->request;
 	error.resourceID = 0;
 	error.minorCode = minorCode;
 	error.majorCode = majorCode;
-	_XError(dpy3D, &error);
+	_XError(dpy, &error);
 
-	UnlockDisplay(dpy3D);
+	UnlockDisplay(dpy);
 }
 
 
@@ -161,16 +173,71 @@ Display *init3D(void)
 		GlobalCriticalSection::SafeLock l(globalMutex);
 		if(!dpy3D)
 		{
-			if(fconfig.verbose)
-				vglout.println("[VGL] Opening connection to 3D X server %s",
-					strlen(fconfig.localdpystring) > 0 ?
-					fconfig.localdpystring : "(default)");
-			if((dpy3D = _XOpenDisplay(fconfig.localdpystring)) == NULL)
+			#ifdef EGLBACKEND
+			if(fconfig.egl)
 			{
-				vglout.print("[VGL] ERROR: Could not open display %s.\n",
-					fconfig.localdpystring);
-				safeExit(1);
-				return NULL;
+				int numDevices = 0, i;
+				const char *exts = NULL;
+				EGLDeviceEXT *devices = NULL;
+
+				if(fconfig.verbose)
+					vglout.println("[VGL] Opening EGL device %s",
+						strlen(fconfig.localdpystring) > 0 ?
+						fconfig.localdpystring : "(default)");
+
+				try
+				{
+					if(!(exts = _eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS)))
+						THROW("Could not query EGL extensions");
+					if(!strstr(exts, "EGL_EXT_platform_device"))
+						THROW("EGL_EXT_platform_device extension not available");
+
+					if(!_eglQueryDevicesEXT(0, NULL, &numDevices) || numDevices < 1)
+						THROW("No EGL devices found");
+					if((devices =
+						(EGLDeviceEXT *)malloc(sizeof(EGLDeviceEXT) * numDevices)) == NULL)
+						THROW("Memory allocation failure");
+					if(!_eglQueryDevicesEXT(numDevices, devices, &numDevices)
+						|| numDevices < 1)
+						THROW("Could not query EGL devices");
+					for(i = 0; i < numDevices; i++)
+					{
+						const char *devStr =
+							_eglQueryDeviceStringEXT(devices[i], EGL_DRM_DEVICE_FILE_EXT);
+						if(!strcasecmp(fconfig.localdpystring, "egl")
+							|| (devStr && !strcmp(devStr, fconfig.localdpystring)))
+							break;
+					}
+					if(i == numDevices) THROW("Invalid EGL device");
+
+					if(!(dpy3D =
+						(Display *)_eglGetPlatformDisplayEXT(EGL_PLATFORM_DEVICE_EXT,
+							devices[i], NULL)))
+						THROW("Could not open EGL display");
+					free(devices);  devices = NULL;
+					if(!_eglInitialize((EGLDisplay)dpy3D, NULL, NULL))
+						THROW("Could not initialize EGL");
+				}
+				catch(...)
+				{
+					if(devices) free(devices);
+					throw;
+				}
+			}
+			else  // fconfig.egl
+			#endif
+			{
+				if(fconfig.verbose)
+					vglout.println("[VGL] Opening connection to 3D X server %s",
+						strlen(fconfig.localdpystring) > 0 ?
+						fconfig.localdpystring : "(default)");
+				if((dpy3D = _XOpenDisplay(fconfig.localdpystring)) == NULL)
+				{
+					vglout.print("[VGL] ERROR: Could not open display %s.\n",
+						fconfig.localdpystring);
+					safeExit(1);
+					return NULL;
+				}
 			}
 		}
 	}

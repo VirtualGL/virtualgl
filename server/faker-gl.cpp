@@ -22,7 +22,7 @@
 
 static void doGLReadback(bool spoilLast, bool sync)
 {
-	GLXDrawable drawable = _glXGetCurrentDrawable();
+	GLXDrawable drawable = VGLGetCurrentDrawable();
 	if(!drawable) return;
 
 	vglfaker::VirtualWin *vw;
@@ -116,6 +116,32 @@ void glXWaitGL(void)
 }
 
 
+void glBindFramebuffer(GLenum target, GLuint framebuffer)
+{
+	if(vglfaker::getExcludeCurrent())
+	{
+		_glBindFramebuffer(target, framebuffer);
+		return;
+	}
+
+	TRY();
+
+		OPENTRACE(glBindFrameBuffer);  PRARGX(target);  PRARGI(framebuffer);
+		STARTTRACE();
+
+	VGLBindFramebuffer(target, framebuffer);
+
+		STOPTRACE();  CLOSETRACE();
+
+	CATCH();
+}
+
+void glBindFramebufferEXT(GLenum target, GLuint framebuffer)
+{
+	glBindFramebuffer(target, framebuffer);
+}
+
+
 // If the application is rendering to the front buffer and switches the draw
 // buffer before calling glFlush()/glFinish()/glXWaitGL(), we set a lazy
 // readback trigger to indicate that the front buffer needs to be read back
@@ -131,19 +157,19 @@ void glDrawBuffer(GLenum mode)
 
 	vglfaker::VirtualWin *vw;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
-	GLXDrawable drawable = _glXGetCurrentDrawable();
+	GLXDrawable drawable = VGLGetCurrentDrawable();
 
 	if(drawable && (vw = winhash.find(NULL, drawable)) != NULL)
 	{
 		before = DrawingToFront();
 		rbefore = DrawingToRight();
-		_glDrawBuffer(mode);
+		VGLDrawBuffer(mode);
 		after = DrawingToFront();
 		rafter = DrawingToRight();
 		if(before && !after) vw->dirty = true;
 		if(rbefore && !rafter && vw->isStereo()) vw->rdirty = true;
 	}
-	else _glDrawBuffer(mode);
+	else VGLDrawBuffer(mode);
 
 		STOPTRACE();
 		if(drawable && vw)
@@ -171,19 +197,19 @@ void glDrawBuffers(GLsizei n, const GLenum *bufs)
 
 	vglfaker::VirtualWin *vw = NULL;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
-	GLXDrawable drawable = _glXGetCurrentDrawable();
+	GLXDrawable drawable = VGLGetCurrentDrawable();
 
 	if(drawable && (vw = winhash.find(NULL, drawable)) != NULL)
 	{
 		before = DrawingToFront();
 		rbefore = DrawingToRight();
-		_glDrawBuffers(n, bufs);
+		VGLDrawBuffers(n, bufs);
 		after = DrawingToFront();
 		rafter = DrawingToRight();
 		if(before && !after) vw->dirty = true;
 		if(rbefore && !rafter && vw->isStereo()) vw->rdirty = true;
 	}
-	else _glDrawBuffers(n, bufs);
+	else VGLDrawBuffers(n, bufs);
 
 		STOPTRACE();
 		if(drawable && vw)
@@ -191,6 +217,154 @@ void glDrawBuffers(GLsizei n, const GLenum *bufs)
 			PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
 		}
 		CLOSETRACE();
+
+	CATCH();
+}
+
+
+void glGetBooleanv(GLenum pname, GLboolean *data)
+{
+	if(vglfaker::getExcludeCurrent() || !data || !fconfig.egl)
+	{
+		_glGetBooleanv(pname, data);  return;
+	}
+
+	TRY();
+
+	switch(pname)
+	{
+		case GL_DOUBLEBUFFER:
+		case GL_DRAW_BUFFER:
+		case GL_DRAW_BUFFER0:
+		case GL_DRAW_FRAMEBUFFER_BINDING:
+		case GL_MAX_DRAW_BUFFERS:
+		case GL_READ_BUFFER:
+		case GL_READ_FRAMEBUFFER_BINDING:
+		case GL_STEREO:
+		{
+			GLint val = -1;
+			VGLGetIntegerv(pname, &val);
+			*data = (val == 0 ? GL_FALSE : GL_TRUE);
+			break;
+		}
+		default:
+			_glGetBooleanv(pname, data);
+	}
+
+	CATCH();
+}
+
+
+void glGetDoublev(GLenum pname, GLdouble *data)
+{
+	if(vglfaker::getExcludeCurrent() || !data || !fconfig.egl)
+	{
+		_glGetDoublev(pname, data);  return;
+	}
+
+	TRY();
+
+	switch(pname)
+	{
+		case GL_DOUBLEBUFFER:
+		case GL_DRAW_BUFFER:
+		case GL_DRAW_BUFFER0:
+		case GL_DRAW_FRAMEBUFFER_BINDING:
+		case GL_MAX_DRAW_BUFFERS:
+		case GL_READ_BUFFER:
+		case GL_READ_FRAMEBUFFER_BINDING:
+		case GL_STEREO:
+		{
+			GLint val = -1;
+			VGLGetIntegerv(pname, &val);
+			*data = (GLdouble)val;
+			break;
+		}
+		default:
+			_glGetDoublev(pname, data);
+	}
+
+	CATCH();
+}
+
+
+void glGetFloatv(GLenum pname, GLfloat *data)
+{
+	if(vglfaker::getExcludeCurrent() || !data || !fconfig.egl)
+	{
+		_glGetFloatv(pname, data);  return;
+	}
+
+	TRY();
+
+	switch(pname)
+	{
+		case GL_DOUBLEBUFFER:
+		case GL_DRAW_BUFFER:
+		case GL_DRAW_BUFFER0:
+		case GL_DRAW_FRAMEBUFFER_BINDING:
+		case GL_MAX_DRAW_BUFFERS:
+		case GL_READ_BUFFER:
+		case GL_READ_FRAMEBUFFER_BINDING:
+		case GL_STEREO:
+		{
+			GLint val = -1;
+			VGLGetIntegerv(pname, &val);
+			*data = (GLfloat)val;
+			break;
+		}
+		default:
+			_glGetFloatv(pname, data);
+	}
+
+	CATCH();
+}
+
+
+void glGetIntegerv(GLenum pname, GLint *params)
+{
+	if(vglfaker::getExcludeCurrent()) { _glGetIntegerv(pname, params);  return; }
+
+	TRY();
+
+		OPENTRACE(glGetIntegerv);  PRARGX(pname);  STARTTRACE();
+
+	VGLGetIntegerv(pname, params);
+
+		STOPTRACE();  if(params) PRARGI(params[0]);  CLOSETRACE();
+
+	CATCH();
+}
+
+
+void glGetInteger64v(GLenum pname, GLint64 *data)
+{
+	if(vglfaker::getExcludeCurrent() || !data || !fconfig.egl)
+	{
+		_glGetInteger64v(pname, data);  return;
+	}
+
+	TRY();
+
+	switch(pname)
+	{
+		case GL_DOUBLEBUFFER:
+		case GL_DRAW_BUFFER:
+		case GL_DRAW_BUFFER0:
+		case GL_DRAW_FRAMEBUFFER_BINDING:
+		case GL_MAX_DRAW_BUFFERS:
+		case GL_READ_BUFFER:
+		case GL_READ_FRAMEBUFFER_BINDING:
+		case GL_STEREO:
+		{
+			GLint val = -1;
+			VGLGetIntegerv(pname, &val);
+			*data = (GLint64)val;
+			break;
+		}
+		default:
+			_glGetInteger64v(pname, data);
+	}
 
 	CATCH();
 }
@@ -268,7 +442,7 @@ void glPopAttrib(void)
 
 	vglfaker::VirtualWin *vw;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
-	GLXDrawable drawable = _glXGetCurrentDrawable();
+	GLXDrawable drawable = VGLGetCurrentDrawable();
 
 	if(drawable && (vw = winhash.find(NULL, drawable)) != NULL)
 	{
@@ -293,6 +467,22 @@ void glPopAttrib(void)
 }
 
 
+void glReadBuffer(GLenum mode)
+{
+	if(vglfaker::getExcludeCurrent()) { _glReadBuffer(mode);  return; }
+
+	TRY();
+
+		OPENTRACE(glReadBuffer);  PRARGX(mode);  STARTTRACE();
+
+	VGLReadBuffer(mode);
+
+		STOPTRACE();  CLOSETRACE();
+
+	CATCH();
+}
+
+
 // Sometimes XNextEvent() is called from a thread other than the
 // rendering thread, so we wait until glViewport() is called and
 // take that opportunity to resize the off-screen drawable.
@@ -309,10 +499,10 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 		OPENTRACE(glViewport);  PRARGI(x);  PRARGI(y);  PRARGI(width);
 		PRARGI(height);  STARTTRACE();
 
-	GLXContext ctx = _glXGetCurrentContext();
-	GLXDrawable draw = _glXGetCurrentDrawable();
-	GLXDrawable read = _glXGetCurrentReadDrawable();
-	Display *dpy = _glXGetCurrentDisplay();
+	GLXContext ctx = VGLGetCurrentContext();
+	GLXDrawable draw = VGLGetCurrentDrawable();
+	GLXDrawable read = VGLGetCurrentReadDrawable();
+	Display *dpy = VGLGetCurrentDisplay();
 	GLXDrawable newRead = 0, newDraw = 0;
 
 	if(dpy && (draw || read) && ctx && ctxhash.findConfig(ctx))
@@ -326,7 +516,7 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 		if(readVW) newRead = readVW->updateGLXDrawable();
 		if(newRead != read || newDraw != draw)
 		{
-			_glXMakeContextCurrent(dpy, newDraw, newRead, ctx);
+			VGLMakeCurrent(dpy, newDraw, newRead, ctx);
 			if(drawVW) { drawVW->clear();  drawVW->cleanup(); }
 			if(readVW) readVW->cleanup();
 		}

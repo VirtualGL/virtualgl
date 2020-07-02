@@ -550,8 +550,11 @@ Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
 
 		OPENTRACE(XQueryExtension);  PRARGD(dpy);  PRARGS(name);  STARTTRACE();
 
-	if(!strcmp(name, "GLX")) dpy = DPY3D;
-	retval = _XQueryExtension(dpy, name, major_opcode, first_event, first_error);
+	if(!strcmp(name, "GLX"))
+		retval = VGLQueryExtension(dpy, major_opcode, first_event, first_error);
+	else
+		retval = _XQueryExtension(dpy, name, major_opcode, first_event,
+			first_error);
 
 		STOPTRACE();  if(major_opcode) PRARGI(*major_opcode);
 		if(first_event) PRARGI(*first_event);

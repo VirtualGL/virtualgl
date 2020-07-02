@@ -44,6 +44,7 @@
 # Path under which docs should be installed
 %define docdir %{_defaultdocdir}/%{name}-%{version}
 
+%define eglbackend @VGL_EGLBACKEND@
 %define fakeopencl @VGL_FAKEOPENCL@
 
 Summary: A toolkit for displaying OpenGL applications to thin clients
@@ -206,6 +207,9 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %{bindir}/tcbench
 %{bindir}/nettest
 %{bindir}/cpustat
+%if %{eglbackend}
+	%{bindir}/eglinfo
+%endif
 %{bindir}/glxinfo
 %{bindir}/vglclient
 %{bindir}/vglconfig

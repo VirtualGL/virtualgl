@@ -28,6 +28,7 @@ BIN=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
 LIB=@CMAKE_LIBRARY_OUTPUT_DIRECTORY@
 SSL=@VGL_USESSL@
 FAKEOPENCL=@VGL_FAKEOPENCL@
+EGLBACKEND=@VGL_EGLBACKEND@
 
 NODL=
 FAKERUTARGS=
@@ -90,7 +91,7 @@ if [ "$GLVND" = "1" ]; then
 	DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut --glvnd
 	DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut --prefix test --glvnd
 fi
-if [ "$FAKEOPENCL" = "1" ]; then
+if [ "$FAKEOPENCL" = "1" -a ! "$EGLBACKEND" = "1" ]; then
 	DISPLAY=:42 $BIN/vglrun +ocl $BIN/dlfakerut
 	DISPLAY=:42 $BIN/vglrun +ocl $BIN/dlfakerut --prefix test
 fi

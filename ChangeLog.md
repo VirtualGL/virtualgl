@@ -37,6 +37,15 @@ simultaneously resized in another thread.
 in 2.6.3[2] and 2.6.4[1] were not returned from the interposed
 `glXGetProcAddress()` and `glXGetProcAddressARB()` functions.
 
+5. The VirtualGL Faker now includes an EGL back end that optionally emulates
+the GLX API using a combination of the EGL API (with the
+`EGL_EXT_platform_device` extension) and OpenGL renderbuffer objects (RBOs.)
+On supported platforms, the EGL back end allows the VirtualGL Faker to be used
+without a 3D X server.  The EGL back end can be activated by setting the
+`VGL_DISPLAY` environment variable to the path of a DRI device, such as
+/dev/dri/card0, or by passing that device path to `vglrun` using the `-d`
+argument.
+
 
 2.6.4
 =====

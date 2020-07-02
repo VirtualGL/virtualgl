@@ -44,12 +44,17 @@ int VirtualPixmap::init(int width, int height, int depth, VGLFBConfig config_,
 	CriticalSection::SafeLock l(mutex);
 	if(oglDraw && oglDraw->getWidth() == width && oglDraw->getHeight() == height
 		&& oglDraw->getDepth() == depth
-		&& FBCID(oglDraw->getConfig()) == FBCID(config_))
+		&& FBCID(oglDraw->getFBConfig()) == FBCID(config_))
 		return 0;
-	oglDraw = new OGLDrawable(width, height, depth, config_, attribs);
+	#ifdef EGLBACKEND
+	if(fconfig.egl)
+		oglDraw = new OGLDrawable(dpy, width, height, config_);
+	else
+	#endif
+		oglDraw = new OGLDrawable(width, height, depth, config_, attribs);
 	if(config && FBCID(config_) != FBCID(config) && ctx)
 	{
-		_glXDestroyContext(DPY3D, ctx);  ctx = 0;
+		VGLDestroyContext(dpy, ctx);  ctx = 0;
 	}
 	config = config_;
 	return 1;
