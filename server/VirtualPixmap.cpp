@@ -1,4 +1,4 @@
-// Copyright (C)2011, 2013-2014, 2017, 2019 D. R. Commander
+// Copyright (C)2011, 2013-2014, 2017, 2019-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -17,7 +17,7 @@
 
 using namespace vglutil;
 using namespace vglcommon;
-using namespace vglserver;
+using namespace vglfaker;
 
 
 VirtualPixmap::VirtualPixmap(Display *dpy_, Visual *visual, Pixmap pm) :

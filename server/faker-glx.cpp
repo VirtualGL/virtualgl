@@ -28,9 +28,6 @@
 #include <X11/Xmd.h>
 #include <GL/glxproto.h>
 
-using namespace vglutil;
-using namespace vglserver;
-
 
 // This emulates the behavior of the nVidia drivers
 #define VGL_MAX_SWAP_INTERVAL  8
@@ -61,14 +58,14 @@ static INLINE VGLFBConfig matchConfig(Display *dpy, XVisualInfo *vis)
 
 GLXDrawable ServerDrawable(Display *dpy, GLXDrawable draw)
 {
-	VirtualWin *vw;
+	vglfaker::VirtualWin *vw;
 	if((vw = winhash.find(dpy, draw)) != NULL)
 		return vw->getGLXDrawable();
 	else return draw;
 }
 
 
-void setWMAtom(Display *dpy, Window win, VirtualWin *vw)
+void setWMAtom(Display *dpy, Window win, vglfaker::VirtualWin *vw)
 {
 	Atom *protocols = NULL, *newProtocols = NULL;  int count = 0;
 
@@ -485,7 +482,7 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 {
 	GLXPixmap drawable = 0;  VGLFBConfig config = 0;
 	int x = 0, y = 0;  unsigned int width = 0, height = 0, depth = 0;
-	VirtualPixmap *vpm = NULL;
+	vglfaker::VirtualPixmap *vpm = NULL;
 
 	TRY();
 
@@ -507,7 +504,7 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 		vglfaker::sendGLXError(X_GLXCreateGLXPixmap, BadPixmap, true);
 		goto done;
 	}
-	if((vpm = new VirtualPixmap(dpy, vis->visual, pm)) != NULL)
+	if((vpm = new vglfaker::VirtualPixmap(dpy, vis->visual, pm)) != NULL)
 	{
 		// Hash the VirtualPixmap instance to the 2D pixmap and also hash the 2D X
 		// display handle to the 3D pixmap.
@@ -531,7 +528,7 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config_, Pixmap pm,
 {
 	GLXPixmap drawable = 0;
 	VGLFBConfig config = (VGLFBConfig)config_;
-	VirtualPixmap *vpm = NULL;
+	vglfaker::VirtualPixmap *vpm = NULL;
 	XVisualInfo *vis = NULL;
 
 	TRY();
@@ -563,7 +560,7 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config_, Pixmap pm,
 	if((vis = glxvisual::visualFromID(dpy, config->screen,
 		config->visualID)) != NULL)
 	{
-		vpm = new VirtualPixmap(dpy, vis->visual, pm);
+		vpm = new vglfaker::VirtualPixmap(dpy, vis->visual, pm);
 		XFree(vis);
 	}
 	if(vpm)
@@ -595,7 +592,7 @@ GLXPixmap glXCreateGLXPixmapWithConfigSGIX(Display *dpy,
 GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config_, Window win,
 	const int *attrib_list)
 {
-	VirtualWin *vw = NULL;
+	vglfaker::VirtualWin *vw = NULL;
 	VGLFBConfig config = (VGLFBConfig)config_;
 
 	TRY();
@@ -714,7 +711,7 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 
 		OPENTRACE(glXDestroyGLXPixmap);  PRARGD(dpy);  PRARGX(pix);  STARTTRACE();
 
-	VirtualPixmap *vpm = pmhash.find(dpy, pix);
+	vglfaker::VirtualPixmap *vpm = pmhash.find(dpy, pix);
 	if(vpm && vpm->isInit()) vpm->readback();
 
 	if(pix) glxdhash.remove(pix);
@@ -737,7 +734,7 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 
 		OPENTRACE(glXDestroyPixmap);  PRARGD(dpy);  PRARGX(pix);  STARTTRACE();
 
-	VirtualPixmap *vpm = pmhash.find(dpy, pix);
+	vglfaker::VirtualPixmap *vpm = pmhash.find(dpy, pix);
 	if(vpm && vpm->isInit()) vpm->readback();
 
 	if(pix) glxdhash.remove(pix);
@@ -931,7 +928,7 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 
 Display *glXGetCurrentDisplay(void)
 {
-	Display *dpy = NULL;  VirtualWin *vw;
+	Display *dpy = NULL;  vglfaker::VirtualWin *vw;
 
 	if(vglfaker::getExcludeCurrent()) return _glXGetCurrentDisplay();
 
@@ -958,7 +955,7 @@ Display *glXGetCurrentDisplay(void)
 
 GLXDrawable glXGetCurrentDrawable(void)
 {
-	VirtualWin *vw;  GLXDrawable draw = _glXGetCurrentDrawable();
+	vglfaker::VirtualWin *vw;  GLXDrawable draw = _glXGetCurrentDrawable();
 
 	if(vglfaker::getExcludeCurrent()) return draw;
 
@@ -977,7 +974,7 @@ GLXDrawable glXGetCurrentDrawable(void)
 
 GLXDrawable glXGetCurrentReadDrawable(void)
 {
-	VirtualWin *vw;  GLXDrawable read = _glXGetCurrentReadDrawable();
+	vglfaker::VirtualWin *vw;  GLXDrawable read = _glXGetCurrentReadDrawable();
 
 	if(vglfaker::getExcludeCurrent()) return read;
 
@@ -1126,7 +1123,7 @@ void glXBindTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer,
 		OPENTRACE(glXBindTexImageEXT);  PRARGD(dpy);  PRARGX(drawable);
 		PRARGI(buffer);  PRARGAL13(attrib_list);  STARTTRACE();
 
-	VirtualPixmap *vpm = NULL;
+	vglfaker::VirtualPixmap *vpm = NULL;
 	if((vpm = pmhash.find(dpy, drawable)) == NULL)
 	{
 		// If we get here, then the drawable wasn't created with
@@ -1441,7 +1438,7 @@ Bool glXIsDirect(Display *dpy, GLXContext ctx)
 Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 {
 	Bool retval = False;  const char *renderer = "Unknown";
-	VirtualWin *vw;  VGLFBConfig config = 0;
+	vglfaker::VirtualWin *vw;  VGLFBConfig config = 0;
 
 	if(vglfaker::deadYet || vglfaker::getFakerLevel() > 0)
 		return _glXMakeCurrent(dpy, drawable, ctx);
@@ -1467,7 +1464,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	if(_glXGetCurrentContext() && _glXGetCurrentDisplay() == DPY3D
 		&& curdraw && (vw = winhash.find(NULL, curdraw)) != NULL)
 	{
-		VirtualWin *newvw;
+		vglfaker::VirtualWin *newvw;
 		if(drawable == 0 || !(newvw = winhash.find(dpy, drawable))
 			|| newvw->getGLXDrawable() != curdraw)
 		{
@@ -1537,7 +1534,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	{
 		vw->clear();  vw->cleanup();
 	}
-	VirtualPixmap *vpm;
+	vglfaker::VirtualPixmap *vpm;
 	if((vpm = pmhash.find(dpy, drawable)) != NULL)
 	{
 		vpm->clear();
@@ -1557,7 +1554,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	GLXContext ctx)
 {
 	Bool retval = False;  const char *renderer = "Unknown";
-	VirtualWin *vw;  VGLFBConfig config = 0;
+	vglfaker::VirtualWin *vw;  VGLFBConfig config = 0;
 
 	if(vglfaker::deadYet || vglfaker::getFakerLevel() > 0)
 		return _glXMakeContextCurrent(dpy, draw, read, ctx);
@@ -1581,7 +1578,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	if(_glXGetCurrentContext() && _glXGetCurrentDisplay() == DPY3D && curdraw
 		&& (vw = winhash.find(NULL, curdraw)) != NULL)
 	{
-		VirtualWin *newvw;
+		vglfaker::VirtualWin *newvw;
 		if(draw == 0 || !(newvw = winhash.find(dpy, draw))
 			|| newvw->getGLXDrawable() != curdraw)
 		{
@@ -1592,7 +1589,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 
 	// If the drawable isn't a window, we pass it through unmodified, else we
 	// map it to an off-screen drawable.
-	VirtualWin *drawVW, *readVW;
+	vglfaker::VirtualWin *drawVW, *readVW;
 	int direct = ctxhash.isDirect(ctx);
 	if(dpy && (draw || read) && ctx)
 	{
@@ -1679,7 +1676,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	}
 	if((readVW = winhash.find(NULL, read)) != NULL)
 		readVW->cleanup();
-	VirtualPixmap *vpm;
+	vglfaker::VirtualPixmap *vpm;
 	if((vpm = pmhash.find(dpy, draw)) != NULL)
 	{
 		vpm->clear();
@@ -1790,7 +1787,7 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 	// GLX_EXT_swap_control attributes
 	if(attribute == GLX_SWAP_INTERVAL_EXT && value)
 	{
-		VirtualWin *vw;
+		vglfaker::VirtualWin *vw;
 		if((vw = winhash.find(dpy, draw)) != NULL)
 			*value = vw->getSwapInterval();
 		else
@@ -1936,8 +1933,8 @@ void glXSelectEventSGIX(Display *dpy, GLXDrawable drawable, unsigned long mask)
 
 void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
 {
-	VirtualWin *vw = NULL;
-	static Timer timer;  Timer sleepTimer;
+	vglfaker::VirtualWin *vw = NULL;
+	static vglutil::Timer timer;  vglutil::Timer sleepTimer;
 	static double err = 0.;  static bool first = true;
 
 	TRY();
@@ -2008,7 +2005,7 @@ void glXSwapIntervalEXT(Display *dpy, GLXDrawable drawable, int interval)
 		// implementation doesn't, so we emulate their behavior.
 		interval = 1;
 
-	VirtualWin *vw;
+	vglfaker::VirtualWin *vw;
 	if((vw = winhash.find(dpy, drawable)) != NULL)
 		vw->setSwapInterval(interval);
 	// NOTE:  Technically, a BadWindow error should be triggered if drawable
@@ -2034,7 +2031,7 @@ int glXSwapIntervalSGI(int interval)
 
 	TRY();
 
-	VirtualWin *vw;  GLXDrawable draw = _glXGetCurrentDrawable();
+	vglfaker::VirtualWin *vw;  GLXDrawable draw = _glXGetCurrentDrawable();
 	if(interval < 0) retval = GLX_BAD_VALUE;
 	else if(!draw || !(vw = winhash.find(NULL, draw)))
 		retval = GLX_BAD_CONTEXT;

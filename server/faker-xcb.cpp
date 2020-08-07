@@ -1,4 +1,4 @@
-// Copyright (C)2014-2016, 2018-2019 D. R. Commander
+// Copyright (C)2014-2016, 2018-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -16,8 +16,6 @@
 #include "XCBConnHash.h"
 #include "faker.h"
 #include "vglconfigLauncher.h"
-
-using namespace vglserver;
 
 
 // This interposes enough of XCB to make Qt 5 work.  It may be necessary to
@@ -141,7 +139,7 @@ xcb_glx_query_version_reply_t *
 
 static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *ev)
 {
-	VirtualWin *vw = NULL;
+	vglfaker::VirtualWin *vw = NULL;
 
 	if(!ev || vglfaker::deadYet || !fconfig.fakeXCB
 		|| vglfaker::getFakerLevel() > 0)

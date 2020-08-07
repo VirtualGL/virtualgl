@@ -1,5 +1,5 @@
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2014-2015, 2019 D. R. Commander
+// Copyright (C)2014-2015, 2019-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -30,7 +30,7 @@ typedef struct
 
 #define HASH  Hash<xcb_connection_t *, void *, XCBConnAttribs *>
 
-namespace vglserver
+namespace vglfaker
 {
 	class XCBConnHash : public HASH
 	{
@@ -127,7 +127,7 @@ namespace vglserver
 #undef HASH
 
 
-#define xcbconnhash  (*(XCBConnHash::getInstance()))
+#define xcbconnhash  (*(vglfaker::XCBConnHash::getInstance()))
 
 #endif  // FAKEXCB
 

@@ -19,16 +19,13 @@
 #include "WindowHash.h"
 #include "faker.h"
 
-using namespace vglfaker;
-using namespace vglserver;
-
 
 static void doGLReadback(bool spoilLast, bool sync)
 {
 	GLXDrawable drawable = _glXGetCurrentDrawable();
 	if(!drawable) return;
 
-	VirtualWin *vw;
+	vglfaker::VirtualWin *vw;
 	if((vw = winhash.find(NULL, drawable)) != NULL)
 	{
 		if(DrawingToFront() || vw->dirty)
@@ -123,7 +120,7 @@ void glDrawBuffer(GLenum mode)
 
 		OPENTRACE(glDrawBuffer);  PRARGX(mode);  STARTTRACE();
 
-	VirtualWin *vw;
+	vglfaker::VirtualWin *vw;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
 	GLXDrawable drawable = _glXGetCurrentDrawable();
 
@@ -163,7 +160,7 @@ void glDrawBuffers(GLsizei n, const GLenum *bufs)
 		}
 		STARTTRACE();
 
-	VirtualWin *vw = NULL;
+	vglfaker::VirtualWin *vw = NULL;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
 	GLXDrawable drawable = _glXGetCurrentDrawable();
 
@@ -202,14 +199,15 @@ const GLubyte *glGetString(GLenum name)
 	if(name == GL_EXTENSIONS && string
 		&& strstr(string, "GL_EXT_x11_sync_object") != NULL)
 	{
-		if(!glExtensions)
+		if(!vglfaker::glExtensions)
 		{
-			GlobalCriticalSection::SafeLock l(globalMutex);
-			if(!glExtensions)
+			vglfaker::GlobalCriticalSection::SafeLock l(globalMutex);
+			if(!vglfaker::glExtensions)
 			{
-				glExtensions = strdup(string);
-				if(!glExtensions) THROW("strdup() failed");
-				char *ptr = strstr((char *)glExtensions, "GL_EXT_x11_sync_object");
+				vglfaker::glExtensions = strdup(string);
+				if(!vglfaker::glExtensions) THROW("strdup() failed");
+				char *ptr =
+					strstr((char *)vglfaker::glExtensions, "GL_EXT_x11_sync_object");
 				if(ptr)
 				{
 					if(ptr[22] == ' ') memmove(ptr, &ptr[23], strlen(&ptr[23]) + 1);
@@ -217,7 +215,7 @@ const GLubyte *glGetString(GLenum name)
 				}
 			}
 		}
-		string = glExtensions;
+		string = vglfaker::glExtensions;
 	}
 
 	CATCH();
@@ -259,7 +257,7 @@ void glPopAttrib(void)
 
 		OPENTRACE(glPopAttrib);  STARTTRACE();
 
-	VirtualWin *vw;
+	vglfaker::VirtualWin *vw;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
 	GLXDrawable drawable = _glXGetCurrentDrawable();
 
@@ -311,8 +309,8 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 	if(dpy && (draw || read) && ctx && ctxhash.findConfig(ctx))
 	{
 		newRead = read, newDraw = draw;
-		VirtualWin *drawVW = winhash.find(NULL, draw);
-		VirtualWin *readVW = winhash.find(NULL, read);
+		vglfaker::VirtualWin *drawVW = winhash.find(NULL, draw);
+		vglfaker::VirtualWin *readVW = winhash.find(NULL, read);
 		if(drawVW) drawVW->checkResize();
 		if(readVW && readVW != drawVW) readVW->checkResize();
 		if(drawVW) newDraw = drawVW->updateGLXDrawable();

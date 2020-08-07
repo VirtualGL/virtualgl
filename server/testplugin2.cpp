@@ -19,7 +19,6 @@
 extern "C" void _vgl_disableFaker(void);
 extern "C" void _vgl_enableFaker(void);
 
-using namespace vglutil;
 using namespace vglcommon;
 using namespace vglserver;
 

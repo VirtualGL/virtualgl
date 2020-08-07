@@ -24,7 +24,7 @@
 #include "TempContext.h"
 
 
-namespace vglserver
+namespace vglfaker
 {
 	class VirtualWin : public VirtualDrawable
 	{
@@ -73,14 +73,14 @@ namespace vglserver
 			Display *eventdpy;
 			OGLDrawable *oldDraw;
 			int newWidth, newHeight;
-			X11Trans *x11trans;
+			vglserver::X11Trans *x11trans;
 			#ifdef USEXV
-			XVTrans *xvtrans;
+			vglserver::XVTrans *xvtrans;
 			#endif
-			VGLTrans *vglconn;
+			vglserver::VGLTrans *vglconn;
 			vglcommon::Profiler profGamma, profAnaglyph, profPassive;
 			bool syncdpy;
-			TransPlugin *plugin;
+			vglserver::TransPlugin *plugin;
 			bool stereoVisual;
 			vglcommon::Frame rFrame, gFrame, bFrame, frame, stereoFrame;
 			bool doWMDelete;

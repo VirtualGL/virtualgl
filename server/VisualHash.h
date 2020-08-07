@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2011, 2014, 2019 D. R. Commander
+// Copyright (C)2011, 2014, 2019-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -24,7 +24,7 @@
 
 // This maps a XVisualInfo * to a VGLFBConfig
 
-namespace vglserver
+namespace vglfaker
 {
 	class VisualHash : public HASH
 	{
@@ -88,6 +88,6 @@ namespace vglserver
 #undef HASH
 
 
-#define vishash  (*(VisualHash::getInstance()))
+#define vishash  (*(vglfaker::VisualHash::getInstance()))
 
 #endif  // __VISUALHASH_H__

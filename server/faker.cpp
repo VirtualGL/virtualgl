@@ -27,10 +27,6 @@
 #include "faker.h"
 
 
-using namespace vglutil;
-using namespace vglserver;
-
-
 namespace vglfaker {
 
 Display *dpy3D = NULL;

@@ -1,4 +1,4 @@
-// Copyright (C)2014 D. R. Commander
+// Copyright (C)2014, 2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -12,7 +12,7 @@
 
 #include "PixmapHash.h"
 
-using namespace vglserver;
+using namespace vglfaker;
 
 PixmapHash *PixmapHash::instance = NULL;
 vglutil::CriticalSection PixmapHash::instanceMutex;

@@ -1,5 +1,5 @@
 // Copyright (C)2007 Sun Microsystems, Inc.
-// Copyright (C)2014, 2018-2019 D. R. Commander
+// Copyright (C)2014, 2018-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -22,7 +22,7 @@
 #include "fakerconfig.h"
 
 
-namespace vglserver
+namespace vglfaker
 {
 	class vglconfigLauncher : public vglutil::Runnable
 	{
@@ -107,6 +107,6 @@ namespace vglserver
 
 
 #define VGLPOPUP(dpy, shmid) \
-	((*(vglconfigLauncher::getInstance())).popup(dpy, shmid))
+	((*(vglfaker::vglconfigLauncher::getInstance())).popup(dpy, shmid))
 
 #endif  // __VGLCONFIGLAUNCHER_H__

@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011-2016, 2018-2019 D. R. Commander
+// Copyright (C)2009, 2011-2016, 2018-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -21,8 +21,6 @@
 #include "XCBConnHash.h"
 #endif
 #include "keycodetokeysym.h"
-
-using namespace vglserver;
 
 
 // Interposed X11 functions
@@ -88,7 +86,7 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 		return _XCopyArea(dpy, src, dst, gc, src_x, src_y, width, height, dest_x,
 			dest_y);
 
-	VirtualDrawable *srcVW = NULL;  VirtualDrawable *dstVW = NULL;
+	vglfaker::VirtualDrawable *srcVW = NULL, *dstVW = NULL;
 	bool srcWin = false, dstWin = false;
 	bool copy2d = true, copy3d = false, triggerRB = false;
 	GLXDrawable glxsrc = 0, glxdst = 0;
@@ -99,9 +97,9 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 		PRARGX(gc);  PRARGI(src_x);  PRARGI(src_y);  PRARGI(width);
 		PRARGI(height);  PRARGI(dest_x);  PRARGI(dest_y);  STARTTRACE();
 
-	if(!(srcVW = (VirtualDrawable *)pmhash.find(dpy, src)))
+	if(!(srcVW = (vglfaker::VirtualDrawable *)pmhash.find(dpy, src)))
 	{
-		srcVW = (VirtualDrawable *)winhash.find(dpy, src);
+		srcVW = (vglfaker::VirtualDrawable *)winhash.find(dpy, src);
 		if(srcVW) srcWin = true;
 	}
 	if(srcVW && !srcVW->isInit())
@@ -111,9 +109,9 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 		srcVW = NULL;
 		srcWin = false;
 	}
-	if(!(dstVW = (VirtualDrawable *)pmhash.find(dpy, dst)))
+	if(!(dstVW = (vglfaker::VirtualDrawable *)pmhash.find(dpy, dst)))
 	{
-		dstVW = (VirtualDrawable *)winhash.find(dpy, dst);
+		dstVW = (vglfaker::VirtualDrawable *)winhash.find(dpy, dst);
 		if(dstVW) dstWin = true;
 	}
 	if(dstVW && !dstVW->isInit())
@@ -125,7 +123,8 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 	// GLX (3D) Pixmap --> non-GLX (2D) drawable
 	// Sync pixels from the 3D pixmap (on the 3D X Server) to the corresponding
 	// 2D pixmap (on the 2D X Server) and let the "real" XCopyArea() do the rest.
-	if(srcVW && !srcWin && !dstVW) ((VirtualPixmap *)srcVW)->readback();
+	if(srcVW && !srcWin && !dstVW)
+		((vglfaker::VirtualPixmap *)srcVW)->readback();
 
 	// non-GLX (2D) drawable --> non-GLX (2D) drawable
 	// Source and destination are not backed by a drawable on the 3D X Server, so
@@ -168,7 +167,7 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 		glxdst = dstVW->getGLXDrawable();
 		srcVW->copyPixels(src_x, src_y, width, height, dest_x, dest_y, glxdst);
 		if(triggerRB)
-			((VirtualWin *)dstVW)->readback(GL_FRONT, false, fconfig.sync);
+			((vglfaker::VirtualWin *)dstVW)->readback(GL_FRONT, false, fconfig.sync);
 	}
 
 		STOPTRACE();  if(copy3d) PRARGX(glxsrc);  if(copy3d) PRARGX(glxdst);
@@ -337,7 +336,7 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 
 		OPENTRACE(XGetGeometry);  PRARGD(dpy);  PRARGX(drawable);  STARTTRACE();
 
-	VirtualWin *vw;
+	vglfaker::VirtualWin *vw;
 	if((vw = winhash.find(NULL, drawable)) != NULL)
 	{
 		// Apparently drawable is a GLX drawable ID that backs a window, so we need
@@ -381,7 +380,7 @@ XImage *XGetImage(Display *dpy, Drawable drawable, int x, int y,
 		PRARGI(y);  PRARGI(width);  PRARGI(height);  PRARGX(plane_mask);
 		PRARGI(format);  STARTTRACE();
 
-	VirtualPixmap *vpm = pmhash.find(dpy, drawable);
+	vglfaker::VirtualPixmap *vpm = pmhash.find(dpy, drawable);
 	if(vpm) vpm->readback();
 
 	xi = _XGetImage(dpy, drawable, x, y, width, height, plane_mask, format);
@@ -571,7 +570,7 @@ char *XServerVendor(Display *dpy)
 
 static void handleEvent(Display *dpy, XEvent *xe)
 {
-	VirtualWin *vw;
+	vglfaker::VirtualWin *vw;
 
 	if(IS_EXCLUDED(dpy))
 		return;
@@ -683,7 +682,7 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 		if(values && (value_mask & CWHeight)) { PRARGI(values->height); }
 		STARTTRACE();
 
-	VirtualWin *vw;
+	vglfaker::VirtualWin *vw;
 	if((vw = winhash.find(dpy, win)) != NULL && values)
 		vw->resize(value_mask & CWWidth ? values->width : 0,
 			value_mask & CWHeight ? values->height : 0);
@@ -721,7 +720,7 @@ int XMoveResizeWindow(Display *dpy, Window win, int x, int y,
 		OPENTRACE(XMoveResizeWindow);  PRARGD(dpy);  PRARGX(win);  PRARGI(x);
 		PRARGI(y);  PRARGI(width);  PRARGI(height);  STARTTRACE();
 
-	VirtualWin *vw;
+	vglfaker::VirtualWin *vw;
 	if((vw = winhash.find(dpy, win)) != NULL)
 		vw->resize(width, height);
 	retval = _XMoveResizeWindow(dpy, win, x, y, width, height);
@@ -758,7 +757,7 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width,
 		OPENTRACE(XResizeWindow);  PRARGD(dpy);  PRARGX(win);  PRARGI(width);
 		PRARGI(height);  STARTTRACE();
 
-	VirtualWin *vw;
+	vglfaker::VirtualWin *vw;
 	if((vw = winhash.find(dpy, win)) != NULL)
 		vw->resize(width, height);
 	retval = _XResizeWindow(dpy, win, width, height);

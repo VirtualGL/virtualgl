@@ -23,9 +23,8 @@
 #include "faker.h"
 #include "glpf.h"
 
-using namespace vglcommon;
 using namespace vglutil;
-using namespace vglserver;
+using namespace vglfaker;
 
 
 #define CHECKGL(m)  if(glError()) THROW("Could not " m);
@@ -489,12 +488,12 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 			color = rgb[0] + (rgb[1] << 8) + (rgb[2] << 16);
 		}
 		if(readBuf == GL_FRONT_RIGHT || readBuf == GL_BACK_RIGHT)
-			vglfaker::setAutotestRColor(color);
+			setAutotestRColor(color);
 		else
-			vglfaker::setAutotestColor(color);
-		vglfaker::setAutotestFrame(autotestFrameCount);
-		vglfaker::setAutotestDisplay(dpy);
-		vglfaker::setAutotestDrawable(x11Draw);
+			setAutotestColor(color);
+		setAutotestFrame(autotestFrameCount);
+		setAutotestDisplay(dpy);
+		setAutotestDrawable(x11Draw);
 	}
 }
 

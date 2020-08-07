@@ -22,6 +22,7 @@
 
 using namespace vglutil;
 using namespace vglcommon;
+using namespace vglfaker;
 using namespace vglserver;
 
 
@@ -69,7 +70,7 @@ VirtualWin::VirtualWin(Display *dpy_, Window win) :
 	alreadyWarnedPluginRenderMode = false;
 	XWindowAttributes xwa;
 	if(!XGetWindowAttributes(dpy, win, &xwa) || !xwa.visual)
-		throw(vglutil::Error(__FUNCTION__, "Invalid window", -1));
+		throw(Error(__FUNCTION__, "Invalid window", -1));
 	if(!fconfig.wm && !(xwa.your_event_mask & StructureNotifyMask))
 	{
 		if(!(eventdpy = _XOpenDisplay(DisplayString(dpy))))
