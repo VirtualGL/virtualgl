@@ -368,8 +368,7 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 			direct)) == 0)
 			THROW("Could not create OpenGL context for readback");
 	}
-	TempContext tc(DPY3D, getGLXDrawable(), getGLXDrawable(), ctx, config,
-		GLX_RGBA_TYPE);
+	TempContext tc(getGLXDrawable(), getGLXDrawable(), ctx);
 
 	_glReadBuffer(readBuf);
 
@@ -509,7 +508,7 @@ void VirtualDrawable::copyPixels(GLint srcX, GLint srcY, GLint width,
 			direct)) == 0)
 			THROW("Could not create OpenGL context for readback");
 	}
-	TempContext tc(DPY3D, draw, getGLXDrawable(), ctx, config, GLX_RGBA_TYPE);
+	TempContext tc(draw, getGLXDrawable(), ctx);
 
 	_glReadBuffer(GL_FRONT);
 	_glDrawBuffer(GL_FRONT_AND_BACK);

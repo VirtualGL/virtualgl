@@ -12,7 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // wxWindows Library License for more details.
 
-// This is a container class which allows us to temporarily swap in a new
+// This is a container class that allows us to temporarily swap in a new
 // drawable and then "pop the stack" after we're done with it.  It does nothing
 // unless there is already a valid context established
 
@@ -23,34 +23,21 @@
 #include "ContextHash.h"
 
 
-#define EXISTING_DRAWABLE  (GLXDrawable)-1
-
-
 namespace vglfaker
 {
 	class TempContext
 	{
 		public:
 
-			TempContext(Display *dpy, GLXDrawable draw, GLXDrawable read,
-				GLXContext ctx = _glXGetCurrentContext(), VGLFBConfig config = NULL,
-				int renderType = 0) : olddpy(_glXGetCurrentDisplay()),
-				oldctx(_glXGetCurrentContext()), newctx(NULL),
-				oldread(_glXGetCurrentReadDrawable()),
+			TempContext(GLXDrawable draw, GLXDrawable read, GLXContext ctx) :
+				oldctx(_glXGetCurrentContext()), oldread(_glXGetCurrentReadDrawable()),
 				olddraw(_glXGetCurrentDrawable()), ctxChanged(false)
 			{
-				if(!dpy) return;
-				if(!olddpy) olddpy = dpy;
-				if(read == EXISTING_DRAWABLE) read = oldread;
-				if(draw == EXISTING_DRAWABLE) draw = olddraw;
-				if(draw && read && !ctx && config && renderType)
-					newctx = ctx =
-						_glXCreateNewContext(dpy, GLXFBC(config), renderType, NULL, True);
-				if(((read || draw) && ctx && dpy)
-					&& (oldread != read  || olddraw != draw || oldctx != ctx
-						|| olddpy != dpy))
+				if(!ctx) THROW("Invalid argument");
+				if((read || draw)
+					&& (oldread != read  || olddraw != draw || oldctx != ctx))
 				{
-					if(!_glXMakeContextCurrent(dpy, draw, read, ctx))
+					if(!_glXMakeContextCurrent(DPY3D, draw, read, ctx))
 						THROW("Could not bind OpenGL context to window (window may have disappeared)");
 					// If oldctx has already been destroyed, then we don't want to
 					// restore it.  This can happen if the application is rendering to
@@ -61,28 +48,18 @@ namespace vglfaker
 				}
 			}
 
-			void restore(void)
+			~TempContext(void)
 			{
 				if(ctxChanged)
 				{
-					_glXMakeContextCurrent(olddpy, olddraw, oldread, oldctx);
+					_glXMakeContextCurrent(DPY3D, olddraw, oldread, oldctx);
 					ctxChanged = false;
 				}
-				if(newctx)
-				{
-					_glXDestroyContext(olddpy, newctx);  newctx = NULL;
-				}
-			}
-
-			~TempContext(void)
-			{
-				restore();
 			}
 
 		private:
 
-			Display *olddpy;
-			GLXContext oldctx, newctx;
+			GLXContext oldctx;
 			GLXDrawable oldread, olddraw;
 			bool ctxChanged;
 	};

@@ -368,8 +368,7 @@ TempContext *VirtualWin::setupPluginTempContext(GLint drawBuf)
 				NULL, direct)) == 0)
 				THROW("Could not create OpenGL context for readback");
 		}
-		tc = new TempContext(DPY3D, getGLXDrawable(), getGLXDrawable(), ctx,
-			config, GLX_RGBA_TYPE);
+		tc = new TempContext(getGLXDrawable(), getGLXDrawable(), ctx);
 		_glReadBuffer(drawBuf);
 	}
 
