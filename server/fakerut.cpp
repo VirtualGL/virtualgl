@@ -33,7 +33,15 @@ using namespace vglutil;
 
 #define CLEAR_BUFFER(buffer, r, g, b, a) \
 { \
-	if(buffer > 0) glDrawBuffer(buffer); \
+	if(buffer > 0) \
+	{ \
+		if(buffer >= GL_FRONT_LEFT && buffer <= GL_BACK_RIGHT) \
+		{ \
+			GLenum tempBuf = buffer; \
+			glDrawBuffers(1, &tempBuf); \
+		} \
+		else glDrawBuffer(buffer); \
+	} \
 	glClearColor(r, g, b, a); \
 	glClear(GL_COLOR_BUFFER_BIT); \
 }
@@ -448,13 +456,14 @@ int readbackTest(bool stereo)
 		try
 		{
 			printf("glFinish() [f]:                ");
-			clr.clear(GL_FRONT);  if(stereo) sclr.clear(GL_FRONT_RIGHT);
-			clr.clear(GL_BACK);  if(stereo) sclr.clear(GL_BACK_RIGHT);
+			clr.clear(stereo ? GL_FRONT : GL_FRONT_LEFT);
+			if(stereo) sclr.clear(GL_FRONT_RIGHT);
+			clr.clear(stereo ? GL_BACK : GL_BACK_LEFT);
+			if(stereo) sclr.clear(GL_BACK_RIGHT);
 			glReadBuffer(GL_BACK);
 			glFinish();  glFinish();
 			checkFrame(dpy, win1, 1, lastFrame1);
-			GLenum buf = GL_FRONT_LEFT;
-			glDrawBuffers(1, &buf);  glFinish();
+			glDrawBuffer(GL_FRONT);  glFinish();
 			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);
 			checkFrame(dpy, win1, 1, lastFrame1);
 			checkWindowColor(dpy, win1, clr.bits(-2));
