@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2009-2016, 2019 D. R. Commander
+// Copyright (C)2009-2016, 2019-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -93,7 +93,7 @@ static bool buildVisAttribTable(Display *dpy, int screen)
 					goto done;
 				olprop = (struct overlay_info *)olproptemp;
 				len += (bytesLeft + 3) / 4;
-				if(bytesLeft && olprop) { XFree(olprop);  olprop = NULL; }
+				if(bytesLeft && olprop) { _XFree(olprop);  olprop = NULL; }
 			} while(bytesLeft);
 
 			for(unsigned long i = 0; i < nop / 4; i++)
@@ -119,7 +119,7 @@ static bool buildVisAttribTable(Display *dpy, int screen)
 			}
 
 			done:
-			if(olprop) { XFree(olprop);  olprop = NULL; }
+			if(olprop) { _XFree(olprop);  olprop = NULL; }
 		}
 
 		for(int i = 0; i < nVisuals; i++)
@@ -132,12 +132,12 @@ static bool buildVisAttribTable(Display *dpy, int screen)
 			}
 		}
 
-		XFree(visuals);
+		_XFree(visuals);
 		vaDisplay = dpy;  vaScreen = screen;
 	}
 	catch(...)
 	{
-		if(visuals) XFree(visuals);
+		if(visuals) _XFree(visuals);
 		delete [] va;  va = NULL;
 		vaDisplay = NULL;  vaScreen = -1;  vaEntries = 0;
 		return false;

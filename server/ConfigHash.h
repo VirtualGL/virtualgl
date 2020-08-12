@@ -1,5 +1,5 @@
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2014, 2016, 2019 D. R. Commander
+// Copyright (C)2014, 2016, 2019-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -55,7 +55,7 @@ namespace vglserver
 				if(!HASH::add(dpystring, FBCID(config), vis))
 				{
 					free(dpystring);
-					XFree(vis);
+					_XFree(vis);
 				}
 			}
 
@@ -89,7 +89,7 @@ namespace vglserver
 			void detach(HashEntry *entry)
 			{
 				if(entry) free(entry->key1);
-				if(entry && entry->value) XFree(entry->value);
+				if(entry && entry->value) _XFree(entry->value);
 			}
 
 			static ConfigHash *instance;

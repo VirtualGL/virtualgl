@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011-2016, 2018-2019 D. R. Commander
+// Copyright (C)2009, 2011-2016, 2018-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -49,6 +49,8 @@ int XCloseDisplay(Display *dpy)
 
 		OPENTRACE(XCloseDisplay);  PRARGD(dpy);  STARTTRACE();
 
+	DISABLE_FAKER();
+
 	#ifdef FAKEXCB
 	if(fconfig.fakeXCB)
 	{
@@ -74,6 +76,7 @@ int XCloseDisplay(Display *dpy)
 		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
+	ENABLE_FAKER();
 	return retval;
 }
 
@@ -88,6 +91,8 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 	if(IS_EXCLUDED(dpy))
 		return _XCopyArea(dpy, src, dst, gc, src_x, src_y, width, height, dest_x,
 			dest_y);
+
+	DISABLE_FAKER();
 
 	VirtualDrawable *srcVW = NULL;  VirtualDrawable *dstVW = NULL;
 	bool srcWin = false, dstWin = false;
@@ -176,6 +181,7 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 		CLOSETRACE();
 
 	CATCH();
+	ENABLE_FAKER();
 	return 0;
 }
 
@@ -259,7 +265,7 @@ static void DeleteWindow(Display *dpy, Window win, bool subOnly = false)
 		&& children && n > 0)
 	{
 		for(unsigned int i = 0; i < n; i++) DeleteWindow(dpy, children[i]);
-		XFree(children);
+		_XFree(children);
 	}
 }
 
@@ -274,12 +280,15 @@ int XDestroySubwindows(Display *dpy, Window win)
 
 		OPENTRACE(XDestroySubwindows);  PRARGD(dpy);  PRARGX(win);  STARTTRACE();
 
+	DISABLE_FAKER();
+
 	if(dpy && win) DeleteWindow(dpy, win, true);
 	retval = _XDestroySubwindows(dpy, win);
 
 		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
+	ENABLE_FAKER();
 	return retval;
 }
 
@@ -294,12 +303,15 @@ int XDestroyWindow(Display *dpy, Window win)
 
 		OPENTRACE(XDestroyWindow);  PRARGD(dpy);  PRARGX(win);  STARTTRACE();
 
+	DISABLE_FAKER();
+
 	if(dpy && win) DeleteWindow(dpy, win);
 	retval = _XDestroyWindow(dpy, win);
 
 		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
+	ENABLE_FAKER();
 	return retval;
 }
 
@@ -382,6 +394,8 @@ XImage *XGetImage(Display *dpy, Drawable drawable, int x, int y,
 		PRARGI(y);  PRARGI(width);  PRARGI(height);  PRARGX(plane_mask);
 		PRARGI(format);  STARTTRACE();
 
+	DISABLE_FAKER();
+
 	VirtualPixmap *vpm = pmhash.find(dpy, drawable);
 	if(vpm) vpm->readback();
 
@@ -390,6 +404,7 @@ XImage *XGetImage(Display *dpy, Drawable drawable, int x, int y,
 		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
+	ENABLE_FAKER();
 	return xi;
 }
 
@@ -483,7 +498,7 @@ Display *XOpenDisplay(_Xconst char *name)
 			// we can only can get away with it because we know that Xlib dynamically
 			// allocates the vendor string.  Xlib has done so for as long as
 			// VirtualGL has been around, so it seems like a safe assumption.
-			XFree(ServerVendor(dpy));
+			_XFree(ServerVendor(dpy));
 			ServerVendor(dpy) = strdup(fconfig.vendor);
 		}
 	}

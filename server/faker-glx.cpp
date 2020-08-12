@@ -151,7 +151,7 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 
 		if(!configs || n < 1) return 0;
 		config = configs[0];
-		XFree(configs);
+		_XFree(configs);
 		if(config)
 		{
 			vishash.add(dpy, vis, config);
@@ -200,7 +200,7 @@ static VisualID matchVisual(Display *dpy, GLXFBConfig config, int &screen)
 					vid = glxvisual::matchVisual2D(dpy, screen, vis->depth, vis->c_class,
 						vis->bits_per_rgb, 0, 0, 0, false);
 			}
-			XFree(vis);
+			_XFree(vis);
 		}
 		if(vid) cfghash.add(dpy, screen, config, vid);
 	}
@@ -231,7 +231,7 @@ void setWMAtom(Display *dpy, Window win, VirtualWin *vw)
 		for(int i = 0; i < count; i++)
 			if(protocols[i] == deleteAtom)
 			{
-				XFree(protocols);  return;
+				_XFree(protocols);  return;
 			}
 		newProtocols = (Atom *)malloc(sizeof(Atom) * (count + 1));
 		if(!newProtocols) goto bailout;
@@ -239,7 +239,7 @@ void setWMAtom(Display *dpy, Window win, VirtualWin *vw)
 			newProtocols[i] = protocols[i];
 		newProtocols[count] = deleteAtom;
 		if(!XSetWMProtocols(dpy, win, newProtocols, count + 1)) goto bailout;
-		XFree(protocols);
+		_XFree(protocols);
 		free(newProtocols);
 	}
 	else if(!XSetWMProtocols(dpy, win, &deleteAtom, 1)) goto bailout;
@@ -247,7 +247,7 @@ void setWMAtom(Display *dpy, Window win, VirtualWin *vw)
 	return;
 
 	bailout:
-	if(protocols) XFree(protocols);
+	if(protocols) _XFree(protocols);
 	free(newProtocols);
 	static bool alreadyWarned = false;
 	if(!alreadyWarned)
@@ -337,7 +337,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 			(GLXFBConfig *)calloc(*nelements, sizeof(GLXFBConfig));
 		if(!newConfigs)
 		{
-			XFree(configs);  configs = NULL;
+			_XFree(configs);  configs = NULL;
 			THROW("Memory allocation error");
 		}
 
@@ -352,7 +352,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 				if(vis->depth > 24) depth = vis->depth;
 				c_class = vis->c_class;
 				bpc = vis->bits_per_rgb;
-				XFree(vis);
+				_XFree(vis);
 			}
 
 			// Find an appropriate matching visual on the 2D X server.
@@ -368,9 +368,9 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 			cfghash.add(dpy, screen, configs[i], vid);
 		}
 		*nelements = nv;
-		XFree(configs);
+		_XFree(configs);
 		configs = newConfigs;
-		if(!nv) { XFree(configs);  configs = NULL; }
+		if(!nv) { _XFree(configs);  configs = NULL; }
 	}
 
 	done:
@@ -464,14 +464,14 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 		goto done;
 	}
 	config = configs[0];
-	XFree(configs);
+	_XFree(configs);
 	vtemp = _glXGetVisualFromFBConfig(DPY3D, config);
 	if(vtemp)
 	{
 		if(vtemp->depth > 24) depth = vtemp->depth;
 		c_class = vtemp->c_class;
 		bpc = vtemp->bits_per_rgb;
-		XFree(vtemp);
+		_XFree(vtemp);
 	}
 
 	// Find an appropriate matching visual on the 2D X server.
@@ -861,7 +861,7 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm,
 	if((vis = glxvisual::visualFromID(dpy, screen, vid)) != NULL)
 	{
 		vpm = new VirtualPixmap(dpy, vis->visual, pm);
-		XFree(vis);
+		_XFree(vis);
 	}
 	if(vpm)
 	{
@@ -910,6 +910,8 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
 		OPENTRACE(glXCreateWindow);  PRARGD(dpy);  PRARGC(config);  PRARGX(win);
 		STARTTRACE();
 
+	DISABLE_FAKER();
+
 	XSync(dpy, False);
 	if(!config)
 	{
@@ -951,6 +953,7 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
 		CLOSETRACE();
 
 	CATCH();
+	ENABLE_FAKER();
 	return win;  // Make the client store the original window handle, which we
 	             // use to find the off-screen drawable in the hash
 }
@@ -1018,6 +1021,8 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 
 		OPENTRACE(glXDestroyGLXPixmap);  PRARGD(dpy);  PRARGX(pix);  STARTTRACE();
 
+	DISABLE_FAKER();
+
 	VirtualPixmap *vpm = pmhash.find(dpy, pix);
 	if(vpm && vpm->isInit()) vpm->readback();
 
@@ -1027,6 +1032,7 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
+	ENABLE_FAKER();
 }
 
 
@@ -1041,6 +1047,8 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 
 		OPENTRACE(glXDestroyPixmap);  PRARGD(dpy);  PRARGX(pix);  STARTTRACE();
 
+	DISABLE_FAKER();
+
 	VirtualPixmap *vpm = pmhash.find(dpy, pix);
 	if(vpm && vpm->isInit()) vpm->readback();
 
@@ -1050,6 +1058,7 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
+	ENABLE_FAKER();
 }
 
 
@@ -1067,11 +1076,14 @@ void glXDestroyWindow(Display *dpy, GLXWindow win)
 
 		OPENTRACE(glXDestroyWindow);  PRARGD(dpy);  PRARGX(win);  STARTTRACE();
 
+	DISABLE_FAKER();
+
 	winhash.remove(dpy, win);
 
 		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
+	ENABLE_FAKER();
 }
 
 
@@ -1837,6 +1849,8 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		OPENTRACE(glXMakeCurrent);  PRARGD(dpy);  PRARGX(drawable);  PRARGX(ctx);
 		STARTTRACE();
 
+	DISABLE_FAKER();
+
 	// glXMakeCurrent() implies a glFinish() on the previous context, which is
 	// why we read back the front buffer here if it is dirty.
 	GLXDrawable curdraw = _glXGetCurrentDrawable();
@@ -1922,6 +1936,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		CLOSETRACE();
 
 	CATCH();
+	ENABLE_FAKER();
 	return retval;
 }
 
@@ -1956,6 +1971,8 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 
 		OPENTRACE(glXMakeContextCurrent);  PRARGD(dpy);  PRARGX(draw);
 		PRARGX(read);  PRARGX(ctx);  STARTTRACE();
+
+	DISABLE_FAKER();
 
 	// glXMakeContextCurrent() implies a glFinish() on the previous context,
 	// which is why we read back the front buffer here if it is dirty.
@@ -2069,6 +2086,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		PRARGS(renderer);  CLOSETRACE();
 
 	CATCH();
+	ENABLE_FAKER();
 	return retval;
 }
 
@@ -2331,6 +2349,8 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
 
 		OPENTRACE(glXSwapBuffers);  PRARGD(dpy);  PRARGX(drawable);  STARTTRACE();
 
+	DISABLE_FAKER();
+
 	fconfig.flushdelay = 0.;
 	if(winhash.find(dpy, drawable, vw))
 	{
@@ -2362,6 +2382,7 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
 		CLOSETRACE();
 
 	CATCH();
+	ENABLE_FAKER();
 }
 
 
@@ -2593,11 +2614,14 @@ void glXUseXFont(Font font, int first, int count, int list_base)
 		OPENTRACE(glXUseXFont);  PRARGX(font);  PRARGI(first);  PRARGI(count);
 		PRARGI(list_base);  STARTTRACE();
 
+	DISABLE_FAKER();
+
 	Fake_glXUseXFont(font, first, count, list_base);
 
 		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
+	ENABLE_FAKER();
 }
 
 

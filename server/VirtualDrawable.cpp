@@ -104,7 +104,7 @@ VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_, int depth_,
 	pm = XCreatePixmap(DPY3D, win, width, height,
 		depth > 0 ? depth : vis->depth);
 	if(!pm) goto bailout;
-	XFree(vis);
+	_XFree(vis);
 	glxDraw = _glXCreatePixmap(DPY3D, config, pm, attribs);
 	if(!glxDraw) goto bailout;
 
@@ -112,7 +112,7 @@ VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_, int depth_,
 	return;
 
 	bailout:
-	if(vis) XFree(vis);
+	if(vis) _XFree(vis);
 	THROW("Could not create GLX pixmap");
 }
 
