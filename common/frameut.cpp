@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2011, 2014, 2017-2019 D. R. Commander
+// Copyright (C)2011, 2014, 2017-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -500,12 +500,12 @@ class FrameTest
 		void shutdown(void)
 		{
 			fprintf(stderr, "Shutting down....\n");  fflush(stderr);
-			if(blitter) blitter->shutdown();
-			if(decompressor) decompressor->shutdown();
 			if(compressor) compressor->shutdown();
-			delete blitter;  blitter = NULL;
-			delete decompressor;  decompressor = NULL;
+			if(decompressor) decompressor->shutdown();
+			if(blitter) blitter->shutdown();
 			delete compressor;  compressor = NULL;
+			delete decompressor;  decompressor = NULL;
+			delete blitter;  blitter = NULL;
 		}
 
 		Display *dpy;  Window win;

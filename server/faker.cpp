@@ -90,7 +90,7 @@ class GlobalCleanup
 			vglfaker::GlobalCriticalSection *gcs =
 				vglfaker::GlobalCriticalSection::getInstance(false);
 			if(gcs) gcs->lock(false);
-			fconfig_deleteinstance();
+			fconfig_deleteinstance(gcs);
 			deadYet = true;
 			if(gcs) gcs->unlock(false);
 		}
