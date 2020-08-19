@@ -41,7 +41,13 @@ static const int pf2trans[PIXELFORMATS] =
 };
 
 
-FakerConfig *fconfig_getinstance(void) { return fconfig; }
+FakerConfig *fconfig_getinstance(void)
+{
+	#ifdef USEHELGRIND
+	ANNOTATE_BENIGN_RACE_SIZED(&fconfig, sizeof(FakerConfig *), );
+	#endif
+	return fconfig;
+}
 
 
 // This just wraps the VGLTrans class in order to demonstrate how to build a
@@ -57,6 +63,9 @@ void *RRTransInit(Display *dpy, Window win_, FakerConfig *fconfig_)
 	void *handle = NULL;
 	try
 	{
+		#ifdef USEHELGRIND
+		ANNOTATE_BENIGN_RACE_SIZED(&fconfig, sizeof(FakerConfig *), );
+		#endif
 		fconfig = fconfig_;
 		win = win_;
 		NEWCHECK(handle = (void *)(new VGLTrans()));

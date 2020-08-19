@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2010-2011, 2014, 2019 D. R. Commander
+// Copyright (C)2010-2011, 2014, 2019-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -21,6 +21,9 @@
 #include "Frame.h"
 #include "GenericQ.h"
 #include "Profiler.h"
+#ifdef USEHELGRIND
+	#include <valgrind/helgrind.h>
+#endif
 
 
 namespace vglserver
@@ -77,6 +80,9 @@ namespace vglserver
 					char temps[20];
 					snprintf(temps, 20, "Compress %d", myRank);
 					profComp.setName(temps);
+					#ifdef USEHELGRIND
+					ANNOTATE_BENIGN_RACE_SIZED(&deadYet, sizeof(bool), );
+					#endif
 				}
 
 				virtual ~Compressor(void)

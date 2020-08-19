@@ -31,6 +31,9 @@
 	#include <X11/extensions/Xv.h>
 	#include <X11/extensions/Xvlib.h>
 #endif
+#ifdef USEHELGRIND
+	#include <valgrind/helgrind.h>
+#endif
 
 using namespace vglutil;
 
@@ -188,6 +191,9 @@ static void fconfig_init(void)
 	fconfig.tilesize = RR_DEFAULTTILESIZE;
 	fconfig.transpixel = -1;
 	fconfig_reloadenv();
+	#ifdef USEHELGRIND
+	ANNOTATE_BENIGN_RACE_SIZED(&fconfig.flushdelay, sizeof(double), );
+	#endif
 }
 
 

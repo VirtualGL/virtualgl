@@ -27,6 +27,9 @@
 #include "glext-vgl.h"
 #include <X11/Xmd.h>
 #include <GL/glxproto.h>
+#ifdef USEHELGRIND
+	#include <valgrind/helgrind.h>
+#endif
 
 using namespace vglutil;
 
@@ -1268,6 +1271,11 @@ class TestThread : public Runnable
 		TestThread(int myRank_, Display *dpy_, Window win_, GLXContext ctx_) :
 			myRank(myRank_), dpy(dpy_), win(win_), ctx(ctx_), doResize(false)
 		{
+			#ifdef USEHELGRIND
+			ANNOTATE_BENIGN_RACE_SIZED(&doResize, sizeof(bool), );
+			ANNOTATE_BENIGN_RACE_SIZED(&width, sizeof(int), );
+			ANNOTATE_BENIGN_RACE_SIZED(&height, sizeof(int), );
+			#endif
 		}
 
 		void run(void)
@@ -1331,6 +1339,9 @@ int multiThreadTest(int nThreads)
 		windows[i] = 0;  contexts[i] = 0;  testThreads[i] = NULL;
 		threads[i] = NULL;
 	}
+	#ifdef USEHELGRIND
+	ANNOTATE_BENIGN_RACE_SIZED(&deadYet, sizeof(bool), );
+	#endif
 
 	printf("Multithreaded rendering test (%d threads)\n\n", nThreads);
 
