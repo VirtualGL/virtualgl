@@ -2002,6 +2002,8 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		}
 		try
 		{
+			bool differentReadDrawable = (read && read != draw);
+
 			if(draw)
 			{
 				drawVW = winhash.initVW(dpy, draw, config);
@@ -2025,7 +2027,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 				}
 			}
 
-			if(read)
+			if(differentReadDrawable)
 			{
 				readVW = winhash.initVW(dpy, read, config);
 				if(readVW)
@@ -2047,6 +2049,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 					}
 				}
 			}
+			else if(read) read = draw;
 		}
 		catch(Error &e)
 		{

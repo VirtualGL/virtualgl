@@ -1,3 +1,14 @@
+2.6.5
+=====
+
+### Significant changes relative to 2.6.4:
+
+1. Fixed a race condition that sometimes caused various fatal errors in the
+interposed `glXMakeContextCurrent()` function if both GLX drawable IDs passed
+to that function were the same window handle and the corresponding X window was
+simultaneously resized in another thread.
+
+
 2.6.4
 =====
 

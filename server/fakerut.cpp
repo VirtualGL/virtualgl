@@ -1273,14 +1273,16 @@ class TestThread : public Runnable
 		void run(void)
 		{
 			int clr = myRank % NC, lastFrame = 0;
-			if(!(glXMakeCurrent(dpy, win, ctx)))
+			bool seenResize = false;
+			if(!(glXMakeContextCurrent(dpy, win, win, ctx)))
 				THROWNL("Could not make context current");
-			while(!deadYet)
+			while(!deadYet || !seenResize)
 			{
 				if(doResize)
 				{
 					glViewport(0, 0, width, height);
 					doResize = false;
+					seenResize = true;
 				}
 				glClearColor(colors[clr].r, colors[clr].g, colors[clr].b, 0.);
 				glClear(GL_COLOR_BUFFER_BIT);
