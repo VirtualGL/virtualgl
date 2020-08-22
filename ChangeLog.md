@@ -8,6 +8,11 @@ interposed `glXMakeContextCurrent()` function if both GLX drawable IDs passed
 to that function were the same window handle and the corresponding X window was
 simultaneously resized in another thread.
 
+2. Fixed an oversight whereby the addresses of the interposed
+`glDrawBuffers()`, `glGetString()`, and `glGetStringi()` functions introduced
+in 2.6.3[2] and 2.6.4[1] were not returned from the interposed
+`glXGetProcAddress()` and `glXGetProcAddressARB()` functions.
+
 
 2.6.4
 =====

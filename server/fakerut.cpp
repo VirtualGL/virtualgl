@@ -2954,12 +2954,66 @@ int procAddrTest(void)
 
 	try
 	{
+		// GLX 1.0
 		TEST_PROC_SYM(glXChooseVisual)
+		TEST_PROC_SYM(glXCopyContext)
 		TEST_PROC_SYM(glXCreateContext)
+		TEST_PROC_SYM(glXCreateGLXPixmap)
+		TEST_PROC_SYM(glXDestroyContext)
+		TEST_PROC_SYM(glXDestroyGLXPixmap)
+		TEST_PROC_SYM(glXGetConfig)
+		TEST_PROC_SYM(glXGetCurrentDrawable)
+		TEST_PROC_SYM(glXIsDirect)
 		TEST_PROC_SYM(glXMakeCurrent)
+		TEST_PROC_SYM(glXQueryExtension)
+		TEST_PROC_SYM(glXQueryVersion)
+		TEST_PROC_SYM(glXSwapBuffers)
+		TEST_PROC_SYM(glXUseXFont)
+		TEST_PROC_SYM(glXWaitGL)
+
+		// GLX 1.1
+		TEST_PROC_SYM(glXGetClientString)
+		TEST_PROC_SYM(glXQueryServerString)
+		TEST_PROC_SYM(glXQueryExtensionsString)
+
+		// GLX 1.2
+		TEST_PROC_SYM(glXGetCurrentDisplay)
+
+		// GLX 1.3
 		TEST_PROC_SYM(glXChooseFBConfig)
 		TEST_PROC_SYM(glXCreateNewContext)
+		TEST_PROC_SYM(glXCreatePbuffer)
+		TEST_PROC_SYM(glXCreatePixmap)
+		TEST_PROC_SYM(glXCreateWindow)
+		TEST_PROC_SYM(glXDestroyPbuffer)
+		TEST_PROC_SYM(glXDestroyPixmap)
+		TEST_PROC_SYM(glXDestroyWindow)
+		TEST_PROC_SYM(glXGetCurrentReadDrawable)
+		TEST_PROC_SYM(glXGetFBConfigAttrib)
+		TEST_PROC_SYM(glXGetFBConfigs)
+		TEST_PROC_SYM(glXGetSelectedEvent)
+		TEST_PROC_SYM(glXGetVisualFromFBConfig)
 		TEST_PROC_SYM(glXMakeContextCurrent)
+		TEST_PROC_SYM(glXQueryContext)
+		TEST_PROC_SYM(glXQueryDrawable)
+		TEST_PROC_SYM(glXSelectEvent)
+
+		// GLX 1.4
+		TEST_PROC_SYM(glXGetProcAddress)
+
+		// GLX_ARB_get_proc_address
+		TEST_PROC_SYM(glXGetProcAddressARB)
+
+		// OpenGL
+		TEST_PROC_SYM(glFinish)
+		TEST_PROC_SYM(glFlush)
+		TEST_PROC_SYM(glDrawBuffer)
+		TEST_PROC_SYM(glDrawBuffers)
+		TEST_PROC_SYM(glGetString)
+		TEST_PROC_SYM(glGetStringi)
+		TEST_PROC_SYM(glPopAttrib)
+		TEST_PROC_SYM(glViewport)
+
 		printf("SUCCESS!\n");
 	}
 	catch(Error &e)
