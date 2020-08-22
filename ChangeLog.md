@@ -27,6 +27,16 @@ OpenGL rendering attributes) will find an suitable visual.
 rendering attributes to all 2D X server visuals, although the usefulness of
 that feature is now very limited.
 
+3. Fixed a race condition that sometimes caused various fatal errors in the
+interposed `glXMakeContextCurrent()` function if both GLX drawable IDs passed
+to that function were the same window handle and the corresponding X window was
+simultaneously resized in another thread.
+
+4. Fixed an oversight whereby the addresses of the interposed
+`glDrawBuffers()`, `glGetString()`, and `glGetStringi()` functions introduced
+in 2.6.3[2] and 2.6.4[1] were not returned from the interposed
+`glXGetProcAddress()` and `glXGetProcAddressARB()` functions.
+
 
 2.6.4
 =====

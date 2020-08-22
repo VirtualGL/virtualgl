@@ -1,4 +1,4 @@
-// Copyright (C)2009-2019 D. R. Commander
+// Copyright (C)2009-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -121,11 +121,11 @@ FakerConfig *fconfig_getinstance(void)
 }
 
 
-void fconfig_deleteinstance(void)
+void fconfig_deleteinstance(CriticalSection *mutex)
 {
 	if(fconfig_instance != NULL)
 	{
-		CriticalSection::SafeLock l(fcmutex, false);
+		CriticalSection::SafeLock l(mutex ? *mutex : fcmutex, false);
 		if(fconfig_instance != NULL)
 		{
 			#if FCONFIG_USESHM == 1

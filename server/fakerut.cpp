@@ -33,7 +33,15 @@ using namespace vglutil;
 
 #define CLEAR_BUFFER(buffer, r, g, b, a) \
 { \
-	if(buffer > 0) glDrawBuffer(buffer); \
+	if(buffer > 0) \
+	{ \
+		if(buffer >= GL_FRONT_LEFT && buffer <= GL_BACK_RIGHT) \
+		{ \
+			GLenum tempBuf = buffer; \
+			glDrawBuffers(1, &tempBuf); \
+		} \
+		else glDrawBuffer(buffer); \
+	} \
 	glClearColor(r, g, b, a); \
 	glClear(GL_COLOR_BUFFER_BIT); \
 }
@@ -448,13 +456,14 @@ int readbackTest(bool stereo)
 		try
 		{
 			printf("glFinish() [f]:                ");
-			clr.clear(GL_FRONT);  if(stereo) sclr.clear(GL_FRONT_RIGHT);
-			clr.clear(GL_BACK);  if(stereo) sclr.clear(GL_BACK_RIGHT);
+			clr.clear(stereo ? GL_FRONT : GL_FRONT_LEFT);
+			if(stereo) sclr.clear(GL_FRONT_RIGHT);
+			clr.clear(stereo ? GL_BACK : GL_BACK_LEFT);
+			if(stereo) sclr.clear(GL_BACK_RIGHT);
 			glReadBuffer(GL_BACK);
 			glFinish();  glFinish();
 			checkFrame(dpy, win1, 1, lastFrame1);
-			GLenum buf = GL_FRONT_LEFT;
-			glDrawBuffers(1, &buf);  glFinish();
+			glDrawBuffer(GL_FRONT);  glFinish();
 			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);
 			checkFrame(dpy, win1, 1, lastFrame1);
 			checkWindowColor(dpy, win1, clr.bits(-2));
@@ -1283,14 +1292,16 @@ class TestThread : public Runnable
 		void run(void)
 		{
 			int clr = myRank % NC, lastFrame = 0;
-			if(!(glXMakeCurrent(dpy, win, ctx)))
+			bool seenResize = false;
+			if(!(glXMakeContextCurrent(dpy, win, win, ctx)))
 				THROWNL("Could not make context current");
-			while(!deadYet)
+			while(!deadYet || !seenResize)
 			{
 				if(doResize)
 				{
 					glViewport(0, 0, width, height);
 					doResize = false;
+					seenResize = true;
 				}
 				glClearColor(colors[clr].r, colors[clr].g, colors[clr].b, 0.);
 				glClear(GL_COLOR_BUFFER_BIT);
@@ -2962,12 +2973,66 @@ int procAddrTest(void)
 
 	try
 	{
+		// GLX 1.0
 		TEST_PROC_SYM(glXChooseVisual)
+		TEST_PROC_SYM(glXCopyContext)
 		TEST_PROC_SYM(glXCreateContext)
+		TEST_PROC_SYM(glXCreateGLXPixmap)
+		TEST_PROC_SYM(glXDestroyContext)
+		TEST_PROC_SYM(glXDestroyGLXPixmap)
+		TEST_PROC_SYM(glXGetConfig)
+		TEST_PROC_SYM(glXGetCurrentDrawable)
+		TEST_PROC_SYM(glXIsDirect)
 		TEST_PROC_SYM(glXMakeCurrent)
+		TEST_PROC_SYM(glXQueryExtension)
+		TEST_PROC_SYM(glXQueryVersion)
+		TEST_PROC_SYM(glXSwapBuffers)
+		TEST_PROC_SYM(glXUseXFont)
+		TEST_PROC_SYM(glXWaitGL)
+
+		// GLX 1.1
+		TEST_PROC_SYM(glXGetClientString)
+		TEST_PROC_SYM(glXQueryServerString)
+		TEST_PROC_SYM(glXQueryExtensionsString)
+
+		// GLX 1.2
+		TEST_PROC_SYM(glXGetCurrentDisplay)
+
+		// GLX 1.3
 		TEST_PROC_SYM(glXChooseFBConfig)
 		TEST_PROC_SYM(glXCreateNewContext)
+		TEST_PROC_SYM(glXCreatePbuffer)
+		TEST_PROC_SYM(glXCreatePixmap)
+		TEST_PROC_SYM(glXCreateWindow)
+		TEST_PROC_SYM(glXDestroyPbuffer)
+		TEST_PROC_SYM(glXDestroyPixmap)
+		TEST_PROC_SYM(glXDestroyWindow)
+		TEST_PROC_SYM(glXGetCurrentReadDrawable)
+		TEST_PROC_SYM(glXGetFBConfigAttrib)
+		TEST_PROC_SYM(glXGetFBConfigs)
+		TEST_PROC_SYM(glXGetSelectedEvent)
+		TEST_PROC_SYM(glXGetVisualFromFBConfig)
 		TEST_PROC_SYM(glXMakeContextCurrent)
+		TEST_PROC_SYM(glXQueryContext)
+		TEST_PROC_SYM(glXQueryDrawable)
+		TEST_PROC_SYM(glXSelectEvent)
+
+		// GLX 1.4
+		TEST_PROC_SYM(glXGetProcAddress)
+
+		// GLX_ARB_get_proc_address
+		TEST_PROC_SYM(glXGetProcAddressARB)
+
+		// OpenGL
+		TEST_PROC_SYM(glFinish)
+		TEST_PROC_SYM(glFlush)
+		TEST_PROC_SYM(glDrawBuffer)
+		TEST_PROC_SYM(glDrawBuffers)
+		TEST_PROC_SYM(glGetString)
+		TEST_PROC_SYM(glGetStringi)
+		TEST_PROC_SYM(glPopAttrib)
+		TEST_PROC_SYM(glViewport)
+
 		printf("SUCCESS!\n");
 	}
 	catch(std::exception &e)

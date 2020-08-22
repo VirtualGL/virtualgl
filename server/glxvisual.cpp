@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2009-2016, 2019 D. R. Commander
+// Copyright (C)2009-2016, 2019-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -271,8 +271,8 @@ static bool buildVisAttribTable(Display *dpy, int screen)
 				}
 			}
 		}
-		XFree(depths);
-		XFree(visuals);
+		_XFree(depths);
+		_XFree(visuals);
 
 		if(!(extData = (XExtData *)calloc(1, sizeof(XExtData))))
 			THROW("Memory allocation error");
@@ -282,7 +282,7 @@ static bool buildVisAttribTable(Display *dpy, int screen)
 	}
 	catch(...)
 	{
-		if(visuals) XFree(visuals);
+		if(visuals) _XFree(visuals);
 		free(va);
 		return false;
 	}
@@ -389,7 +389,7 @@ static VisualID matchVisual2D(Display *dpy, int screen, VGLFBConfig config)
 				vid = matchVisual2D(dpy, screen, vis->depth, vis->c_class,
 					vis->bits_per_rgb, 0, false);
 		}
-		XFree(vis);
+		_XFree(vis);
 	}
 
 	return vid;
@@ -458,11 +458,11 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 					ca[i].id, (unsigned int)ca[i].visualID);
 		}
 
-		XFree(glxConfigs);
+		_XFree(glxConfigs);
 	}
 	catch(...)
 	{
-		if(glxConfigs) XFree(glxConfigs);
+		if(glxConfigs) _XFree(glxConfigs);
 		free(ca);
 		throw;
 	}
@@ -696,7 +696,7 @@ VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
 	}
 
 	bailout:
-	if(glxConfigs) XFree(glxConfigs);
+	if(glxConfigs) _XFree(glxConfigs);
 	return configs;
 }
 
@@ -757,7 +757,7 @@ VGLFBConfig getDefaultFBConfig(Display *dpy, int screen, VisualID vid)
 							(unsigned int)va[i].visualID, configs[0]->id);
 					va[i].config = configs[0];
 				}
-				XFree(configs);
+				_XFree(configs);
 			}
 			return va[i].config;
 		}

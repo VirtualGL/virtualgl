@@ -165,10 +165,10 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
                                 InputOutput, v->visual,
                                 CWBorderPixel | CWColormap | CWEventMask,
                                 &swa)) == 0) {
-         XFree(v);
+         _XFree(v);
          THROW("Could not create temporary window for font rendering");
       }
-      XFree(v);
+      _XFree(v);
       newwin = true;
    }
 
@@ -185,7 +185,7 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
          char *name = XGetAtomName(dpy, name_value);
 
          if (name) {
-            PRARGS(name);  XFree(name);
+            PRARGS(name);  _XFree(name);
          }
       }
    }
@@ -290,7 +290,7 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
       }
 
       XFreeGC(dpy, gc);  gc = 0;
-      ERRIFNOT(image = XGetImage(dpy, pixmap, 0, 0, 8 * max_bm_width * n,
+      ERRIFNOT(image = _XGetImage(dpy, pixmap, 0, 0, 8 * max_bm_width * n,
                                   max_bm_height, 1, XYPixmap));
       XFreePixmap(dpy, pixmap);  pixmap = 0;
 

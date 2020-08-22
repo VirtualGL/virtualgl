@@ -55,11 +55,14 @@ void glFinish(void)
 
 		if(fconfig.trace) vglout.print("[VGL] glFinish()\n");
 
+	DISABLE_FAKER();
+
 	_glFinish();
 	fconfig.flushdelay = 0.;
 	doGLReadback(false, fconfig.sync);
 
 	CATCH();
+	ENABLE_FAKER();
 }
 
 
@@ -72,6 +75,8 @@ void glFlush(void)
 	TRY();
 
 		if(fconfig.trace) vglout.print("[VGL] glFlush()\n");
+
+	DISABLE_FAKER();
 
 	_glFlush();
 	if(lastTime < 0.) lastTime = GetTime();
@@ -87,6 +92,7 @@ void glFlush(void)
 	if(fconfig.glflushtrigger) doGLReadback(fconfig.spoillast, fconfig.sync);
 
 	CATCH();
+	ENABLE_FAKER();
 }
 
 
@@ -98,12 +104,15 @@ void glXWaitGL(void)
 
 		if(fconfig.trace) vglout.print("[VGL] glXWaitGL()\n");
 
+	DISABLE_FAKER();
+
 	_glFinish();  // glXWaitGL() on some systems calls glFinish(), so we do this
 	              // to avoid 2 readbacks
 	fconfig.flushdelay = 0.;
 	doGLReadback(false, fconfig.sync);
 
 	CATCH();
+	ENABLE_FAKER();
 }
 
 
