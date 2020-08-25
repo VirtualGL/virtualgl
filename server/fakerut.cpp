@@ -1276,7 +1276,8 @@ class TestThread : public Runnable
 			bool seenResize = false;
 			if(!(glXMakeContextCurrent(dpy, win, win, ctx)))
 				THROWNL("Could not make context current");
-			while(!deadYet || !seenResize)
+			int iter = 0;
+			while(!deadYet || !seenResize || iter < 3)
 			{
 				if(doResize)
 				{
@@ -1292,6 +1293,7 @@ class TestThread : public Runnable
 				checkFrame(dpy, win, 1, lastFrame);
 				checkWindowColor(dpy, win, colors[clr].bits, false);
 				clr = (clr + 1) % NC;
+				iter++;
 			}
 		}
 
