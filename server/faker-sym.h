@@ -35,10 +35,16 @@ extern "C" {
 }
 #endif
 #include "faker.h"
+#ifdef USEHELGRIND
+	#include <valgrind/helgrind.h>
+#else
+	#define ANNOTATE_BENIGN_RACE_SIZED(a, b, c) {}
+#endif
 
 
 #define CHECKSYM_NONFATAL(s) \
 { \
+	ANNOTATE_BENIGN_RACE_SIZED(&__##s, sizeof(_##s##Type), ); \
 	if(!__##s) \
 	{ \
 		vglfaker::init(); \
@@ -49,6 +55,7 @@ extern "C" {
 
 #define CHECKSYM(s, fake_s) \
 { \
+	ANNOTATE_BENIGN_RACE_SIZED(&__##s, sizeof(_##s##Type), ); \
 	if(!__##s) \
 	{ \
 		vglfaker::init(); \

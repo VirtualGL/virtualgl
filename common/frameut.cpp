@@ -19,6 +19,9 @@
 #include "Timer.h"
 #include "bmp.h"
 #include "vgllogo.h"
+#ifdef USEHELGRIND
+	#include <valgrind/helgrind.h>
+#endif
 
 using namespace vglutil;
 using namespace vglcommon;
@@ -69,6 +72,9 @@ class Blitter : public Runnable
 			}
 			thread = new Thread(this);
 			thread->start();
+			#ifdef USEHELGRIND
+			ANNOTATE_BENIGN_RACE_SIZED(&deadYet, sizeof(bool), );
+			#endif
 		}
 
 		virtual ~Blitter(void)
@@ -217,6 +223,9 @@ class Decompressor : public Runnable
 		{
 			thread = new Thread(this);
 			thread->start();
+			#ifdef USEHELGRIND
+			ANNOTATE_BENIGN_RACE_SIZED(&deadYet, sizeof(bool), );
+			#endif
 		}
 
 		virtual ~Decompressor(void) { shutdown(); }
@@ -302,6 +311,9 @@ class Compressor : public Runnable
 		{
 			thread = new Thread(this);
 			thread->start();
+			#ifdef USEHELGRIND
+			ANNOTATE_BENIGN_RACE_SIZED(&deadYet, sizeof(bool), );
+			#endif
 		}
 
 		virtual ~Compressor(void)

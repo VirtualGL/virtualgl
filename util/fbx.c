@@ -1,7 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2015 Open Text SA and/or Open Text ULC (in Canada)
- * Copyright (C)2010-2013, 2015, 2017-2020 D. R. Commander
+ * Copyright (C)2010-2013, 2015, 2017-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -108,69 +107,22 @@ typedef struct _BMINFO
 
 #ifdef USESHM
 
-#ifdef INFAKER
-
-#include <pthread.h>
-
-#define FBX_THREAD_LOCAL(name, type, initValue) \
-static pthread_key_t get##name##Key(void) \
-{ \
-	static pthread_key_t key = 0; \
-	static unsigned char init = 0; \
-	if(!init) \
-	{ \
-		if(pthread_key_create(&key, NULL)) \
-			THROW("pthread_key_create() for " #name " failed"); \
-		pthread_setspecific(key, (const void *)initValue); \
-		init = 1; \
-	} \
-	finally: \
-	return key; \
-} \
-\
-static type get##name(void) \
-{ \
-	return (type)pthread_getspecific(get##name##Key()); \
-} \
-\
-static void set##name(type value) \
-{ \
-	pthread_setspecific(get##name##Key(), (const void *)value); \
-}
-
-FBX_THREAD_LOCAL(Serial, unsigned long, 0)
-FBX_THREAD_LOCAL(ExtOK, long, 1)
-FBX_THREAD_LOCAL(PrevHandler, XErrorHandler, NULL)
-
-#else
-
 static unsigned long serial = 0;  static int extok = 1;
 static XErrorHandler prevHandler = NULL;
 
-#endif  /* INFAKER */
-
 static int xhandler(Display *dpy, XErrorEvent *e)
 {
-	#ifdef INFAKER
-	unsigned long serial = getSerial();
-	XErrorHandler prevHandler = getPrevHandler();
-	#endif
 	if(e->serial == serial && (e->minor_code == X_ShmAttach
 		&& e->error_code == BadAccess))
 	{
-		#ifdef INFAKER
-		setExtOK(0);  return 0;
-		#else
 		extok = 0;  return 0;
-		#endif
 	}
 	if(prevHandler && prevHandler != xhandler) return prevHandler(dpy, e);
 	else return 0;
 }
+#endif
 
-#endif  /* USESHM */
-
-#endif  /* _WIN32 */
+#endif
 
 
 char *fbx_geterrmsg(void)
@@ -355,24 +307,13 @@ int fbx_init(fbx_struct *fb, fbx_wh wh, int width_, int height_, int useShm)
 		fb->shminfo.readOnly = False;
 		XLockDisplay(fb->wh.dpy);
 		XSync(fb->wh.dpy, False);
-		#ifdef INFAKER
-		setPrevHandler(XSetErrorHandler(xhandler));
-		setExtOK(1);
-		setSerial(NextRequest(fb->wh.dpy));
-		#else
 		prevHandler = XSetErrorHandler(xhandler);
 		extok = 1;
 		serial = NextRequest(fb->wh.dpy);
-		#endif
 		XShmAttach(fb->wh.dpy, &fb->shminfo);
 		XSync(fb->wh.dpy, False);
-		#ifdef INFAKER
-		XSetErrorHandler(getPrevHandler());
-		shmok = getExtOK();
-		#else
 		XSetErrorHandler(prevHandler);
 		shmok = extok;
-		#endif
 		if(!alreadyWarned && !shmok && warningFile)
 		{
 			fprintf(warningFile,

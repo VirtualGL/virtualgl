@@ -1,5 +1,5 @@
 // Copyright (C)2004 Landmark Graphics Corporation
-// Copyright (C)2011, 2014, 2019 D. R. Commander
+// Copyright (C)2011, 2014, 2019-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -16,6 +16,9 @@
 #include <errno.h>
 #include "GenericQ.h"
 #include "Error.h"
+#ifdef USEHELGRIND
+	#include <valgrind/helgrind.h>
+#endif
 
 using namespace vglutil;
 
@@ -24,6 +27,9 @@ GenericQ::GenericQ(void)
 {
 	start = NULL;  end = NULL;
 	deadYet = 0;
+	#ifdef USEHELGRIND
+	ANNOTATE_BENIGN_RACE_SIZED(&deadYet, sizeof(int), );
+	#endif
 }
 
 

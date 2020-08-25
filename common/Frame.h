@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005-2007 Sun Microsystems, Inc.
-// Copyright (C)2009-2012, 2014, 2017-2018 D. R. Commander
+// Copyright (C)2009-2012, 2014, 2017-2018, 2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -126,6 +126,7 @@ namespace vglcommon
 			fbx_struct fb;
 			tjhandle tjhnd;
 			bool reuseConn;
+			static vglutil::CriticalSection mutex;
 	};
 }
 
@@ -153,6 +154,7 @@ namespace vglcommon
 			fbxv_struct fb;
 			Display *dpy;  Window win;
 			tjhandle tjhnd;
+			static vglutil::CriticalSection mutex;
 	};
 }
 

@@ -71,7 +71,7 @@ while [ $# -gt 0 ]; do
 	shift
 done
 if [ ! "$FAKERUTARGS" = "" ]; then
-	FAKERUTARGS=$FAKERUTARGS ${1+"$@"}
+	FAKERUTARGS="$FAKERUTARGS "${1+"$@"}
 else
 	FAKERUTARGS=${1+"$@"}
 fi

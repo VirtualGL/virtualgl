@@ -16,6 +16,9 @@
 
 #include "VirtualPixmap.h"
 #include "Hash.h"
+#ifdef USEHELGRIND
+	#include <valgrind/helgrind.h>
+#endif
 
 
 #define HASH  Hash<char *, Pixmap, VirtualPixmap *>
@@ -31,6 +34,9 @@ namespace vglfaker
 
 			static PixmapHash *getInstance(void)
 			{
+				#ifdef USEHELGRIND
+				ANNOTATE_BENIGN_RACE_SIZED(&instance, sizeof(PixmapHash *), );
+				#endif
 				if(instance == NULL)
 				{
 					vglutil::CriticalSection::SafeLock l(instanceMutex);

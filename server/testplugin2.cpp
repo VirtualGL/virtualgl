@@ -15,6 +15,9 @@
 #include <X11/Xlib.h>
 #include "rrtransport.h"
 #include "X11Trans.h"
+#ifdef USEHELGRIND
+	#include <valgrind/helgrind.h>
+#endif
 
 extern "C" void _vgl_disableFaker(void);
 extern "C" void _vgl_enableFaker(void);
@@ -36,7 +39,13 @@ static const int pf2trans[PIXELFORMATS] =
 };
 
 
-FakerConfig *fconfig_getinstance(void) { return fconfig; }
+FakerConfig *fconfig_getinstance(void)
+{
+	#ifdef USEHELGRIND
+	ANNOTATE_BENIGN_RACE_SIZED(&fconfig, sizeof(FakerConfig *), );
+	#endif
+	return fconfig;
+}
 
 
 // This just wraps the X11Trans class in order to demonstrate how to
@@ -52,6 +61,9 @@ void *RRTransInit(Display *dpy_, Window win_, FakerConfig *fconfig_)
 	void *handle = NULL;
 	try
 	{
+		#ifdef USEHELGRIND
+		ANNOTATE_BENIGN_RACE_SIZED(&fconfig, sizeof(FakerConfig *), );
+		#endif
 		fconfig = fconfig_;
 		dpy = dpy_;
 		win = win_;

@@ -274,6 +274,15 @@ message(STATUS "INLINE = ${INLINE} (VGL_FORCEINLINE = ${VGL_FORCEINLINE})")
 configure_file(include/vglinline.h.in include/vglinline.h)
 include_directories(${CMAKE_BINARY_DIR}/include)
 
+option(VGL_USEHELGRIND
+	"Include code annotations to suppress helgrind warning messages about innocuous VirtualGL behaviors."
+	OFF)
+if(VGL_USEHELGRIND)
+	add_definitions(-DUSEHELGRIND)
+	boolean_number(VGL_USEHELGRIND)
+	report_option(VGL_USEHELGRIND "Helgrind annotations")
+endif()
+
 option(VGL_USESSL
 	"Enable SSL (Secure Sockets Layer) encryption feature in the VGL Transport"
 	OFF)
