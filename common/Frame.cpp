@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005-2007 Sun Microsystems, Inc.
-// Copyright (C)2009-2012, 2014, 2017-2019 D. R. Commander
+// Copyright (C)2009-2012, 2014, 2017-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -554,6 +554,9 @@ void CompressedFrame::init(rrframeheader &h, int buffer)
 
 // Frame created from shared graphics memory
 
+CriticalSection FBXFrame::mutex;
+
+
 FBXFrame::FBXFrame(Display *dpy, Drawable draw, Visual *vis,
 	bool reuseConn_) : Frame()
 {
@@ -577,6 +580,7 @@ void FBXFrame::init(char *dpystring, Drawable draw, Visual *vis)
 	memset(&fb, 0, sizeof(fbx_struct));
 
 	if(!dpystring || !draw) throw(Error("FBXFrame::init", "Invalid argument"));
+	CriticalSection::SafeLock l(mutex);
 	if(!(wh.dpy = XOpenDisplay(dpystring)))
 		throw(Error("FBXFrame::init", "Could not open display"));
 
@@ -612,10 +616,14 @@ void FBXFrame::init(rrframeheader &h)
 	if((env = getenv("VGL_USEXSHM")) != NULL && strlen(env) > 0
 		&& !strcmp(env, "0"))
 		usexshm = 0;
-	TRY_FBX(fbx_init(&fb, wh, h.framew, h.frameh, usexshm));
+	{
+		CriticalSection::SafeLock l(mutex);
+		TRY_FBX(fbx_init(&fb, wh, h.framew, h.frameh, usexshm));
+	}
 	if(h.framew > fb.width || h.frameh > fb.height)
 	{
 		XSync(wh.dpy, False);
+		CriticalSection::SafeLock l(mutex);
 		TRY_FBX(fbx_init(&fb, wh, h.framew, h.frameh, usexshm));
 	}
 	hdr = h;
@@ -672,6 +680,9 @@ void FBXFrame::redraw(void)
 
 // Frame created using X Video
 
+CriticalSection XVFrame::mutex;
+
+
 XVFrame::XVFrame(Display *dpy_, Window win_) : Frame()
 {
 	if(!dpy_ || !win_) throw(Error("XVFrame::XVFrame", "Invalid argument"));
@@ -693,6 +704,7 @@ void XVFrame::init(char *dpystring, Window win_)
 	memset(&fb, 0, sizeof(fbxv_struct));
 
 	if(!dpystring || !win_) throw(Error("XVFrame::init", "Invalid argument"));
+	CriticalSection::SafeLock l(mutex);
 	if(!(dpy = XOpenDisplay(dpystring)))
 		throw(Error("XVFrame::init", "Could not open display"));
 
@@ -735,10 +747,14 @@ XVFrame &XVFrame::operator= (Frame &f)
 void XVFrame::init(rrframeheader &h)
 {
 	checkHeader(h);
-	TRY_FBXV(fbxv_init(&fb, dpy, win, h.framew, h.frameh, I420_PLANAR, 0));
+	{
+		CriticalSection::SafeLock l(mutex);
+		TRY_FBXV(fbxv_init(&fb, dpy, win, h.framew, h.frameh, I420_PLANAR, 0));
+	}
 	if(h.framew > fb.xvi->width || h.frameh > fb.xvi->height)
 	{
 		XSync(dpy, False);
+		CriticalSection::SafeLock l(mutex);
 		TRY_FBXV(fbxv_init(&fb, dpy, win, h.framew, h.frameh, I420_PLANAR, 0));
 	}
 	hdr = h;
