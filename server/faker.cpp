@@ -37,6 +37,9 @@ namespace vglfaker {
 Display *dpy3D = NULL;
 bool deadYet = false;
 char *glExtensions = NULL;
+#ifdef EGLBACKEND
+EGLint eglMajor = 0, eglMinor = 0;
+#endif
 VGL_THREAD_LOCAL(TraceLevel, long, 0)
 VGL_THREAD_LOCAL(FakerLevel, long, 0)
 VGL_THREAD_LOCAL(ExcludeCurrent, bool, false)
@@ -215,7 +218,7 @@ Display *init3D(void)
 							devices[i], NULL)))
 						THROW("Could not open EGL display");
 					free(devices);  devices = NULL;
-					if(!_eglInitialize((EGLDisplay)dpy3D, NULL, NULL))
+					if(!_eglInitialize((EGLDisplay)dpy3D, &eglMajor, &eglMinor))
 						THROW("Could not initialize EGL");
 				}
 				catch(...)

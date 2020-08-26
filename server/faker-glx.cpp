@@ -792,14 +792,27 @@ static const char *getGLXExtensions(void)
 	const char *realGLXExtensions = fconfig.egl ? "" :
 		_glXQueryExtensionsString(DPY3D, DefaultScreen(DPY3D));
 
-	if(!fconfig.egl) CHECKSYM_NONFATAL(glXCreateContextAttribsARB)
-	if((fconfig.egl || __glXCreateContextAttribsARB)
-		&& !strstr(glxextensions, "GLX_ARB_create_context"))
-		strncat(glxextensions,
-			" GLX_ARB_create_context GLX_ARB_create_context_profile",
-			1023 - strlen(glxextensions));
-
-	if(fconfig.egl) return glxextensions;
+	#ifdef EGLBACKEND
+	if(fconfig.egl)
+	{
+		if((vglfaker::eglMajor > 1
+				|| (vglfaker::eglMajor == 1 && vglfaker::eglMinor >= 5))
+			&& !strstr(glxextensions, "GLX_ARB_create_context"))
+			strncat(glxextensions,
+				" GLX_ARB_create_context GLX_ARB_create_context_profile",
+				1023 - strlen(glxextensions));
+		return glxextensions;
+	}
+	else
+	#endif
+	{
+		CHECKSYM_NONFATAL(glXCreateContextAttribsARB)
+		if(__glXCreateContextAttribsARB
+			&& !strstr(glxextensions, "GLX_ARB_create_context"))
+			strncat(glxextensions,
+				" GLX_ARB_create_context GLX_ARB_create_context_profile",
+				1023 - strlen(glxextensions));
+	}
 
 	if(strstr(realGLXExtensions, "GLX_ARB_create_context_robustness")
 		&& !strstr(glxextensions, "GLX_ARB_create_context_robustness"))

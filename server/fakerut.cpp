@@ -2100,12 +2100,16 @@ int contextMismatchTest(void)
 				attribs[8] = GLX_CONTEXT_RESET_NOTIFICATION_STRATEGY_ARB;
 				attribs[9] = GLX_LOSE_CONTEXT_ON_RESET_ARB;
 			}
-			PFNGLXCREATECONTEXTATTRIBSARBPROC __glXCreateContextAttribsARB =
-				(PFNGLXCREATECONTEXTATTRIBSARBPROC)glXGetProcAddress(
-					(const GLubyte *)"glXCreateContextAttribsARB");
-			if(__glXCreateContextAttribsARB)
-				ctx2 = __glXCreateContextAttribsARB(dpy, config2, NULL, True, attribs);
-			else
+			if(GLX_EXTENSION_EXISTS(GLX_ARB_create_context))
+			{
+				PFNGLXCREATECONTEXTATTRIBSARBPROC __glXCreateContextAttribsARB =
+					(PFNGLXCREATECONTEXTATTRIBSARBPROC)glXGetProcAddress(
+						(const GLubyte *)"glXCreateContextAttribsARB");
+					if(__glXCreateContextAttribsARB)
+						ctx2 = __glXCreateContextAttribsARB(dpy, config2, NULL, True,
+							attribs);
+			}
+			if(!ctx2)
 				ctx2 = glXCreateNewContext(dpy, config2, GLX_RGBA_TYPE, NULL, True);
 			if(!ctx2) THROW("Could not create context");
 
