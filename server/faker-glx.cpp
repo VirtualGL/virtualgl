@@ -264,8 +264,12 @@ void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst,
 	if(IS_EXCLUDED(dpy))
 		return _glXCopyContext(dpy, src, dst, mask);
 
-	// TODO: Is there a way to implement this with EGL?
-	if(fconfig.egl) THROW("glXCopyContext() requires the GLX back end");
+	if(fconfig.egl)
+	{
+		vglout.println("[VGL] ERROR: glXCopyContext() requires the GLX back end");
+		vglfaker::sendGLXError(dpy, X_GLXCopyContext, BadRequest, true);
+		return;
+	}
 	_glXCopyContext(DPY3D, src, dst, mask);
 
 	CATCH();

@@ -44,7 +44,27 @@ On supported platforms, the EGL back end allows the VirtualGL Faker to be used
 without a 3D X server.  The EGL back end can be activated by setting the
 `VGL_DISPLAY` environment variable to the path of a DRI device, such as
 /dev/dri/card0, or by passing that device path to `vglrun` using the `-d`
-argument.
+argument.  Some obsolete OpenGL and GLX features are not supported by the EGL
+back end:
+    - `glXCopyContext()`
+    - Accumulation buffers
+    - Aux buffers
+    - Indirect OpenGL contexts
+
+    The EGL back end also does not currently support the following GLX
+extensions:
+
+    - `GLX_ARB_create_context_robustness`
+    - `GLX_ARB_fbconfig_float`
+    - `GLX_EXT_create_context_es2_profile`
+    - `GLX_EXT_fbconfig_packed_float`
+    - `GLX_EXT_framebuffer_sRGB`
+    - `GLX_EXT_import_context`
+    - `GLX_EXT_texture_from_pixmap`
+    - `GLX_NV_float_buffer`
+
+    Those extensions are supported by the GLX back end if the 3D X server
+supports them.
 
 
 2.6.4
