@@ -27,7 +27,7 @@
 #include <GL/glx.h>
 
 
-typedef class _VGLFBConfig *VGLFBConfig;
+typedef struct _VGLFBConfig *VGLFBConfig;
 
 
 void CheckEGLErrors(Display *dpy, unsigned short minorCode);
