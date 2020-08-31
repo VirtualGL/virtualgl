@@ -1127,10 +1127,12 @@ int visTest(void)
 													visualTypes[visualTypeIndex];
 												if((!(configs = glXChooseFBConfig(dpy,
 													DefaultScreen(dpy), rgbattrib13, &n)) || n == 0)
-													&& !stereo && !samples && !aux && !accum)
+													&& !stereo && !samples && !aux && !accum
+													&& visualTypeIndex != 1)
 													THROW("No FB configs found");
 												if(!(vis0 = glXChooseVisual(dpy, DefaultScreen(dpy),
-													rgbattrib)) && !stereo && !samples && !aux && !accum)
+													rgbattrib)) && !stereo && !samples && !aux && !accum
+													&& visualTypeIndex != 1)
 													THROW("Could not find visual");
 												if(vis0 && configs)
 													configVsVisual(dpy, configs[0], vis0);
