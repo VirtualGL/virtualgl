@@ -45,7 +45,10 @@ typedef struct
 	XExtData *extData; \
 	\
 	obj.screen = XScreenOfDisplay(dpy, screen); \
-	extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 3); \
+	int minExtensionNumber = \
+		XFindOnExtensionList(XEHeadOfExtensionList(obj), 0) ? 0 : 1; \
+	extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), \
+		minExtensionNumber + 2); \
 	if(!extData) \
 		THROW("Could not retrieve visual attribute table for screen"); \
 	va = (VisAttrib *)extData->private_data; \
@@ -58,7 +61,10 @@ typedef struct
 	XExtData *extData; \
 	\
 	obj.screen = XScreenOfDisplay(dpy, screen); \
-	extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 4); \
+	int minExtensionNumber = \
+		XFindOnExtensionList(XEHeadOfExtensionList(obj), 0) ? 0 : 1; \
+	extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), \
+		minExtensionNumber + 3); \
 	if(!extData) \
 		THROW("Could not retrieve FB config attribute table for screen"); \
 	ca = (struct _VGLFBConfig *)extData->private_data; \
@@ -214,7 +220,10 @@ static bool buildVisAttribTable(Display *dpy, int screen)
 	{
 		CriticalSection::SafeLock l(vglfaker::getDisplayCS(dpy));
 
-		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 3);
+		int minExtensionNumber =
+			XFindOnExtensionList(XEHeadOfExtensionList(obj), 0) ? 0 : 1;
+		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj),
+			minExtensionNumber + 2);
 		if(extData && extData->private_data) return true;
 
 		if(fconfig.probeglx
@@ -430,7 +439,10 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 	{
 		CriticalSection::SafeLock l(vglfaker::getDisplayCS(dpy));
 
-		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 4);
+		int minExtensionNumber =
+			XFindOnExtensionList(XEHeadOfExtensionList(obj), 0) ? 0 : 1;
+		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj),
+			minExtensionNumber + 3);
 		if(extData && extData->private_data) return;
 
 		#ifdef EGLBACKEND

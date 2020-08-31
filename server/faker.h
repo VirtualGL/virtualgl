@@ -68,7 +68,10 @@ namespace vglfaker
 		if(!dpy) return false;
 		// The 3D X server may have its own extensions that conflict with ours.
 		if(!fconfig.egl && dpy == dpy3D) return true;
-		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 1);
+		int minExtensionNumber =
+			XFindOnExtensionList(XEHeadOfExtensionList(obj), 0) ? 0 : 1;
+		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj),
+			minExtensionNumber);
 		ERRIFNOT(extData);
 		ERRIFNOT(extData->private_data);
 
@@ -85,7 +88,10 @@ namespace vglfaker
 		// The 3D X server may have its own extensions that conflict with ours.
 		if(!fconfig.egl && dpy == dpy3D)
 			THROW("vglfaker::getDisplayCS() called with 3D X server handle (this should never happen)");
-		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj), 2);
+		int minExtensionNumber =
+			XFindOnExtensionList(XEHeadOfExtensionList(obj), 0) ? 0 : 1;
+		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj),
+			minExtensionNumber + 1);
 		ERRIFNOT(extData);
 		ERRIFNOT(extData->private_data);
 
