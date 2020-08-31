@@ -802,14 +802,11 @@ Bool VGLQueryExtension(Display *dpy, int *majorOpcode, int *eventBase,
 		// and error base.
 		Bool retval = _XQueryExtension(dpy, "GLX", majorOpcode, eventBase,
 			errorBase);
-		if(retval) return retval;
-		// Otherwise, we have no choice but to create a work of fiction.  We
-		// assign the maximum possible values for the major opcode and error base,
-		// in order to minimize the odds of stomping on another X extension.
-		*majorOpcode = 255;
-		*eventBase = 0;
-		*errorBase = LastExtensionError - __GLX_NUMBER_ERRORS + 1;
-		return True;
+		// Otherwise, there is no sane way for the EGL back end to operate, mostly
+		// because of XCB.
+		if(!retval)
+			THROW("The EGL back end requires a 2D X server with a GLX extension.");
+		return retval;
 	}
 	// When using the GLX back end, all GLX errors will come from the 3D X
 	// server.

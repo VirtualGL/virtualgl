@@ -43,7 +43,8 @@ const xcb_query_extension_reply_t *
 			OPENTRACE(xcb_get_extension_data);  PRARGX(conn);  PRARGS(ext->name);
 			PRARGI(ext->global_id);  STARTTRACE();
 
-		xcb_connection_t *conn3D = _XGetXCBConnection(DPY3D);
+		xcb_connection_t *conn3D =
+			(fconfig.egl ? conn : _XGetXCBConnection(DPY3D));
 		if(conn3D != NULL)
 			reply = _xcb_get_extension_data(conn3D, _xcb_glx_id());
 
@@ -83,7 +84,7 @@ xcb_glx_query_version_cookie_t
 		OPENTRACE(xcb_glx_query_version);  PRARGX(conn);  PRARGI(major_version);
 		PRARGI(minor_version);  STARTTRACE();
 
-	xcb_connection_t *conn3D = _XGetXCBConnection(DPY3D);
+	xcb_connection_t *conn3D = (fconfig.egl ? conn : _XGetXCBConnection(DPY3D));
 	if(conn3D != NULL)
 		cookie = _xcb_glx_query_version(conn3D, major_version, minor_version);
 
@@ -110,7 +111,7 @@ xcb_glx_query_version_reply_t *
 		OPENTRACE(xcb_glx_query_version_reply);  PRARGX(conn);
 		STARTTRACE();
 
-	xcb_connection_t *conn3D = _XGetXCBConnection(DPY3D);
+	xcb_connection_t *conn3D = (fconfig.egl ? conn : _XGetXCBConnection(DPY3D));
 	if(conn3D != NULL)
 		reply = _xcb_glx_query_version_reply(conn3D, cookie, error);
 

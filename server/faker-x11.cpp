@@ -545,6 +545,8 @@ Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
 {
 	Bool retval = True;
 
+	TRY();
+
 	if(IS_EXCLUDED(dpy))
 		return _XQueryExtension(dpy, name, major_opcode, first_event, first_error);
 
@@ -559,6 +561,8 @@ Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
 		STOPTRACE();  if(major_opcode) PRARGI(*major_opcode);
 		if(first_event) PRARGI(*first_event);
 		if(first_error) PRARGI(*first_error);  CLOSETRACE();
+
+	CATCH();
 
 	return retval;
 }

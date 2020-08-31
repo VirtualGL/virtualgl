@@ -20,6 +20,11 @@
 #include <GL/glu.h>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
+#ifdef FAKEXCB
+	#include <xcb/xcb.h>
+	#include <xcb/glx.h>
+	#include <X11/Xlib-xcb.h>
+#endif
 #include <dlfcn.h>
 #include <unistd.h>
 #include "Error.h"
@@ -2592,6 +2597,22 @@ int extensionQueryTest(void)
 		if(!XQueryExtension(dpy, "GLX", &majorOpcode, &eventBase, &errorBase)
 			|| majorOpcode <= 0 || eventBase <= 0 || errorBase <= 0)
 			THROW("GLX Extension not reported as present");
+		#ifdef FAKEXCB
+		xcb_connection_t *conn = XGetXCBConnection(dpy);
+		if(!conn) THROW("Could not get XCB connection for display");
+		const xcb_query_extension_reply_t *qeReply =
+			xcb_get_extension_data(conn, &xcb_glx_id);
+		if(!qeReply || qeReply->major_opcode <= 0 || qeReply->first_event <= 0
+			|| qeReply->first_error <= 0)
+			THROW("GLX extension not reported as present in XCB");
+		xcb_glx_query_version_cookie_t cookie = xcb_glx_query_version(conn, 1, 4);
+		xcb_generic_error_t *error;
+		xcb_glx_query_version_reply_t *qvReply =
+			xcb_glx_query_version_reply(conn, cookie, &error);
+		if(!qvReply) THROW("Could not get GLX version in XCB");
+		if(qvReply->major_version != 1 || qvReply->minor_version != 4)
+			THROW("Incorrect GLX version returned in XCB");
+		#endif
 		// For some reason, the GLX error string table isn't initialized until a
 		// substantial GLX command completes.
 		if((configs = glXGetFBConfigs(dpy, DefaultScreen(dpy), &dummy1)) != NULL)

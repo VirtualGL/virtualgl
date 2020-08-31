@@ -64,7 +64,7 @@ extensions:
     - `GLX_NV_float_buffer`
 
     Those extensions are supported by the GLX back end if the 3D X server
-supports them.
+supports them.  The EGL back end requires a 2D X server with a GLX extension.
 
 
 2.6.4
