@@ -1931,8 +1931,11 @@ Bool glXQueryExtension(Display *dpy, int *error_base, int *event_base)
 	if(IS_EXCLUDED(dpy))
 		return _glXQueryExtension(dpy, error_base, event_base);
 
-	int dummy;
-	return VGLQueryExtension(dpy, &dummy, event_base, error_base);
+	int majorOpcode, eventBase, errorBase;
+	Bool retval = VGLQueryExtension(dpy, &majorOpcode, &eventBase, &errorBase);
+	if(error_base) *error_base = errorBase;
+	if(event_base) *event_base = eventBase;
+	return retval;
 
 	CATCH();
 	return False;

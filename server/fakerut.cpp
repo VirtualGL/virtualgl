@@ -2602,7 +2602,7 @@ int extensionQueryTest(void)
 
 		int errorBase2 = -1, eventBase2 = -1;
 		if(!glXQueryExtension(dpy, &errorBase2, &eventBase2) || errorBase2 <= 0
-			|| eventBase2 <= 0)
+			|| eventBase2 <= 0 || !glXQueryExtension(dpy, NULL, NULL))
 			THROW("GLX Extension not reported as present");
 		if(errorBase != errorBase2 || eventBase != eventBase2)
 			THROW("XQueryExtension()/glXQueryExtension() mismatch");
