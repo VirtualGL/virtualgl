@@ -52,7 +52,10 @@ while [ $# -gt 0 ]; do
 		IPV6=0
 		;;
 	-noglx)
-		XVFBARGS="-extension GLX"
+		XVFBARGS=$XVFBARGS" -extension GLX"
+		;;
+	-nomitshm)
+		XVFBARGS=$XVFBARGS" -extension MIT-SHM"
 		;;
 	-10bpc)
 		DEPTH=30
@@ -84,6 +87,14 @@ which Xvfb >/dev/null 2>&1 || (
 Xvfb :42 -screen 0 1920x1200x$DEPTH -screen 1 1920x1200x$DEPTH $XVFBARGS >/dev/null 2>&1 & PID=$!
 echo Xvfb $XVFBARGS started as process $PID
 sleep 2
+if [[ $XVFBARGS =~ "-extension MIT-SHM" ]]; then
+	DISPLAY=:42 xdpyinfo | grep -q MIT-SHM && ( echo ERROR: MIT-SHM extension not disabled; false; )
+	echo MIT-SHM extension disabled
+fi
+if [[ $XVFBARGS =~ "-extension GLX" ]]; then
+	DISPLAY=:42 xdpyinfo | grep -q GLX && ( echo ERROR: GLX extension not disabled; false; )
+	echo GLX extension disabled
+fi
 
 DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut
 DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut --prefix test

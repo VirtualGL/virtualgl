@@ -21,6 +21,9 @@
 	#include <valgrind/helgrind.h>
 #endif
 
+extern "C" void _vgl_disableFaker(void);
+extern "C" void _vgl_enableFaker(void);
+
 using namespace vglutil;
 using namespace vglcommon;
 using namespace vglserver;
@@ -49,6 +52,8 @@ void X11Trans::run(void)
 
 	try
 	{
+		_vgl_disableFaker();
+
 		while(!deadYet)
 		{
 			FBXFrame *f;  void *ftemp = NULL;
@@ -94,8 +99,11 @@ void X11Trans::run(void)
 	catch(std::exception &e)
 	{
 		if(thread) thread->setError(e);
-		ready.signal();  throw;
+		ready.signal();
+		_vgl_enableFaker();
+		throw;
 	}
+	_vgl_enableFaker();
 }
 
 

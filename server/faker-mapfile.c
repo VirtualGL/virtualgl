@@ -139,8 +139,6 @@
 		#endif
 		XWindowEvent;
 
-		XCopyArea_FBX;
-
 		_vgl_dlopen;
 		_vgl_getAutotestColor;
 		_vgl_getAutotestFrame;

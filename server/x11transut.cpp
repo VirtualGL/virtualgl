@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2009-2010, 2014, 2017-2019 D. R. Commander
+// Copyright (C)2009-2010, 2014, 2017-2020 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -20,6 +20,10 @@
 using namespace vglutil;
 using namespace vglcommon;
 using namespace vglserver;
+
+
+extern "C" void _vgl_disableFaker(void) {}
+extern "C" void _vgl_enableFaker(void) {}
 
 
 void usage(char **argv)

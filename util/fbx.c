@@ -83,17 +83,6 @@ static char *lastError = "No error";
 #endif  /* _WIN32 */
 
 
-#ifdef INFAKER
-
-extern int XCopyArea_FBX(Display *, Drawable, Drawable, GC, int, int,
-	unsigned int, unsigned int, int, int);
-
-#define XCopyArea(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y) \
-	XCopyArea_FBX(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y); \
-
-#endif
-
-
 #ifdef _WIN32
 
 typedef struct _BMINFO

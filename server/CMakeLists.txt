@@ -22,7 +22,7 @@ configure_file(vendor.h.in vendor.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
 	../common)
 
-set(FBXFAKERLIB fbx-faker)
+set(FBXFAKERLIB fbx)
 if(VGL_USEXV)
 	set(FBXFAKERLIB ${FBXFAKERLIB};fbxv)
 endif()
