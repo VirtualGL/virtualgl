@@ -88,6 +88,7 @@ namespace vglfaker
 					bool isPixmap;
 			};
 
+			void initReadbackContext(void);
 			void readPixels(GLint x, GLint y, GLint width, GLint pitch, GLint height,
 				GLenum glFormat, PF *pf, GLubyte *bits, GLint readBuf, bool stereo);
 

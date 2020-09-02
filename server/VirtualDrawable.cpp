@@ -214,6 +214,7 @@ int VirtualDrawable::init(int width, int height, VGLFBConfig config_)
 void VirtualDrawable::setDirect(Bool direct_)
 {
 	if(direct_ != True && direct_ != False) return;
+	CriticalSection::SafeLock l(mutex);
 	if(direct_ != direct && ctx)
 	{
 		VGLDestroyContext(dpy, ctx);  ctx = 0;
@@ -249,6 +250,19 @@ Display *VirtualDrawable::getX11Display(void)
 Drawable VirtualDrawable::getX11Drawable(void)
 {
 	return x11Draw;
+}
+
+
+void VirtualDrawable::initReadbackContext(void)
+{
+	CriticalSection::SafeLock l(mutex);
+	if(!ctx)
+	{
+		if(!isInit())
+			THROW("VirtualDrawable instance has not been fully initialized");
+		if((ctx = VGLCreateContext(dpy, config, NULL, direct, NULL)) == 0)
+			THROW("Could not create OpenGL context for readback");
+	}
 }
 
 
@@ -321,13 +335,7 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 		return;
 	}
 
-	if(!ctx)
-	{
-		if(!isInit())
-			THROW("VirtualDrawable instance has not been fully initialized");
-		if((ctx = VGLCreateContext(dpy, config, NULL, direct, NULL)) == 0)
-			THROW("Could not create OpenGL context for readback");
-	}
+	initReadbackContext();
 	TempContext tc(dpy, getGLXDrawable(), getGLXDrawable(), ctx);
 
 	VGLReadBuffer(readBuf);
@@ -459,13 +467,7 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 void VirtualDrawable::copyPixels(GLint srcX, GLint srcY, GLint width,
 	GLint height, GLint destX, GLint destY, GLXDrawable draw)
 {
-	if(!ctx)
-	{
-		if(!isInit())
-			THROW("VirtualDrawable instance has not been fully initialized");
-		if((ctx = VGLCreateContext(dpy, config, NULL, direct, NULL)) == 0)
-			THROW("Could not create OpenGL context for readback");
-	}
+	initReadbackContext();
 	TempContext tc(dpy, draw, getGLXDrawable(), ctx);
 
 	VGLReadBuffer(GL_FRONT);

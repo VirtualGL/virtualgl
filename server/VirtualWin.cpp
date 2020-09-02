@@ -360,13 +360,7 @@ TempContext *VirtualWin::setupPluginTempContext(GLint drawBuf)
 	}
 	else
 	{
-		if(!ctx)
-		{
-			if(!isInit())
-				THROW("VirtualDrawable instance has not been fully initialized");
-			if((ctx = VGLCreateContext(dpy, config, NULL, direct, NULL)) == 0)
-				THROW("Could not create OpenGL context for readback");
-		}
+		initReadbackContext();
 		tc = new TempContext(dpy, getGLXDrawable(), getGLXDrawable(), ctx);
 		VGLReadBuffer(drawBuf);
 	}
