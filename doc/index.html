@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2020-08-12T08:55:16">
+<meta name="date" content="2020-09-14T22:13:01">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.6.5</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1892,17 +1892,12 @@ is an enterprise-class, open source virtualization solution that
 supports hardware-accelerated OpenGL in Windows and Linux guests running 
 on Windows, Mac, Linux, and Solaris/x86 hosts.  3D acceleration in 
 VirtualBox is accomplished by installing a special driver in the guest 
-that uses a subset of 
-<span class="remote"><a href="http://chromium.sourceforge.net/" class="remote">Chromium</a></span><a name="idx0031"></a> 
-to transmit OpenGL calls through a local connection to the VirtualBox 
+that transmits OpenGL calls through a local connection to the VirtualBox 
 process running on the host.  When used in conjunction with VirtualGL on 
 a Linux or Solaris/x86 host, this solution provides a means of 
 displaying Windows 3D applications remotely.</p>
 
 <p>To use VirtualGL with VirtualBox, perform the following procedures:</p>
-
-
-<h3 id="hd0013000001">Configuring the System</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
@@ -1910,10 +1905,10 @@ displaying Windows 3D applications remotely.</p>
         virtual machine.
     </li>
     <li class="Ordered-1 Ordered">
-        Follow the procedures outlined in the VirtualBox User&rsquo;s Manual to 
-        enable 3D acceleration in the virtual machine.  If possible, verify that 
-        3D acceleration works on a local display <em>without</em> VirtualGL 
-        before adding VirtualGL to the mix.
+        Follow the procedures outlined in the VirtualBox User Manual to enable 
+        3D acceleration in the virtual machine.  If possible, verify that 3D 
+        acceleration works on a local display <em>without</em> VirtualGL before 
+        adding VirtualGL to the mix.
     </li>
     <li class="Ordered-1 Ordered">
         Follow the procedure described in Chapter 
@@ -1923,38 +1918,47 @@ displaying Windows 3D applications remotely.</p>
         (Linux) or to add the VirtualGL library directory to the list of secure 
         paths (Solaris).
     </li>
+    <li class="Ordered-1 Ordered">
+        Exit VirtualBox and re-launch it with <code>vglrun</code>.
+    </li>
 </ol>
 
 
-
-<h3 id="hd0013000002">Launching VirtualBox</h3>
-
-<pre class="verbatim">vglrun VirtualBox -startvm <em>VM-name-or-UUID</em></pre>
-
-
-<h3 id="hd0013000003">NOTES</h3>
+<h3 id="hd0013000001">NOTES</h3>
 
 <ul class="Itemize">
     <li class="Itemize-1 Itemize asterisk">
-        You might want to temporarily enable profiling (add an argument of 
-        <code>+pr</code> to <code>vglrun</code> above) or set the 
-        <code>VGL_LOGO</code> environment variable to <code>1</code> in order to 
-        verify that VirtualGL is loaded and working.
+        If VirtualGL is working properly with VirtualBox, then the OpenGL 
+        renderer string in Windows guests should contain &ldquo;SVGA3D&rdquo; 
+        rather than &ldquo;GDI Generic&rdquo;.
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        It is necessary to start the virtual machine directly as described 
-        above. Simply executing <code>vglrun&nbsp;VirtualBox</code> and using 
-        the GUI to launch the VM does not work.  VirtualBox forks a separate 
-        process for each VM, and the value of the <code>LD_PRELOAD</code> 
-        environment variable from <code>vglrun</code> does not get propagated to 
-        the VM process unless you start it directly.
+        The OpenGL renderer string in Un*x guests always contains 
+        &ldquo;SVGA3D&rdquo;, so the only reliable way to verify that VirtualGL 
+        is working properly with VirtualBox in this case is to enable tracing 
+        (see below) and run a 3D application in the guest.
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        VirtualBox sends mainly uncompressed images to the X server, so even 
-        with VirtualGL, it will not perform well over a remote X connection.  
-        Using a high-performance X proxy (such as TurboVNC) is generally 
-        preferred when remotely displaying VirtualBox using VirtualGL, 
-        particularly on 100-megabit and slower networks.
+        Tracing (<code>VGL_TRACE</code> or <code>vglrun&nbsp;+tr</code>) will 
+        not work with VirtualBox unless the virtual machine is started from the 
+        command line, using
+        <pre class="verbatim">vglrun VirtualBoxVM -startvm <em>VM-name-or-UUID</em></pre>
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
+        VirtualBox bypasses VirtualGL&rsquo;s readback mechanism and image 
+        pipeline, which has two ramifications:
+        <ul class="Itemize">
+            <li class="Itemize-3 Itemize dash">
+                Features that are specific to VirtualGL&rsquo;s readback mechanism or 
+                image pipeline, including the built-in profiling system and 
+                <code>VGL_LOGO</code>, do not work with VirtualBox.
+            </li>
+            <li class="Itemize-3 Itemize dash">
+                VirtualBox sends mainly uncompressed images to the X server, so even 
+                with VirtualGL, it will not perform well over a remote X connection.  
+                Using a high-performance X proxy such as TurboVNC is highly recommended.
+            </li>
+        </ul>
     </li>
 </ul>
 
@@ -2219,7 +2223,7 @@ supported in Cygwin/X.) Otherwise, VirtualGL will fall back to using
 anaglyphic stereo (see below.)  It is usually necessary to explicitly 
 enable stereo in the graphics driver configuration for both the client 
 and VirtualGL server.  The 
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0032"></a> 
+<a href="#Troubleshooting">Troubleshooting</a><a name="idx0031"></a> 
 section below lists a way to verify that both the 3D X server and the 2D 
 X server have stereo visuals available.</p>
 
@@ -2351,7 +2355,7 @@ overlays are not currently supported in Cygwin/X.</p>
 <p>Indexed color (8-bit) overlays have been tested and are known to work 
 with VirtualGL.  True color (24-bit) overlays work, in theory, but have 
 not been tested.  Use <code>glxinfo</code> (see 
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0033"></a> 
+<a href="#Troubleshooting">Troubleshooting</a><a name="idx0032"></a> 
 below) to verify whether the 2D X server supports overlays and whether 
 they are enabled.</p>
 
@@ -2926,7 +2930,7 @@ Image transport plugins are free to handle or ignore any configuration option as
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
-    <td class="standard"><code>0</code> (all OpenGL contexts use direct rendering, unless rendering to a <a href="#overlays">transparent overlay</a><a name="idx0034"></a>)</td>
+    <td class="standard"><code>0</code> (all OpenGL contexts use direct rendering, unless rendering to a <a href="#overlays">transparent overlay</a><a name="idx0033"></a>)</td>
   </tr>
 </table>
 </div>
@@ -3128,7 +3132,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         attribute list for <code>glXChooseFBConfig()</code>.  Example: 
         <code>VGL_DEFAULTFBCONFIG=GLX_ALPHA_SIZE,8,GLX_STENCIL_SIZE,8</code>.  
         See <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0035"></a> for a list of 3D applications that are 
+        Recipes</a><a name="idx0034"></a> for a list of 3D applications that are 
         known to require the use of this configuration option.
     </dd>
 </dl>
@@ -3336,7 +3340,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         <code>VGL_FORCEALPHA</code> might be necessary in order to use PBO 
         readback mode with the aforementioned GPUs (as of this writing, nVidia 
         GeForce adapters are known to require this.)  See the 
-        <a href="#VGL_READBACK"><code>VGL_READBACK</code></a><a name="idx0036"></a> 
+        <a href="#VGL_READBACK"><code>VGL_READBACK</code></a><a name="idx0035"></a> 
         option for further information.
     </dd>
 </dl>
@@ -3483,7 +3487,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         <code>glFlush()</code> so often that VirtualGL cannot get away with 
         reading back/transporting a frame every time <code>glFlush()</code> is 
         called, either (see 
-        <a href="#VGL_SPOILLAST"><code>VGL_SPOILLAST</code></a><a name="idx0037"></a> 
+        <a href="#VGL_SPOILLAST"><code>VGL_SPOILLAST</code></a><a name="idx0036"></a> 
         for more information on how VirtualGL tries to handle this, under normal 
         circumstances.) <br /><br /> Some 3D applications use 
         <code>glFlush()</code> very liberally and intend for it to be an 
@@ -3498,7 +3502,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         applications, setting <code>VGL_GLFLUSHTRIGGER</code> to <code>0</code> 
         should make them display properly with VirtualGL.  See 
         <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0038"></a> for a list of 3D applications that are 
+        Recipes</a><a name="idx0037"></a> for a list of 3D applications that are 
         known to require this.
     </dd>
 </dl>
@@ -3618,7 +3622,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         for that issue was introduced in VirtualGL 2.1.1, this option 
         isn&rsquo;t really useful anymore.
         <div class="important"><p class="important">
-        When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0039"></a> option
+        When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0038"></a> option
         </p></div>
     </dd>
 </dl>
@@ -3726,7 +3730,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         used for compression, nor will it allow you to set this parameter to a 
         value greater than the number of CPU cores in the system.
         <div class="important"><p class="important">
-        When using the VGL Transport, multithreaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0040"></a> option
+        When using the VGL Transport, multithreaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0039"></a> option
         </p></div>
     </dd>
 </dl>
@@ -3893,7 +3897,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         level at which JPEG compression becomes perceptually lossless is 
         different for each image, but experiments with various visual difference 
         benchmarks (such as 
-        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0041"></a>) 
+        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0040"></a>) 
         suggest that a JPEG quality of 95 is sufficient to guarantee perceptual 
         losslessness for the types of 3D applications (volume visualization 
         applications, in particular) in which image quality is critical.  As 
@@ -3945,7 +3949,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         frames, so setting <code>VGL_READBACK=none</code> disables 
         VirtualGL&rsquo;s readback mechanism and prevents duplication of effort. 
         <br /><br /> This option was developed initially to support running 
-        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0042"></a> 
+        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0041"></a> 
         in parallel using MPI.  ParaView/MPI normally uses MPI Processes 1 
         through N as rendering servers, each rendering a portion of the geometry 
         into a separate window on a separate X display. ParaView reads back 
@@ -3981,7 +3985,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         proxy&rsquo;s virtual framebuffer is BGRA but, unless the 3D application 
         has requested an alpha channel, its Pbuffer is likely BGR.  In this 
         specific case, setting the 
-        <a href="#VGL_FORCEALPHA"><code>VGL_FORCEALPHA</code></a><a name="idx0043"></a> 
+        <a href="#VGL_FORCEALPHA"><code>VGL_FORCEALPHA</code></a><a name="idx0042"></a> 
         option to <code>1</code> could alleviate the issue. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -4196,7 +4200,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         at the expense of increased load on the GPU (because VirtualGL is now 
         reading back the rendered frame every time <code>glFlush()</code> is 
         called.)  See <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0044"></a> for a list of 3D applications that are 
+        Recipes</a><a name="idx0043"></a> for a list of 3D applications that are 
         known to require this.
     </dd>
 </dl>
@@ -4427,7 +4431,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         (<code>conformx</code>, specifically), but at least one commercial 
         application is known to require it as well (see 
         <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0045"></a>.) <br /><br /> When 
+        Recipes</a><a name="idx0044"></a>.) <br /><br /> When 
         <code>VGL_SYNC</code> is enabled, every call to a frame trigger function 
         will cause VirtualGL to read back the rendered frame and 
         <em>synchronously</em> draw it into the 3D application&rsquo;s window 
@@ -4476,11 +4480,11 @@ Image transport plugins are free to handle or ignore any configuration option as
         square tiles, compares each tile against the same tile in the previous 
         frame, and compresses/sends only the tiles that have changed (assuming 
         <a href="#VGL_INTERFRAME">interframe 
-        comparison</a><a name="idx0046"></a> is enabled.)  The VGL Transport 
+        comparison</a><a name="idx0045"></a> is enabled.)  The VGL Transport 
         also divides the task of compressing or encoding these tiles among the 
         available CPUs in a round robin fashion, if multithreaded compression is 
         enabled (see 
-        <a href="#VGL_NPROCS"><code>VGL_NPROCS</code></a><a name="idx0047"></a>.) 
+        <a href="#VGL_NPROCS"><code>VGL_NPROCS</code></a><a name="idx0046"></a>.) 
         <br /><br /> There are several tradeoffs that must be considered when 
         choosing a tile size: <br /><br /> <em>Parallel scalability:</em> 
         <ul class="Itemize"><li class="Itemize-0">
