@@ -292,7 +292,8 @@ bool stereoTest(void)
 	if((err = glGetError()) != GL_NO_ERROR) \
 		PRERROR1("OpenGL error 0x%.4x in glGetInteger64v()\n", err); \
 	if(ival64 != (GLint64)ival) \
-		PRERROR3("glGetInteger64v(0x%.4x) %ld != %d\n", param, ival64, ival); \
+		PRERROR3("glGetInteger64v(0x%.4x) %ld != %d\n", param, (long)ival64, \
+			ival); \
 }
 
 void glGetTest(void)
