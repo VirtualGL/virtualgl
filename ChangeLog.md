@@ -22,7 +22,7 @@ rendering attributes to the available 2D X server visuals.  This maximizes the
 chances that "visual hunting" 3D applications (applications that use X11
 functions to obtain a list of 2D X server visuals, then iterate through the
 list with `glXGetConfig()` until they find a visual with a desired set of
-OpenGL rendering attributes) will find an suitable visual.
+OpenGL rendering attributes) will find a suitable visual.
 `VGL_DEFAULTFBCONFIG` can still be used to assign a specified set of OpenGL
 rendering attributes to all 2D X server visuals, although the usefulness of
 that feature is now very limited.
@@ -64,7 +64,8 @@ extensions:
     - `GLX_NV_float_buffer`
 
     Those extensions are supported by the GLX back end if the 3D X server
-supports them.  The EGL back end requires a 2D X server with a GLX extension.
+supports them.  The EGL back end also requires a 2D X server with a GLX
+extension.
 
 
 2.6.4
