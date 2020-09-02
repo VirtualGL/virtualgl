@@ -302,7 +302,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 	if(ctx)
 	{
 		int newctxIsDirect = VGLIsDirect(ctx);
-		if(!newctxIsDirect && direct)
+		if(!fconfig.egl && !newctxIsDirect && direct)
 		{
 			vglout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
 			vglout.println("[VGL]    %s is indirect, which may cause performance to suffer.",
@@ -346,7 +346,7 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config_,
 	if(ctx)
 	{
 		int newctxIsDirect = VGLIsDirect(ctx);
-		if(!newctxIsDirect && direct)
+		if(!fconfig.egl && !newctxIsDirect && direct)
 		{
 			vglout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
 			vglout.println("[VGL]    %s is indirect, which may cause performance to suffer.",
@@ -385,7 +385,7 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config_,
 	if(ctx)
 	{
 		int newctxIsDirect = VGLIsDirect(ctx);
-		if(!newctxIsDirect && direct)
+		if(!fconfig.egl && !newctxIsDirect && direct)
 		{
 			vglout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
 			vglout.println("[VGL]    %s is indirect, which may cause performance to suffer.",
@@ -1803,7 +1803,7 @@ int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 		*value = config->screen;
 		retval = Success;
 	}
-	else retval = VGLQueryContext(DPY3D, ctx, attribute, value);
+	else retval = VGLQueryContext(dpy, ctx, attribute, value);
 
 		STOPTRACE();  if(value) PRARGIX(*value);  CLOSETRACE();
 
@@ -2084,7 +2084,7 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
 			timer.start();
 		}
 	}
-	else VGLSwapBuffers(DPY3D, drawable);
+	else VGLSwapBuffers(dpy, drawable);
 
 		STOPTRACE();  if(vw) { PRARGX(vw->getGLXDrawable()); }
 		CLOSETRACE();

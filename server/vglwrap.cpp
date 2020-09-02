@@ -772,8 +772,8 @@ void VGLQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 					if(!_eglBindAPI(EGL_OPENGL_API))
 						THROW("Could not enable OpenGL API");
 					EGLint eglValue;
-					if(!_eglQuerySurface((EGLDisplay)DPY3D, pb->getEGLSurface(),
-						EGL_LARGEST_PBUFFER, &eglValue))
+					if(!_eglQuerySurface(EDPY, pb->getEGLSurface(), EGL_LARGEST_PBUFFER,
+						&eglValue))
 						THROW_EGL("eglQuerySurface()");
 					*value = eglValue;
 				}

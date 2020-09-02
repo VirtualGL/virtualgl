@@ -473,7 +473,7 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 			EGLConfig config;  int n;
 			if(!_eglBindAPI(EGL_OPENGL_API))
 				THROW("Could not enable OpenGL API");
-			if(!_eglChooseConfig((EGLDisplay)DPY3D, attribs, &config, 1, &n))
+			if(!_eglChooseConfig(EDPY, attribs, &config, 1, &n))
 				THROW("Could not obtain EGL config");
 
 			for(int bpcIndex = 0; bpcIndex < nbpcs; bpcIndex++)
