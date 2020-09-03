@@ -1072,7 +1072,7 @@ int visTest(void)
 				GLX_ACCUM_BLUE_SIZE, 0, GLX_ACCUM_ALPHA_SIZE, 0, GLX_SAMPLE_BUFFERS, 0,
 				GLX_SAMPLES, 1, GLX_RGBA, GLX_X_VISUAL_TYPE, GLX_NONE, None, None,
 				None };
-			int rgbattrib13[] = { GLX_DOUBLEBUFFER, 1, GLX_STEREO, 1,
+			int rgbattrib13[] = { GLX_LEVEL, 0, GLX_DOUBLEBUFFER, 1, GLX_STEREO, 1,
 				GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8,
 				GLX_ALPHA_SIZE, 0, GLX_DEPTH_SIZE, 0, GLX_AUX_BUFFERS, 0,
 				GLX_STENCIL_SIZE, 0, GLX_ACCUM_RED_SIZE, 0, GLX_ACCUM_GREEN_SIZE, 0,
@@ -1083,53 +1083,56 @@ int visTest(void)
 			if(DefaultDepth(dpy, DefaultScreen(dpy)) == 30)
 			{
 				rgbattrib[1] = rgbattrib[3] = rgbattrib[5] = 10;
-				rgbattrib13[5] = rgbattrib13[7] = rgbattrib13[9] = 10;
+				rgbattrib13[7] = rgbattrib13[9] = rgbattrib13[11] = 10;
 			}
 
 			for(int db = 0; db <= 1; db++)
 			{
-				rgbattrib13[1] = db;
+				rgbattrib13[0] = db ? GLX_TRANSPARENT_TYPE : GLX_LEVEL;
+				rgbattrib13[1] = db ? GLX_NONE : 0;
+
+				rgbattrib13[3] = db;
 				rgbattrib[29] = db ? GLX_DOUBLEBUFFER : 0;
 
 				for(int stereo = 0; stereo <= 1; stereo++)
 				{
-					rgbattrib13[3] = stereo;
+					rgbattrib13[5] = stereo;
 					rgbattrib[db ? 30 : 29] = stereo ? GLX_STEREO : 0;
 
 					for(int alpha = 0; alpha <= 1; alpha++)
 					{
-						rgbattrib13[11] = rgbattrib[7] = alpha;
+						rgbattrib13[13] = rgbattrib[7] = alpha;
 
 						for(int depth = 0; depth <= 1; depth++)
 						{
-							rgbattrib13[13] = rgbattrib[9] = depth;
+							rgbattrib13[15] = rgbattrib[9] = depth;
 
 							for(int aux = 0; aux <= 1; aux++)
 							{
-								rgbattrib13[15] = rgbattrib[11] = aux;
+								rgbattrib13[17] = rgbattrib[11] = aux;
 
 								for(int stencil = 0; stencil <= 1; stencil++)
 								{
-									rgbattrib13[17] = rgbattrib[13] = stencil;
+									rgbattrib13[19] = rgbattrib[13] = stencil;
 
 									for(int accum = 0; accum <= 1; accum++)
 									{
-										rgbattrib13[19] = rgbattrib13[21] =
-											rgbattrib13[23] = accum;
+										rgbattrib13[21] = rgbattrib13[23] =
+											rgbattrib13[25] = accum;
 										rgbattrib[15] = rgbattrib[17] = rgbattrib[19] = accum;
-										if(alpha) { rgbattrib13[25] = rgbattrib[21] = accum; }
-										else { rgbattrib13[25] = rgbattrib[21] = 0; }
+										if(alpha) { rgbattrib13[27] = rgbattrib[21] = accum; }
+										else { rgbattrib13[27] = rgbattrib[21] = 0; }
 
 										for(int samples = 0; samples <= 16;
 											samples == 0 ? samples = 1 : samples *= 2)
 										{
-											rgbattrib13[29] = rgbattrib[25] = samples;
-											rgbattrib13[27] = rgbattrib[23] = samples ? 1 : 0;
+											rgbattrib13[31] = rgbattrib[25] = samples;
+											rgbattrib13[29] = rgbattrib[23] = samples ? 1 : 0;
 
 											for(int visualTypeIndex = 0; visualTypeIndex < 3;
 												visualTypeIndex++)
 											{
-												rgbattrib13[31] = rgbattrib[28] =
+												rgbattrib13[33] = rgbattrib[28] =
 													visualTypes[visualTypeIndex];
 												if((!(configs = glXChooseFBConfig(dpy,
 													DefaultScreen(dpy), rgbattrib13, &n)) || n == 0)

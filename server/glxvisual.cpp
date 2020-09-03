@@ -612,8 +612,11 @@ VGLFBConfig *configsFromVisAttribs(Display *dpy, int screen,
 		{
 			renderType = attribs[i + 1];  i++;
 		}
-		else if(attribs[i] == GLX_LEVEL && attribs[++i] != 0)
-			return NULL;
+		else if(attribs[i] == GLX_LEVEL)
+		{
+			if(attribs[i + 1] != 0) return NULL;
+			i++;
+		}
 		else if(attribs[i] == GLX_STEREO)
 		{
 			if(glx13) { stereo = attribs[i + 1];  i++; }
@@ -635,8 +638,11 @@ VGLFBConfig *configsFromVisAttribs(Display *dpy, int screen,
 		{
 			alphaSize = attribs[i + 1];  i++;
 		}
-		else if(attribs[i] == GLX_TRANSPARENT_TYPE && attribs[++i] != GLX_NONE)
-			return NULL;
+		else if(attribs[i] == GLX_TRANSPARENT_TYPE)
+		{
+			if(attribs[i + 1] != GLX_NONE) return NULL;
+			i++;
+		}
 		else if(attribs[i] == GLX_SAMPLES)
 		{
 			samples = attribs[i + 1];  i++;
