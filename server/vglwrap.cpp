@@ -269,6 +269,7 @@ void VGLDestroyContext(Display *dpy, GLXContext ctx)
 	{
 		try
 		{
+			if(!ctx) return;
 			VGLFBConfig config = ectxhash.findConfig(ctx);
 			EGLContext share = ectxhash.findShare(ctx);
 			ectxhash.remove(ctx);

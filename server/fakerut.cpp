@@ -2847,6 +2847,15 @@ int extensionQueryTest(void)
 		XFreePixmap(dpy, pm);  pm = 0;
 
 		//-------------------------------------------------------------------------
+		//    glXDestroyContext()
+		//-------------------------------------------------------------------------
+
+		// Technically this function should throw a GLXBadContext error if passed a
+		// NULL context, but all of the major GLX implementations treat that
+		// situation as a no-op.
+		glXDestroyContext(dpy, NULL);
+
+		//-------------------------------------------------------------------------
 		//    glXDestroyGLXPixmap()
 		//    glXDestroyPixmap()
 		//-------------------------------------------------------------------------
