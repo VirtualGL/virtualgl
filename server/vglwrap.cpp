@@ -96,16 +96,18 @@ void VGLBindFramebuffer(GLenum target, GLuint framebuffer)
 		{
 			if(target == GL_DRAW_FRAMEBUFFER || target == GL_FRAMEBUFFER)
 			{
-				vglfaker::VGLPbuffer *pb = getCurrentVGLPbuffer(EGL_DRAW);
+				EGLSurface surface = _eglGetCurrentSurface(EGL_DRAW);
+				vglfaker::VGLPbuffer *pb = epbhash.find(surface);
 				if(pb)
 				{
 					framebuffer = pb->getFBO();
 					ectxhash.setDrawFBO(_eglGetCurrentContext(), 0);
 				}
 			}
-			else if(target == GL_READ_FRAMEBUFFER)
+			if(target == GL_READ_FRAMEBUFFER || target == GL_FRAMEBUFFER)
 			{
-				vglfaker::VGLPbuffer *pb = getCurrentVGLPbuffer(EGL_READ);
+				EGLSurface surface = _eglGetCurrentSurface(EGL_READ);
+				vglfaker::VGLPbuffer *pb = epbhash.find(surface);
 				if(pb)
 				{
 					framebuffer = pb->getFBO();
@@ -116,16 +118,9 @@ void VGLBindFramebuffer(GLenum target, GLuint framebuffer)
 		else
 		{
 			if(target == GL_DRAW_FRAMEBUFFER || target == GL_FRAMEBUFFER)
-			{
 				ectxhash.setDrawFBO(_eglGetCurrentContext(), framebuffer);
-				GLenum tmp = GL_NONE;
-				ectxhash.setDrawBuffers(_eglGetCurrentContext(), 1, &tmp);
-			}
 			if(target == GL_READ_FRAMEBUFFER || target == GL_FRAMEBUFFER)
-			{
 				ectxhash.setReadFBO(_eglGetCurrentContext(), framebuffer);
-				ectxhash.setReadBuffer(_eglGetCurrentContext(), GL_NONE);
-			}
 		}
 	}
 	#endif
@@ -318,8 +313,6 @@ void VGLDrawBuffer(GLenum mode)
 			pb->setDrawBuffer(mode);
 			return;
 		}
-		GLenum tmp = GL_NONE;
-		ectxhash.setDrawBuffers(_eglGetCurrentContext(), 1, &tmp);
 	}
 	#endif
 	_glDrawBuffer(mode);
@@ -337,8 +330,6 @@ void VGLDrawBuffers(GLsizei n, const GLenum *bufs)
 			pb->setDrawBuffers(n, bufs);
 			return;
 		}
-		GLenum tmp = GL_NONE;
-		ectxhash.setDrawBuffers(_eglGetCurrentContext(), 1, &tmp);
 	}
 	#endif
 	_glDrawBuffers(n, bufs);
@@ -828,7 +819,6 @@ void VGLReadBuffer(GLenum mode)
 			pb->setReadBuffer(mode);
 			return;
 		}
-		ectxhash.setReadBuffer(_eglGetCurrentContext(), 0);
 	}
 	#endif
 	_glReadBuffer(mode);

@@ -1570,6 +1570,26 @@ void checkDrawable(Display *dpy, GLXDrawable draw, int width, int height,
 		PRERROR2(tag " is 0x%.6x, should be 0x%.6x", color, (colorShouldBe)); \
 }
 
+#define VERIFY_FBO(drawFBO, drawBuf, readFBO, readBuf) \
+{ \
+	GLint __drawFBO = -1; \
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &__drawFBO); \
+	if(__drawFBO != (GLint)drawFBO) \
+		PRERROR2("Draw FBO is %d, should be %d", __drawFBO, drawFBO); \
+	GLint __readFBO = -1; \
+	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &__readFBO); \
+	if(__readFBO != (GLint)readFBO) \
+		PRERROR2("Read FBO is %d, should be %d", __readFBO, readFBO); \
+	GLint __drawBuf = -1; \
+	glGetIntegerv(GL_DRAW_BUFFER, &__drawBuf); \
+	if(__drawBuf != (GLint)drawBuf) \
+		PRERROR2("Draw buffer is 0x%.4x, should be 0x%.4x", __drawBuf, drawBuf); \
+	GLint __readBuf = -1; \
+	glGetIntegerv(GL_READ_BUFFER, &__readBuf); \
+	if(__readBuf != (GLint)readBuf) \
+		PRERROR2("Read buffer is 0x%.4x, should be 0x%.4x", __readBuf, readBuf); \
+}
+
 // Test off-screen rendering
 int offScreenTest(bool dbPixmap, bool doSelectEvent)
 {
@@ -1762,18 +1782,21 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				THROWNL("Could not make context current");
 			checkCurrent(dpy, glxwin, glxwin, ctx);
-			glDrawBuffer(GL_BACK);
+			glDrawBuffer(GL_FRONT_AND_BACK);
+			glReadBuffer(GL_FRONT);
 			glGenFramebuffersEXT(1, &fbo);
 			glGenRenderbuffersEXT(1, &rbo);
 			glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rbo);
 			glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_RGBA, dpyw / 2,
 				dpyh / 2);
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+			VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0_EXT, fbo, GL_COLOR_ATTACHMENT0_EXT);
 			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
 				GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, rbo);
 			clr.clear(0);
 			VERIFY_BUF_COLOR(0, clr.bits(-1), "FBO");
 			glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
+			VERIFY_FBO(0, GL_FRONT_AND_BACK, fbo, GL_COLOR_ATTACHMENT0_EXT);
 			glFramebufferRenderbufferEXT(GL_DRAW_FRAMEBUFFER_EXT,
 				GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, 0);
 			glDrawBuffer(GL_BACK);
@@ -1781,6 +1804,11 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			checkFrame(dpy, win, 1, lastFrame);
 			checkReadbackState(GL_COLOR_ATTACHMENT0_EXT, dpy, glxwin, glxwin, ctx);
 			checkWindowColor(dpy, win, clr.bits(-3), false);
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+			VERIFY_FBO(0, GL_BACK, 0, GL_FRONT);
+			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
+				THROWNL("Could not make context current");
+			VERIFY_FBO(0, GL_BACK, 0, GL_FRONT);
 			printf("SUCCESS\n");
 		}
 		catch(std::exception &e)
