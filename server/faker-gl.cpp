@@ -142,6 +142,36 @@ void glBindFramebufferEXT(GLenum target, GLuint framebuffer)
 }
 
 
+void glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers)
+{
+	if(vglfaker::getExcludeCurrent())
+	{
+		_glDeleteFramebuffers(n, framebuffers);
+		return;
+	}
+
+	TRY();
+
+		OPENTRACE(glDeleteFramebuffers);  PRARGI(n);
+		if(n && framebuffers)
+		{
+			for(GLsizei i = 0; i < n; i++) PRARGI(framebuffers[i]);
+		}
+		STARTTRACE();
+
+	VGLDeleteFramebuffers(n, framebuffers);
+
+		STOPTRACE();  CLOSETRACE();
+
+	CATCH();
+}
+
+void glDeleteFramebuffersEXT(GLsizei n, const GLuint *framebuffers)
+{
+	glDeleteFramebuffers(n, framebuffers);
+}
+
+
 // If the application is rendering to the front buffer and switches the draw
 // buffer before calling glFlush()/glFinish()/glXWaitGL(), we set a lazy
 // readback trigger to indicate that the front buffer needs to be read back

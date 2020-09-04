@@ -128,6 +128,30 @@ void VGLBindFramebuffer(GLenum target, GLuint framebuffer)
 }
 
 
+void VGLDeleteFramebuffers(GLsizei n, const GLuint *framebuffers)
+{
+	#ifdef EGLBACKEND
+	if(fconfig.egl)
+	{
+		if(n > 0 && framebuffers)
+		{
+			GLint drawFBO = -1, readFBO = -1;
+			_glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFBO);
+			_glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFBO);
+			for(GLsizei i = 0; i < n; i++)
+			{
+				if((GLint)framebuffers[i] == drawFBO)
+					VGLBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+				if((GLint)framebuffers[i] == readFBO)
+					VGLBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+			}
+		}
+	}
+	#endif
+	_glDeleteFramebuffers(n, framebuffers);
+}
+
+
 GLXContext VGLCreateContext(Display *dpy, VGLFBConfig config, GLXContext share,
 	Bool direct, const int *glxAttribs)
 {

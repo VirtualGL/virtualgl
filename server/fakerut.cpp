@@ -1809,6 +1809,14 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				THROWNL("Could not make context current");
 			VERIFY_FBO(0, GL_BACK, 0, GL_FRONT);
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+			VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0_EXT, fbo, GL_COLOR_ATTACHMENT0_EXT);
+			glDeleteRenderbuffersEXT(1, &rbo);  rbo = 0;
+			glDeleteFramebuffersEXT(1, &fbo);  fbo = 0;
+			VERIFY_FBO(0, GL_BACK, 0, GL_FRONT);
+			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
+				THROWNL("Could not make context current");
+			VERIFY_FBO(0, GL_BACK, 0, GL_FRONT);
 			printf("SUCCESS\n");
 		}
 		catch(std::exception &e)
@@ -3160,6 +3168,8 @@ int procAddrTest(void)
 		// OpenGL
 		TEST_PROC_SYM(glBindFramebuffer)
 		TEST_PROC_SYM(glBindFramebufferEXT)
+		TEST_PROC_SYM(glDeleteFramebuffers)
+		TEST_PROC_SYM(glDeleteFramebuffersEXT)
 		TEST_PROC_SYM(glFinish)
 		TEST_PROC_SYM(glFlush)
 		TEST_PROC_SYM(glDrawBuffer)

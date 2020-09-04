@@ -545,6 +545,9 @@ FUNCDEF2(GLXFBConfigSGIX, glXGetFBConfigFromVisualSGIX, Display *, dpy,
 VFUNCDEF2(glBindFramebuffer, GLenum, target, GLuint, framebuffer,
 	glBindFramebuffer)
 
+VFUNCDEF2(glDeleteFramebuffers, GLsizei, n, const GLuint *, framebuffers,
+	glDeleteFramebuffers)
+
 VFUNCDEF0(glFinish, glFinish)
 
 VFUNCDEF0(glFlush, glFlush)
@@ -727,9 +730,6 @@ VFUNCDEF4(glClearColor, GLclampf, red, GLclampf, green, GLclampf, blue,
 
 VFUNCDEF5(glCopyPixels, GLint, x, GLint, y, GLsizei, width, GLsizei, height,
 	GLenum, type, NULL)
-
-VFUNCDEF2(glDeleteFramebuffers, GLsizei, n, const GLuint *, framebuffers,
-	NULL)
 
 VFUNCDEF2(glDeleteRenderbuffers, GLsizei, n, const GLuint *, renderbuffers,
 	NULL)

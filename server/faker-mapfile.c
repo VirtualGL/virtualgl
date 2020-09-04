@@ -91,6 +91,8 @@
 		/* OpenGL */
 		glBindFramebuffer;
 		glBindFramebufferEXT;
+		glDeleteFramebuffers;
+		glDeleteFramebuffersEXT;
 		glFinish;
 		glFlush;
 		glDrawBuffer;

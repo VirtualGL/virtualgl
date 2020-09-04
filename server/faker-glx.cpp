@@ -1349,6 +1349,8 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		// OpenGL
 		CHECK_FAKED(glBindFramebuffer)
 		CHECK_FAKED(glBindFramebufferEXT)
+		CHECK_FAKED(glDeleteFramebuffers)
+		CHECK_FAKED(glDeleteFramebuffersEXT)
 		CHECK_FAKED(glFinish)
 		CHECK_FAKED(glFlush)
 		CHECK_FAKED(glDrawBuffer)

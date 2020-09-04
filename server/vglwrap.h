@@ -40,6 +40,8 @@ GLXContext VGLCreateContext(Display *dpy, VGLFBConfig config, GLXContext share,
 GLXPbuffer VGLCreatePbuffer(Display *dpy, VGLFBConfig config,
 	const int *glxAttribs);
 
+void VGLDeleteFramebuffers(GLsizei n, const GLuint *framebuffers);
+
 void VGLDestroyContext(Display *dpy, GLXContext ctx);
 
 void VGLDestroyPbuffer(Display *dpy, GLXPbuffer pbuf);
