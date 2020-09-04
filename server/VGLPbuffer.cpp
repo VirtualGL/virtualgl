@@ -57,7 +57,7 @@ VGLPbuffer::VGLPbuffer(Display *dpy_, VGLFBConfig config_,
 		if(!eglpb) THROW_EGL("eglCreatePbufferSurface()");
 
 		config->rboCtx->createContext();
-		createBuffer(GL_FRAMEBUFFER, true);
+		createBuffer(true);
 	}
 	catch(std::exception &e)
 	{
@@ -73,7 +73,7 @@ VGLPbuffer::~VGLPbuffer(void)
 }
 
 
-void VGLPbuffer::createBuffer(GLenum target, bool useRBOContext)
+void VGLPbuffer::createBuffer(bool useRBOContext)
 {
 	TempContextEGL *tc = NULL;
 	GLint oldDrawFBO = -1, oldReadFBO = -1, oldRBO = -1;
@@ -97,7 +97,7 @@ void VGLPbuffer::createBuffer(GLenum target, bool useRBOContext)
 		TRY_GL();
 		if(fbo) _glDeleteFramebuffers(1, &fbo);
 		_glGenFramebuffers(1, &fbo);
-		_glBindFramebuffer(target, fbo);
+		_glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		// 0 = front left, 1 = back left, 2 = front right, 3 = back right
 		for(int i = 0; i < 2 * (!!config->attr.stereo + 1);
 			i += (1 - !!config->attr.doubleBuffer + 1))
@@ -118,7 +118,7 @@ void VGLPbuffer::createBuffer(GLenum target, bool useRBOContext)
 						height);
 			}
 			else _glBindRenderbuffer(GL_RENDERBUFFER, rboc[i]);
-			_glFramebufferRenderbuffer(target, GL_COLOR_ATTACHMENT0 + i,
+			_glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
 				GL_RENDERBUFFER, rboc[i]);
 		}
 		if(config->attr.stencilSize || config->attr.depthSize)
@@ -148,10 +148,11 @@ void VGLPbuffer::createBuffer(GLenum target, bool useRBOContext)
 			else if(config->attr.stencilSize)
 				attachment = GL_STENCIL_ATTACHMENT;
 
-			_glFramebufferRenderbuffer(target, attachment, GL_RENDERBUFFER, rbod);
+			_glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER,
+				rbod);
 		}
 		CATCH_GL("Could not create FBO");
-		GLenum status = _glCheckFramebufferStatus(target);
+		GLenum status = _glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if(status != GL_FRAMEBUFFER_COMPLETE)
 		{
 			vglout.print("[VGL] ERROR: glCheckFramebufferStatus() error 0x%.4x\n",
@@ -246,19 +247,16 @@ void VGLPbuffer::swap(void)
 		GLint drawFBO = -1, readFBO = -1;
 		_glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFBO);
 		_glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFBO);
+		GLuint oldFBO = fbo;
 
-		bool doDraw = false, doRead = false;
-		if(_eglGetCurrentSurface(EGL_DRAW) == eglpb && drawFBO == (GLint)fbo)
-			doDraw = true;
-		if(_eglGetCurrentSurface(EGL_READ) == eglpb && readFBO == (GLint)fbo)
-			doRead = true;
+		if(_eglGetCurrentSurface(EGL_DRAW) == eglpb
+			|| _eglGetCurrentSurface(EGL_READ) == eglpb)
+			createBuffer(false);
 
-		if(doDraw && doRead)
-			createBuffer(GL_FRAMEBUFFER, false);
-		else if(doDraw)
-			createBuffer(GL_DRAW_FRAMEBUFFER, false);
-		else if(doRead)
-			createBuffer(GL_READ_FRAMEBUFFER, false);
+		if(_eglGetCurrentSurface(EGL_DRAW) == eglpb && drawFBO == (GLint)oldFBO)
+			_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+		if(_eglGetCurrentSurface(EGL_READ) == eglpb && readFBO == (GLint)oldFBO)
+			_glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 	}
 }
 

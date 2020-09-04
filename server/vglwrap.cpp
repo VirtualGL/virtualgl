@@ -658,13 +658,8 @@ Bool VGLMakeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 			_glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFBO);
 			_glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFBO);
 
-			if(drawpb && readpb == drawpb)
-				drawpb->createBuffer(GL_FRAMEBUFFER, false);
-			else
-			{
-				if(drawpb) drawpb->createBuffer(GL_DRAW_FRAMEBUFFER, false);
-				if(readpb) readpb->createBuffer(GL_READ_FRAMEBUFFER, false);
-			}
+			if(drawpb) drawpb->createBuffer(false);
+			if(readpb && readpb != drawpb) readpb->createBuffer(false);
 
 			bool boundNewDrawFBO = false, boundNewReadFBO = false;
 			if(drawpb && (ectxhash.getDrawFBO(ctx) == 0 || oldDraw != draw))

@@ -28,7 +28,7 @@ namespace vglfaker
 			VGLPbuffer(Display *dpy, VGLFBConfig config, const int *glxAttribs);
 			~VGLPbuffer(void);
 
-			void createBuffer(GLenum target, bool useRBOContext);
+			void createBuffer(bool useRBOContext);
 			Display *getDisplay(void) { return dpy; }
 			EGLSurface getEGLSurface(void) { return eglpb; }
 			VGLFBConfig getFBConfig(void) { return config; }

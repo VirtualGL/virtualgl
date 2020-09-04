@@ -1809,11 +1809,18 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				THROWNL("Could not make context current");
 			VERIFY_FBO(0, GL_BACK, 0, GL_FRONT);
+			clr.clear(GL_FRONT);
+			clr.clear(GL_BACK);
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 			VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0_EXT, fbo, GL_COLOR_ATTACHMENT0_EXT);
+			VERIFY_BUF_COLOR(0, clr.bits(-3), "FBO");
+			glXSwapBuffers(dpy, glxwin);
+			checkFrame(dpy, win, 1, lastFrame);
+			checkWindowColor(dpy, win, clr.bits(-1), false);
 			glDeleteRenderbuffersEXT(1, &rbo);  rbo = 0;
 			glDeleteFramebuffersEXT(1, &fbo);  fbo = 0;
 			VERIFY_FBO(0, GL_BACK, 0, GL_FRONT);
+			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "Win");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				THROWNL("Could not make context current");
 			VERIFY_FBO(0, GL_BACK, 0, GL_FRONT);
