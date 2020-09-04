@@ -2658,7 +2658,11 @@ int extensionQueryTest(void)
 			xcb_glx_query_version_reply(conn, cookie, &error);
 		if(!qvReply) THROW("Could not get GLX version in XCB");
 		if(qvReply->major_version != 1 || qvReply->minor_version != 4)
+		{
+			free(qvReply);
 			THROW("Incorrect GLX version returned in XCB");
+		}
+		free(qvReply);
 		#endif
 		// For some reason, the GLX error string table isn't initialized until a
 		// substantial GLX command completes.
