@@ -641,9 +641,6 @@ Bool VGLMakeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	{
 		try
 		{
-			GLXDrawable oldDraw = (GLXDrawable)_eglGetCurrentSurface(EGL_DRAW);
-			GLXDrawable oldRead = (GLXDrawable)_eglGetCurrentSurface(EGL_READ);
-
 			if(!_eglBindAPI(EGL_OPENGL_API))
 				THROW("Could not enable OpenGL API");
 			EGLBoolean ret = (Bool)_eglMakeCurrent(EDPY, (EGLSurface)draw,
@@ -662,12 +659,12 @@ Bool VGLMakeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 			if(readpb && readpb != drawpb) readpb->createBuffer(false);
 
 			bool boundNewDrawFBO = false, boundNewReadFBO = false;
-			if(drawpb && (ectxhash.getDrawFBO(ctx) == 0 || oldDraw != draw))
+			if(drawpb && (ectxhash.getDrawFBO(ctx) == 0 || drawFBO == 0))
 			{
 				_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, drawpb->getFBO());
 				boundNewDrawFBO = true;
 			}
-			if(readpb && (ectxhash.getReadFBO(ctx) == 0 || oldRead != read))
+			if(readpb && (ectxhash.getReadFBO(ctx) == 0 || readFBO == 0))
 			{
 				_glBindFramebuffer(GL_READ_FRAMEBUFFER, readpb->getFBO());
 				boundNewReadFBO = true;

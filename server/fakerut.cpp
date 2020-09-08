@@ -1795,6 +1795,14 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 				GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, rbo);
 			clr.clear(0);
 			VERIFY_BUF_COLOR(0, clr.bits(-1), "FBO");
+			if(!glXMakeContextCurrent(dpy, pb, pb, ctx))
+				THROW("Could not make context current");
+			checkCurrent(dpy, pb, pb, ctx);
+			VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0_EXT, fbo, GL_COLOR_ATTACHMENT0_EXT);
+			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
+				THROWNL("Could not make context current");
+			checkCurrent(dpy, glxwin, glxwin, ctx);
+			VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0_EXT, fbo, GL_COLOR_ATTACHMENT0_EXT);
 			glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
 			VERIFY_FBO(0, GL_FRONT_AND_BACK, fbo, GL_COLOR_ATTACHMENT0_EXT);
 			glFramebufferRenderbufferEXT(GL_DRAW_FRAMEBUFFER_EXT,
