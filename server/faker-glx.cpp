@@ -799,6 +799,7 @@ static const char *getGLXExtensions(void)
 	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
+		vglfaker::init3D();
 		if((vglfaker::eglMajor > 1
 				|| (vglfaker::eglMajor == 1 && vglfaker::eglMinor >= 5))
 			&& !strstr(glxextensions, "GLX_ARB_create_context"))
