@@ -126,12 +126,7 @@ void glBindFramebuffer(GLenum target, GLuint framebuffer)
 
 	TRY();
 
-		OPENTRACE(glBindFrameBuffer);  PRARGX(target);  PRARGI(framebuffer);
-		STARTTRACE();
-
 	VGLBindFramebuffer(target, framebuffer);
-
-		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
 }
@@ -152,16 +147,7 @@ void glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers)
 
 	TRY();
 
-		OPENTRACE(glDeleteFramebuffers);  PRARGI(n);
-		if(n && framebuffers)
-		{
-			for(GLsizei i = 0; i < n; i++) PRARGI(framebuffers[i]);
-		}
-		STARTTRACE();
-
 	VGLDeleteFramebuffers(n, framebuffers);
-
-		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
 }
@@ -357,11 +343,7 @@ void glGetIntegerv(GLenum pname, GLint *params)
 
 	TRY();
 
-		OPENTRACE(glGetIntegerv);  PRARGX(pname);  STARTTRACE();
-
 	VGLGetIntegerv(pname, params);
-
-		STOPTRACE();  if(params) PRARGI(params[0]);  CLOSETRACE();
 
 	CATCH();
 }
@@ -605,11 +587,7 @@ void glReadBuffer(GLenum mode)
 
 	TRY();
 
-		OPENTRACE(glReadBuffer);  PRARGX(mode);  STARTTRACE();
-
 	VGLReadBuffer(mode);
-
-		STOPTRACE();  CLOSETRACE();
 
 	CATCH();
 }
