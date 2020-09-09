@@ -55,6 +55,15 @@ using namespace vglutil;
 }
 
 
+#define VERIFY_BUF_COLOR(buf, colorShouldBe, tag) \
+{ \
+	if(buf > 0) glReadBuffer(buf); \
+	unsigned int color = checkBufferColor(); \
+	if(color != (colorShouldBe)) \
+		PRERROR2(tag " is 0x%.6x, should be 0x%.6x", color, (colorShouldBe)); \
+}
+
+
 #define GLX_EXTENSION_EXISTS(ext) \
 	strstr(glXQueryExtensionsString(dpy, DefaultScreen(dpy)), #ext)
 
@@ -603,6 +612,29 @@ int readbackTest(bool stereo)
 			glXSwapBuffers(dpy, win1);
 			checkFrame(dpy, win1, 1, lastFrame1);
 			checkWindowColor(dpy, win1, clr.bits(-1));
+			// Verify that the previous glXSwapBuffers() call was successful
+			clr.clear(GL_FRONT);  if(stereo) sclr.clear(GL_FRONT_RIGHT);
+			clr.clear(GL_BACK);  if(stereo) sclr.clear(GL_BACK_RIGHT);
+			glXMakeCurrent(dpy, win1, ctx0);
+			checkFrame(dpy, win0, 1, lastFrame0);
+			checkWindowColor(dpy, win0, clr.bits(-2));
+			if(stereo)
+				checkWindowColor(dpy, win0, sclr.bits(-2), true);
+			VERIFY_BUF_COLOR(GL_FRONT_LEFT, clr.bits(-3), "GL_FRONT_LEFT");
+			if(stereo)
+				VERIFY_BUF_COLOR(GL_FRONT_RIGHT, sclr.bits(-3), "GL_FRONT_RIGHT");
+			glReadBuffer(GL_BACK);
+			// Verify that glXSwapBuffers() works properly without a current context
+			glXMakeCurrent(dpy, 0, 0);
+			glXSwapBuffers(dpy, win0);
+			checkFrame(dpy, win0, 1, lastFrame0);
+			checkWindowColor(dpy, win0, clr.bits(-1));
+			glXMakeCurrent(dpy, win0, ctx0);
+			VERIFY_BUF_COLOR(GL_FRONT_LEFT, clr.bits(-1), "GL_FRONT_LEFT");
+			if(stereo)
+				VERIFY_BUF_COLOR(GL_FRONT_RIGHT, sclr.bits(-1), "GL_FRONT_RIGHT");
+			glReadBuffer(GL_BACK);
+			glDrawBuffer(GL_FRONT);
 			printf("SUCCESS\n");
 		}
 		catch(std::exception &e)
@@ -1560,14 +1592,6 @@ void checkDrawable(Display *dpy, GLXDrawable draw, int width, int height,
 	COMPARE_DRAW_ATTRIB(dpy, draw, preservedContents, GLX_PRESERVED_CONTENTS);
 	COMPARE_DRAW_ATTRIB(dpy, draw, largestPbuffer, GLX_LARGEST_PBUFFER);
 	COMPARE_DRAW_ATTRIB(dpy, draw, fbcid, GLX_FBCONFIG_ID);
-}
-
-#define VERIFY_BUF_COLOR(buf, colorShouldBe, tag) \
-{ \
-	if(buf > 0) glReadBuffer(buf); \
-	unsigned int color = checkBufferColor(); \
-	if(color != (colorShouldBe)) \
-		PRERROR2(tag " is 0x%.6x, should be 0x%.6x", color, (colorShouldBe)); \
 }
 
 #define VERIFY_FBO(drawFBO, drawBuf, readFBO, readBuf) \
