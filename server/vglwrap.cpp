@@ -674,8 +674,11 @@ Bool VGLMakeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 			if(drawpb)
 			{
 				if(drawFBO == 0 && config)
+				{
 					drawpb->setDrawBuffer(config->attr.doubleBuffer ?
 						GL_BACK : GL_FRONT);
+					_glViewport(0, 0, drawpb->getWidth(), drawpb->getHeight());
+				}
 				else if(boundNewDrawFBO)
 				{
 					const GLenum *oldDrawBufs;  GLsizei nDrawBufs = 0;

@@ -105,6 +105,13 @@ void clickToContinue(Display *dpy)
 	throw(Error(__FUNCTION__, tempErrStr, 0)); \
 }
 
+#define PRERROR4(m, a1, a2, a3, a4) \
+{ \
+	char tempErrStr[256]; \
+	snprintf(tempErrStr, 256, m, a1, a2, a3, a4); \
+	throw(Error(__FUNCTION__, tempErrStr, 0)); \
+}
+
 #define PRERROR5(m, a1, a2, a3, a4, a5) \
 { \
 	char tempErrStr[256]; \
@@ -194,7 +201,7 @@ void checkFrame(Display *dpy, Window win, int desiredReadbacks, int &lastFrame)
 
 
 void checkCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
-	GLXContext ctx)
+	GLXContext ctx, int width, int height)
 {
 	if(glXGetCurrentDisplay() != dpy)
 		THROW("glXGetCurrentDisplay() returned incorrect value");
@@ -204,6 +211,13 @@ void checkCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		THROW("glXGetCurrentReadDrawable() returned incorrect value");
 	if(glXGetCurrentContext() != ctx)
 		THROW("glXGetCurrentContext() returned incorrect value");
+	int viewport[4] = { 0, 0, 0, 0 };
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	if(viewport[2] < 1 || viewport[3] < 1)
+		THROW("Invalid viewport dimensions");
+	if(viewport[2] != width || viewport[3] != height)
+		PRERROR4("Viewport is %dx%d, should be %dx%d\n", viewport[2], viewport[3],
+			width, height);
 }
 
 
@@ -432,7 +446,7 @@ int readbackTest(bool stereo)
 
 		if(!glXMakeCurrent(dpy, win1, ctx0))
 			THROW("Could not make context current");
-		checkCurrent(dpy, win1, win1, ctx0);
+		checkCurrent(dpy, win1, win1, ctx0, dpyw / 2, dpyh / 2);
 		if(stereo && !stereoTest())
 		{
 			THROW("Stereo is not available or is not properly implemented");
@@ -444,7 +458,7 @@ int readbackTest(bool stereo)
 
 		if(!glXMakeContextCurrent(dpy, win1, win0, ctx1))
 			THROW("Could not make context current");
-		checkCurrent(dpy, win1, win0, ctx1);
+		checkCurrent(dpy, win1, win0, ctx1, dpyw / 2, dpyh / 2);
 
 		XMapWindow(dpy, win0);
 		XMapWindow(dpy, win1);
@@ -842,7 +856,7 @@ int flushTest(void)
 		XFree(vis);  vis = NULL;
 		if(!glXMakeCurrent(dpy, win, ctx))
 			THROW("Could not make context current");
-		checkCurrent(dpy, win, win, ctx);
+		checkCurrent(dpy, win, win, ctx, dpyw / 2, dpyh / 2);
 		if(!doubleBufferTest())
 			THROW("This test requires double buffering, which appears to be broken.");
 		glReadBuffer(GL_FRONT);
@@ -1703,13 +1717,13 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 
 		if(!glXMakeContextCurrent(dpy, glxwin, glxwin, ctx))
 			THROW("Could not make context current");
-		checkCurrent(dpy, glxwin, glxwin, ctx);
+		checkCurrent(dpy, glxwin, glxwin, ctx, dpyw / 2, dpyh / 2);
 		if(!doubleBufferTest())
 			THROW("Double buffering appears to be broken");
 
 		if(!glXMakeContextCurrent(dpy, pb, pb, ctx))
 			THROW("Could not make context current");
-		checkCurrent(dpy, pb, pb, ctx);
+		checkCurrent(dpy, pb, pb, ctx, dpyw / 2, dpyh / 2);
 		if(!doubleBufferTest())
 			THROW("Double-buffered off-screen rendering not available");
 		checkFrame(dpy, win, -1, lastFrame);
@@ -1741,13 +1755,13 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			printf("Pbuffer->Window:                ");
 			if(!(glXMakeContextCurrent(dpy, pb, pb, ctx)))
 				THROWNL("Could not make context current");
-			checkCurrent(dpy, pb, pb, ctx);
+			checkCurrent(dpy, pb, pb, ctx, dpyw / 2, dpyh / 2);
 			clr.clear(GL_BACK);
 			clr.clear(GL_FRONT);
 			VERIFY_BUF_COLOR(GL_BACK, clr.bits(-2), "PB");
 			if(!(glXMakeContextCurrent(dpy, glxwin, pb, ctx)))
 				THROWNL("Could not make context current");
-			checkCurrent(dpy, glxwin, pb, ctx);
+			checkCurrent(dpy, glxwin, pb, ctx, dpyw / 2, dpyh / 2);
 			glReadBuffer(GL_BACK);  glDrawBuffer(GL_BACK);
 			glCopyPixels(0, 0, dpyw / 2, dpyh / 2, GL_COLOR);
 			glReadBuffer(GL_FRONT);
@@ -1771,7 +1785,7 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			fontListBase = glGenLists(maxChar + 1);
 			glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
 				fontListBase + minChar);
-			checkCurrent(dpy, glxwin, glxwin, ctx);
+			checkCurrent(dpy, glxwin, glxwin, ctx, dpyw / 2, dpyh / 2);
 			clr.clear(GL_BACK);
 			clr.clear(GL_FRONT);
 			VERIFY_BUF_COLOR(GL_BACK, clr.bits(-2), "Win");
@@ -1780,7 +1794,7 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			fontListBase = glGenLists(maxChar + 1);
 			glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
 				fontListBase + minChar);
-			checkCurrent(dpy, pb, glxwin, ctx);
+			checkCurrent(dpy, pb, glxwin, ctx, dpyw / 2, dpyh / 2);
 			checkFrame(dpy, win, 1, lastFrame);
 			glReadBuffer(GL_BACK);  glDrawBuffer(GL_BACK);
 			glCopyPixels(0, 0, dpyw / 2, dpyh / 2, GL_COLOR);
@@ -1799,13 +1813,13 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			printf("FBO->Window:                    ");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				THROWNL("Could not make context current");
-			checkCurrent(dpy, glxwin, glxwin, ctx);
+			checkCurrent(dpy, glxwin, glxwin, ctx, dpyw / 2, dpyh / 2);
 			clr.clear(GL_BACK);
 			clr.clear(GL_FRONT);
 			VERIFY_BUF_COLOR(GL_BACK, clr.bits(-2), "Win");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				THROWNL("Could not make context current");
-			checkCurrent(dpy, glxwin, glxwin, ctx);
+			checkCurrent(dpy, glxwin, glxwin, ctx, dpyw / 2, dpyh / 2);
 			glDrawBuffer(GL_FRONT_AND_BACK);
 			glReadBuffer(GL_FRONT);
 			glGenFramebuffersEXT(1, &fbo);
@@ -1821,11 +1835,11 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			VERIFY_BUF_COLOR(0, clr.bits(-1), "FBO");
 			if(!glXMakeContextCurrent(dpy, pb, pb, ctx))
 				THROW("Could not make context current");
-			checkCurrent(dpy, pb, pb, ctx);
+			checkCurrent(dpy, pb, pb, ctx, dpyw / 2, dpyh / 2);
 			VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0_EXT, fbo, GL_COLOR_ATTACHMENT0_EXT);
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				THROWNL("Could not make context current");
-			checkCurrent(dpy, glxwin, glxwin, ctx);
+			checkCurrent(dpy, glxwin, glxwin, ctx, dpyw / 2, dpyh / 2);
 			VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0_EXT, fbo, GL_COLOR_ATTACHMENT0_EXT);
 			glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
 			VERIFY_FBO(0, GL_FRONT_AND_BACK, fbo, GL_COLOR_ATTACHMENT0_EXT);
@@ -1880,7 +1894,7 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			fontListBase = glGenLists(maxChar + 1);
 			glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
 				fontListBase + minChar);
-			checkCurrent(dpy, glxpm0, glxpm0, ctx);
+			checkCurrent(dpy, glxpm0, glxpm0, ctx, dpyw / 2, dpyh / 2);
 			clr.clear(GL_FRONT);
 			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "PM0");
 			glDrawBuffer(GL_BACK);  glReadBuffer(GL_BACK);
@@ -1909,13 +1923,13 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			fontListBase = glGenLists(maxChar + 1);
 			glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
 				fontListBase + minChar);
-			checkCurrent(dpy, glxwin, glxwin, ctx);
+			checkCurrent(dpy, glxwin, glxwin, ctx, dpyw / 2, dpyh / 2);
 			clr.clear(GL_FRONT);
 			if(dbPixmap) clr.clear(GL_BACK);
 			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(dbPixmap ? -2 : -1), "Win");
 			if(!(glXMakeContextCurrent(dpy, glxpm1, glxpm1, ctx)))
 				THROWNL("Could not make context current");
-			checkCurrent(dpy, glxpm1, glxpm1, ctx);
+			checkCurrent(dpy, glxpm1, glxpm1, ctx, dpyw / 2, dpyh / 2);
 			checkFrame(dpy, win, 1, lastFrame);
 			glDrawBuffer(GL_BACK);  glReadBuffer(GL_BACK);
 			XCopyArea(dpy, win, pm1, DefaultGC(dpy, DefaultScreen(dpy)), 0, 0,
@@ -1945,12 +1959,12 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
 				fontListBase + minChar);
 			XFreeFont(dpy, fontInfo);  fontInfo = NULL;
-			checkCurrent(dpy, glxpm0, glxpm0, ctx);
+			checkCurrent(dpy, glxpm0, glxpm0, ctx, dpyw / 2, dpyh / 2);
 			clr.clear(GL_FRONT);
 			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "PM0");
 			if(!(glXMakeContextCurrent(dpy, glxpm1, glxpm1, ctx)))
 				THROWNL("Could not make context current");
-			checkCurrent(dpy, glxpm1, glxpm1, ctx);
+			checkCurrent(dpy, glxpm1, glxpm1, ctx, dpyw / 2, dpyh / 2);
 			glDrawBuffer(GL_BACK);  glReadBuffer(GL_BACK);
 			XCopyArea(dpy, pm0, pm1, DefaultGC(dpy, DefaultScreen(dpy)), 0, 0,
 				dpyw / 2, dpyh / 2, 0, 0);
@@ -1975,7 +1989,7 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			lastFrame = 0;
 			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
 				THROWNL("Could not make context current");
-			checkCurrent(dpy, glxpm0, glxpm0, ctx);
+			checkCurrent(dpy, glxpm0, glxpm0, ctx, dpyw / 2, dpyh / 2);
 
 			clr.clear(GL_FRONT);
 			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "PM0");
@@ -2015,7 +2029,7 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			printf("Deleted GLX Pixmap->2D Pixmap:  ");
 			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
 				THROWNL("Could not make context current");
-			checkCurrent(dpy, glxpm0, glxpm0, ctx);
+			checkCurrent(dpy, glxpm0, glxpm0, ctx, dpyw / 2, dpyh / 2);
 			clr.clear(GL_FRONT);
 			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "PM0");
 			glDrawBuffer(GL_BACK);  glReadBuffer(GL_BACK);
@@ -2047,7 +2061,7 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 				THROW("Could not create context");
 			if(!glXMakeContextCurrent(dpy, glxpm1, glxpm1, ctx2))
 				THROW("Could not make context current");
-			checkCurrent(dpy, glxpm1, glxpm1, ctx2);
+			checkCurrent(dpy, glxpm1, glxpm1, ctx2, dpyw / 2, dpyh / 2);
 			clr.clear(GL_FRONT);
 			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "PM1");
 			if(dbPixmap)
@@ -2057,7 +2071,7 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			}
 			if(!glXMakeContextCurrent(dpy, pb, pb, ctx))
 				THROW("Could not make context current");
-			checkCurrent(dpy, pb, pb, ctx);
+			checkCurrent(dpy, pb, pb, ctx, dpyw / 2, dpyh / 2);
 			clr.clear(GL_FRONT);
 			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "PB");
 			clr.clear(GL_BACK);
