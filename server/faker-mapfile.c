@@ -100,6 +100,7 @@
 		#ifdef GL_VERSION_4_5
 		glFramebufferDrawBufferEXT;
 		glFramebufferDrawBuffersEXT;
+		glFramebufferReadBufferEXT;
 		#endif
 		glGetBooleanv;
 		glGetDoublev;
@@ -111,6 +112,7 @@
 		#ifdef GL_VERSION_4_5
 		glNamedFramebufferDrawBuffer;
 		glNamedFramebufferDrawBuffers;
+		glNamedFramebufferReadBuffer;
 		#endif
 		glPopAttrib;
 		glReadBuffer;

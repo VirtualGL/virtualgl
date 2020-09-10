@@ -37,7 +37,7 @@ namespace vglfaker
 			int getHeight(void) { return height; }
 			void setDrawBuffer(GLenum mode, bool deferred);
 			void setDrawBuffers(GLsizei n, const GLenum *bufs, bool deferred);
-			void setReadBuffer(GLenum readBuf);
+			void setReadBuffer(GLenum readBuf, bool deferred);
 			void swap(void);
 
 		private:

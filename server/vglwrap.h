@@ -75,6 +75,8 @@ void VGLNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf);
 void VGLNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 	const GLenum *bufs);
 
+void VGLNamedFramebufferReadBuffer(GLuint framebuffer, GLenum mode);
+
 #endif
 
 int VGLQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value);

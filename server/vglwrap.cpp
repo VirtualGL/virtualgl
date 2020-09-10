@@ -691,11 +691,11 @@ Bool VGLMakeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 			{
 				if(readFBO == 0 && config)
 					readpb->setReadBuffer(config->attr.doubleBuffer ?
-						GL_BACK : GL_FRONT);
+						GL_BACK : GL_FRONT, false);
 				else if(boundNewReadFBO)
 				{
 					GLenum oldReadBuf = ectxhash.getReadBuffer(ctx);
-					if(oldReadBuf) readpb->setReadBuffer(oldReadBuf);
+					if(oldReadBuf) readpb->setReadBuffer(oldReadBuf, false);
 				}
 			}
 
@@ -744,6 +744,23 @@ void VGLNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 	}
 	#endif
 	_glNamedFramebufferDrawBuffers(framebuffer, n, bufs);
+}
+
+
+void VGLNamedFramebufferReadBuffer(GLuint framebuffer, GLenum mode)
+{
+	#ifdef EGLBACKEND
+	if(fconfig.egl)
+	{
+		vglfaker::VGLPbuffer *pb;
+		if(framebuffer == 0 && (pb = getCurrentVGLPbuffer(EGL_READ)) != NULL)
+		{
+			pb->setReadBuffer(mode, true);
+			return;
+		}
+	}
+	#endif
+	_glNamedFramebufferReadBuffer(framebuffer, mode);
 }
 
 #endif
@@ -874,7 +891,7 @@ void VGLReadBuffer(GLenum mode)
 		vglfaker::VGLPbuffer *pb = getCurrentVGLPbuffer(EGL_READ);
 		if(pb)
 		{
-			pb->setReadBuffer(mode);
+			pb->setReadBuffer(mode, false);
 			return;
 		}
 	}

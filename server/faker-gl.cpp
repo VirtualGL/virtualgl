@@ -541,6 +541,27 @@ void glFramebufferDrawBuffersEXT(GLuint framebuffer, GLsizei n,
 	glNamedFramebufferDrawBuffers(framebuffer, n, bufs);
 }
 
+
+void glNamedFramebufferReadBuffer(GLuint framebuffer, GLenum mode)
+{
+	if(vglfaker::getExcludeCurrent())
+	{
+		_glNamedFramebufferReadBuffer(framebuffer, mode);
+		return;
+	}
+
+	TRY();
+
+	VGLNamedFramebufferReadBuffer(framebuffer, mode);
+
+	CATCH();
+}
+
+void glFramebufferReadBufferEXT(GLuint framebuffer, GLenum mode)
+{
+	glNamedFramebufferReadBuffer(framebuffer, mode);
+}
+
 #endif
 
 

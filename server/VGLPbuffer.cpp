@@ -412,7 +412,7 @@ void VGLPbuffer::setDrawBuffers(GLsizei n, const GLenum *bufs, bool deferred)
 }
 
 
-void VGLPbuffer::setReadBuffer(GLenum readBuf)
+void VGLPbuffer::setReadBuffer(GLenum readBuf, bool deferred)
 {
 	if(((readBuf == GL_FRONT_RIGHT || readBuf == GL_RIGHT)
 			&& !config->attr.stereo)
@@ -429,15 +429,20 @@ void VGLPbuffer::setReadBuffer(GLenum readBuf)
 	}
 
 	// 0 = front left, 1 = back left, 2 = front right, 3 = back right
+	GLenum actualReadBuf = readBuf;
 	if(readBuf == GL_FRONT_LEFT || readBuf == GL_FRONT || readBuf == GL_LEFT)
-		_glReadBuffer(GL_COLOR_ATTACHMENT0);
+		actualReadBuf = GL_COLOR_ATTACHMENT0;
 	else if(readBuf == GL_FRONT_RIGHT || readBuf == GL_RIGHT)
-		_glReadBuffer(GL_COLOR_ATTACHMENT2);
+		actualReadBuf = GL_COLOR_ATTACHMENT2;
 	else if(readBuf == GL_BACK_LEFT || readBuf == GL_BACK)
-		_glReadBuffer(GL_COLOR_ATTACHMENT1);
+		actualReadBuf = GL_COLOR_ATTACHMENT1;
 	else if(readBuf == GL_BACK_RIGHT)
-		_glReadBuffer(GL_COLOR_ATTACHMENT3);
+		actualReadBuf = GL_COLOR_ATTACHMENT3;
+	#ifdef GL_VERSION_4_5
+	if(deferred)
+		_glNamedFramebufferReadBuffer(fbo, actualReadBuf);
 	else
-		_glReadBuffer(readBuf);
+	#endif
+		_glReadBuffer(actualReadBuf);
 	ectxhash.setReadBuffer(_eglGetCurrentContext(), readBuf);
 }
