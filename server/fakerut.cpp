@@ -472,6 +472,34 @@ int readbackTest(bool stereo)
 			checkWindowColor(dpy, win1, clr.bits(-2));
 			if(stereo)
 				checkWindowColor(dpy, win1, sclr.bits(-2), true);
+			#ifdef GL_VERSION_4_5
+			if(stereo)
+			{
+				PFNGLFRAMEBUFFERDRAWBUFFERSEXTPROC __glFramebufferDrawBuffersEXT =
+					(PFNGLFRAMEBUFFERDRAWBUFFERSEXTPROC)glXGetProcAddress(
+						(const GLubyte *)"glFramebufferDrawBuffersEXT");
+				if(!__glFramebufferDrawBuffersEXT)
+					THROW("glFramebufferDrawBuffersEXT() not available");
+				const GLenum buf = GL_BACK;
+				__glFramebufferDrawBuffersEXT(0, 1, &buf);
+			}
+			else
+			{
+				PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC __glNamedFramebufferDrawBuffers =
+					(PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC)glXGetProcAddress(
+						(const GLubyte *)"glNamedFramebufferDrawBuffers");
+				if(!__glNamedFramebufferDrawBuffers)
+					THROW("glNamedFramebufferDrawBuffers() not available");
+				const GLenum buf = GL_BACK;
+				__glNamedFramebufferDrawBuffers(0, 1, &buf);
+			}
+			glFinish();
+			checkFrame(dpy, win1, 1, lastFrame1);
+			checkWindowColor(dpy, win1, clr.bits(-2));
+			if(stereo)
+				checkWindowColor(dpy, win1, sclr.bits(-2), true);
+			glDrawBuffer(GL_FRONT);
+			#endif
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)
@@ -494,6 +522,32 @@ int readbackTest(bool stereo)
 			checkWindowColor(dpy, win1, clr.bits(-2));
 			if(stereo)
 				checkWindowColor(dpy, win1, sclr.bits(-2), true);
+			#ifdef GL_VERSION_4_5
+			if(stereo)
+			{
+				PFNGLFRAMEBUFFERDRAWBUFFEREXTPROC __glFramebufferDrawBufferEXT =
+					(PFNGLFRAMEBUFFERDRAWBUFFEREXTPROC)glXGetProcAddress(
+						(const GLubyte *)"glFramebufferDrawBufferEXT");
+				if(!__glFramebufferDrawBufferEXT)
+					THROW("glFramebufferDrawBufferEXT() not available");
+				__glFramebufferDrawBufferEXT(0, GL_BACK);
+			}
+			else
+			{
+				PFNGLNAMEDFRAMEBUFFERDRAWBUFFERPROC __glNamedFramebufferDrawBuffer =
+					(PFNGLNAMEDFRAMEBUFFERDRAWBUFFERPROC)glXGetProcAddress(
+						(const GLubyte *)"glNamedFramebufferDrawBuffer");
+				if(!__glNamedFramebufferDrawBuffer)
+					THROW("glNamedFramebufferDrawBuffer() not available");
+				__glNamedFramebufferDrawBuffer(0, GL_BACK);
+			}
+			glXWaitGL();
+			checkFrame(dpy, win1, 1, lastFrame1);
+			checkWindowColor(dpy, win1, clr.bits(-2));
+			if(stereo)
+				checkWindowColor(dpy, win1, sclr.bits(-2), true);
+			glDrawBuffer(GL_FRONT);
+			#endif
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)

@@ -57,6 +57,19 @@ endforeach()
 if(VGL_FAKEOPENCL)
 	set(DEFINES ${DEFINES};-DFAKEOPENCL)
 endif()
+check_c_source_compiles("#include <GL/gl.h>
+int main(void)
+{
+	#ifdef GL_VERSION_4_5
+	return 0;
+	#else
+	#error OpenGL 4.5 required
+	#endif
+}" OPENGL_4_5_AVAILABLE)
+if(OPENGL_4_5_AVAILABLE)
+	set(DEFINES ${DEFINES};-DGL_VERSION_4_5)
+endif()
+
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile
 	COMMAND ${CMAKE_C_COMPILER} ${DEFINES} -E
 		${CMAKE_CURRENT_SOURCE_DIR}/faker-mapfile.c

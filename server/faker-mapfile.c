@@ -103,8 +103,16 @@
 		glFlush;
 		glDrawBuffer;
 		glDrawBuffers;
+		#ifdef GL_VERSION_4_5
+		glFramebufferDrawBufferEXT;
+		glFramebufferDrawBuffersEXT;
+		#endif
 		glGetString;
 		glGetStringi;
+		#ifdef GL_VERSION_4_5
+		glNamedFramebufferDrawBuffer;
+		glNamedFramebufferDrawBuffers;
+		#endif
 		glPopAttrib;
 		glViewport;
 

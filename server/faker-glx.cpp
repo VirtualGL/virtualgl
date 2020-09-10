@@ -1684,8 +1684,16 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		CHECK_FAKED(glFlush)
 		CHECK_FAKED(glDrawBuffer)
 		CHECK_FAKED(glDrawBuffers)
+		#ifdef GL_VERSION_4_5
+		CHECK_FAKED(glFramebufferDrawBufferEXT)
+		CHECK_FAKED(glFramebufferDrawBuffersEXT)
+		#endif
 		CHECK_FAKED(glGetString)
 		CHECK_FAKED(glGetStringi)
+		#ifdef GL_VERSION_4_5
+		CHECK_FAKED(glNamedFramebufferDrawBuffer)
+		CHECK_FAKED(glNamedFramebufferDrawBuffers)
+		#endif
 		CHECK_FAKED(glPopAttrib)
 		CHECK_FAKED(glViewport)
 	}

@@ -13,6 +13,12 @@ simultaneously resized in another thread.
 in 2.6.3[2] and 2.6.4[1] were not returned from the interposed
 `glXGetProcAddress()` and `glXGetProcAddressARB()` functions.
 
+3. VirtualGL now works properly with 3D applications that use the
+`glNamedFramebufferDrawBuffer()` and `glNamedFramebufferDrawBuffers()`
+functions (OpenGL 4.5) or the `glFramebufferDrawBufferEXT()` and
+`glFramebufferDrawBuffersEXT()` functions (`GL_EXT_direct_state_access`) and
+render to the front buffer.
+
 
 2.6.4
 =====
