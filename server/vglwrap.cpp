@@ -334,7 +334,7 @@ void VGLDrawBuffer(GLenum mode)
 		vglfaker::VGLPbuffer *pb = getCurrentVGLPbuffer(EGL_DRAW);
 		if(pb)
 		{
-			pb->setDrawBuffer(mode);
+			pb->setDrawBuffer(mode, false);
 			return;
 		}
 	}
@@ -351,7 +351,7 @@ void VGLDrawBuffers(GLsizei n, const GLenum *bufs)
 		vglfaker::VGLPbuffer *pb = getCurrentVGLPbuffer(EGL_DRAW);
 		if(pb)
 		{
-			pb->setDrawBuffers(n, bufs);
+			pb->setDrawBuffers(n, bufs, false);
 			return;
 		}
 	}
@@ -676,7 +676,7 @@ Bool VGLMakeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 				if(drawFBO == 0 && config)
 				{
 					drawpb->setDrawBuffer(config->attr.doubleBuffer ?
-						GL_BACK : GL_FRONT);
+						GL_BACK : GL_FRONT, false);
 					_glViewport(0, 0, drawpb->getWidth(), drawpb->getHeight());
 				}
 				else if(boundNewDrawFBO)
@@ -684,7 +684,7 @@ Bool VGLMakeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 					const GLenum *oldDrawBufs;  GLsizei nDrawBufs = 0;
 					oldDrawBufs = ectxhash.getDrawBuffers(ctx, nDrawBufs);
 					if(oldDrawBufs && nDrawBufs > 0)
-						drawpb->setDrawBuffers(nDrawBufs, oldDrawBufs);
+						drawpb->setDrawBuffers(nDrawBufs, oldDrawBufs, false);
 				}
 			}
 			if(readpb)
@@ -708,6 +708,45 @@ Bool VGLMakeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	#endif
 		return _glXMakeContextCurrent(DPY3D, draw, read, ctx);
 }
+
+
+#ifdef GL_VERSION_4_5
+
+void VGLNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf)
+{
+	#ifdef EGLBACKEND
+	if(fconfig.egl)
+	{
+		vglfaker::VGLPbuffer *pb;
+		if(framebuffer == 0 && (pb = getCurrentVGLPbuffer(EGL_DRAW)) != NULL)
+		{
+			pb->setDrawBuffer(buf, true);
+			return;
+		}
+	}
+	#endif
+	_glNamedFramebufferDrawBuffer(framebuffer, buf);
+}
+
+
+void VGLNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
+	const GLenum *bufs)
+{
+	#ifdef EGLBACKEND
+	if(fconfig.egl)
+	{
+		vglfaker::VGLPbuffer *pb;
+		if(framebuffer == 0 && (pb = getCurrentVGLPbuffer(EGL_DRAW)) != NULL)
+		{
+			pb->setDrawBuffers(n, bufs, true);
+			return;
+		}
+	}
+	#endif
+	_glNamedFramebufferDrawBuffers(framebuffer, n, bufs);
+}
+
+#endif
 
 
 int VGLQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)

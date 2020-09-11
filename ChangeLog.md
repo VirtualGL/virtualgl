@@ -67,6 +67,12 @@ extensions:
 supports them.  The EGL back end also requires a 2D X server with a GLX
 extension.
 
+6. VirtualGL now works properly with 3D applications that use the
+`glNamedFramebufferDrawBuffer()` and `glNamedFramebufferDrawBuffers()`
+functions (OpenGL 4.5) or the `glFramebufferDrawBufferEXT()` and
+`glFramebufferDrawBuffersEXT()` functions (`GL_EXT_direct_state_access`) and
+render to the front buffer.
+
 
 2.6.4
 =====

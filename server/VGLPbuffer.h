@@ -35,8 +35,8 @@ namespace vglfaker
 			GLuint getFBO(void) { return fbo; }
 			int getWidth(void) { return width; }
 			int getHeight(void) { return height; }
-			void setDrawBuffer(GLenum mode);
-			void setDrawBuffers(GLsizei n, const GLenum *bufs);
+			void setDrawBuffer(GLenum mode, bool deferred);
+			void setDrawBuffers(GLsizei n, const GLenum *bufs, bool deferred);
 			void setReadBuffer(GLenum readBuf);
 			void swap(void);
 

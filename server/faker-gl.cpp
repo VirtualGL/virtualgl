@@ -460,6 +460,108 @@ const GLubyte *glGetStringi(GLenum name, GLuint index)
 }
 
 
+#ifdef GL_VERSION_4_5
+
+void glNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf)
+{
+	if(vglfaker::getExcludeCurrent())
+	{
+		_glNamedFramebufferDrawBuffer(framebuffer, buf);
+		return;
+	}
+
+	TRY();
+
+		OPENTRACE(glNamedFramebufferDrawBuffer);  PRARGI(framebuffer);
+		PRARGX(buf);  STARTTRACE();
+
+	vglfaker::VirtualWin *vw = NULL;
+	int before = -1, after = -1, rbefore = -1, rafter = -1;
+	GLXDrawable drawable = 0;
+
+	if(framebuffer == 0 && (drawable = VGLGetCurrentDrawable()) != 0
+		&& (vw = winhash.find(NULL, drawable)) != NULL)
+	{
+		before = DrawingToFront();
+		rbefore = DrawingToRight();
+		VGLNamedFramebufferDrawBuffer(framebuffer, buf);
+		after = DrawingToFront();
+		rafter = DrawingToRight();
+		if(before && !after) vw->dirty = true;
+		if(rbefore && !rafter && vw->isStereo()) vw->rdirty = true;
+	}
+	else VGLNamedFramebufferDrawBuffer(framebuffer, buf);
+
+		STOPTRACE();
+		if(drawable && vw)
+		{
+			PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
+		}
+		CLOSETRACE();
+
+	CATCH();
+}
+
+void glFramebufferDrawBufferEXT(GLuint framebuffer, GLenum buf)
+{
+	glNamedFramebufferDrawBuffer(framebuffer, buf);
+}
+
+
+void glNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
+	const GLenum *bufs)
+{
+	if(vglfaker::getExcludeCurrent())
+	{
+		_glNamedFramebufferDrawBuffers(framebuffer, n, bufs);
+		return;
+	}
+
+	TRY();
+
+		OPENTRACE(glNamedFramebufferDrawBuffers);  PRARGI(framebuffer);  PRARGI(n);
+		if(n && bufs)
+		{
+			for(GLsizei i = 0; i < n; i++) PRARGX(bufs[i]);
+		}
+		STARTTRACE();
+
+	vglfaker::VirtualWin *vw = NULL;
+	int before = -1, after = -1, rbefore = -1, rafter = -1;
+	GLXDrawable drawable = 0;
+
+	if(framebuffer == 0 && (drawable = VGLGetCurrentDrawable()) != 0
+		&& (vw = winhash.find(NULL, drawable)) != NULL)
+	{
+		before = DrawingToFront();
+		rbefore = DrawingToRight();
+		VGLNamedFramebufferDrawBuffers(framebuffer, n, bufs);
+		after = DrawingToFront();
+		rafter = DrawingToRight();
+		if(before && !after) vw->dirty = true;
+		if(rbefore && !rafter && vw->isStereo()) vw->rdirty = true;
+	}
+	else VGLNamedFramebufferDrawBuffers(framebuffer, n, bufs);
+
+		STOPTRACE();
+		if(drawable && vw)
+		{
+			PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
+		}
+		CLOSETRACE();
+
+	CATCH();
+}
+
+void glFramebufferDrawBuffersEXT(GLuint framebuffer, GLsizei n,
+	const GLenum *bufs)
+{
+	glNamedFramebufferDrawBuffers(framebuffer, n, bufs);
+}
+
+#endif
+
+
 // glPopAttrib() can change the draw buffer state as well :|
 
 void glPopAttrib(void)

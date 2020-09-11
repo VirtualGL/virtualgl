@@ -64,6 +64,27 @@ using namespace vglutil;
 }
 
 
+#define VERIFY_FBO(drawFBO, drawBuf, readFBO, readBuf) \
+{ \
+	GLint __drawFBO = -1; \
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &__drawFBO); \
+	if(__drawFBO != (GLint)drawFBO) \
+		PRERROR2("Draw FBO is %d, should be %d", __drawFBO, drawFBO); \
+	GLint __readFBO = -1; \
+	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &__readFBO); \
+	if(__readFBO != (GLint)readFBO) \
+		PRERROR2("Read FBO is %d, should be %d", __readFBO, readFBO); \
+	GLint __drawBuf = -1; \
+	glGetIntegerv(GL_DRAW_BUFFER, &__drawBuf); \
+	if(__drawBuf != (GLint)drawBuf) \
+		PRERROR2("Draw buffer is 0x%.4x, should be 0x%.4x", __drawBuf, drawBuf); \
+	GLint __readBuf = -1; \
+	glGetIntegerv(GL_READ_BUFFER, &__readBuf); \
+	if(__readBuf != (GLint)readBuf) \
+		PRERROR2("Read buffer is 0x%.4x, should be 0x%.4x", __readBuf, readBuf); \
+}
+
+
 #define GLX_EXTENSION_EXISTS(ext) \
 	strstr(glXQueryExtensionsString(dpy, DefaultScreen(dpy)), #ext)
 
@@ -380,7 +401,7 @@ class TestColor
 
 
 // This tests the faker's readback heuristics
-int readbackTest(bool stereo)
+int readbackTest(bool stereo, bool doNamedFB)
 {
 	TestColor clr(0), sclr(3);
 	Display *dpy = NULL;  Window win0 = 0, win1 = 0;
@@ -552,6 +573,41 @@ int readbackTest(bool stereo)
 			checkWindowColor(dpy, win1, clr.bits(-2));
 			if(stereo)
 				checkWindowColor(dpy, win1, sclr.bits(-2), true);
+			#ifdef GL_VERSION_4_5
+			GLint major = -1, minor = -1;
+			glGetIntegerv(GL_MAJOR_VERSION, &major);
+			glGetIntegerv(GL_MINOR_VERSION, &minor);
+			if(doNamedFB && (major > 4 || (major == 4 && minor >= 5)))
+			{
+				if(stereo)
+				{
+					PFNGLFRAMEBUFFERDRAWBUFFERSEXTPROC __glFramebufferDrawBuffersEXT =
+						(PFNGLFRAMEBUFFERDRAWBUFFERSEXTPROC)glXGetProcAddress(
+							(const GLubyte *)"glFramebufferDrawBuffersEXT");
+					if(!__glFramebufferDrawBuffersEXT)
+						THROW("glFramebufferDrawBuffersEXT() not available");
+					const GLenum buf = GL_BACK;
+					__glFramebufferDrawBuffersEXT(0, 1, &buf);
+				}
+				else
+				{
+					PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC __glNamedFramebufferDrawBuffers =
+						(PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC)glXGetProcAddress(
+							(const GLubyte *)"glNamedFramebufferDrawBuffers");
+					if(!__glNamedFramebufferDrawBuffers)
+						THROW("glNamedFramebufferDrawBuffers() not available");
+					const GLenum buf = GL_BACK;
+					__glNamedFramebufferDrawBuffers(0, 1, &buf);
+				}
+				VERIFY_FBO(0, GL_BACK, 0, GL_BACK);
+				glFinish();
+				checkFrame(dpy, win1, 1, lastFrame1);
+				checkWindowColor(dpy, win1, clr.bits(-2));
+				if(stereo)
+					checkWindowColor(dpy, win1, sclr.bits(-2), true);
+				glDrawBuffer(GL_FRONT);
+			}
+			#endif
 			printf("SUCCESS\n");
 		}
 		catch(std::exception &e)
@@ -574,6 +630,39 @@ int readbackTest(bool stereo)
 			checkWindowColor(dpy, win1, clr.bits(-2));
 			if(stereo)
 				checkWindowColor(dpy, win1, sclr.bits(-2), true);
+			#ifdef GL_VERSION_4_5
+			GLint major = -1, minor = -1;
+			glGetIntegerv(GL_MAJOR_VERSION, &major);
+			glGetIntegerv(GL_MINOR_VERSION, &minor);
+			if(doNamedFB && (major > 4 || (major == 4 && minor >= 5)))
+			{
+				if(stereo)
+				{
+					PFNGLFRAMEBUFFERDRAWBUFFEREXTPROC __glFramebufferDrawBufferEXT =
+						(PFNGLFRAMEBUFFERDRAWBUFFEREXTPROC)glXGetProcAddress(
+							(const GLubyte *)"glFramebufferDrawBufferEXT");
+					if(!__glFramebufferDrawBufferEXT)
+						THROW("glFramebufferDrawBufferEXT() not available");
+					__glFramebufferDrawBufferEXT(0, GL_BACK);
+				}
+				else
+				{
+					PFNGLNAMEDFRAMEBUFFERDRAWBUFFERPROC __glNamedFramebufferDrawBuffer =
+						(PFNGLNAMEDFRAMEBUFFERDRAWBUFFERPROC)glXGetProcAddress(
+							(const GLubyte *)"glNamedFramebufferDrawBuffer");
+					if(!__glNamedFramebufferDrawBuffer)
+						THROW("glNamedFramebufferDrawBuffer() not available");
+					__glNamedFramebufferDrawBuffer(0, GL_BACK);
+				}
+				VERIFY_FBO(0, GL_BACK, 0, GL_BACK);
+				glXWaitGL();
+				checkFrame(dpy, win1, 1, lastFrame1);
+				checkWindowColor(dpy, win1, clr.bits(-2));
+				if(stereo)
+					checkWindowColor(dpy, win1, sclr.bits(-2), true);
+				glDrawBuffer(GL_FRONT);
+			}
+			#endif
 			printf("SUCCESS\n");
 		}
 		catch(std::exception &e)
@@ -1606,26 +1695,6 @@ void checkDrawable(Display *dpy, GLXDrawable draw, int width, int height,
 	COMPARE_DRAW_ATTRIB(dpy, draw, preservedContents, GLX_PRESERVED_CONTENTS);
 	COMPARE_DRAW_ATTRIB(dpy, draw, largestPbuffer, GLX_LARGEST_PBUFFER);
 	COMPARE_DRAW_ATTRIB(dpy, draw, fbcid, GLX_FBCONFIG_ID);
-}
-
-#define VERIFY_FBO(drawFBO, drawBuf, readFBO, readBuf) \
-{ \
-	GLint __drawFBO = -1; \
-	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &__drawFBO); \
-	if(__drawFBO != (GLint)drawFBO) \
-		PRERROR2("Draw FBO is %d, should be %d", __drawFBO, drawFBO); \
-	GLint __readFBO = -1; \
-	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &__readFBO); \
-	if(__readFBO != (GLint)readFBO) \
-		PRERROR2("Read FBO is %d, should be %d", __readFBO, readFBO); \
-	GLint __drawBuf = -1; \
-	glGetIntegerv(GL_DRAW_BUFFER, &__drawBuf); \
-	if(__drawBuf != (GLint)drawBuf) \
-		PRERROR2("Draw buffer is 0x%.4x, should be 0x%.4x", __drawBuf, drawBuf); \
-	GLint __readBuf = -1; \
-	glGetIntegerv(GL_READ_BUFFER, &__readBuf); \
-	if(__readBuf != (GLint)readBuf) \
-		PRERROR2("Read buffer is 0x%.4x, should be 0x%.4x", __readBuf, readBuf); \
 }
 
 // Test off-screen rendering
@@ -3265,6 +3334,7 @@ void usage(char **argv)
 	fprintf(stderr, "-nodbpixmap = Assume GLXPixmaps are always single-buffered, even if created\n");
 	fprintf(stderr, "              with a double-buffered visual or FB config.\n");
 	fprintf(stderr, "-nocopycontext = Disable glXCopyContext() tests\n");
+	fprintf(stderr, "-nonamedfb = Disable named framebuffer function tests\n");
 	fprintf(stderr, "-selectevent = Enable glXSelectEvent() tests\n");
 	fprintf(stderr, "\n");
 	exit(1);
@@ -3275,7 +3345,7 @@ int main(int argc, char **argv)
 {
 	int ret = 0, nThreads = DEFTHREADS;
 	bool doStereo = true, doDBPixmap = true, doCopyContext = true,
-		doSelectEvent = false;
+		doSelectEvent = false, doNamedFB = true;
 
 	if(putenv((char *)"VGL_AUTOTEST=1") == -1
 		|| putenv((char *)"VGL_SPOIL=0") == -1
@@ -3296,6 +3366,7 @@ int main(int argc, char **argv)
 		else if(!strcasecmp(argv[i], "-nostereo")) doStereo = false;
 		else if(!strcasecmp(argv[i], "-nodbpixmap")) doDBPixmap = false;
 		else if(!strcasecmp(argv[i], "-nocopycontext")) doCopyContext = false;
+		else if(!strcasecmp(argv[i], "-nonamedfb")) doNamedFB = false;
 		else if(!strcasecmp(argv[i], "-selectevent")) doSelectEvent = true;
 		else usage(argv);
 	}
@@ -3310,11 +3381,11 @@ int main(int argc, char **argv)
 	printf("\n");
 	if(!procAddrTest()) ret = -1;
 	printf("\n");
-	if(!readbackTest(false)) ret = -1;
+	if(!readbackTest(false, doNamedFB)) ret = -1;
 	printf("\n");
 	if(doStereo)
 	{
-		if(!readbackTest(true)) ret = -1;
+		if(!readbackTest(true, doNamedFB)) ret = -1;
 		printf("\n");
 	}
 	if(!contextMismatchTest()) ret = -1;

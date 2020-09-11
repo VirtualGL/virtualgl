@@ -261,7 +261,7 @@ void VGLPbuffer::swap(void)
 }
 
 
-void VGLPbuffer::setDrawBuffer(GLenum drawBuf)
+void VGLPbuffer::setDrawBuffer(GLenum drawBuf, bool deferred)
 {
 	if(((drawBuf == GL_FRONT_RIGHT || drawBuf == GL_RIGHT)
 			&& !config->attr.stereo)
@@ -302,12 +302,17 @@ void VGLPbuffer::setDrawBuffer(GLenum drawBuf)
 		actualBufs[nActualBufs++] = GL_COLOR_ATTACHMENT3;
 	if(nActualBufs == 0)
 		actualBufs[nActualBufs++] = drawBuf;
-	_glDrawBuffers(nActualBufs, actualBufs);
+	#ifdef GL_VERSION_4_5
+	if(deferred)
+		_glNamedFramebufferDrawBuffers(fbo, nActualBufs, actualBufs);
+	else
+	#endif
+		_glDrawBuffers(nActualBufs, actualBufs);
 	ectxhash.setDrawBuffers(_eglGetCurrentContext(), 1, &drawBuf);
 }
 
 
-void VGLPbuffer::setDrawBuffers(GLsizei n, const GLenum *bufs)
+void VGLPbuffer::setDrawBuffers(GLsizei n, const GLenum *bufs, bool deferred)
 {
 	if(n < 0)
 	{
@@ -397,7 +402,12 @@ void VGLPbuffer::setDrawBuffers(GLsizei n, const GLenum *bufs)
 		if(bufs[i] == GL_NONE)
 			actualBufs[nActualBufs++] = bufs[i];
 	}
-	_glDrawBuffers(nActualBufs, actualBufs);
+	#ifdef GL_VERSION_4_5
+	if(deferred)
+		_glNamedFramebufferDrawBuffers(fbo, nActualBufs, actualBufs);
+	else
+	#endif
+		_glDrawBuffers(nActualBufs, actualBufs);
 	ectxhash.setDrawBuffers(_eglGetCurrentContext(), n, bufs);
 }
 
