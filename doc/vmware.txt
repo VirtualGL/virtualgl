@@ -1,34 +1,28 @@
-* Using VirtualGL with VMWare Workstation
+* Using VirtualGL with VMware Workstation
 
-VirtualGL can also be used with VMWare Workstation, and the concept is
-basically the same as that of VirtualBox.  As with VirtualBox, VMWare uses a
+VirtualGL can also be used with VMware Workstation, and the concept is
+basically the same as that of VirtualBox.  As with VirtualBox, VMware uses a
 special driver in the guest O/S to intercept the OpenGL commands and marshal
 them to the host O/S, where VirtualGL picks them up.
 
-To use VirtualGL with VMWare Workstation, perform the following procedures:
+To use VirtualGL with VMware Workstation, perform the following procedures:
 
-*** Configuring the System
-#OPT: noList! plain!
+	#. Launch VMware Workstation and use the VMware Workstation GUI to create and
+		test your virtual machine.
 
-	#. Launch VMWare and use the VMWare GUI to create and test your
-		virtual machine.
-
-	#. Follow the procedures outlined in the VMWare User's Manual to enable
-		3D acceleration in the virtual machine.  If possible, verify that 3D
+	#. Follow the procedures outlined in the VMware Workstation User's Manual to
+		enable 3D acceleration in the virtual machine.  If possible, verify that 3D
 		acceleration works on a local display __without__ VirtualGL before adding
 		VirtualGL to the mix.
 
 	#. Follow the procedure described in {ref prefix="Chapter ": setuid_linux} to
 		make {file: libvglfaker.so} and {file: libdlfaker.so} setuid executables.
 
-*** Launching VMWare
-#OPT: noList! plain!
-
-#Pverb: <<---
-vglrun vmware -X __VM-path__/__VM-name__.vmx
----
+	#. Exit VMware Workstation and re-launch it with ''vglrun''.
 
 *** NOTES
 #OPT: noList! plain!
 
-The notes from the previous chapter apply to VMWare Workstation as well.
+	* You might want to temporarily enable profiling (add an argument of ''+pr''
+		to ''vglrun'' above) or set the ''VGL_LOGO'' environment variable to ''1''
+		in order to verify that VirtualGL is loaded and working.

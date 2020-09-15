@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2020-09-14T22:13:01">
+<meta name="date" content="2020-09-14T22:13:49">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.6.5</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -20,7 +20,7 @@
 <link rel="chapter" href="index.html#hd0011" title="11 Transport Plugins">
 <link rel="chapter" href="index.html#hd0012" title="12 Using VirtualGL with setuid/setgid Executables">
 <link rel="chapter" href="index.html#hd0013" title="13 Using VirtualGL with VirtualBox">
-<link rel="chapter" href="index.html#hd0014" title="14 Using VirtualGL with VMWare Workstation">
+<link rel="chapter" href="index.html#hd0014" title="14 Using VirtualGL with VMware Workstation">
 <link rel="chapter" href="index.html#hd0015" title="15 Other Application Recipes">
 <link rel="chapter" href="index.html#hd0016" title="16 Advanced OpenGL Features">
 <link rel="chapter" href="index.html#hd0017" title="17 Performance Measurement">
@@ -194,7 +194,7 @@ systems, OpenGL and GLX, and X windows.</p>
         <a href="#hd0013" class="hd">13 Using VirtualGL with VirtualBox</a>
     </li>
     <li class="Itemize-1 hd">
-        <a href="#hd0014" class="hd">14 Using VirtualGL with VMWare 
+        <a href="#hd0014" class="hd">14 Using VirtualGL with VMware 
         Workstation</a>
     </li>
     <li class="Itemize-1 hd">
@@ -1968,29 +1968,26 @@ displaying Windows 3D applications remotely.</p>
 
 
 
-<h1 id="hd0014"><a name="file014"></a>14&nbsp;Using VirtualGL with VMWare Workstation</h1>
+<h1 id="hd0014"><a name="file014"></a>14&nbsp;Using VirtualGL with VMware Workstation</h1>
 
-<p>VirtualGL can also be used with VMWare Workstation, and the concept is 
-basically the same as that of VirtualBox.  As with VirtualBox, VMWare 
+<p>VirtualGL can also be used with VMware Workstation, and the concept is 
+basically the same as that of VirtualBox.  As with VirtualBox, VMware 
 uses a special driver in the guest O/S to intercept the OpenGL commands 
 and marshal them to the host O/S, where VirtualGL picks them up.</p>
 
-<p>To use VirtualGL with VMWare Workstation, perform the following 
+<p>To use VirtualGL with VMware Workstation, perform the following 
 procedures:</p>
-
-
-<h3 id="hd0014000001">Configuring the System</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
-        Launch VMWare and use the VMWare GUI to create and test your virtual 
-        machine.
+        Launch VMware Workstation and use the VMware Workstation GUI to create 
+        and test your virtual machine.
     </li>
     <li class="Ordered-1 Ordered">
-        Follow the procedures outlined in the VMWare User&rsquo;s Manual to 
-        enable 3D acceleration in the virtual machine.  If possible, verify that 
-        3D acceleration works on a local display <em>without</em> VirtualGL 
-        before adding VirtualGL to the mix.
+        Follow the procedures outlined in the VMware Workstation User&rsquo;s 
+        Manual to enable 3D acceleration in the virtual machine.  If possible, 
+        verify that 3D acceleration works on a local display <em>without</em> 
+        VirtualGL before adding VirtualGL to the mix.
     </li>
     <li class="Ordered-1 Ordered">
         Follow the procedure described in Chapter 
@@ -1998,18 +1995,22 @@ procedures:</p>
         <strong class="filename">libvglfaker.so</strong> and 
         <strong class="filename">libdlfaker.so</strong> setuid executables.
     </li>
+    <li class="Ordered-1 Ordered">
+        Exit VMware Workstation and re-launch it with <code>vglrun</code>.
+    </li>
 </ol>
 
 
+<h3 id="hd0014000001">NOTES</h3>
 
-<h3 id="hd0014000002">Launching VMWare</h3>
-
-<pre class="verbatim">vglrun vmware -X <em>VM-path</em>/<em>VM-name</em>.vmx</pre>
-
-
-<h3 id="hd0014000003">NOTES</h3>
-
-<p>The notes from the previous chapter apply to VMWare Workstation as well.</p>
+<ul class="Itemize">
+    <li class="Itemize-1 Itemize asterisk">
+        You might want to temporarily enable profiling (add an argument of 
+        <code>+pr</code> to <code>vglrun</code> above) or set the 
+        <code>VGL_LOGO</code> environment variable to <code>1</code> in order to 
+        verify that VirtualGL is loaded and working.
+    </li>
+</ul>
 
 <p><br /></p>
 
