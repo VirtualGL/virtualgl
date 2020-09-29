@@ -19,6 +19,9 @@ functions (OpenGL 4.5) or the `glFramebufferDrawBufferEXT()` and
 `glFramebufferDrawBuffersEXT()` functions (`GL_EXT_direct_state_access`) and
 render to the front buffer.
 
+4. Fixed a BadRequest X11 error that occurred when attempting to use the X11
+Transport with a remote X connection.
+
 
 2.6.4
 =====
