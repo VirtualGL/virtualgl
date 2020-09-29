@@ -181,10 +181,10 @@ previous method:
 
 {anchor: VGL_FORCEALPHA}
 | Environment Variable | {pcode: VGL_FORCEALPHA = __0 \| 1__ } |
-| Summary | Force the Pbuffers used for 3D rendering to have an 8-bit alpha \
-	channel |
+| Summary | Force the Pbuffers used for 3D rendering to have an alpha channel |
 | Image Transports | All |
-| Default Value | ''1'' if PBO readback mode is used, ''0'' otherwise |
+| Default Value | ''0'' (honor the 3D application's choice of visual \
+	attributes) |
 #OPT: hiCol=first
 
 	Description :: Normally, VirtualGL will create Pbuffers whose attributes

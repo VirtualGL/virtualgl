@@ -32,7 +32,7 @@ To use VirtualGL with VirtualBox, perform the following procedures:
 	* If VirtualGL is working properly with VirtualBox, then the OpenGL renderer
 		string in Windows guests should contain "SVGA3D" rather than "GDI Generic".
 
-	*	The OpenGL renderer string in Un*x guests always contains "SVGA3D", so the
+	* The OpenGL renderer string in Un*x guests always contains "SVGA3D", so the
 		only reliable way to verify that VirtualGL is working properly with
 		VirtualBox in this case is to enable tracing (see below) and run a 3D
 		application in the guest.

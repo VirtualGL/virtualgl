@@ -229,6 +229,14 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 		goto done;
 	}
 	config = configs[0];
+	for(int i = 0; i < n; i++)
+	{
+		if(configs[i]->visualID)
+		{
+			config = configs[i];
+			break;
+		}
+	}
 	_XFree(configs);
 
 	// Find an appropriate matching visual on the 2D X server.
