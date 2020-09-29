@@ -744,9 +744,9 @@ EOF
 	echo Done.  You must restart the display manager for the changes to take effect.
 	if [ "$RMMODNEEDED" = "1" ]; then
 		echo
-		echo IMPORTANT NOTE: Your system uses modprobe.d to set device permissions.  You
-		echo must execute 'rmmod nvidia' with the display manager stopped in order for the
-		echo new device permission settings to become effective.
+		echo "IMPORTANT NOTE: Your system uses modprobe.d to set device permissions.  You"
+		echo "must execute 'rmmod nvidia_drm nvidia_modeset nvidia' with the display manager"
+		echo "stopped in order for the new device permission settings to become effective."
 	fi
 	echo
 }
@@ -1027,9 +1027,9 @@ EOF
 	echo Done.  You must restart the display manager for the changes to take effect.
 	if [ "$RMMODNEEDED" = "1" ]; then
 		echo
-		echo IMPORTANT NOTE: Your system uses modprobe.d to set device permissions.  You
-		echo must execute 'rmmod nvidia' with the display manager stopped in order for the
-		echo new device permission settings to become effective.
+		echo "IMPORTANT NOTE: Your system uses modprobe.d to set device permissions.  You"
+		echo "must execute 'rmmod nvidia_drm nvidia_modeset nvidia' with the display manager"
+		echo "stopped in order for the new device permission settings to become effective."
 	fi
 	echo
 }

@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010-2013, 2015, 2017-2019 D. R. Commander
+ * Copyright (C)2010-2013, 2015, 2017-2020 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -102,7 +102,7 @@ static XErrorHandler prevHandler = NULL;
 static int xhandler(Display *dpy, XErrorEvent *e)
 {
 	if(e->serial == serial && (e->minor_code == X_ShmAttach
-		&& e->error_code == BadAccess))
+		&& (e->error_code == BadAccess || e->error_code == BadRequest)))
 	{
 		extok = 0;  return 0;
 	}
