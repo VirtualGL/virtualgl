@@ -464,15 +464,20 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 		goto done;
 	}
 	config = configs[0];
-	_XFree(configs);
-	vtemp = _glXGetVisualFromFBConfig(DPY3D, config);
-	if(vtemp)
+	for(int i = 0; i < n; i++)
 	{
-		if(vtemp->depth > 24) depth = vtemp->depth;
-		c_class = vtemp->c_class;
-		bpc = vtemp->bits_per_rgb;
-		_XFree(vtemp);
+		vtemp = _glXGetVisualFromFBConfig(DPY3D, configs[i]);
+		if(vtemp)
+		{
+			if(vtemp->depth > 24) depth = vtemp->depth;
+			c_class = vtemp->c_class;
+			bpc = vtemp->bits_per_rgb;
+			_XFree(vtemp);
+			config = configs[i];
+			break;
+		}
 	}
+	_XFree(configs);
 
 	// Find an appropriate matching visual on the 2D X server.
 	vid = glxvisual::matchVisual2D(dpy, screen, depth, c_class, bpc, level,

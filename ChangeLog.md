@@ -22,6 +22,13 @@ render to the front buffer.
 4. Fixed a BadRequest X11 error that occurred when attempting to use the X11
 Transport with a remote X connection.
 
+5. Worked around an issue with certain GLX implementations that list
+10-bit-per-component FB configs ahead of 8-bit-per-component FB configs and
+incorrectly set `GLX_DRAWABLE_TYPE|=GLX_PIXMAP_BIT` for those 10-bpc FB
+configs, even though they have no X visuals attached.  This caused VirtualGL's
+interposed `glXChooseVisual()` function to choose one of the 10-bpc FB configs
+behind the scenes, which made it impossible to use the VGL Transport.
+
 
 2.6.4
 =====
