@@ -255,7 +255,8 @@ void VirtualWin::readback(GLint drawBuf, bool spoilLast, bool sync)
 	fconfig_reloadenv();
 	bool doStereo = false;  int stereoMode = fconfig.stereo;
 
-	if(fconfig.readback == RRREAD_NONE) return;
+	if(fconfig.readback == RRREAD_NONE || !checkRenderMode())
+		return;
 
 	CriticalSection::SafeLock l(mutex);
 	if(doWMDelete) THROW("Window has been deleted by window manager");

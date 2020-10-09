@@ -83,6 +83,11 @@ configs, even though they have no X visuals attached.  This caused VirtualGL's
 interposed `glXChooseVisual()` function to choose one of the 10-bpc FB configs
 behind the scenes, which made it impossible to use the VGL Transport.
 
+6. Fixed an issue whereby, when using the X11 Transport, a vertically flipped
+image of a previously-rendered frame was sometimes displayed if the 3D
+application called `glFlush()` while the front buffer was the active drawing
+buffer and the render mode was `GL_FEEDBACK` or `GL_SELECT`.
+
 
 2.6.4
 =====

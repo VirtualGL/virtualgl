@@ -73,6 +73,8 @@ Pixmap VirtualPixmap::get3DX11Pixmap(void)
 
 void VirtualPixmap::readback(void)
 {
+	if(!checkRenderMode()) return;
+
 	fconfig_reloadenv();
 
 	CriticalSection::SafeLock l(mutex);
