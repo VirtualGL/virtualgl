@@ -34,6 +34,9 @@ image of a previously-rendered frame was sometimes displayed if the 3D
 application called `glFlush()` while the front buffer was the active drawing
 buffer and the render mode was `GL_FEEDBACK` or `GL_SELECT`.
 
+7. `vglserver_config` now works properly if invoked with a relative path
+(for example, `cd /opt/VirtualGL/bin; sudo ./vglserver_config`.)
+
 
 2.6.4
 =====
