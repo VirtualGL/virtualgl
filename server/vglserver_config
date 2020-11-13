@@ -1034,7 +1034,7 @@ EOF
 	echo
 }
 
-MYPATH=`dirname $0`
+MYPATH=$(dirname "$(realpath "$0")")
 if [ -x $MYPATH/vglgenkey ]; then
 	VGLGENKEY=$MYPATH/vglgenkey
 else

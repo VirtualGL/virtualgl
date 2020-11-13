@@ -1327,7 +1327,7 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		CHECK_OPT_FAKED(glXQueryContextInfoEXT)
 
 		// GLX_EXT_swap_control
-		CHECK_OPT_FAKED(glXSwapIntervalEXT)
+		CHECK_FAKED(glXSwapIntervalEXT)
 
 		// GLX_EXT_texture_from_pixmap
 		CHECK_OPT_FAKED(glXBindTexImageEXT)
@@ -1338,7 +1338,7 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		CHECK_FAKED(glXMakeCurrentReadSGI)
 
 		// GLX_SGI_swap_control
-		CHECK_OPT_FAKED(glXSwapIntervalSGI)
+		CHECK_FAKED(glXSwapIntervalSGI)
 
 		// GLX_SGIX_fbconfig
 		CHECK_FAKED(glXChooseFBConfigSGIX)
