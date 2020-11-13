@@ -37,6 +37,10 @@ buffer and the render mode was `GL_FEEDBACK` or `GL_SELECT`.
 7. `vglserver_config` now works properly if invoked with a relative path
 (for example, `cd /opt/VirtualGL/bin; sudo ./vglserver_config`.)
 
+8. Worked around a limitation in the AMDGPU drivers that prevented recent
+versions of Google Chrome from enabling GPU acceleration when used with
+VirtualGL.
+
 
 2.6.4
 =====
