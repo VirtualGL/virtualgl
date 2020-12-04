@@ -2,7 +2,7 @@
 # SETUP
 ###############################################################################
 
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 2.8.12)
 # Shut up CMake 3.1 and later
 if(POLICY CMP0053)
 	cmake_policy(SET CMP0053 NEW)
@@ -174,9 +174,9 @@ if(GNUCXX AND NOT APPLE AND NOT CYGWIN)
 		"Link statically against libgcc and libstdc++, if possible"
 		${DEFAULT_VGL_BUILDSTATIC})
 	if(VGL_BUILDSTATIC)
-		# For some reason, simply passing ${CMAKE_CXX_FLAGS} to the compiler in
-		# execute_process() doesn't work.  Grrr...
-		execute_process(COMMAND ${CMAKE_CXX_COMPILER} -m${BITS}
+		string(REGEX REPLACE " " ";" CMAKE_CXX_FLAGS_SEMICOLON
+			"${CMAKE_CXX_FLAGS}")
+		execute_process(COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_FLAGS_SEMICOLON}
 			--print-file-name=libstdc++.a OUTPUT_VARIABLE LIBSTDCPLUSPLUS
 			RESULT_VARIABLE RESULT)
 		string(REGEX REPLACE "\n" "" LIBSTDCPLUSPLUS ${LIBSTDCPLUSPLUS})

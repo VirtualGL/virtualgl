@@ -306,8 +306,10 @@ class Compressor : public Runnable
 	public:
 
 		Compressor(Decompressor *decompressor_, Blitter *blitter_) : findex(0),
-			deadYet(false), thread(NULL), decompressor(decompressor_),
-			blitter(blitter_)
+			deadYet(false), thread(NULL), decompressor(decompressor_)
+			#ifdef USEXV
+			, blitter(blitter_)
+			#endif
 		{
 			thread = new Thread(this);
 			thread->start();
@@ -403,7 +405,9 @@ class Compressor : public Runnable
 		Thread *thread;
 		Frame frames[NFRAMES];
 		Decompressor *decompressor;
+		#ifdef USEXV
 		Blitter *blitter;
+		#endif
 };
 
 
