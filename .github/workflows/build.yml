@@ -1,0 +1,56 @@
+name: Build
+
+on: [push, pull_request, workflow_dispatch]
+
+env:
+  LJT_VERSION: 2.0.6
+  LJT_GPG_KEY: https://sourceforge.net/projects/libjpeg-turbo/files/LJT-GPG-KEY
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set global environment variables
+        run: |
+          echo "BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >$GITHUB_ENV
+          echo "LJT_URL=https://sourceforge.net/projects/libjpeg-turbo/files/$LJT_VERSION" >>$GITHUB_ENV
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Set up build
+        run: |
+          mkdir -p $HOME/src/vgl.nightly
+          docker pull dcommander/buildvgl:$BRANCH
+          git clone --depth=1 https://github.com/VirtualGL/buildscripts.git $HOME/src/buildscripts
+          mkdir $HOME/libjpeg-turbo-rpm
+          pushd $HOME/libjpeg-turbo-rpm
+          wget --no-check-certificate $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.x86_64.rpm $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.i386.rpm
+          popd
+          mkdir $HOME/rpmkeys
+          wget --no-check-certificate "$LJT_GPG_KEY" -O $HOME/rpmkeys/LJT-GPG-KEY
+          wget --no-check-certificate http://www.virtualgl.org/key/VGLPR-GPG-KEY -O $HOME/rpmkeys/VGLPR-GPG-KEY
+      - name: Configure GPG signing
+        if: ${{github.event_name != 'pull_request'}}
+        run: |
+          sudo apt install -y gnupg1
+          printf "${{secrets.GPG_KEY}}" | base64 --decode | gpg1 --batch --import -
+          chmod 600 $HOME/.gnupg/gpg.conf
+          echo "GPG_KEY_NAME=\"${{secrets.GPG_KEY_NAME}}\"" >$HOME/src/buildscripts/gpgsign
+          echo "GPG_KEY_ID=${{secrets.GPG_KEY_ID}}" >>$HOME/src/buildscripts/gpgsign
+          echo "GPG_KEY_PASS=${{secrets.GPG_KEY_PASS}}" >>$HOME/src/buildscripts/gpgsign
+      - name: Build
+        run: |
+          docker run -v $HOME/src/vgl.nightly:/root/src/vgl.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $GITHUB_WORKSPACE:/root/src/virtualgl -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-rpm:/rpms -v $HOME/rpmkeys:/rpmkeys -t dcommander/buildvgl:$BRANCH bash -c "rpm --import /rpmkeys/LJT-GPG-KEY && rpm -K /rpms/*.rpm && rpm -i /rpms/*.rpm && rpm --import /rpmkeys/VGLPR-GPG-KEY && ~/src/buildscripts/buildvgl -d /root/src/virtualgl -v"
+          sudo chown -R runner:runner $HOME/src/vgl.nightly
+          mv $HOME/src/vgl.nightly/latest/log-${{github.job}}.txt $HOME/src/vgl.nightly/latest/files/
+          mv $HOME/src/vgl.nightly $GITHUB_WORKSPACE
+      - name: Deploy
+        uses: jakejarvis/s3-sync-action@master
+        if: ${{github.event_name != 'pull_request'}}
+        with:
+          args: --acl public-read --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: virtualgl-pr
+          AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+          SOURCE_DIR: /github/workspace/vgl.nightly/latest/files
+          DEST_DIR: ${{env.BRANCH}}/${{github.job}}
