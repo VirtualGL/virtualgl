@@ -10,7 +10,7 @@ called "VirtualGL-Utils".
 Build Requirements
 ------------------
 
-- [CMake](http://www.cmake.org) v2.8.11 or later
+- [CMake](http://www.cmake.org) v2.8.12 or later
 
 - If building SSL support:
   * [OpenSSL](http://www.OpenSSL.org) -- see "Building SSL Support" below
@@ -31,7 +31,7 @@ Build Requirements
     `vcvars32.bat` or `vcvars64.bat`, which are located in the same directory
     as the compiler.
 
-... OR ...
+   ... OR ...
 
 - MinGW
 
