@@ -323,7 +323,7 @@ include(FindX11)
 set(OpenGL_GL_PREFERENCE LEGACY)
 include(FindOpenGL)
 
-# Ensure that we build and link against the X11 version of OpenGL on OS X
+# Ensure that we build and link against the X11 version of OpenGL on OS X/macOS
 if(APPLE)
 	set(X11_X11_INCLUDE_PATH /opt/X11/include)
 	set(OPENGL_gl_LIBRARY /opt/X11/lib/libGL.dylib)
