@@ -325,13 +325,6 @@ include(FindOpenGL)
 
 # Ensure that we build and link against the X11 version of OpenGL on OS X
 if(APPLE)
-	option(VGL_OSXOGLFIX "Adds Linker arguments needed to correctly select the X11 OpenGL Library" TRUE)
-	if(VGL_OSXOGLFIX)
-		set(CMAKE_EXE_LINKER_FLAGS
-			"${CMAKE_EXE_LINKER_FLAGS} -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib")
-		set(CMAKE_SHARED_LINKER_FLAGS
-			"${CMAKE_SHARED_LINKER_FLAGS} -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib")
-	endif()
 	set(X11_X11_INCLUDE_PATH /opt/X11/include)
 	set(OPENGL_gl_LIBRARY /opt/X11/lib/libGL.dylib)
 	set(OPENGL_glu_LIBRARY /opt/X11/lib/libGLU.dylib)
