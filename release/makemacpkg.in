@@ -63,7 +63,7 @@ TMPDIR=`mktemp -d /tmp/$PKGNAME-build.XXXXXX`
 PKGROOT=$TMPDIR/pkg/Package_Root
 mkdir -p $PKGROOT
 
-make install DESTDIR=$PKGROOT
+DESTDIR=$PKGROOT @CMAKE_MAKE_PROGRAM@ install
 
 mkdir -p $PKGROOT/Library/Documentation
 safedirmove $PKGROOT$DOCDIR $PKGROOT/Library/Documentation/$PKGNAME $TMPDIR/__tmpdoc

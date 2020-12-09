@@ -104,7 +104,7 @@ Ertl 2000.)
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install DESTDIR=$RPM_BUILD_ROOT
+DESTDIR=$RPM_BUILD_ROOT @CMAKE_MAKE_PROGRAM@ install
 rm $RPM_BUILD_ROOT/%{bindir}/.vglrun.vars*
 
 %if "%{bindir}" != "%{_bindir}" && %{binsymlinks}

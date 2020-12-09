@@ -5,10 +5,7 @@ Building VirtualGL
 Build Requirements
 ------------------
 
-
-### All Systems
-
-- [CMake](http://www.cmake.org) v2.8.11 or later
+- [CMake](http://www.cmake.org) v2.8.12 or later
   * CMake v3.1 or later is required if building the VirtualGL Faker with the
     OpenCL interposer enabled (this is the default on Linux and FreeBSD but can
     be changed using the `VGL_FAKEOPENCL` CMake variable.)
@@ -27,10 +24,7 @@ Build Requirements
     flags needed to link with the TurboJPEG library (for instance,
     `-DTJPEG_LIBRARY="-L/opt/libjpeg-turbo/lib64 -lturbojpeg"`.)
 
-
-### Un*x Platforms (including Linux, Mac, FreeBSD, and Solaris)
-
-- GCC and G++
+- G++ or Clang
   * On Mac platforms, these can be obtained from
     [MacPorts](http://www.macports.org/) or [Homebrew](http://brew.sh/) or by
     installing [Xcode](http://developer.apple.com/tools/xcode).
@@ -114,6 +108,8 @@ of VirtualGL.  See "Build Recipes" for specific instructions on how to build a
     cmake -G"Unix Makefiles" [additional CMake flags] {source_directory}
     make
 
+Replace `make` with `ninja` and `Unix Makefiles` with `Ninja` if using Ninja.
+
 
 Debug Build
 -----------
@@ -172,7 +168,7 @@ OpenSSL build.  For instance, adding
       -DOPENSSL_CRYPTO_LIBRARY=~/openssl/libcrypto.a
 
 to the CMake command line will cause VirtualGL to be statically linked against
-a custom build of OpenSSL that resides under ~/openssl.
+a custom build of OpenSSL that resides under **~/openssl**.
 
 
 ### Mac
@@ -254,10 +250,8 @@ Installing VirtualGL
 ====================
 
 You can use the build system to install VirtualGL (as opposed to creating an
-installer package.)  To do this, run `make install` or `nmake install` (or
-build the "install" target in the Visual Studio IDE.)  Running `make uninstall`
-or `nmake uninstall` (or building the "uninstall" target in the Visual Studio
-IDE) will uninstall VirtualGL.
+installer package.)  To do this, run `make install` or `ninja install`.
+Running `make uninstall` or `ninja uninstall` will uninstall VirtualGL.
 
 The `CMAKE_INSTALL_PREFIX` CMake variable can be modified in order to install
 VirtualGL into a directory of your choosing.  If you don't specify
@@ -295,7 +289,7 @@ Creating Distribution Packages
 ==============================
 
 The following commands can be used to create various types of distribution
-packages:
+packages (replace `make` with `ninja` if using Ninja):
 
 
 Linux

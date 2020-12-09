@@ -66,7 +66,7 @@ makedeb()
 	TMPDIR=`mktemp -d /tmp/$PKGNAME-build.XXXXXX`
 	mkdir $TMPDIR/DEBIAN
 
-	make install DESTDIR=$TMPDIR
+	DESTDIR=$TMPDIR @CMAKE_MAKE_PROGRAM@ install
 	rm $TMPDIR/$BINDIR/.vglrun.vars*
 	mkdir -p $TMPDIR/usr
 
