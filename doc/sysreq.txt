@@ -56,7 +56,7 @@
 	| Any 64-bit Intel-based Mac \
 	|
 | O/S \
-	| OS X 10.7 "Lion" or later \
+	| OS X/macOS 10.7 "Lion" or later \
 	|
 | Other Software \
 	| [[http://xquartz.macosforge.org][XQuartz]] \
