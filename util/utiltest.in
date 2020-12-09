@@ -48,7 +48,7 @@ echo
 
 NOSHM=
 if [ "`uname -s`" = "Darwin" ]; then
-	# MIT-SHM doesn't work with Xvfb on OS X for some reason.
+	# MIT-SHM doesn't work with Xvfb on OS X/macOS for some reason.
 	NOSHM=-noshm
 fi
 

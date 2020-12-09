@@ -131,9 +131,9 @@ endif() # WIN32
 
 if(APPLE)
 
-set(OSX_APP_CERT_NAME "" CACHE STRING
+set(MACOS_APP_CERT_NAME "" CACHE STRING
 	"Name of the Developer ID Application certificate (in the macOS keychain) that should be used to sign the VirtualGL DMG.  Leave this blank to generate an unsigned DMG.")
-set(OSX_INST_CERT_NAME "" CACHE STRING
+set(MACOS_INST_CERT_NAME "" CACHE STRING
 	"Name of the Developer ID Installer certificate (in the macOS keychain) that should be used to sign the VirtualGL installer package.  Leave this blank to generate an unsigned package.")
 
 string(REGEX REPLACE "/" ":" CMAKE_INSTALL_MACPREFIX ${CMAKE_INSTALL_PREFIX})

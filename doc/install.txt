@@ -60,7 +60,7 @@
 		apt install -f
 		---
 
-** Installing the VirtualGL Client on OS X
+** Installing the VirtualGL Client on OS X/macOS
 
 	#. Download the VirtualGL Mac disk image
 		({file: VirtualGL-{val: _VERSION}.dmg}) from the
@@ -111,7 +111,7 @@ As root, issue one of the following commands:
 	dpkg -r virtualgl32
 	---
 
-*** OS X
+*** OS X/macOS
 #OPT: noList! plain!
 
 Open the {file: Uninstall VirtualGL} application, located in the

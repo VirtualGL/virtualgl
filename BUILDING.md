@@ -173,9 +173,9 @@ a custom build of OpenSSL that resides under **~/openssl**.
 
 ### Mac
 
-Linking with the OpenSSL dynamic libraries is generally not a concern on OS X,
-since Apple ships several versions of these in order to retain backward
-compatibility with prior versions of OS X.
+Linking with the OpenSSL dynamic libraries is generally not a concern on
+OS X/macOS, since Apple ships several versions of these in order to retain
+backward compatibility with prior versions of OS X/macOS.
 
 
 ### Solaris
@@ -310,4 +310,4 @@ Mac
     make dmg
 
 Create Mac package/disk image.  This requires pkgbuild and productbuild, which
-are installed by default on OS X 10.7 and later.
+are installed by default on OS X/macOS 10.7 and later.
