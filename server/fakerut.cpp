@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2010-2015, 2017-2020 D. R. Commander
+// Copyright (C)2010-2015, 2017-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -19,6 +19,7 @@
 #include <GL/glx.h>
 #include <GL/glu.h>
 #include <X11/Xlib.h>
+#include <X11/XKBlib.h>
 #include <X11/keysym.h>
 #ifdef FAKEXCB
 	#include <xcb/xcb.h>
@@ -2753,7 +2754,8 @@ int extensionQueryTest(void)
 		unsigned long dummy3;
 		GLXFBConfig *configs = NULL;
 
-		if((dpy = XOpenDisplay(0)) == NULL)
+		if((dpy = XkbOpenDisplay(0, &dummy1, &dummy1, NULL, NULL,
+			&dummy1)) == NULL)
 			THROW("Could not open display");
 
 		if(!XQueryExtension(dpy, "GLX", &majorOpcode, &eventBase, &errorBase)
@@ -2797,6 +2799,9 @@ int extensionQueryTest(void)
 		char *vendor = XServerVendor(dpy);
 		if(!vendor || strcmp(vendor, "Spacely Sprockets, Inc."))
 			THROW("XServerVendor()");
+		vendor = ServerVendor(dpy);
+		if(!vendor || strcmp(vendor, "Spacely Sprockets, Inc."))
+			THROW("ServerVendor()");
 
 		glXQueryVersion(dpy, &major, &minor);
 		if(major != 1 || minor != 4)
