@@ -141,6 +141,7 @@
 		XMoveResizeWindow;
 		XNextEvent;
 		XOpenDisplay;
+		XkbOpenDisplay;
 		XQueryExtension;
 		XResizeWindow;
 		XServerVendor;

@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011-2016, 2018-2020 D. R. Commander
+// Copyright (C)2009, 2011-2016, 2018-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -471,6 +471,22 @@ char **XListExtensions(Display *dpy, int *next)
 }
 
 
+static void setupXDisplay(Display *dpy)
+{
+	if(vglfaker::excludeDisplay(DisplayString(dpy)))
+		dpyhash.add(dpy);
+	else if(strlen(fconfig.vendor) > 0)
+	{
+		// Danger, Will Robinson!  We do this to prevent a small memory leak, but
+		// we can only can get away with it because we know that Xlib dynamically
+		// allocates the vendor string.  Xlib has done so for as long as VirtualGL
+		// has been around, so it seems like a safe assumption.
+		_XFree(ServerVendor(dpy));
+		ServerVendor(dpy) = strdup(fconfig.vendor);
+	}
+}
+
+
 // This is normally where VirtualGL initializes, unless a GLX function is
 // called first.
 
@@ -488,22 +504,43 @@ Display *XOpenDisplay(_Xconst char *name)
 		OPENTRACE(XOpenDisplay);  PRARGS(name);  STARTTRACE();
 
 	dpy = _XOpenDisplay(name);
-	if(dpy)
-	{
-		if(vglfaker::excludeDisplay(DisplayString(dpy)))
-			dpyhash.add(dpy);
-		else if(strlen(fconfig.vendor) > 0)
-		{
-			// Danger, Will Robinson!  We do this to prevent a small memory leak, but
-			// we can only can get away with it because we know that Xlib dynamically
-			// allocates the vendor string.  Xlib has done so for as long as
-			// VirtualGL has been around, so it seems like a safe assumption.
-			_XFree(ServerVendor(dpy));
-			ServerVendor(dpy) = strdup(fconfig.vendor);
-		}
-	}
+	if(dpy) setupXDisplay(dpy);
 
 		STOPTRACE();  PRARGD(dpy);  CLOSETRACE();
+
+	CATCH();
+	return dpy;
+}
+
+
+// XkbOpenDisplay() calls XOpenDisplay(), but since that function call occurs
+// within libX11, VirtualGL cannot intercept it on some platforms.  Thus we
+// need to interpose XkbOpenDisplay().
+
+Display *XkbOpenDisplay(char *display_name, int *event_rtrn, int *error_rtrn,
+	int *major_in_out, int *minor_in_out, int *reason_rtrn)
+{
+	Display *dpy = NULL;
+
+	TRY();
+
+	if(vglfaker::deadYet || vglfaker::getFakerLevel() > 0)
+		return _XkbOpenDisplay(display_name, event_rtrn, error_rtrn, major_in_out,
+			minor_in_out, reason_rtrn);
+
+	vglfaker::init();
+
+		OPENTRACE(XkbOpenDisplay);  PRARGS(display_name);  STARTTRACE();
+
+	dpy = _XkbOpenDisplay(display_name, event_rtrn, error_rtrn, major_in_out,
+		minor_in_out, reason_rtrn);
+	if(dpy) setupXDisplay(dpy);
+
+		STOPTRACE();  PRARGD(dpy);  if(event_rtrn) PRARGI(*event_rtrn);
+		if(error_rtrn) PRARGI(*error_rtrn);
+		if(major_in_out) PRARGI(*major_in_out);
+		if(minor_in_out) PRARGI(*minor_in_out);
+		if(reason_rtrn) PRARGI(*reason_rtrn);  CLOSETRACE();
 
 	CATCH();
 	return dpy;
