@@ -1,7 +1,7 @@
 3.0 pre-beta
 ============
 
-### Significant changes relative to 2.6.4:
+### Significant changes relative to 2.6.5:
 
 1. Support for transparent overlay visuals has been retired in this version of
 VirtualGL.  That feature will continue to be maintained in the 2.6.x branch on
@@ -27,17 +27,7 @@ OpenGL rendering attributes) will find a suitable visual.
 rendering attributes to all 2D X server visuals, although the usefulness of
 that feature is now very limited.
 
-3. Fixed a race condition that sometimes caused various fatal errors in the
-interposed `glXMakeContextCurrent()` function if both GLX drawable IDs passed
-to that function were the same window handle and the corresponding X window was
-simultaneously resized in another thread.
-
-4. Fixed an oversight whereby the addresses of the interposed
-`glDrawBuffers()`, `glGetString()`, and `glGetStringi()` functions introduced
-in 2.6.3[2] and 2.6.4[1] were not returned from the interposed
-`glXGetProcAddress()` and `glXGetProcAddressARB()` functions.
-
-5. The VirtualGL Faker now includes an EGL back end that optionally emulates
+3. The VirtualGL Faker now includes an EGL back end that optionally emulates
 the GLX API using a combination of the EGL API (with the
 `EGL_EXT_platform_device` extension) and OpenGL renderbuffer objects (RBOs.)
 On supported platforms, the EGL back end allows the VirtualGL Faker to be used
@@ -67,7 +57,23 @@ extensions:
 supports them.  The EGL back end also requires a 2D X server with a GLX
 extension.
 
-6. VirtualGL now works properly with 3D applications that use the
+
+2.6.5
+=====
+
+### Significant changes relative to 2.6.4:
+
+1. Fixed a race condition that sometimes caused various fatal errors in the
+interposed `glXMakeContextCurrent()` function if both GLX drawable IDs passed
+to that function were the same window handle and the corresponding X window was
+simultaneously resized in another thread.
+
+2. Fixed an oversight whereby the addresses of the interposed
+`glDrawBuffers()`, `glGetString()`, and `glGetStringi()` functions introduced
+in 2.6.3[2] and 2.6.4[1] were not returned from the interposed
+`glXGetProcAddress()` and `glXGetProcAddressARB()` functions.
+
+3. VirtualGL now works properly with 3D applications that use the
 `glNamedFramebufferDrawBuffer()` and `glNamedFramebufferDrawBuffers()`
 functions (OpenGL 4.5) or the `glFramebufferDrawBufferEXT()` and
 `glFramebufferDrawBuffersEXT()` functions (`GL_EXT_direct_state_access`) and
