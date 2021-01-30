@@ -410,6 +410,7 @@ int fbx_init(fbx_struct *fb, fbx_wh wh, int width_, int height_, int useShm)
 	fb->pixmap = pixmap;
 	TRY_X11(fb->xgc = XCreateGC(fb->wh.dpy, fb->pm ? fb->pm : fb->wh.d, 0,
 		NULL));
+	if(!useShm) XSetGraphicsExposures(fb->wh.dpy, fb->xgc, False);
 	return 0;
 
 	finally:

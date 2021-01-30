@@ -1,3 +1,18 @@
+2.6.6
+=====
+
+### Significant changes relative to 2.6.5:
+
+1. Fixed an issue whereby, when the 2D X server was using a "traditional"
+window manager (such as TWM) or no window manager and the X11 Transport was not
+using the `MIT-SHM` X extension (because the extension was unavailable or
+explicitly disabled/bypassed, because the X connection was remote, or because
+the 3D application and the 2D X server did not share an IPC namespace),
+unhandled X NoExpose events would continue to queue up in Xlib until the 3D
+application exited or the available memory on the VirtualGL server was
+exhausted.
+
+
 2.6.5
 =====
 
