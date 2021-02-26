@@ -1,4 +1,4 @@
-// Copyright (C)2009-2020 D. R. Commander
+// Copyright (C)2009-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -516,7 +516,11 @@ void fconfig_setdefaultsfromdpy(Display *dpy)
 
 	if(fconfig.port < 0)
 	{
+		#ifdef USESSL
 		fconfig.port = fconfig.ssl ? RR_DEFAULTSSLPORT : RR_DEFAULTPORT;
+		#else
+		fconfig.port = RR_DEFAULTPORT;
+		#endif
 		Atom atom = None;  unsigned long n = 0, bytesLeft = 0;
 		int actualFormat = 0;  Atom actualType = None;
 		unsigned char *prop = NULL;
