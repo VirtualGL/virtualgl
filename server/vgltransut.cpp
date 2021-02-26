@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2009-2011, 2014, 2017-2019 D. R. Commander
+// Copyright (C)2009-2011, 2014, 2017-2019, 2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -35,7 +35,11 @@ void usage(char **argv)
 		fconfig.client : "read from DISPLAY environment");
 	fprintf(stderr, "-port <p> = TCP port on which the VirtualGL Client is listening\n");
 	fprintf(stderr, "            (default: %d)\n",
+		#ifdef USESSL
 		fconfig.port < 0 ? (fconfig.ssl ? RR_DEFAULTSSLPORT : RR_DEFAULTPORT) :
+		#else
+		fconfig.port < 0 ? RR_DEFAULTPORT :
+		#endif
 		fconfig.port);
 	fprintf(stderr, "-samp <s> = JPEG chrominance subsampling factor: 0 (gray), 1, 2, or 4\n");
 	fprintf(stderr, "            (default: %d)\n", fconfig.subsamp);
