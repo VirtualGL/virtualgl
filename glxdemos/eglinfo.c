@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1999-2014  Brian Paul   All Rights Reserved.
  * Copyright (C) 2005-2007  Sun Microsystems, Inc.   All Rights Reserved.
- * Copyright (C) 2011, 2013, 2015, 2019-2020  D. R. Commander
+ * Copyright (C) 2011, 2013, 2015, 2019-2021  D. R. Commander
  *                                            All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -608,7 +608,8 @@ static void
 usage(void)
 {
    printf("Usage: eglinfo <device> [-v] [-h] [-l] [-s]\n");
-   printf("\t<device>: Print EGL configs on specified device.\n");
+   printf("\t<device>: Print EGL configs for the specified DRI device.\n");
+   printf("\t          (\"egl\" = print EGL configs for the first DRI device)\n");
    printf("\t-B: brief output, print only the basics.\n");
    printf("\t-v: Print config info in verbose form.\n");
    printf("\t-h: This information.\n");
@@ -702,21 +703,29 @@ main(int argc, char *argv[])
       fprintf(stderr, "Error: eglQueryDeviceStringEXT() could not be loaded");
       return -1;
    }
+   _eglGetPlatformDisplayEXT =
+      (PFNEGLGETPLATFORMDISPLAYEXTPROC)eglGetProcAddress("eglGetPlatformDisplayEXT");
+   if (!_eglGetPlatformDisplayEXT) {
+      fprintf(stderr, "Error: eglGetPlatformDisplayEXT() could not be loaded\n");
+      return -1;
+   }
    for (i = 0; i < numDevices; i++) {
-      const char *devStr =
-         _eglQueryDeviceStringEXT(devices[i], EGL_DRM_DEVICE_FILE_EXT);
+      const char *devStr;
+
+      edpy = _eglGetPlatformDisplayEXT(EGL_PLATFORM_DEVICE_EXT, devices[i],
+                                       NULL);
+      if (!edpy || !eglInitialize(edpy, &major, &minor))
+         continue;
+      eglTerminate(edpy);
+      if (!strcasecmp(opts.displayName, "egl"))
+         break;
+      devStr = _eglQueryDeviceStringEXT(devices[i], EGL_DRM_DEVICE_FILE_EXT);
       if (devStr && !strcmp(devStr, opts.displayName))
          break;
    }
    if (i == numDevices) {
       fprintf(stderr, "Error: invalid EGL device\n");
       free(devices);
-      return -1;
-   }
-   _eglGetPlatformDisplayEXT =
-      (PFNEGLGETPLATFORMDISPLAYEXTPROC)eglGetProcAddress("eglGetPlatformDisplayEXT");
-   if (!_eglGetPlatformDisplayEXT) {
-      fprintf(stderr, "Error: eglGetPlatformDisplayEXT() could not be loaded\n");
       return -1;
    }
    edpy = _eglGetPlatformDisplayEXT(EGL_PLATFORM_DEVICE_EXT, devices[i], NULL);

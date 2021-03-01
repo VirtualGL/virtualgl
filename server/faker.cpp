@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011, 2013-2016, 2019-2020 D. R. Commander
+// Copyright (C)2009, 2011, 2013-2016, 2019-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -205,10 +205,17 @@ Display *init3D(void)
 						THROW("Could not query EGL devices");
 					for(i = 0; i < numDevices; i++)
 					{
+						EGLDisplay edpy =
+							_eglGetPlatformDisplayEXT(EGL_PLATFORM_DEVICE_EXT, devices[i],
+								NULL);
+						if(!edpy || !_eglInitialize(edpy, &eglMajor, &eglMinor))
+							continue;
+						_eglTerminate(edpy);
+						if(!strcasecmp(fconfig.localdpystring, "egl"))
+							break;
 						const char *devStr =
 							_eglQueryDeviceStringEXT(devices[i], EGL_DRM_DEVICE_FILE_EXT);
-						if(!strcasecmp(fconfig.localdpystring, "egl")
-							|| (devStr && !strcmp(devStr, fconfig.localdpystring)))
+						if(devStr && !strcmp(devStr, fconfig.localdpystring))
 							break;
 					}
 					if(i == numDevices) THROW("Invalid EGL device");

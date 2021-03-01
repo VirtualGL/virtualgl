@@ -860,6 +860,8 @@ FUNCDEF2(char const *, eglQueryString, EGLDisplay, display, EGLint, name,
 FUNCDEF4(EGLBoolean, eglQuerySurface, EGLDisplay, display, EGLSurface,
 	surface, EGLint, attribute, EGLint *, value, NULL)
 
+FUNCDEF1(EGLBoolean, eglTerminate, EGLDisplay, display, NULL)
+
 #endif
 
 // We load all XCB functions dynamically, so that the same VirtualGL binary
