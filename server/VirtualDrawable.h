@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2009-2015, 2017-2020 D. R. Commander
+// Copyright (C)2009-2015, 2017-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -37,7 +37,8 @@ namespace vglfaker
 			Drawable getX11Drawable(void);
 			GLXDrawable getGLXDrawable(void);
 			void copyPixels(GLint srcX, GLint srcY, GLint width, GLint height,
-				GLint destX, GLint destY, GLXDrawable draw);
+				GLint destX, GLint destY, GLXDrawable draw, GLint readBuf = GL_FRONT,
+				GLint drawBuf = GL_FRONT_AND_BACK);
 			int getWidth(void) { return oglDraw ? oglDraw->getWidth() : -1; }
 			int getHeight(void) { return oglDraw ? oglDraw->getHeight() : -1; }
 			bool isInit(void) { return direct == True || direct == False; }

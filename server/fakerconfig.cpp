@@ -278,6 +278,7 @@ void fconfig_reloadenv(void)
 	CriticalSection::SafeLock l(fcmutex);
 
 	FETCHENV_BOOL("VGL_ALLOWINDIRECT", allowindirect);
+	FETCHENV_BOOL("VGL_AMDGPUHACK", amdgpuHack);
 	FETCHENV_BOOL("VGL_AUTOTEST", autotest);
 	FETCHENV_STR("VGL_CLIENT", client);
 	if((env = getenv("VGL_SUBSAMP")) != NULL && strlen(env) > 0)
@@ -597,6 +598,7 @@ void fconfig_setcompress(FakerConfig &fc, int i)
 void fconfig_print(FakerConfig &fc)
 {
 	PRCONF_INT(allowindirect);
+	PRCONF_INT(amdgpuHack);
 	PRCONF_STR(client);
 	PRCONF_INT(compress);
 	PRCONF_STR(config);

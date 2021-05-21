@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009-2015, 2017-2020 D. R. Commander
+// Copyright (C)2009-2015, 2017-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -472,13 +472,14 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 
 
 void VirtualDrawable::copyPixels(GLint srcX, GLint srcY, GLint width,
-	GLint height, GLint destX, GLint destY, GLXDrawable draw)
+	GLint height, GLint destX, GLint destY, GLXDrawable draw, GLint readBuf,
+	GLint drawBuf)
 {
 	initReadbackContext();
 	TempContext tc(dpy, draw, getGLXDrawable(), ctx);
 
-	VGLReadBuffer(GL_FRONT);
-	VGLDrawBuffer(GL_FRONT_AND_BACK);
+	VGLReadBuffer(readBuf);
+	VGLDrawBuffer(drawBuf);
 
 	_glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	_glPixelStorei(GL_PACK_ALIGNMENT, 1);

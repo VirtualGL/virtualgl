@@ -1,4 +1,4 @@
-// Copyright (C)2019-2020 D. R. Commander
+// Copyright (C)2019-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -801,7 +801,13 @@ int VGLQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 	}
 	else
 	#endif
-		return _glXQueryContext(DPY3D, ctx, attribute, value);
+	{
+		int retval = _glXQueryContext(DPY3D, ctx, attribute, value);
+		if(fconfig.amdgpuHack && ctx && attribute == GLX_RENDER_TYPE && value
+			&& *value == 0)
+			*value = GLX_RGBA_TYPE;
+		return retval;
+	}
 }
 
 

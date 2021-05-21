@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005-2007 Sun Microsystems, Inc.
- * Copyright (C)2009-2013, 2015-2020 D. R. Commander
+ * Copyright (C)2009-2013, 2015-2021 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -214,6 +214,7 @@ typedef struct _FakerConfig
   char xcbx11lib[MAXSTR];
   char excludeddpys[MAXSTR];
   char ocllib[MAXSTR];
+  char amdgpuHack;
 } FakerConfig;
 
 #if !defined(__SUNPRO_CC) && !defined(__SUNPRO_C)

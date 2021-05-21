@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009-2015, 2017-2020 D. R. Commander
+// Copyright (C)2009-2015, 2017-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -232,7 +232,14 @@ void VirtualWin::swapBuffers(void)
 {
 	CriticalSection::SafeLock l(mutex);
 	if(doWMDelete) THROW("Window has been deleted by window manager");
-	if(oglDraw) oglDraw->swap();
+	if(oglDraw)
+	{
+		if(fconfig.amdgpuHack)
+			copyPixels(0, 0, oglDraw->getWidth(), oglDraw->getHeight(), 0, 0,
+				getGLXDrawable(), GL_BACK, GL_FRONT);
+		else
+			oglDraw->swap();
+	}
 }
 
 
