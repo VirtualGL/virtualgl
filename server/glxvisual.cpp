@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2009-2016, 2019-2020 D. R. Commander
+// Copyright (C)2009-2016, 2019-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -22,6 +22,7 @@
 #include "vglutil.h"
 #ifdef EGLBACKEND
 #include "EGLConfigHash.h"
+#include "TempContextEGL.h"
 #endif
 
 using namespace vglutil;
@@ -427,6 +428,9 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 {
 	int nConfigs = 0;
 	GLXFBConfig *glxConfigs = NULL;
+	#ifdef EGLBACKEND
+	EGLContext ctx = 0;  EGLSurface pb = 0;
+	#endif
 	struct _VGLFBConfig *ca = NULL;
 	XEDataObject obj;
 	XExtData *extData;
@@ -452,36 +456,56 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 			int defaultDepth = DefaultDepth(dpy, screen);
 			int nbpcs = defaultDepth == 30 ? 2 : 1;
 			int bpcs[] = { defaultDepth == 30 ? 10 : 8, defaultDepth == 30 ? 8 : 0 };
-
-			nConfigs = 2 *  // visual classes
-				2 *  // stereo options
-				2 *  // alpha channel options
-				2 *  // double buffering options
-				3 *  // stencil & depth buffer options
-				7 *  // multisampling options (0, 2, 4, 8, 16, 32, 64)
-				2 *  // visual depths
-				nbpcs;  // bits-per-component options
-
-			if(!(ca =
-				(struct _VGLFBConfig *)calloc(nConfigs, sizeof(struct _VGLFBConfig))))
-				THROW("Memory allocation error");
-
+			int maxSamples = 0, nsamps = 1;
 			int attribs[] = { EGL_CONFIG_CAVEAT, EGL_NONE,
 				EGL_RED_SIZE, 1, EGL_GREEN_SIZE, 1, EGL_BLUE_SIZE, 1,
 				EGL_CONFORMANT, EGL_OPENGL_BIT, EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
 				EGL_SURFACE_TYPE, EGL_PBUFFER_BIT, EGL_NONE };
 			EGLConfig config;  int n;
+			int pbAttribs[] = { EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
+
 			if(!_eglBindAPI(EGL_OPENGL_API))
 				THROW("Could not enable OpenGL API");
 			if(!_eglChooseConfig(EDPY, attribs, &config, 1, &n))
 				THROW("Could not obtain EGL config");
+			if(!(ctx = _eglCreateContext(EDPY, config, NULL, NULL)))
+				THROW("Could not create temporary EGL context");
+			if(!(pb = _eglCreatePbufferSurface(EDPY, config, pbAttribs)))
+				THROW("Could not create temporary EGL Pbuffer surface");
+			{
+				vglfaker::TempContextEGL tc(pb, pb, ctx);
+
+				_glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
+				if(maxSamples > 0)
+				{
+					int temp = maxSamples;
+					while(temp >>= 1) nsamps++;
+				}
+				else maxSamples = 0;
+			}
+			_eglDestroySurface(EDPY, pb);  pb = 0;
+			_eglDestroyContext(EDPY, ctx);  ctx = 0;
+
+			nConfigs =
+				2 *       // visual classes
+				2 *       // stereo options
+				2 *       // alpha channel options
+				2 *       // double buffering options
+				3 *       // stencil & depth buffer options
+				nsamps *  // multisampling options (0, 2, 4, 8, 16, 32, 64)
+				2 *       // visual depths
+				nbpcs;    // bits-per-component options
+
+			if(!(ca =
+				(struct _VGLFBConfig *)calloc(nConfigs, sizeof(struct _VGLFBConfig))))
+				THROW("Memory allocation error");
 
 			for(int bpcIndex = 0; bpcIndex < nbpcs; bpcIndex++)
 			{
 				int bpc = bpcs[bpcIndex];
 				for(int depth = bpc * 3; depth <= 32; depth += 32 - bpc * 3)
 				{
-					for(int samples = 0; samples <= 64;
+					for(int samples = 0; samples <= maxSamples;
 						samples = (samples ? samples * 2 : 2))
 					{
 						for(int depthBuffer = 1; depthBuffer >= 0; depthBuffer--)
@@ -584,6 +608,10 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 	catch(...)
 	{
 		if(glxConfigs) _XFree(glxConfigs);
+		#ifdef EGLBACKEND
+		if(pb) _eglDestroySurface(EDPY, pb);
+		if(ctx) _eglDestroyContext(EDPY, ctx);
+		#endif
 		free(ca);
 		throw;
 	}
