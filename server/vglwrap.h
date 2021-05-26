@@ -30,8 +30,6 @@
 typedef struct _VGLFBConfig *VGLFBConfig;
 
 
-void CheckEGLErrors(Display *dpy, unsigned short minorCode);
-
 void VGLBindFramebuffer(GLenum target, GLuint framebuffer);
 
 GLXContext VGLCreateContext(Display *dpy, VGLFBConfig config, GLXContext share,

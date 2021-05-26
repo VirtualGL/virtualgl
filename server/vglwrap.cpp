@@ -162,6 +162,7 @@ GLXContext VGLCreateContext(Display *dpy, VGLFBConfig config, GLXContext share,
 
 		int eglAttribs[256], egli = 0;
 		for(int i = 0; i < 256; i++) eglAttribs[i] = EGL_NONE;
+		bool majorVerSpecified = false;
 
 		if(glxAttribs && glxAttribs[0] != None)
 		{
@@ -172,6 +173,7 @@ GLXContext VGLCreateContext(Display *dpy, VGLFBConfig config, GLXContext share,
 					case GLX_CONTEXT_MAJOR_VERSION_ARB:
 						eglAttribs[egli++] = EGL_CONTEXT_MAJOR_VERSION;
 						eglAttribs[egli++] = glxAttribs[glxi + 1];
+						majorVerSpecified = true;
 						break;
 					case GLX_CONTEXT_MINOR_VERSION_ARB:
 						eglAttribs[egli++] = EGL_CONTEXT_MINOR_VERSION;
@@ -238,8 +240,11 @@ GLXContext VGLCreateContext(Display *dpy, VGLFBConfig config, GLXContext share,
 				THROW("Could not enable OpenGL API");
 			GLXContext ctx = (GLXContext)_eglCreateContext(EDPY, EGLFBC(config),
 				(EGLContext)share, egli ? eglAttribs : NULL);
-			if(!ctx) THROW_EGL("eglCreateContext()");
-			ectxhash.add(ctx, config, (EGLContext)share);
+			EGLint eglError = _eglGetError();
+			if(!ctx && eglError != EGL_SUCCESS
+				&& (eglError != EGL_BAD_MATCH || !majorVerSpecified))
+				throw(vglfaker::EGLError("eglCreateContext()", __LINE__, eglError));
+			if(ctx) ectxhash.add(ctx, config, (EGLContext)share);
 			return ctx;
 		}
 		CATCH_EGL(minorCode)

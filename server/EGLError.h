@@ -1,4 +1,4 @@
-// Copyright (C)2020 D. R. Commander
+// Copyright (C)2020-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -26,6 +26,12 @@ namespace vglfaker
 		public:
 
 			EGLError(const char *method_, int line_) : eglError(_eglGetError())
+			{
+				init(method_, (char *)getEGLErrorString(), line_);
+			}
+
+			EGLError(const char *method_, int line_, EGLint eglError_) :
+				eglError(eglError_)
 			{
 				init(method_, (char *)getEGLErrorString(), line_);
 			}
