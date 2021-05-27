@@ -1,4 +1,4 @@
-// Copyright (C)2019-2020 D. R. Commander
+// Copyright (C)2019-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -254,9 +254,19 @@ void VGLPbuffer::swap(void)
 			createBuffer(false);
 
 		if(_eglGetCurrentSurface(EGL_DRAW) == eglpb && drawFBO == (GLint)oldFBO)
+		{
+			GLint oldDrawBuf = -1;
+			_glGetIntegerv(GL_DRAW_BUFFER, &oldDrawBuf);
 			_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+			_glDrawBuffer(oldDrawBuf);
+		}
 		if(_eglGetCurrentSurface(EGL_READ) == eglpb && readFBO == (GLint)oldFBO)
+		{
+			GLint oldReadBuf = -1;
+			_glGetIntegerv(GL_READ_BUFFER, &oldReadBuf);
 			_glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+			_glReadBuffer(oldReadBuf);
+		}
 	}
 }
 

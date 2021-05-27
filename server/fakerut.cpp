@@ -1500,27 +1500,36 @@ class TestThread : public Runnable
 		{
 			int clr = myRank % NC, lastFrame = 0;
 			bool seenResize = false;
-			if(!(glXMakeContextCurrent(dpy, win, win, ctx)))
-				THROWNL("Could not make context current");
-			int iter = 0;
-			while(!deadYet || !seenResize || iter < 3)
+			try
 			{
-				if(doResize)
+				if(!(glXMakeContextCurrent(dpy, win, win, ctx)))
+					THROWNL("Could not make context current");
+				int iter = 0;
+				while(!deadYet || !seenResize || iter < 3)
 				{
-					glViewport(0, 0, width, height);
-					doResize = false;
-					seenResize = true;
+					if(doResize)
+					{
+						glViewport(0, 0, width, height);
+						doResize = false;
+						seenResize = true;
+					}
+					glClearColor(colors[clr].r, colors[clr].g, colors[clr].b, 0.);
+					glClear(GL_COLOR_BUFFER_BIT);
+					glReadBuffer(GL_FRONT);
+					glXSwapBuffers(dpy, win);
+					checkReadbackState(GL_FRONT, dpy, win, win, ctx);
+					checkFrame(dpy, win, 1, lastFrame);
+					checkWindowColor(dpy, win, colors[clr].bits, false);
+					clr = (clr + 1) % NC;
+					iter++;
 				}
-				glClearColor(colors[clr].r, colors[clr].g, colors[clr].b, 0.);
-				glClear(GL_COLOR_BUFFER_BIT);
-				glReadBuffer(GL_FRONT);
-				glXSwapBuffers(dpy, win);
-				checkReadbackState(GL_FRONT, dpy, win, win, ctx);
-				checkFrame(dpy, win, 1, lastFrame);
-				checkWindowColor(dpy, win, colors[clr].bits, false);
-				clr = (clr + 1) % NC;
-				iter++;
 			}
+			catch(...)
+			{
+				glXMakeContextCurrent(dpy, 0, 0, 0);
+				throw;
+			}
+			glXMakeContextCurrent(dpy, 0, 0, 0);
 		}
 
 		void resize(int width_, int height_)
