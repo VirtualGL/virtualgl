@@ -928,8 +928,11 @@ void VGLReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
 			if(fbo)
 			{
 				GLint oldDrawFBO = -1, oldReadFBO = -1;
+				GLint oldDrawBuf = -1, oldReadBuf = -1;
 				_glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &oldDrawFBO);
 				_glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &oldReadFBO);
+				_glGetIntegerv(GL_DRAW_BUFFER, &oldDrawBuf);
+				_glGetIntegerv(GL_READ_BUFFER, &oldReadBuf);
 				_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
 
 				_glGenRenderbuffers(1, &rbo);
@@ -966,6 +969,8 @@ void VGLReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
 					_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, oldDrawFBO);
 				if(oldReadFBO >= 0)
 					_glBindFramebuffer(GL_READ_FRAMEBUFFER, oldReadFBO);
+				if(oldDrawBuf >= 0) _glDrawBuffer(oldDrawBuf);
+				if(oldReadBuf >= 0) _glReadBuffer(oldReadBuf);
 			}
 		}
 		if(!fallthrough) return;
