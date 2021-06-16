@@ -244,9 +244,10 @@ be individually addressed by setting ''VGL_DISPLAY'' to (or invoking
 
 ** SSH Server Configuration
 
-The application server's SSH daemon should have the ''X11Forwarding'' option
-enabled and the ''UseLogin'' option disabled.  This is configured in
-{file: sshd_config}, which is usually located under {file: /etc/ssh}.
+If you intend to use the VGL Transport, then the application server's SSH
+daemon should have the ''X11Forwarding'' option enabled and the ''UseLogin''
+option disabled.  This is configured in {file: sshd_config}, which is usually
+located under {file: /etc/ssh}.
 
 ** Un-Configuring the Server
 

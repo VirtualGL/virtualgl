@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2020-12-09T12:39:53">
+<meta name="date" content="2021-06-16T13:00:25">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -553,8 +553,8 @@ transport plugins.</p>
 </li>
 <li class="Itemize-0">
     Install the AMD or nVidia proprietary drivers.  Open source drivers for 
-    these GPUs do not generally provide full 3D acceleration, and some of 
-    those drivers do not provide Pbuffer support.
+    these GPUs do not always provide full 3D acceleration, and some of those 
+    drivers are not fully compatible with VirtualGL.
 </li></ul></td>
     <td class="standard">Any graphics adapter with decent 2D performance <ul class="Itemize"><li class="Itemize-0">
     If using a 3D graphics adapter (GPU), install the vendor drivers for 
@@ -1186,11 +1186,11 @@ with) <code>:0.0</code>, <code>:1.0</code>, <code>:2.0</code>, etc.</p>
 
 <h2 id="hd006004">6.4&nbsp;SSH Server Configuration</h2>
 
-<p>The application server&rsquo;s SSH daemon should have the 
-<code>X11Forwarding</code> option enabled and the <code>UseLogin</code> 
-option disabled.  This is configured in 
-<strong class="filename">sshd_config</strong>, which is usually located 
-under <strong class="filename">/etc/ssh</strong>.</p>
+<p>If you intend to use the VGL Transport, then the application 
+server&rsquo;s SSH daemon should have the <code>X11Forwarding</code> 
+option enabled and the <code>UseLogin</code> option disabled.  This is 
+configured in <strong class="filename">sshd_config</strong>, which is 
+usually located under <strong class="filename">/etc/ssh</strong>.</p>
 
 
 
@@ -1374,9 +1374,9 @@ using this mode, and thus it provides a completely secure solution.  It
 is also useful when either the client or the VirtualGL server is behind 
 a restrictive firewall and only SSH connections are allowed through.  
 Using SSH tunneling on wide-area networks should not affect performance 
-significantly.  However, using SSH tunneling on a local-area network can 
-reduce the end-to-end performance of the VGL Transport by anywhere from 
-20-40%.</p>
+significantly.  However, using SSH tunneling with certain SSH clients on 
+a local-area network can reduce the end-to-end performance of the VGL 
+Transport.</p>
 
 
 <h3 id="hd008002001">Procedure</h3>
@@ -3906,7 +3906,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         This option was added primarily because certain vendor-specific methods 
         of enabling full-scene antialiasing at a global level (such as 
         nVidia&rsquo;s <code>__GL_FSAA_MODE</code> environment variable) do not 
-        work with Pbuffers and, subsequently, do not work with VirtualGL.  If 
+        work with Pbuffers and, consequently, do not work with VirtualGL.  If 
         <code>VGL_SAMPLES</code> is &gt; 0, then VirtualGL will attempt to 
         create Pbuffers with the specified number (or a greater number) of 
         samples.  This effectively forces the 3D application to render with the 

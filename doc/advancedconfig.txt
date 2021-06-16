@@ -569,7 +569,7 @@ previous method:
 	Description :: This option was added primarily because certain
 	vendor-specific methods of enabling full-scene antialiasing at a global level
 	(such as nVidia's ''__GL_FSAA_MODE'' environment variable) do not work with
-	Pbuffers and, subsequently, do not work with VirtualGL.  If ''VGL_SAMPLES''
+	Pbuffers and, consequently, do not work with VirtualGL.  If ''VGL_SAMPLES''
 	is > 0, then VirtualGL will attempt to create Pbuffers with the specified
 	number (or a greater number) of samples.  This effectively forces the 3D
 	application to render with the specified multisampling level, as if the

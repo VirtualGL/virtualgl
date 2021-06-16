@@ -19,8 +19,8 @@
 				users, a professional-grade GPU such as the AMD Radeon Pro or nVidia \
 				Quadro is recommended.} \
 			{item:Install the AMD or nVidia proprietary drivers.  Open source \
-				drivers for these GPUs do not generally provide full 3D acceleration, \
-				and some of those drivers do not provide Pbuffer support.}} \
+				drivers for these GPUs do not always provide full 3D acceleration, \
+				and some of those drivers are not fully compatible with VirtualGL.}} \
 	| < \
 	| Any graphics adapter with decent 2D performance \
 		{list type=ul: \
