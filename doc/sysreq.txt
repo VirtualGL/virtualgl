@@ -86,21 +86,25 @@
 	!!! The client requirements do not apply to anaglyphic stereo.  See
 	{ref prefix="Chapter ": Advanced_OpenGL} for more details.
 
-|| || Server || Client (VGL Transport required) ||
+|| || Server (GLX back end) || Server (EGL back end) \
+	|| Client (VGL Transport required) ||
 | Linux/Unix \
 	| {list type=ul: \
 			{item:AMD or nVidia GPU that supports stereo (examples: AMD Radeon Pro, \
 				nVidia Quadro)} \
 			{item:The 3D X server should be configured to export stereo visuals.}} \
+	| No additional requirements \
 	| {list type=ul: \
 			{item:GPU that supports stereo} \
 			{item:The 2D X server should be configured to export stereo visuals.}} \
 	|
 | Mac/x86 \
 	| N/A \
+	| N/A \
 	| GPU that supports stereo (example: nVidia Quadro) \
 	|
 | Windows \
+	| N/A \
 	| N/A \
 	| This version of VirtualGL does not support quad-buffered stereo with \
 		Windows clients. \

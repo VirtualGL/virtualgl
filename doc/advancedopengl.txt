@@ -30,18 +30,18 @@ However, a GPU is required to display stereo image pairs, so one must be
 present in any client that will use VirtualGL's quad-buffered stereo feature.
 Since the GPU is only being used to draw images, it need not necessarily be a
 high-end GPU.  Generally, the least expensive GPU that has stereo capabilities
-will work fine in the client.  The VirtualGL server must also have a GPU that
-supports stereo, since this is the only way that VirtualGL can obtain a stereo
-Pbuffer.
+will work fine in the client.  If using the GLX back end, the VirtualGL server
+must also have a GPU that supports stereo, since this is the only way that
+VirtualGL can create a stereo off-screen buffer.
 
 When a 3D application tries to render something in stereo, VirtualGL will
 default to using quad-buffered stereo rendering if the 2D X server supports
 OpenGL and has stereo visuals available (not currently supported in Cygwin/X.)
 Otherwise, VirtualGL will fall back to using anaglyphic stereo (see below.)  It
 is usually necessary to explicitly enable stereo in the graphics driver
-configuration for both the client and VirtualGL server.  The
-[[#Troubleshooting]] section below lists a way to verify that both the 3D X
-server and the 2D X server have stereo visuals available.
+configuration for both the client and, if using the GLX back end, the VirtualGL
+server.  The [[#Troubleshooting]] section below lists a way to verify that both
+the 3D X server and the 2D X server have stereo visuals available.
 
 In quad-buffered mode, VirtualGL reads back both the left and right eye buffers
 on the server and sends the contents as a pair of compressed images to the
@@ -80,8 +80,9 @@ than quad-buffered stereo, since it does not require sending twice the data to
 the client.
 
 As with quad-buffered stereo, anaglyphic stereo requires that the VirtualGL
-server have stereo rendering capabilities.  However, anaglyphic stereo does not
-require any 3D rendering capabilities (stereo or otherwise) on the client.
+server have stereo rendering capabilities if using the GLX back end.  However,
+anaglyphic stereo does not require any 3D rendering capabilities (stereo or
+otherwise) on the client.
 
 *** Passive Stereo
 

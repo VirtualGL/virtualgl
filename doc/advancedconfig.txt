@@ -25,27 +25,31 @@ previous method:
 
 {anchor: VGL_ALLOWINDIRECT}
 | Environment Variable | {pcode: VGL_ALLOWINDIRECT = __0 \| 1__ } |
-| Summary | Allow 3D applications to request an indirect OpenGL context |
+| Summary | When using the GLX back end, allow 3D applications to request an \
+	indirect OpenGL context |
 | Image Transports | All |
 | Default Value | ''0'' (all OpenGL contexts use direct rendering) |
 #OPT: hiCol=first
 
-	Description :: Normally, when VirtualGL maps a Pbuffer to a window and
-	establishes an OpenGL rendering context with the Pbuffer, it forces direct
-	rendering to be used with this context.  Some 3D applications erroneously try
-	to create indirect OpenGL contexts because they detect that the X server is
-	on a different machine and assume that the 3D rendering commands will be sent
-	over the network.  Thus, VirtualGL normally forces all contexts to be direct
-	in order to prevent severe readback performance degradation with such
-	applications (even on modern GPUs, and even when the connection to the 3D X
-	server is local, ''glReadPixels()'' can perform very slowly if an indirect
-	OpenGL context is used.)
+	Description :: Normally, when VirtualGL maps an off-screen buffer to a window
+	and establishes an OpenGL rendering context with the off-screen buffer, it
+	forces direct rendering to be used with this context.  Some 3D applications
+	erroneously try to create indirect OpenGL contexts because they detect that
+	the X server is on a different machine and assume that the 3D rendering
+	commands will be sent over the network.  Thus, VirtualGL normally forces all
+	contexts to be direct in order to prevent severe readback performance
+	degradation with such applications (even on modern GPUs, and even when the
+	connection to the 3D X server is local, ''glReadPixels()'' can perform very
+	slowly if an indirect OpenGL context is used.)
 	{nl}{nl}
 	However, some 3D applications intentionally try to create indirect contexts
 	so that these contexts can be shared, and those applications may not work
 	properly when the contexts are forced to be direct.  For such applications,
 	setting ''VGL_ALLOWINDIRECT'' to ''1'' will cause VirtualGL to honor the
 	application's request for an indirect OpenGL context.
+
+	!!! EGL does not support indirect OpenGL contexts, so this option requires
+	the GLX back end.
 
 | Environment Variable | {pcode: VGL_CLIENT = __{c}__ } |
 | ''vglrun'' argument | {pcode: -cl __{c}__ } |
@@ -111,17 +115,35 @@ previous method:
 
 | Environment Variable | {pcode: VGL_DISPLAY = __{d}__ } |
 | ''vglrun'' argument | {pcode: -d __{d}__ } |
-| Summary | __''{d}''__ = the X display/screen to use for 3D rendering |
+| Summary | __''{d}''__ = the X display/screen or DRI device to use for 3D \
+	rendering |
 | Image Transports | All |
 | Default Value | '':0'' |
 #OPT: hiCol=first
 
-	Description :: If the VirtualGL server has multiple GPUs, each attached to a
-	separate X screen or a separate X server, then you can use this option to
-	specify which GPU should be used for 3D rendering.  For instance, setting
-	''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with) '':0.1'' would cause
-	VirtualGL to redirect all of the OpenGL rendering from the 3D application to
-	a GPU attached to Screen 1 on X display :0.
+	Description :: If the VirtualGL server has multiple GPUs, then you can use
+	this option to specify which GPU should be used for 3D rendering.  For
+	instance, setting ''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with)
+	'':0.1'' would cause VirtualGL to use the GLX back end and redirect all of
+	the OpenGL rendering from the 3D application to a GPU attached to Screen 1 on
+	X display :0.  Setting ''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with)
+	''/dev/dri/card0'' or ''egl'' would cause VirtualGL to use the EGL back end
+	and redirect all of the OpenGL rendering from the 3D application to the first
+	GPU in the system.
+
+| Environment Variable | {pcode: VGL_EGLLIB = __{l}__ } |
+| Summary | __''{l}''__ = the location of an alternate EGL library |
+| Image Transports | All |
+#OPT: hiCol=first
+
+	Description :: Normally VirtualGL will call the ''eglGetProcAddress()''
+	function in the EGL library against which it was linked (usually {file:
+	libEGL.so.1}, in the system library path), and VGL will use that function to
+	load any other EGL functions that it needs to call.  You can use the
+	''VGL_EGLLIB'' environment variable to specify the path of a dynamic library
+	from which VirtualGL should load EGL functions.
+	{nl}{nl}
+	You shouldn't need to change this unless something doesn't work.
 
 | Environment Variable | \
 	{pcode: VGL_EXCLUDE = __{d1}[,{d2},{d3},\.\.\.]__ } |
@@ -181,25 +203,27 @@ previous method:
 
 {anchor: VGL_FORCEALPHA}
 | Environment Variable | {pcode: VGL_FORCEALPHA = __0 \| 1__ } |
-| Summary | Force the Pbuffers used for 3D rendering to have an alpha channel |
+| Summary | Force the off-screen buffers used for 3D rendering to have an \
+	alpha channel |
 | Image Transports | All |
 | Default Value | ''0'' (honor the 3D application's choice of visual \
 	attributes) |
 #OPT: hiCol=first
 
-	Description :: Normally, VirtualGL will create Pbuffers whose attributes
-	match those of the visuals requested by the 3D application.  Setting
-	''VGL_FORCEALPHA'' to ''1'' causes VirtualGL to always create Pbuffers with
-	alpha channels.  This means that a 32-bit-per-pixel (BGRA) Pbuffer will be
-	created if the application requests a 24-bit-per-pixel visual.
+	Description :: Normally, VirtualGL will create off-screen buffers whose
+	attributes match those of the visuals requested by the 3D application.
+	Setting ''VGL_FORCEALPHA'' to ''1'' causes VirtualGL to always create
+	off-screen buffers with alpha channels.  This means that a 32-bit-per-pixel
+	(BGRA) off-screen buffer will be created if the application requests a
+	24-bit-per-pixel visual.
 	{nl}{nl}
 	The primary purpose of this option is to work around a limitation of certain
 	consumer-grade GPUs whereby the pixel format requested by the framebuffer
-	readback operation must match the pixel format of the Pbuffer in order for
-	pixel buffer objects (PBOs) to behave correctly.  Since displaying to an X
-	proxy typically requires VirtualGL to read back the framebuffer in BGRA
-	format, enabling ''VGL_FORCEALPHA'' might be necessary in order to use PBO
-	readback mode with the aforementioned GPUs (as of this writing, nVidia
+	readback operation must match the pixel format of the off-screen buffer in
+	order for pixel buffer objects (PBOs) to behave correctly.  Since displaying
+	to an X proxy typically requires VirtualGL to read back the framebuffer in
+	BGRA format, enabling ''VGL_FORCEALPHA'' might be necessary in order to use
+	PBO readback mode with the aforementioned GPUs (as of this writing, nVidia
 	GeForce adapters are known to require this.)  See the
 	[[#VGL_READBACK][''VGL_READBACK'']] option for further information.
 
@@ -486,8 +510,8 @@ previous method:
 	Description :: {:}
 	* ''none'' = Do not read back the rendered frames at all.  On rare occasions,
 	it might be desirable to have VirtualGL redirect OpenGL rendering from an
-	application's window into a Pbuffer but not automatically read back and
-	transport the rendered frames.  Some 3D applications have their own
+	application's window into an off-screen buffer but not automatically read
+	back and transport the rendered frames.  Some 3D applications have their own
 	mechanisms for reading back the rendered frames, so setting
 	''VGL_READBACK=none'' disables VirtualGL's readback mechanism and prevents
 	duplication of effort.
@@ -500,9 +524,8 @@ previous method:
 	main application window, which is controlled by MPI Process 0.  By creating a
 	script that passes a different value of ''VGL_DISPLAY'' and ''VGL_READBACK''
 	to each MPI process, it is possible to make all of the ParaView server
-	processes render to off-screen buffers on different GPUs while
-	preventing VirtualGL from displaying any pixels except those generated by
-	Process 0.
+	processes render to off-screen buffers on different GPUs while preventing
+	VirtualGL from displaying any pixels except those generated by Process 0.
 	{nl}{nl}
 	* ''pbo'' = PBO readback mode.  Attempt to use pixel buffer objects (PBOs)
 	to read back the rendered frames from the GPU.  A PBO is an opaque memory
@@ -519,13 +542,13 @@ previous method:
 	{nl}{nl}
 	As of this writing, some nVidia GeForce adapters will fall back to using
 	blocking readbacks if the pixel format requested by the readback operation
-	does not match the pixel format of the Pbuffer.  If VirtualGL detects that
-	this is occurring-- that is, if PBOs are no longer behaving asynchronously--
-	then VGL will fall back to synchronous readback mode until the next time the
-	compression  type is changed.  If you are using an X proxy, then this
-	situation could occur because the X proxy's virtual framebuffer is BGRA but,
-	unless the 3D application has requested an alpha channel, its Pbuffer is
-	likely BGR.  In this specific case, setting the
+	does not match the pixel format of the off-screen buffer.  If VirtualGL
+	detects that this is occurring-- that is, if PBOs are no longer behaving
+	asynchronously-- then VGL will fall back to synchronous readback mode until
+	the next time the compression type is changed.  If you are using an X proxy,
+	then this situation could occur because the X proxy's virtual framebuffer is
+	BGRA but, unless the 3D application has requested an alpha channel, its
+	off-screen buffer is likely BGR.  In this specific case, setting the
 	[[#VGL_FORCEALPHA][''VGL_FORCEALPHA'']] option to ''1'' could alleviate the
 	issue.
 	{nl}{nl}
@@ -534,9 +557,9 @@ previous method:
 	{nl}{nl}
 	Setting ''VGL_VERBOSE=1'' will cause VirtualGL to print the current readback
 	mode being used, as well as the pixel format requested by the readback
-	operation and the pixel format of the Pbuffer.  Additionally, a notification
-	will be printed if VirtualGL falls back from PBO readback mode to synchronous
-	readback mode.
+	operation and the pixel format of the off-screen buffer.  Additionally, a
+	notification will be printed if VirtualGL falls back from PBO readback mode
+	to synchronous readback mode.
 
 | Environment Variable | {pcode: VGL_REFRESHRATE = __{r}__ } |
 | Summary |  __''{r}''__ = the "virtual" refresh rate, in Hz, for the \
@@ -569,14 +592,14 @@ previous method:
 	Description :: This option was added primarily because certain
 	vendor-specific methods of enabling full-scene antialiasing at a global level
 	(such as nVidia's ''__GL_FSAA_MODE'' environment variable) do not work with
-	Pbuffers and, consequently, do not work with VirtualGL.  If ''VGL_SAMPLES''
-	is > 0, then VirtualGL will attempt to create Pbuffers with the specified
-	number (or a greater number) of samples.  This effectively forces the 3D
-	application to render with the specified multisampling level, as if the
-	application had explicitly passed attributes of {pcode: GLX_SAMPLES,__{s}__}
-	to ''glXChooseVisual()''.  If ''VGL_SAMPLES'' is ''0'', then VirtualGL forces
-	multisampling to be disabled, even if the 3D application explicitly tries to
-	enable it.
+	off-screen buffers and, consequently, do not work with VirtualGL.  If
+	''VGL_SAMPLES'' is > 0, then VirtualGL will attempt to create off-screen
+	buffers with the specified number (or a greater number) of samples.  This
+	effectively forces the 3D application to render with the specified
+	multisampling level, as if the application had explicitly passed attributes
+	of {pcode: GLX_SAMPLES,__{s}__} to ''glXChooseVisual()''.  If ''VGL_SAMPLES''
+	is ''0'', then VirtualGL forces multisampling to be disabled, even if the 3D
+	application explicitly tries to enable it.
 
 	!!! Multisampling cannot be used with Pixmap rendering.  Any application
 	that uses Pixmap rendering will fail if ''VGL_SAMPLES'' is set to a value

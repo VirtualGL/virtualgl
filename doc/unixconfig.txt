@@ -10,22 +10,25 @@ exceptions, you should install the drivers supplied by your GPU vendor rather
 than the drivers supplied by your O/S distribution.  See
 {ref prefix="Section ": Linux_Requirements}.
 
-2. The 3D X server has been configured to use the GPU drivers you installed
+If you intend to configure the machine for use with the GLX back end, then you
+should also ensure that:
+
+1. The 3D X server has been configured to use the GPU drivers you installed
 above.
 
-3. The machine has an appropriate display manager (such as GDM, KDM, or
+2. The machine has an appropriate display manager (such as GDM, KDM, or
 LightDM) installed and has been configured to start the display manager and 3D
 X server at boot time.  This is the default with most modern Linux and Unix
 distributions.
 
-	!!! On Wayland-enabled Linux machines running GDM, configuring the machine as
-	a VirtualGL server will disable the ability to log in locally with a Wayland
-	session.  In general, logging in locally once the machine has been configured
-	as a VirtualGL server is discouraged, as this could disrupt VirtualGL's
-	connection to the 3D X server and thus cause OpenGL applications running with
-	VirtualGL to abort or freeze.
+	!!! On Wayland-enabled Linux machines running GDM, configuring the machine
+	for use with the GLX back end will disable the ability to log in locally with
+	a Wayland session.  In general, logging in locally once the machine has been
+	configured for use with the GLX back end is discouraged, as this could
+	disrupt VirtualGL's connection to the 3D X server and thus cause OpenGL
+	applications running with VirtualGL to abort or freeze.
 
-4. Accelerated OpenGL is working properly in the 3D X server.
+3. Accelerated OpenGL is working properly in the 3D X server.
 	* If the 3D X server is not headless, then this can be verified by logging
 	into the X server locally and running ''glxinfo''.
 	* If the 3D X server is headless, then proceed with the instructions below,
@@ -35,30 +38,30 @@ distributions.
 More specific instructions are unfortunately outside of the scope of this
 guide, since they will vary from system to system.
 
-** Granting Access to the 3D X Server
+** GLX Back End: Granting Access to the 3D X Server
 
 VirtualGL requires access to a GPU in the application server so that it can
-create off-screen pixel buffers (Pbuffers) and redirect the 3D rendering from
-X windows into these Pbuffers.  Unfortunately, accessing a GPU on Linux and
-Unix systems requires going through an X server.  On such systems, the only way
-to share the application server's GPU(s) among multiple users is to grant those
+create off-screen buffers and redirect the 3D rendering from X windows into
+these buffers.  When using the GLX back end, accessing a GPU requires going
+through an X server attached to that GPU (the 3D X server), so the only way to
+share the application server's GPU(s) among multiple users is to grant those
 users access to the 3D X server.
 
-It is important to understand the security risks associated with this.  Once
-a user has access to the 3D X server, there is nothing that would prevent
-the user from logging keystrokes or reading back images from that X server.
-Using ''xauth'', one can obtain "untrusted" X authentication keys that prevent
-such exploits, but unfortunately, those untrusted keys also disallow access to
-the 3D hardware.  Thus, it is necessary to grant full, trusted access to the 3D
-X server for any users that will need to run VirtualGL.  Unless you fully trust
-the users to whom you are granting this access, then you should avoid logging
-in locally to the 3D X server (particularly as root) unless absolutely
+It is important to understand the security risks associated with this.  Once a
+user has access to the 3D X server, there is nothing that would prevent the
+user from logging keystrokes or reading back images from that X server. Using
+''xauth'', one can obtain "untrusted" X authentication keys that prevent such
+exploits, but unfortunately, those untrusted keys also disallow access to the
+3D hardware.  Thus, it is necessary to grant full, trusted access to the 3D X
+server for any users that will need to use the GLX back end.  Unless you fully
+trust the users to whom you are granting this access, then you should avoid
+logging in locally to the 3D X server (particularly as root) unless absolutely
 necessary (logging in locally to the 3D X server is discouraged anyhow, for
 reasons explained in the previous section.)
 
 This section will explain how to configure a VirtualGL server such that
-selected users can run VirtualGL, even if the server is sitting at the login
-prompt.
+selected users can use the GLX back end, even if the server is sitting at the
+login prompt.
 
 	#. Shut down the display manager.  Examples:
 
@@ -90,7 +93,8 @@ prompt.
 		/opt/VirtualGL/bin/vglserver_config
 		---
 
-	#. Select option 1 (''Configure server for use with VirtualGL in GLX mode''.)
+	#. Select option 1 (''Configure server for use with VirtualGL (GLX + EGL back
+		ends)''.)
 
 	#. {:}
 
@@ -99,17 +103,17 @@ prompt.
 		[Y/n]
 		---
 
-		Yes :: Only users in the ''vglusers'' group can use VirtualGL (the
+		Yes :: Only users in the ''vglusers'' group can use the GLX back end (the
 			configuration script will create the ''vglusers'' group if it doesn't
 			already exist.)  This is the most secure option, since it prevents any
 			users outside of the ''vglusers'' group from accessing (and thus
 			exploiting) the 3D X server.
 
-		No :: VirtualGL can be used by any user that successfully logs into the
-			VirtualGL server.  The 3D X server can also be accessed (and potentially
-			exploited) by any user who is logged into the VirtualGL server.  If you
-			choose this option, it is recommended that you also disable the ''XTEST''
-			extension (see below.)
+		No :: The GLX back end can be used by any user that successfully logs into
+			the VirtualGL server.  The 3D X server can also be accessed (and
+			potentially exploited) by any user who is logged into the VirtualGL
+			server.  If you choose this option, it is recommended that you also
+			disable the ''XTEST'' extension (see below.)
 
 	#. {:}
 
@@ -190,9 +194,9 @@ prompt.
 {anchor: Sanity_Check}
 #OPT: noList! plain!
 
-To verify that the application server is ready to run VirtualGL, log out of the
-server, log back into the server using SSH, and execute the following commands
-in the SSH session:
+To verify that the application server is ready to be used with the GLX back
+end, log out of the server, log back into the server using SSH, and execute the
+following commands in the SSH session:
 
 	If you restricted 3D X server access to ''vglusers'' :: {:}
 	#Verb <<---
@@ -230,17 +234,84 @@ also typically indicated by the word ''Mesa'' in the client GLX vendor string
 and/or the OpenGL vendor string, and the words ''Software Rasterizer'' in the
 OpenGL renderer string.
 
+** EGL Back End: Granting Access to the GPU(s)
+
+When using the EGL back end, accessing a GPU requires going through an
+associated DRI device, so the only way to share the application server's GPU(s)
+among multiple users is to grant those users access to the DRI device(s)
+associated with the GPU(s).
+
+This section will explain how to configure a VirtualGL server such that
+selected users can use the EGL back end.
+
+	#. Log in as root from the text console (or remotely using SSH.)
+
+	#. Run
+
+		#Verb: <<---
+		/opt/VirtualGL/bin/vglserver_config
+		---
+
+	#. Select option 2 (''Configure server for use with VirtualGL (EGL back end
+		only)''.)
+
+	#. {:}
+
+		#Verb: <<---
+		Restrict framebuffer device access to vglusers group (recommended)?
+		[Y/n]
+		---
+
+		Yes :: Only users in the ''vglusers'' group can run OpenGL applications on
+			the VirtualGL server (the configuration script will create the
+			''vglusers'' group if it doesn't already exist.)  This limits the
+			possibility that an unauthorized user could snoop the 3D framebuffer
+			device(s) and thus see (or alter) the output of a 3D application that is
+			being used with VirtualGL.
+
+		No :: Any authenticated user can run OpenGL applications on the VirtualGL
+			server.  If it is necessary for users outside of the ''vglusers'' group
+			to log in locally to this server and run OpenGL applications, then this
+			option must be selected.
+
+	#. If you chose to restrict framebuffer device access to the ''vglusers''
+		group, then edit {file: /etc/group} and add ''root'' to the ''vglusers''
+		group.  If you choose, you can also add additional users to the group at
+		this time.  Note that any user you add to ''vglusers'' must log out and
+		back in again before their new group permissions will take effect.
+
+*** Sanity Check
+{anchor: Sanity_Check_EGL}
+#OPT: noList! plain!
+
+To verify that the application server is ready to be used with the EGL back
+end, log out of the server, log back into the server using SSH, and execute the
+following command in the SSH session:
+
+	#Verb <<---
+	/opt/VirtualGL/bin/eglinfo /dev/dri/card0
+	---
+
+This command should output a list of EGL configs and should complete with no
+errors.
+
 ** Using VirtualGL with Multiple GPUs
 
-VirtualGL can redirect the OpenGL commands from a 3D application to any GPU
-in the VirtualGL server.  In order for this to work, however, all of the GPUs
-must be attached to different screens on the same X server or to different X
-servers.  Attaching them to different screens is the easiest and most common
-approach, and this allows the GPUs to be individually addressed by setting
-''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with) '':0.0'', '':0.1'',
-'':0.2'', etc.  If the GPUs are attached to different X servers, then they can
-be individually addressed by setting ''VGL_DISPLAY'' to (or invoking
+VirtualGL can redirect the OpenGL commands from a 3D application to any GPU in
+the VirtualGL server.  In order for this to work with the GLX back end,
+however, all of the GPUs must be attached to different screens on the same X
+server or to different X servers.  Attaching them to different screens is the
+easiest and most common approach, and this allows a specific GPU to be selected
+by setting ''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with) '':0.0'',
+'':0.1'', '':0.2'', etc.  If the GPUs are attached to different X servers, then
+a specific GPU can be selected by setting ''VGL_DISPLAY'' to (or invoking
 ''vglrun -d'' with) '':0.0'', '':1.0'', '':2.0'', etc.
+
+Setting ''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with) ''egl'' or the path
+to a DRI device enables the EGL back end.  When using the EGL back end, a
+specific GPU can be selected by setting ''VGL_DISPLAY'' to (or invoking
+''vglrun -d'' with) ''/dev/dri/card0'', ''/dev/dri/card1'', ''/dev/dri/card2'',
+etc.
 
 ** SSH Server Configuration
 
@@ -253,14 +324,17 @@ located under {file: /etc/ssh}.
 
 You can use the ''vglserver_config'' script to restore the security settings
 that were in place before VirtualGL was installed.  Option 2 (''Unconfigure
-server for use with VirtualGL in GLX mode'') will remove any shared access to
-the 3D X server and thus prevent VirtualGL from accessing the 3D hardware in
+server for use with VirtualGL (GLX + EGL back ends)'') will remove any shared
+access to the 3D X server and thus prevent VirtualGL from accessing a GPU in
 that manner.  Additionally, this option will re-enable the ''XTEST'' extension
 on the 3D X server and will restore the framebuffer device permissions to their
 default (by default, only root or the user that is currently logged into the
 application server locally can access the framebuffer devices.)
 
-	!!! Unconfiguring the server does not remove the ''vglusers'' group.
-
 After selecting Option 2, you must restart the display manager before the
 changes will take effect.
+
+Option 4 (''Unconfigure server for use with VirtualGL (EGL back end only)'')
+will restore the framebuffer device permissions to their default.
+
+	!!! Unconfiguring the server does not remove the ''vglusers'' group.

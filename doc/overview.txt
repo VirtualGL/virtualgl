@@ -34,26 +34,27 @@ application to a GPU in the application server.  VGL accomplishes this by
 pre-loading a dynamic shared object (DSO), the VirtualGL Faker, into the OpenGL
 application at run time.  The VirtualGL Faker intercepts and modifies a handful
 of GLX, OpenGL, X11, and XCB function calls in order to divert OpenGL rendering
-from the 3D application's windows into corresponding pixel buffers
-("Pbuffers"), which VGL creates in GPU memory on the application server.  When
-the 3D application swaps the OpenGL drawing buffers or flushes the OpenGL
-command buffer to indicate that it has finished rendering a frame, VirtualGL
-reads back the rendered frame from the Pbuffer and transports it (which
-normally involves delivering the frame to the 2D X server and compositing it
-into the 3D application's window.)
+from the 3D application's windows into corresponding off-screen buffers, which
+VGL creates in GPU memory on the application server.  When the 3D application
+swaps the OpenGL drawing buffers or flushes the OpenGL command buffer to
+indicate that it has finished rendering a frame, VirtualGL reads back the
+rendered frame from the off-screen buffer and transports it (which normally
+involves delivering the frame to the 2D X server and compositing it into the 3D
+application's window.)
 
-The beauty of this approach is its non-intrusiveness.  VirtualGL monitors a
-few X11 commands and events to determine when windows have been resized, etc.,
-but it does not interfere in any way with the delivery of X11 2D drawing
-commands to the X server.  For the most part, VGL does not interfere with the
-delivery of OpenGL commands to the GPU, either.  VGL merely forces the OpenGL
-commands to be delivered to a GPU that is attached to a different X server (the
-3D X server) than the X server to which the 2D drawing commands are delivered
-(the 2D X server.)  Once the OpenGL rendering has been redirected to a
-Pbuffer, everything (including esoteric OpenGL extensions, fragment/vertex
-shaders, etc.) should "just work."  If an OpenGL application runs correctly
-when accessing a 3D server/workstation locally, then the same application
-should run correctly with VirtualGL when accessing the same machine remotely.
+The beauty of this approach is its non-intrusiveness.  VirtualGL monitors a few
+X11 commands and events to determine when windows have been resized, etc., but
+it does not interfere in any way with the delivery of X11 2D drawing commands
+to the X server.  For the most part, VGL does not interfere with the delivery
+of OpenGL commands to the GPU, either.  VGL merely forces the OpenGL commands
+to be delivered to a GPU in the application server, either through the 3D X
+server attached to the GPU or through a DRI device, rather than to the X server
+to which the 2D drawing commands are delivered (the 2D X server.)  Once the
+OpenGL rendering has been redirected to an off-screen buffer, everything
+(including esoteric OpenGL extensions, fragment/vertex shaders, etc.) should
+"just work."  If an OpenGL application runs correctly when accessing a 3D
+server/workstation locally, then the same application should run correctly with
+VirtualGL when accessing the same machine remotely.
 
 VirtualGL has two built-in "image transports" that can be used to deliver
 rendered frames to the 2D X server:
@@ -75,7 +76,7 @@ rendered frames to the 2D X server:
 {anchor: X11_Transport}
 	\2. X11 Transport :: The X11 Transport simply draws the rendered frames into
 	the appropriate X window using ''XPutImage()'' or similar X-Windows commands.
-	 This is most useful in conjunction with an X proxy, which can be one of any
+	This is most useful in conjunction with an X proxy, which can be one of any
 	number of Un*x remote display applications, such as VNC.  When using the X11
 	Transport, VirtualGL does not normally perform any image compression or
 	encoding itself.  It instead relies on an X proxy to encode the frames and

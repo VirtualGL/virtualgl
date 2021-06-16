@@ -42,9 +42,22 @@ different directory, then adjust the instructions accordingly.
 	VirtualGL Faker :: A shared library ("dynamic shared object" or "DSO"),
 	loaded into a Linux/Unix OpenGL application at run time, that intercepts and
 	modifies ("interposes") certain GLX, OpenGL, X11, and XCB function calls in
-	order to seamlessly redirect 3D rendering into an off-screen buffer on the 3D
-	X server, read back the rendered frames, and transport the rendered frames
-	(which normally means delivering them to the 2D X server)
+	order to seamlessly redirect 3D rendering into an off-screen buffer on a GPU,
+	read back the rendered frames, and transport the rendered frames (which
+	normally means delivering them to the 2D X server)
+
+	back end :: The method by which the VirtualGL Faker creates off-screen
+	buffers on a GPU and redirects 3D rendering into them.  The GLX back end uses
+	the GLX API, so it can only access a GPU through an attached X server (the 3D
+	X server.)  The EGL back end uses the EGL API with the
+	''EGL_EXT_platform_device'' extension, so it accesses a GPU through an
+	associated DRI device without the need for a 3D X server.  The EGL back end
+	emulates a subset of the GLX API using the EGL API.  Since the EGL API does
+	not support multi-buffering (double buffering or quad-buffered stereo) with
+	off-screen surfaces, the EGL back end emulates multi-buffering using OpenGL
+	renderbuffer objects (RBOs.)  As of this writing, the EGL back end does not
+	yet support all of the GLX extensions and esoteric OpenGL features that the
+	GLX back end supports.
 
 	frame trigger :: A function that is called by the 3D application to signal
 	that it has finished rendering a frame.  VirtualGL reads back and transports

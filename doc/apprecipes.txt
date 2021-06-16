@@ -13,16 +13,15 @@
 		{nl}{nl} \
 		to \
 		{file: __abaqus-install-dir__/__abaqus-version__/site/abaqus_v6.env} \
-		to make Abaqus v6 work properly with VirtualGL if the 2D X server does \
-		not support transparent overlays.  If this is not done, then the \
-		application may fail to launch, it may fail to display any \
+		to make Abaqus v6 work properly with VirtualGL.  If this is not done, \
+		then the application may fail to launch, it may fail to display any \
 		OpenGL-rendered pixels, or those pixels may become corrupted whenever \
 		other windows obscure them. \
 	| VirtualGL does not support transparent overlays, since those cannot be \
-		rendered in a Pbuffer.  Setting ''ABAQUS_EMULATE_OVERLAYS'' to ''1'' \
-		causes the application to emulate overlay rendering instead of using \
-		actual transparent overlays.  This workaround is known to be necessary \
-		when running Abaqus 6.9 and 6.10. \
+		rendered in an off-screen buffer.  Setting ''ABAQUS_EMULATE_OVERLAYS'' to \
+		''1'' causes the application to emulate overlay rendering instead of \
+		using actual transparent overlays.  This workaround is known to be \
+		necessary when running Abaqus 6.9 and 6.10. \
 	|
 | Abaqus | v6 | Linux \
 	| {pcode: vglrun -nodl __abaqus-path__/abaqus} \
@@ -164,7 +163,8 @@
 	|
 | Mathematica | v7 | Linux \
 	| Set the ''VGL_ALLOWINDIRECT'' environment variable to ''1'' prior to \
-		launching the application with ''vglrun'' \
+		launching the application with ''vglrun''.  Note that \
+		''VGL_ALLOWINDIRECT'' requires the GLX back end. \
 	| Mathematica 7 will not draw the axis numbers on 3D charts correctly \
 		unless it is allowed to create an indirect OpenGL context.  See \
 		{ref prefix="Section ": VGL_ALLOWINDIRECT} for further information. \
