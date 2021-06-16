@@ -1,5 +1,5 @@
-3.0 pre-beta
-============
+2.6.90 (3.0 beta1)
+==================
 
 ### Significant changes relative to 2.6.5:
 
