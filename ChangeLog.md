@@ -12,6 +12,11 @@ unhandled X NoExpose events would continue to queue up in Xlib until the 3D
 application exited or the available memory on the VirtualGL server was
 exhausted.
 
+2. Worked around an issue with Red Hat Enterprise Linux 8 and work-alike
+operating systems whereby, if X11 forwarding was enabled by default in the SSH
+client, `vglconnect -s` would hang while making a preliminary SSH connection to
+find a free port on a server running one of those operating systems.
+
 
 2.6.5
 =====
