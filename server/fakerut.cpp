@@ -589,6 +589,13 @@ int readbackTest(bool stereo, bool doNamedFB)
 						THROW("glFramebufferDrawBuffersEXT() not available");
 					const GLenum buf = GL_BACK;
 					__glFramebufferDrawBuffersEXT(0, 1, &buf);
+
+					PFNGLFRAMEBUFFERREADBUFFEREXTPROC __glFramebufferReadBufferEXT =
+						(PFNGLFRAMEBUFFERREADBUFFEREXTPROC)glXGetProcAddress(
+							(const GLubyte *)"glFramebufferReadBufferEXT");
+					if(!__glFramebufferReadBufferEXT)
+						THROW("glFramebufferReadBufferEXT() not available");
+					__glFramebufferReadBufferEXT(0, GL_FRONT);
 				}
 				else
 				{
@@ -599,8 +606,15 @@ int readbackTest(bool stereo, bool doNamedFB)
 						THROW("glNamedFramebufferDrawBuffers() not available");
 					const GLenum buf = GL_BACK;
 					__glNamedFramebufferDrawBuffers(0, 1, &buf);
+
+					PFNGLNAMEDFRAMEBUFFERREADBUFFERPROC __glNamedFramebufferReadBuffer =
+						(PFNGLNAMEDFRAMEBUFFERREADBUFFERPROC)glXGetProcAddress(
+							(const GLubyte *)"glNamedFramebufferReadBuffer");
+					if(!__glNamedFramebufferReadBuffer)
+						THROW("glNamedFramebufferReadBuffer() not available");
+					__glNamedFramebufferReadBuffer(0, GL_FRONT);
 				}
-				VERIFY_FBO(0, GL_BACK, 0, GL_BACK);
+				VERIFY_FBO(0, GL_BACK, 0, GL_FRONT);
 				glFinish();
 				checkFrame(dpy, win1, 1, lastFrame1);
 				checkWindowColor(dpy, win1, clr.bits(-2));
