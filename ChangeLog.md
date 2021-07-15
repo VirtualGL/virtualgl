@@ -8,6 +8,9 @@ operating systems whereby, if X11 forwarding was enabled by default in the SSH
 client, `vglconnect -s` would hang while making a preliminary SSH connection to
 find a free port on a server running one of those operating systems.
 
+2. Fixed an issue in the EGL back end whereby `glReadPixels()` did not work
+with multisampled drawables.
+
 
 2.6.90 (3.0 beta1)
 ==================

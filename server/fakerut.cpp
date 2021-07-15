@@ -922,6 +922,89 @@ int readbackTest(bool stereo, bool doNamedFB)
 }
 
 
+// This tests whether a multisampled off-screen buffer can be read back, both
+// internally within frame trigger functions and externally with
+// glReadPixels(), when using the EGL back end.
+int readbackTestMS(void)
+{
+	TestColor clr(0);
+	Display *dpy = NULL;  Window win = 0;
+	int dpyw, dpyh, lastFrame = 0, retval = 1;
+	int glxattribs13[] = { GLX_DOUBLEBUFFER, 1, GLX_RENDER_TYPE, GLX_RGBA_BIT,
+		GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
+		GLX_BLUE_SIZE, 8, GLX_SAMPLES, 2, None };
+	XVisualInfo *vis = NULL;
+	GLXFBConfig config = 0, *configs = NULL;
+	int n = 0;
+	GLXContext ctx = 0;
+	XSetWindowAttributes swa;
+
+	printf("Multisampled readback test:\n\n");
+
+	try
+	{
+		if(!(dpy = XOpenDisplay(0))) THROW("Could not open display");
+		dpyw = DisplayWidth(dpy, DefaultScreen(dpy));
+		dpyh = DisplayHeight(dpy, DefaultScreen(dpy));
+
+		if((configs = glXChooseFBConfig(dpy, DefaultScreen(dpy), glxattribs13, &n))
+			== NULL || n == 0)
+			THROW("Could not find a suitable FB config");
+		config = configs[0];
+		XFree(configs);  configs = NULL;
+		if((vis = glXGetVisualFromFBConfig(dpy, config)) == NULL)
+			THROW("glXGetVisualFromFBConfig()");
+
+		Window root = RootWindow(dpy, DefaultScreen(dpy));
+		swa.colormap = XCreateColormap(dpy, root, vis->visual, AllocNone);
+		swa.border_pixel = 0;
+		swa.event_mask = 0;
+		if((win = XCreateWindow(dpy, root, 0, 0, dpyw / 2, dpyh / 2, 0,
+			vis->depth, InputOutput, vis->visual,
+			CWBorderPixel | CWColormap | CWEventMask, &swa)) == 0)
+			THROW("Could not create window");
+		XFree(vis);  vis = NULL;
+
+		if((ctx = glXCreateNewContext(dpy, config, GLX_RGBA_TYPE, NULL, True))
+			== NULL)
+			THROW("Could not establish GLX context");
+		if(!glXMakeContextCurrent(dpy, win, win, ctx))
+			THROW("Could not make context current");
+		checkCurrent(dpy, win, win, ctx, dpyw / 2, dpyh / 2);
+
+		XMapWindow(dpy, win);
+
+		clr.clear(GL_BACK);
+		VERIFY_BUF_COLOR(GL_BACK, clr.bits(-1), "GL_BACK");
+		clr.clear(GL_FRONT);
+		VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "GL_FRONT");
+		glDrawBuffer(GL_FRONT);
+		glReadBuffer(GL_FRONT);
+		glXSwapBuffers(dpy, win);
+		VERIFY_FBO(0, GL_FRONT, 0, GL_FRONT);
+		VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-2), "GL_FRONT");
+		checkReadbackState(GL_FRONT, dpy, win, win, ctx);
+		checkFrame(dpy, win, 1, lastFrame);
+		checkWindowColor(dpy, win, clr.bits(-2));
+
+		printf("SUCCESS\n");
+	}
+	catch(std::exception &e)
+	{
+		printf("Failed! (%s)\n", e.what());  retval = 0;
+	}
+	if(ctx && dpy)
+	{
+		glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx);
+	}
+	if(win) XDestroyWindow(dpy, win);
+	if(vis) XFree(vis);
+	if(configs) XFree(configs);
+	if(dpy) XCloseDisplay(dpy);
+	return retval;
+}
+
+
 // This tests the faker's ability to handle the 2000 Flushes issue
 int flushTest(void)
 {
@@ -3348,6 +3431,7 @@ void usage(char **argv)
 	fprintf(stderr, "         (default: %d).  <n>=0 disables the multithreaded rendering test.\n",
 		DEFTHREADS);
 	fprintf(stderr, "-nostereo = Disable stereo tests\n");
+	fprintf(stderr, "-nomultisample = Disable multisampling tests\n");
 	fprintf(stderr, "-nodbpixmap = Assume GLXPixmaps are always single-buffered, even if created\n");
 	fprintf(stderr, "              with a double-buffered visual or FB config.\n");
 	fprintf(stderr, "-nocopycontext = Disable glXCopyContext() tests\n");
@@ -3361,8 +3445,8 @@ void usage(char **argv)
 int main(int argc, char **argv)
 {
 	int ret = 0, nThreads = DEFTHREADS;
-	bool doStereo = true, doDBPixmap = true, doCopyContext = true,
-		doSelectEvent = false, doNamedFB = true;
+	bool doStereo = true, doMultisample = true, doDBPixmap = true,
+		doCopyContext = true, doSelectEvent = false, doNamedFB = true;
 
 	if(putenv((char *)"VGL_AUTOTEST=1") == -1
 		|| putenv((char *)"VGL_SPOIL=0") == -1
@@ -3381,6 +3465,7 @@ int main(int argc, char **argv)
 			if(nThreads < 0 || nThreads > MAXTHREADS) usage(argv);
 		}
 		else if(!strcasecmp(argv[i], "-nostereo")) doStereo = false;
+		else if(!strcasecmp(argv[i], "-nomultisample")) doMultisample = false;
 		else if(!strcasecmp(argv[i], "-nodbpixmap")) doDBPixmap = false;
 		else if(!strcasecmp(argv[i], "-nocopycontext")) doCopyContext = false;
 		else if(!strcasecmp(argv[i], "-nonamedfb")) doNamedFB = false;
@@ -3403,6 +3488,11 @@ int main(int argc, char **argv)
 	if(doStereo)
 	{
 		if(!readbackTest(true, doNamedFB)) ret = -1;
+		printf("\n");
+	}
+	if(doMultisample)
+	{
+		if(!readbackTestMS()) ret = -1;
 		printf("\n");
 	}
 	if(!contextMismatchTest()) ret = -1;

@@ -589,6 +589,9 @@ VFUNCDEF0(glPopAttrib, glPopAttrib)
 
 VFUNCDEF1(glReadBuffer, GLenum, mode, glReadBuffer)
 
+VFUNCDEF7(glReadPixels, GLint, x, GLint, y, GLsizei, width, GLsizei, height,
+	GLenum, format, GLenum, type, GLvoid *, pixels, glReadPixels)
+
 VFUNCDEF4(glViewport, GLint, x, GLint, y, GLsizei, width, GLsizei, height,
 	glViewport)
 
@@ -788,9 +791,6 @@ VFUNCDEF1(glPushAttrib, GLbitfield, mask, NULL)
 VFUNCDEF0(glPushMatrix, NULL)
 
 VFUNCDEF2(glRasterPos2i, GLint, x, GLint, y, NULL)
-
-VFUNCDEF7(glReadPixels, GLint, x, GLint, y, GLsizei, width, GLsizei, height,
-	GLenum, format, GLenum, type, GLvoid *, pixels, NULL)
 
 VFUNCDEF4(glRenderbufferStorage, GLenum, target, GLenum, internalformat,
 	GLsizei, width, GLsizei, height, NULL)

@@ -116,6 +116,7 @@
 		#endif
 		glPopAttrib;
 		glReadBuffer;
+		glReadPixels;
 		glViewport;
 
 		/* OpenCL */
