@@ -892,18 +892,18 @@ int readbackTest(bool stereo, bool doNamedFB)
 	}
 	if(ctx0 && dpy)
 	{
-		glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx0);  ctx0 = 0;
+		glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx0);
 	}
 	if(ctx1 && dpy)
 	{
-		glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx1);  ctx1 = 0;
+		glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx1);
 	}
-	if(win0) { XDestroyWindow(dpy, win0);  win0 = 0; }
-	if(win1) { XDestroyWindow(dpy, win1);  win1 = 0; }
-	if(vis0) { XFree(vis0);  vis0 = NULL; }
-	if(vis1) { XFree(vis1);  vis1 = NULL; }
-	if(configs) { XFree(configs);  configs = NULL; }
-	if(dpy) { XCloseDisplay(dpy);  dpy = NULL; }
+	if(win0) XDestroyWindow(dpy, win0);
+	if(win1) XDestroyWindow(dpy, win1);
+	if(vis0) XFree(vis0);
+	if(vis1) XFree(vis1);
+	if(configs) XFree(configs);
+	if(dpy) XCloseDisplay(dpy);
 	return retval;
 }
 
@@ -973,11 +973,11 @@ int flushTest(void)
 
 	if(ctx && dpy)
 	{
-		glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx);  ctx = 0;
+		glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx);
 	}
-	if(win) { XDestroyWindow(dpy, win);  win = 0; }
-	if(vis) { XFree(vis);  vis = NULL; }
-	if(dpy) { XCloseDisplay(dpy);  dpy = NULL; }
+	if(win) XDestroyWindow(dpy, win);
+	if(vis) XFree(vis);
+	if(dpy) XCloseDisplay(dpy);
 	return retval;
 }
 
@@ -1119,11 +1119,11 @@ void queryContextTest(Display *dpy, XVisualInfo *vis, GLXFBConfig config)
 				THROWNL("glXQueryContextInfoEXT visual ID");
 		}
 
-		glXDestroyContext(dpy, ctx);  ctx = 0;
+		glXDestroyContext(dpy, ctx);
 	}
 	catch(...)
 	{
-		if(ctx) { glXDestroyContext(dpy, ctx);  ctx = 0; }
+		if(ctx) glXDestroyContext(dpy, ctx);
 		throw;
 	}
 }
@@ -1152,8 +1152,8 @@ GLXFBConfig getFBConfigFromVisual(Display *dpy, XVisualInfo *vis)
 	}
 	catch(...)
 	{
-		if(ctx) { glXDestroyContext(dpy, ctx);  ctx = 0; }
-		if(configs) { XFree(configs);  configs = NULL; }
+		if(ctx) glXDestroyContext(dpy, ctx);
+		if(configs) XFree(configs);
 		throw;
 	}
 }
@@ -1458,7 +1458,7 @@ int visTest(void)
 		{
 			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
-		if(vis2) { XFree(vis2);  vis2 = NULL; }
+		if(vis2) XFree(vis2);
 	}
 	catch(std::exception &e)
 	{
@@ -1469,11 +1469,11 @@ int visTest(void)
 	if(visuals && n)
 	{
 		for(i = 0; i < n; i++) { if(visuals[i]) XFree(visuals[i]); }
-		free(visuals);  visuals = NULL;
+		free(visuals);
 	}
-	if(vis0) { XFree(vis0);  vis0 = NULL; }
-	if(configs) { XFree(configs);  configs = NULL; }
-	if(dpy) { XCloseDisplay(dpy);  dpy = NULL; }
+	if(vis0) XFree(vis0);
+	if(configs) XFree(configs);
+	if(dpy) XCloseDisplay(dpy);
 	return retval;
 }
 
@@ -1657,28 +1657,21 @@ int multiThreadTest(int nThreads)
 	}
 	fflush(stdout);
 
-	for(i = 0; i < nThreads; i++)
-	{
-		delete threads[i];  threads[i] = NULL;
-	}
-	for(i = 0; i < nThreads; i++)
-	{
-		delete testThreads[i];  testThreads[i] = NULL;
-	}
-	if(vis) { XFree(vis);  vis = NULL; }
+	for(i = 0; i < nThreads; i++) delete threads[i];
+	for(i = 0; i < nThreads; i++)	delete testThreads[i];
+	if(vis) XFree(vis);
 	for(i = 0; i < nThreads; i++)
 	{
 		if(dpy && contexts[i])
 		{
 			glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, contexts[i]);
-			contexts[i] = 0;
 		}
 	}
 	for(i = 0; i < nThreads; i++)
 	{
-		if(dpy && windows[i]) { XDestroyWindow(dpy, windows[i]);  windows[i] = 0; }
+		if(dpy && windows[i]) XDestroyWindow(dpy, windows[i]);
 	}
-	if(dpy) { XCloseDisplay(dpy);  dpy = NULL; }
+	if(dpy) XCloseDisplay(dpy);
 	return retval;
 }
 
@@ -2180,25 +2173,25 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 	if(ctx && dpy)
 	{
 		glXMakeContextCurrent(dpy, 0, 0, 0);
-		glXDestroyContext(dpy, ctx);  ctx = 0;
+		glXDestroyContext(dpy, ctx);
 	}
 	if(ctx2 && dpy)
 	{
 		glXMakeContextCurrent(dpy, 0, 0, 0);
-		glXDestroyContext(dpy, ctx2);  ctx2 = 0;
+		glXDestroyContext(dpy, ctx2);
 	}
-	if(fontInfo && dpy) { XFreeFont(dpy, fontInfo);  fontInfo = NULL; }
-	if(pb && dpy) { glXDestroyPbuffer(dpy, pb);  pb = 0; }
-	if(glxpm1 && dpy) { glXDestroyGLXPixmap(dpy, glxpm1);  glxpm1 = 0; }
-	if(glxpm0 && dpy) { glXDestroyGLXPixmap(dpy, glxpm0);  glxpm0 = 0; }
-	if(pm2 && dpy) { XFreePixmap(dpy, pm2);  pm2 = 0; }
-	if(pm1 && dpy) { XFreePixmap(dpy, pm1);  pm1 = 0; }
-	if(pm0 && dpy) { XFreePixmap(dpy, pm0);  pm0 = 0; }
-	if(glxwin && dpy) { glXDestroyWindow(dpy, glxwin);  glxwin = 0; }
-	if(win && dpy) { XDestroyWindow(dpy, win);  win = 0; }
-	if(vis) { XFree(vis);  vis = NULL; }
-	if(configs) { XFree(configs);  configs = NULL; }
-	if(dpy) { XCloseDisplay(dpy);  dpy = NULL; }
+	if(fontInfo && dpy) XFreeFont(dpy, fontInfo);
+	if(pb && dpy) glXDestroyPbuffer(dpy, pb);
+	if(glxpm1 && dpy) glXDestroyGLXPixmap(dpy, glxpm1);
+	if(glxpm0 && dpy) glXDestroyGLXPixmap(dpy, glxpm0);
+	if(pm2 && dpy) XFreePixmap(dpy, pm2);
+	if(pm1 && dpy) XFreePixmap(dpy, pm1);
+	if(pm0 && dpy) XFreePixmap(dpy, pm0);
+	if(glxwin && dpy) glXDestroyWindow(dpy, glxwin);
+	if(win && dpy) XDestroyWindow(dpy, win);
+	if(vis) XFree(vis);
+	if(configs) XFree(configs);
+	if(dpy) XCloseDisplay(dpy);
 	return retval;
 }
 
@@ -2344,17 +2337,15 @@ int contextMismatchTest(void)
 	if(ctx1 && dpy)
 	{
 		glXMakeContextCurrent(dpy, 0, 0, 0);  glXDestroyContext(dpy, ctx1);
-		ctx1 = 0;
 	}
 	if(ctx2 && dpy)
 	{
 		glXMakeContextCurrent(dpy, 0, 0, 0);  glXDestroyContext(dpy, ctx2);
-		ctx2 = 0;
 	}
-	if(win && dpy) { XDestroyWindow(dpy, win);  win = 0; }
-	if(vis) { XFree(vis);  vis = NULL; }
-	if(configs) { XFree(configs);  configs = NULL; }
-	if(dpy) { XCloseDisplay(dpy);  dpy = NULL; }
+	if(win && dpy) XDestroyWindow(dpy, win);
+	if(vis) XFree(vis);
+	if(configs) XFree(configs);
+	if(dpy) XCloseDisplay(dpy);
 	return retval;
 }
 
@@ -2607,16 +2598,14 @@ int copyContextTest(void)
 	if(ctx1 && dpy)
 	{
 		glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx1);
-		ctx1 = 0;
 	}
 	if(ctx2 && dpy)
 	{
 		glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx2);
-		ctx2 = 0;
 	}
-	if(win && dpy) { XDestroyWindow(dpy, win);  win = 0; }
-	if(vis) { XFree(vis);  vis = NULL; }
-	if(dpy) { XCloseDisplay(dpy);  dpy = NULL; }
+	if(win && dpy) XDestroyWindow(dpy, win);
+	if(vis) XFree(vis);
+	if(dpy) XCloseDisplay(dpy);
 	return retval;
 }
 
@@ -2703,11 +2692,11 @@ int subWinTest(void)
 	}
 	if(ctx && dpy)
 	{
-		glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx);  ctx = 0;
+		glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx);
 	}
-	if(win && dpy) { XDestroyWindow(dpy, win);  win = 0; }
-	if(vis) { XFree(vis);  vis = NULL; }
-	if(dpy) { XCloseDisplay(dpy);  dpy = NULL; }
+	if(win && dpy) XDestroyWindow(dpy, win);
+	if(vis) XFree(vis);
+	if(dpy) XCloseDisplay(dpy);
 	return retval;
 }
 
