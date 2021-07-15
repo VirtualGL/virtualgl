@@ -12,6 +12,7 @@
 
 #include "VGLPbuffer.h"
 #include "TempContextEGL.h"
+#include "BufferState.h"
 #include "EGLContextHash.h"
 #include <X11/Xlibint.h>
 
@@ -76,8 +77,7 @@ VGLPbuffer::~VGLPbuffer(void)
 void VGLPbuffer::createBuffer(bool useRBOContext)
 {
 	TempContextEGL *tc = NULL;
-	GLint oldDrawFBO = -1, oldReadFBO = -1, oldRBO = -1;
-	GLint oldDrawBuf = -1, oldReadBuf = -1;
+	BufferState *bs = NULL;
 
 	CriticalSection::SafeLock l(config->rboCtx->getMutex());
 
@@ -86,13 +86,8 @@ void VGLPbuffer::createBuffer(bool useRBOContext)
 		if(useRBOContext)
 			tc = new TempContextEGL(eglpb, eglpb, config->rboCtx->getContext());
 		else
-		{
-			_glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &oldDrawFBO);
-			_glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &oldReadFBO);
-			_glGetIntegerv(GL_RENDERBUFFER_BINDING, &oldRBO);
-			_glGetIntegerv(GL_DRAW_BUFFER, &oldDrawBuf);
-			_glGetIntegerv(GL_READ_BUFFER, &oldReadBuf);
-		}
+			bs = new BufferState(BS_DRAWFBO | BS_READFBO | BS_RBO | BS_DRAWBUFS |
+				BS_READBUF);
 
 		TRY_GL();
 		if(fbo) _glDeleteFramebuffers(1, &fbo);
@@ -162,25 +157,11 @@ void VGLPbuffer::createBuffer(bool useRBOContext)
 	}
 	catch(...)
 	{
-		if(!useRBOContext)
-		{
-			if(oldDrawFBO >= 0) _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, oldDrawFBO);
-			if(oldReadFBO >= 0) _glBindFramebuffer(GL_READ_FRAMEBUFFER, oldReadFBO);
-			if(oldRBO >= 0) _glBindRenderbuffer(GL_RENDERBUFFER, oldRBO);
-			if(oldDrawBuf >= 0) _glDrawBuffer(oldDrawBuf);
-			if(oldReadBuf >= 0) _glReadBuffer(oldReadBuf);
-		}
+		delete bs;
 		delete tc;
 		throw;
 	}
-	if(!useRBOContext)
-	{
-		if(oldDrawFBO >= 0) _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, oldDrawFBO);
-		if(oldReadFBO >= 0) _glBindFramebuffer(GL_READ_FRAMEBUFFER, oldReadFBO);
-		if(oldRBO >= 0) _glBindRenderbuffer(GL_RENDERBUFFER, oldRBO);
-		if(oldDrawBuf >= 0) _glDrawBuffer(oldDrawBuf);
-		if(oldReadBuf >= 0) _glReadBuffer(oldReadBuf);
-	}
+	delete bs;
 	delete tc;
 }
 
@@ -255,17 +236,13 @@ void VGLPbuffer::swap(void)
 
 		if(_eglGetCurrentSurface(EGL_DRAW) == eglpb && drawFBO == (GLint)oldFBO)
 		{
-			GLint oldDrawBuf = -1;
-			_glGetIntegerv(GL_DRAW_BUFFER, &oldDrawBuf);
+			BufferState bs(BS_DRAWBUFS);
 			_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-			_glDrawBuffer(oldDrawBuf);
 		}
 		if(_eglGetCurrentSurface(EGL_READ) == eglpb && readFBO == (GLint)oldFBO)
 		{
-			GLint oldReadBuf = -1;
-			_glGetIntegerv(GL_READ_BUFFER, &oldReadBuf);
+			BufferState bs(BS_READBUF);
 			_glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-			_glReadBuffer(oldReadBuf);
 		}
 	}
 }

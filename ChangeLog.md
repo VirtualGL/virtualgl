@@ -11,6 +11,10 @@ find a free port on a server running one of those operating systems.
 2. Fixed an issue in the EGL back end whereby `glReadPixels()` did not work
 with multisampled drawables.
 
+3. Fixed an issue in the EGL back end whereby the `glGet*()` functions
+sometimes returned an incorrect value for `GL_DRAW_BUFFER0` through
+`GL_DRAW_BUFFER15` if the correct value was `GL_NONE`.
+
 
 2.6.90 (3.0 beta1)
 ==================

@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2011-2012, 2014-2015, 2019-2020 D. R. Commander
+// Copyright (C)2011-2012, 2014-2015, 2019-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -86,6 +86,7 @@ namespace vglfaker
 				if(attribs)
 				{
 					attribs->nDrawBufs = n;
+					for(int i = 0; i < 16; i++) attribs->drawBufs[i] = GL_NONE;
 					memcpy(attribs->drawBufs, bufs, sizeof(GLenum) * n);
 				}
 			}
@@ -98,13 +99,19 @@ namespace vglfaker
 				return GL_NONE;
 			}
 
-			const GLenum *getDrawBuffers(EGLContext ctx, GLsizei &nDrawBufs)
+			GLenum *getDrawBuffers(EGLContext ctx, GLsizei &nDrawBufs)
 			{
 				EGLContextAttribs *attribs = HASH::find(ctx, NULL);
 				if(attribs)
 				{
 					nDrawBufs = attribs->nDrawBufs;
-					return attribs->drawBufs;
+					if(nDrawBufs)
+					{
+						GLenum *drawBufs = new GLenum[nDrawBufs];
+						for(GLsizei i = 0; i < nDrawBufs; i++)
+							drawBufs[i] = attribs->drawBufs[i];
+						return drawBufs;
+					}
 				}
 				nDrawBufs = 0;
 				return NULL;

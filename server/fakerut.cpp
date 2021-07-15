@@ -65,7 +65,7 @@ using namespace vglutil;
 }
 
 
-#define VERIFY_FBO(drawFBO, drawBuf, readFBO, readBuf) \
+#define VERIFY_FBO(drawFBO, drawBuf0, drawBuf1, readFBO, readBuf) \
 { \
 	GLint __drawFBO = -1; \
 	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &__drawFBO); \
@@ -75,10 +75,16 @@ using namespace vglutil;
 	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &__readFBO); \
 	if(__readFBO != (GLint)readFBO) \
 		PRERROR2("Read FBO is %d, should be %d", __readFBO, readFBO); \
-	GLint __drawBuf = -1; \
-	glGetIntegerv(GL_DRAW_BUFFER, &__drawBuf); \
-	if(__drawBuf != (GLint)drawBuf) \
-		PRERROR2("Draw buffer is 0x%.4x, should be 0x%.4x", __drawBuf, drawBuf); \
+	GLint __drawBuf0 = -1; \
+	glGetIntegerv(GL_DRAW_BUFFER0, &__drawBuf0); \
+	if(__drawBuf0 != (GLint)drawBuf0) \
+		PRERROR2("Draw buffer 0 is 0x%.4x, should be 0x%.4x", __drawBuf0, \
+			drawBuf0); \
+	GLint __drawBuf1 = -1; \
+	glGetIntegerv(GL_DRAW_BUFFER1, &__drawBuf1); \
+	if(__drawBuf1 != (GLint)drawBuf1) \
+		PRERROR2("Draw buffer 1 is 0x%.4x, should be 0x%.4x", __drawBuf1, \
+			drawBuf1); \
 	GLint __readBuf = -1; \
 	glGetIntegerv(GL_READ_BUFFER, &__readBuf); \
 	if(__readBuf != (GLint)readBuf) \
@@ -614,7 +620,7 @@ int readbackTest(bool stereo, bool doNamedFB)
 						THROW("glNamedFramebufferReadBuffer() not available");
 					__glNamedFramebufferReadBuffer(0, GL_FRONT);
 				}
-				VERIFY_FBO(0, GL_BACK, 0, GL_FRONT);
+				VERIFY_FBO(0, GL_BACK, GL_NONE, 0, GL_FRONT);
 				glFinish();
 				checkFrame(dpy, win1, 1, lastFrame1);
 				checkWindowColor(dpy, win1, clr.bits(-2));
@@ -669,7 +675,7 @@ int readbackTest(bool stereo, bool doNamedFB)
 						THROW("glNamedFramebufferDrawBuffer() not available");
 					__glNamedFramebufferDrawBuffer(0, GL_BACK);
 				}
-				VERIFY_FBO(0, GL_BACK, 0, GL_BACK);
+				VERIFY_FBO(0, GL_BACK, GL_NONE, 0, GL_BACK);
 				glXWaitGL();
 				checkFrame(dpy, win1, 1, lastFrame1);
 				checkWindowColor(dpy, win1, clr.bits(-2));
@@ -938,6 +944,7 @@ int readbackTestMS(void)
 	int n = 0;
 	GLXContext ctx = 0;
 	XSetWindowAttributes swa;
+	GLuint fbo = 0, rbo0 = 0, rbo1 = 0;
 
 	printf("Multisampled readback test:\n\n");
 
@@ -978,11 +985,27 @@ int readbackTestMS(void)
 		VERIFY_BUF_COLOR(GL_BACK, clr.bits(-1), "GL_BACK");
 		clr.clear(GL_FRONT);
 		VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "GL_FRONT");
-		glDrawBuffer(GL_FRONT);
-		glReadBuffer(GL_FRONT);
+		glGenFramebuffers(1, &fbo);
+		glGenRenderbuffers(1, &rbo0);
+		glGenRenderbuffers(1, &rbo1);
+		glBindRenderbuffer(GL_RENDERBUFFER, rbo0);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, dpyw / 2, dpyh / 2);
+		glBindRenderbuffer(GL_RENDERBUFFER, rbo1);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, dpyw / 2, dpyh / 2);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+			GL_RENDERBUFFER, rbo0);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
+			GL_RENDERBUFFER, rbo1);
+		GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+		glDrawBuffers(2, bufs);
+		glReadBuffer(GL_COLOR_ATTACHMENT1);
 		glXSwapBuffers(dpy, win);
-		VERIFY_FBO(0, GL_FRONT, 0, GL_FRONT);
+		VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, fbo,
+			GL_COLOR_ATTACHMENT1);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-2), "GL_FRONT");
+		VERIFY_FBO(0, GL_FRONT, GL_NONE, 0, GL_FRONT);
 		checkReadbackState(GL_FRONT, dpy, win, win, ctx);
 		checkFrame(dpy, win, 1, lastFrame);
 		checkWindowColor(dpy, win, clr.bits(-2));
@@ -995,6 +1018,19 @@ int readbackTestMS(void)
 	}
 	if(ctx && dpy)
 	{
+		if(fbo)
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+				GL_RENDERBUFFER, 0);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
+				GL_RENDERBUFFER, 0);
+			glBindRenderbuffer(GL_RENDERBUFFER, 0);
+			if(rbo0) glDeleteRenderbuffers(1, &rbo0);
+			if(rbo1) glDeleteRenderbuffers(1, &rbo1);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glDeleteFramebuffers(1, &fbo);
+		}
 		glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx);
 	}
 	if(win) XDestroyWindow(dpy, win);
@@ -1997,7 +2033,8 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_RGBA, dpyw / 2,
 				dpyh / 2);
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-			VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0_EXT, fbo, GL_COLOR_ATTACHMENT0_EXT);
+			VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0_EXT, GL_NONE, fbo,
+				GL_COLOR_ATTACHMENT0_EXT);
 			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
 				GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, rbo);
 			clr.clear(0);
@@ -2005,13 +2042,15 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			if(!glXMakeContextCurrent(dpy, pb, pb, ctx))
 				THROW("Could not make context current");
 			checkCurrent(dpy, pb, pb, ctx, dpyw / 2, dpyh / 2);
-			VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0_EXT, fbo, GL_COLOR_ATTACHMENT0_EXT);
+			VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0_EXT, GL_NONE, fbo,
+				GL_COLOR_ATTACHMENT0_EXT);
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				THROWNL("Could not make context current");
 			checkCurrent(dpy, glxwin, glxwin, ctx, dpyw / 2, dpyh / 2);
-			VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0_EXT, fbo, GL_COLOR_ATTACHMENT0_EXT);
+			VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0_EXT, GL_NONE, fbo,
+				GL_COLOR_ATTACHMENT0_EXT);
 			glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
-			VERIFY_FBO(0, GL_FRONT_AND_BACK, fbo, GL_COLOR_ATTACHMENT0_EXT);
+			VERIFY_FBO(0, GL_FRONT_AND_BACK, GL_NONE, fbo, GL_COLOR_ATTACHMENT0_EXT);
 			glFramebufferRenderbufferEXT(GL_DRAW_FRAMEBUFFER_EXT,
 				GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, 0);
 			glDrawBuffer(GL_BACK);
@@ -2020,25 +2059,26 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			checkReadbackState(GL_COLOR_ATTACHMENT0_EXT, dpy, glxwin, glxwin, ctx);
 			checkWindowColor(dpy, win, clr.bits(-3), false);
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-			VERIFY_FBO(0, GL_BACK, 0, GL_FRONT);
+			VERIFY_FBO(0, GL_BACK, GL_NONE, 0, GL_FRONT);
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				THROWNL("Could not make context current");
-			VERIFY_FBO(0, GL_BACK, 0, GL_FRONT);
+			VERIFY_FBO(0, GL_BACK, GL_NONE, 0, GL_FRONT);
 			clr.clear(GL_FRONT);
 			clr.clear(GL_BACK);
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-			VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0_EXT, fbo, GL_COLOR_ATTACHMENT0_EXT);
+			VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0_EXT, GL_NONE, fbo,
+				GL_COLOR_ATTACHMENT0_EXT);
 			VERIFY_BUF_COLOR(0, clr.bits(-3), "FBO");
 			glXSwapBuffers(dpy, glxwin);
 			checkFrame(dpy, win, 1, lastFrame);
 			checkWindowColor(dpy, win, clr.bits(-1), false);
 			glDeleteRenderbuffersEXT(1, &rbo);  rbo = 0;
 			glDeleteFramebuffersEXT(1, &fbo);  fbo = 0;
-			VERIFY_FBO(0, GL_BACK, 0, GL_FRONT);
+			VERIFY_FBO(0, GL_BACK, GL_NONE, 0, GL_FRONT);
 			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "Win");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				THROWNL("Could not make context current");
-			VERIFY_FBO(0, GL_BACK, 0, GL_FRONT);
+			VERIFY_FBO(0, GL_BACK, GL_NONE, 0, GL_FRONT);
 			printf("SUCCESS\n");
 		}
 		catch(std::exception &e)

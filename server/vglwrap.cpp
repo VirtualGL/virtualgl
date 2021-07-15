@@ -15,6 +15,7 @@
 #include "EGLContextHash.h"
 #include "EGLPbufferHash.h"
 #include "EGLError.h"
+#include "BufferState.h"
 #endif
 #include "glxvisual.h"
 #include <X11/Xmd.h>
@@ -574,7 +575,7 @@ void VGLGetIntegerv(GLenum pname, GLint *params)
 		{
 			vglfaker::VGLPbuffer *pb = getCurrentVGLPbuffer(EGL_DRAW);
 			GLenum drawBuf = ectxhash.getDrawBuffer(ctx, 0);
-			if(pb && drawBuf)
+			if(pb)
 			{
 				*params = drawBuf;
 				return;
@@ -585,7 +586,7 @@ void VGLGetIntegerv(GLenum pname, GLint *params)
 			vglfaker::VGLPbuffer *pb = getCurrentVGLPbuffer(EGL_DRAW);
 			int index = pname - GL_DRAW_BUFFER0;
 			GLenum drawBuf = ectxhash.getDrawBuffer(ctx, index);
-			if(pb && drawBuf)
+			if(pb)
 			{
 				*params = drawBuf;
 				return;
@@ -605,7 +606,7 @@ void VGLGetIntegerv(GLenum pname, GLint *params)
 		{
 			vglfaker::VGLPbuffer *pb = getCurrentVGLPbuffer(EGL_READ);
 			GLenum readBuf = ectxhash.getReadBuffer(ctx);
-			if(pb && readBuf)
+			if(pb)
 			{
 				*params = readBuf;
 				return;
@@ -689,7 +690,10 @@ Bool VGLMakeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 					const GLenum *oldDrawBufs;  GLsizei nDrawBufs = 0;
 					oldDrawBufs = ectxhash.getDrawBuffers(ctx, nDrawBufs);
 					if(oldDrawBufs && nDrawBufs > 0)
+					{
 						drawpb->setDrawBuffers(nDrawBufs, oldDrawBufs, false);
+						delete [] oldDrawBufs;
+					}
 				}
 			}
 			if(readpb)
@@ -927,19 +931,14 @@ void VGLReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
 			_glGenFramebuffers(1, &fbo);
 			if(fbo)
 			{
-				GLint oldDrawFBO = -1, oldReadFBO = -1;
-				GLint oldDrawBuf = -1, oldReadBuf = -1;
-				_glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &oldDrawFBO);
-				_glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &oldReadFBO);
-				_glGetIntegerv(GL_DRAW_BUFFER, &oldDrawBuf);
-				_glGetIntegerv(GL_READ_BUFFER, &oldReadBuf);
+				vglfaker::BufferState
+					bs(BS_DRAWFBO | BS_READFBO | BS_DRAWBUFS | BS_READBUF);
 				_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
 
 				_glGenRenderbuffers(1, &rbo);
 				if(rbo)
 				{
-					GLint oldRBO = -1;
-					_glGetIntegerv(GL_RENDERBUFFER_BINDING, &oldRBO);
+					vglfaker::BufferState bsRBO(BS_RBO);
 					_glBindRenderbuffer(GL_RENDERBUFFER, rbo);
 
 					GLenum internalFormat = GL_RGB8;
@@ -956,21 +955,14 @@ void VGLReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
 						_glBlitFramebuffer(0, 0, readpb->getWidth(), readpb->getHeight(),
 							0, 0, readpb->getWidth(), readpb->getHeight(),
 							GL_COLOR_BUFFER_BIT, GL_NEAREST);
-						_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, oldReadFBO);
+						_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, bs.getOldReadFBO());
 						_glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 						_glReadPixels(x, y, width, height, format, type, data);
 						fallthrough = false;
 					}
 					_glDeleteRenderbuffers(1, &rbo);
-					if(oldRBO >= 0) _glBindRenderbuffer(GL_RENDERBUFFER, oldRBO);
 				}
 				_glDeleteFramebuffers(1, &fbo);
-				if(oldDrawFBO >= 0)
-					_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, oldDrawFBO);
-				if(oldReadFBO >= 0)
-					_glBindFramebuffer(GL_READ_FRAMEBUFFER, oldReadFBO);
-				if(oldDrawBuf >= 0) _glDrawBuffer(oldDrawBuf);
-				if(oldReadBuf >= 0) _glReadBuffer(oldReadBuf);
 			}
 		}
 		if(!fallthrough) return;
