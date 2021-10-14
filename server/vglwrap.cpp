@@ -29,22 +29,19 @@
 #ifdef EGLBACKEND
 
 #define CATCH_EGL(minorCode) \
-	catch(std::exception &e) \
+	catch(vglfaker::EGLError &e) \
 	{ \
-		if(dynamic_cast <const vglfaker::EGLError *>(&e)) \
+		int glxError = e.getGLXError(); \
+		bool isX11Error = e.isX11Error(); \
+		if(glxError >= 0) \
 		{ \
-			CARD8 glxError = ((vglfaker::EGLError &)e).getGLXError(); \
-			bool isX11Error = ((vglfaker::EGLError &)e).isX11Error(); \
-			if(glxError > 0) \
-			{ \
+			if(fconfig.verbose) \
 				vglout.print("[VGL] ERROR: in %s--\n[VGL]    %s\n", GET_METHOD(e), \
 					e.what()); \
-				vglfaker::sendGLXError(dpy, minorCode, glxError, isX11Error); \
-			} \
-			else throw; \
+			vglfaker::sendGLXError(dpy, minorCode, glxError, isX11Error); \
 		} \
 		else throw; \
-	}
+	} \
 
 
 static int CheckEGLErrors_NonFatal(void)
