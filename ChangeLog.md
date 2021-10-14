@@ -21,6 +21,10 @@ which is part of the `GLX_EXT_import_context` extension.  (The
 underlying OpenGL library and 3D X server support the extension and if indirect
 OpenGL contexts are enabled using `VGL_ALLOWINDIRECT`.)
 
+5. Fixed an issue in the EGL back end whereby the `glXChooseFBConfig()`
+function returned no FB configs if the `GLX_DRAWABLE_TYPE` attribute was set to
+`GLX_DONT_CARE`.
+
 
 2.6.90 (3.0 beta1)
 ==================

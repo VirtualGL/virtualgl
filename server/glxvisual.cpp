@@ -892,8 +892,8 @@ VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
 				PARSE_ATTRIB(GLX_SAMPLES, samples, 0, 64)
 				case GLX_DRAWABLE_TYPE:
 					drawableType = attribs[++i];
-					if(drawableType &
-						~(GLX_WINDOW_BIT | GLX_PIXMAP_BIT | GLX_PBUFFER_BIT))
+					if(drawableType != (int)GLX_DONT_CARE && (drawableType &
+						~(GLX_WINDOW_BIT | GLX_PIXMAP_BIT | GLX_PBUFFER_BIT)))
 						goto bailout;
 					break;
 				PARSE_ATTRIB_DC(GLX_X_RENDERABLE, xRenderable, 0, 1)
