@@ -1389,6 +1389,7 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		#endif
 		CHECK_FAKED(glPopAttrib)
 		CHECK_FAKED(glReadBuffer)
+		CHECK_FAKED(glReadPixels)
 		CHECK_FAKED(glViewport)
 	}
 	if(!retval)

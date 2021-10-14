@@ -3449,6 +3449,7 @@ int procAddrTest(void)
 		TEST_PROC_SYM(glGetStringi)
 		TEST_PROC_SYM(glPopAttrib)
 		TEST_PROC_SYM(glReadBuffer)
+		TEST_PROC_SYM(glReadPixels);
 		TEST_PROC_SYM(glViewport)
 
 		printf("SUCCESS!\n");
