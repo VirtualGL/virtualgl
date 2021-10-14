@@ -17,6 +17,7 @@
 #include "EGLError.h"
 #include "BufferState.h"
 #endif
+#include "PixmapHash.h"
 #include "glxvisual.h"
 #include <X11/Xmd.h>
 #include <GL/glxproto.h>
@@ -979,6 +980,8 @@ void VGLSwapBuffers(Display *dpy, GLXDrawable drawable)
 	{
 		try
 		{
+			if(pmhash.find(dpy, drawable)) return;
+
 			vglfaker::VGLPbuffer *pb = NULL;
 
 			if(drawable && (pb = epbhash.find((EGLSurface)drawable)) != NULL)

@@ -25,6 +25,9 @@ OpenGL contexts are enabled using `VGL_ALLOWINDIRECT`.)
 function returned no FB configs if the `GLX_DRAWABLE_TYPE` attribute was set to
 `GLX_DONT_CARE`.
 
+6. Fixed an issue in the EGL back end whereby the `glXSwapBuffers()` function
+erroneously swapped the buffers of double-buffered Pixmaps.
+
 
 2.6.90 (3.0 beta1)
 ==================
