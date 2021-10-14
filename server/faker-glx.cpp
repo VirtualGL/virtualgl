@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011-2020 D. R. Commander
+// Copyright (C)2009, 2011-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -991,6 +991,11 @@ Display *glXGetCurrentDisplay(void)
 	return dpy;
 }
 
+Display *glXGetCurrentDisplayEXT(void)
+{
+	return glXGetCurrentDisplay();
+}
+
 
 // As far as the application is concerned, it is rendering to a window and not
 // an off-screen drawable, so we must maintain that illusion and pass it back
@@ -1323,6 +1328,7 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 
 		// GLX_EXT_import_context
 		CHECK_OPT_FAKED(glXFreeContextEXT)
+		CHECK_FAKED(glXGetCurrentDisplayEXT)
 		CHECK_OPT_FAKED(glXImportContextEXT)
 		CHECK_OPT_FAKED(glXQueryContextInfoEXT)
 

@@ -508,6 +508,8 @@ static INLINE void (*_glXGetProcAddressARB(const GLubyte *procName))(void)
 VFUNCDEF2(glXFreeContextEXT, Display *, dpy, GLXContext, ctx,
 	glXFreeContextEXT)
 
+FUNCDEF0(Display *, glXGetCurrentDisplayEXT, glXGetCurrentDisplayEXT)
+
 FUNCDEF2(GLXContext, glXImportContextEXT, Display *, dpy,
 	GLXContextID, contextID, glXImportContextEXT)
 

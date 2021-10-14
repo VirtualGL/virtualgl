@@ -15,6 +15,12 @@ with multisampled drawables.
 sometimes returned an incorrect value for `GL_DRAW_BUFFER0` through
 `GL_DRAW_BUFFER15` if the correct value was `GL_NONE`.
 
+4. The VirtualGL Faker now interposes the `glXGetCurrentDisplayEXT()` function,
+which is part of the `GLX_EXT_import_context` extension.  (The
+`GLX_EXT_import_context` extension can be used with the GLX back end if the
+underlying OpenGL library and 3D X server support the extension and if indirect
+OpenGL contexts are enabled using `VGL_ALLOWINDIRECT`.)
+
 
 2.6.90 (3.0 beta1)
 ==================

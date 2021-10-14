@@ -56,6 +56,7 @@
 
 		/* GLX_EXT_import_context */
 		glXFreeContextEXT;
+		glXGetCurrentDisplayEXT;
 		glXImportContextEXT;
 		glXQueryContextInfoEXT;
 
