@@ -17,6 +17,12 @@ operating systems whereby, if X11 forwarding was enabled by default in the SSH
 client, `vglconnect -s` would hang while making a preliminary SSH connection to
 find a free port on a server running one of those operating systems.
 
+3. The VirtualGL Faker now interposes the `glXGetCurrentDisplayEXT()` function,
+which is part of the `GLX_EXT_import_context` extension.  (The
+`GLX_EXT_import_context` extension can be used if the underlying OpenGL library
+and 3D X server support it and if indirect OpenGL contexts are enabled using
+`VGL_ALLOWINDIRECT`.)
+
 
 2.6.5
 =====
