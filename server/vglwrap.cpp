@@ -227,7 +227,7 @@ GLXContext VGLCreateContext(Display *dpy, VGLFBConfig config, GLXContext share,
 		{
 			if(!share)
 			{
-				if(config) config->rboCtx->createContext();
+				if(config && config->rboCtx) config->rboCtx->createContext();
 				else
 				{
 					vglfaker::sendGLXError(dpy, minorCode, GLXBadFBConfig, false);
