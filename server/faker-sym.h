@@ -808,28 +808,13 @@ FUNCDEF1(GLboolean, glUnmapBuffer, GLenum, target, NULL)
 
 FUNCDEF1(EGLBoolean, eglBindAPI, EGLenum, api, NULL)
 
-FUNCDEF5(EGLBoolean, eglChooseConfig, EGLDisplay, display,
-	EGLint const *, attrib_list, EGLConfig *, configs, EGLint, config_size,
-	EGLint *, num_config, NULL)
-
 FUNCDEF4(EGLContext, eglCreateContext, EGLDisplay, display, EGLConfig, config,
 	EGLContext, share_context, EGLint const *, attrib_list, NULL)
-
-FUNCDEF3(EGLSurface, eglCreatePbufferSurface, EGLDisplay, display,
-	EGLConfig, config, EGLint const *, attrib_list, NULL)
 
 FUNCDEF2(EGLBoolean, eglDestroyContext, EGLDisplay, display,
 	EGLContext, context, NULL)
 
-FUNCDEF2(EGLBoolean, eglDestroySurface, EGLDisplay, display,
-	EGLSurface, surface, NULL)
-
-FUNCDEF4(EGLBoolean, eglGetConfigAttrib, EGLDisplay, display,
-	EGLConfig, config, EGLint, attribute, EGLint *, value, NULL)
-
 FUNCDEF0(EGLContext, eglGetCurrentContext, NULL)
-
-FUNCDEF1(EGLSurface, eglGetCurrentSurface, EGLint, readdraw, NULL)
 
 FUNCDEF0(EGLint, eglGetError, NULL)
 
@@ -858,9 +843,6 @@ FUNCDEF2(const char *, eglQueryDeviceStringEXT, EGLDeviceEXT, device, EGLint,
 
 FUNCDEF2(char const *, eglQueryString, EGLDisplay, display, EGLint, name,
 	NULL)
-
-FUNCDEF4(EGLBoolean, eglQuerySurface, EGLDisplay, display, EGLSurface,
-	surface, EGLint, attribute, EGLint *, value, NULL)
 
 FUNCDEF1(EGLBoolean, eglTerminate, EGLDisplay, display, NULL)
 

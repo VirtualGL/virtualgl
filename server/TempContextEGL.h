@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2011, 2014-2015, 2018-2020 D. R. Commander
+// Copyright (C)2011, 2014-2015, 2018-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -28,18 +28,15 @@ namespace vglfaker
 	{
 		public:
 
-			TempContextEGL(EGLSurface draw, EGLSurface read, EGLContext ctx) :
-				oldctx(_eglGetCurrentContext()),
-				oldread(_eglGetCurrentSurface(EGL_READ)),
-				olddraw(_eglGetCurrentSurface(EGL_DRAW)), ctxChanged(false)
+			TempContextEGL(EGLContext ctx) : oldctx(_eglGetCurrentContext()),
+				ctxChanged(false)
 			{
 				if(!ctx) THROW("Invalid argument");
-				if((read || draw)
-					&& (oldread != read  || olddraw != draw || oldctx != ctx))
+				if(oldctx != ctx)
 				{
 					if(!_eglBindAPI(EGL_OPENGL_API))
 						THROW("Could not enable OpenGL API");
-					if(!_eglMakeCurrent(EDPY, draw, read, ctx))
+					if(!_eglMakeCurrent(EDPY, EGL_NO_SURFACE, EGL_NO_SURFACE, ctx))
 						THROW_EGL("eglMakeCurrent()");
 					ctxChanged = true;
 				}
@@ -50,7 +47,7 @@ namespace vglfaker
 				if(ctxChanged)
 				{
 					_eglBindAPI(EGL_OPENGL_API);
-					_eglMakeCurrent(EDPY, olddraw, oldread, oldctx);
+					_eglMakeCurrent(EDPY, EGL_NO_SURFACE, EGL_NO_SURFACE, oldctx);
 					ctxChanged = false;
 				}
 			}
@@ -58,7 +55,6 @@ namespace vglfaker
 		private:
 
 			EGLContext oldctx;
-			EGLSurface oldread, olddraw;
 			bool ctxChanged;
 	};
 }

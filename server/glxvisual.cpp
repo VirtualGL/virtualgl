@@ -21,7 +21,6 @@
 #include "faker.h"
 #include "vglutil.h"
 #ifdef EGLBACKEND
-#include "EGLConfigHash.h"
 #include "TempContextEGL.h"
 #endif
 
@@ -388,7 +387,7 @@ static VisualID matchVisual2D(Display *dpy, int screen, VGLFBConfig config)
 	else
 	#endif
 	{
-		XVisualInfo *vis = _glXGetVisualFromFBConfig(DPY3D, config->cfg.glx);
+		XVisualInfo *vis = _glXGetVisualFromFBConfig(DPY3D, config->glx);
 		if(!vis) return 0;
 		depth = vis->depth;
 		c_class = vis->c_class;
@@ -429,7 +428,7 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 	int nConfigs = 0;
 	GLXFBConfig *glxConfigs = NULL;
 	#ifdef EGLBACKEND
-	EGLContext ctx = 0;  EGLSurface pb = 0;
+	EGLContext ctx = 0;
 	#endif
 	struct _VGLFBConfig *ca = NULL;
 	XEDataObject obj;
@@ -456,24 +455,14 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 			int defaultDepth = DefaultDepth(dpy, screen);
 			int nbpcs = defaultDepth == 30 ? 2 : 1;
 			int bpcs[] = { defaultDepth == 30 ? 10 : 8, defaultDepth == 30 ? 8 : 0 };
-			int maxSamples = 0, nsamps = 1;
-			int attribs[] = { EGL_CONFIG_CAVEAT, EGL_NONE,
-				EGL_RED_SIZE, 1, EGL_GREEN_SIZE, 1, EGL_BLUE_SIZE, 1,
-				EGL_CONFORMANT, EGL_OPENGL_BIT, EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
-				EGL_SURFACE_TYPE, EGL_PBUFFER_BIT, EGL_NONE };
-			EGLConfig config;  int n;
-			int pbAttribs[] = { EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
+			int maxSamples = 0, maxPBWidth = 32768, maxPBHeight = 32768, nsamps = 1;
 
 			if(!_eglBindAPI(EGL_OPENGL_API))
 				THROW("Could not enable OpenGL API");
-			if(!_eglChooseConfig(EDPY, attribs, &config, 1, &n))
-				THROW("Could not obtain EGL config");
-			if(!(ctx = _eglCreateContext(EDPY, config, NULL, NULL)))
+			if(!(ctx = _eglCreateContext(EDPY, (EGLConfig)0, NULL, NULL)))
 				THROW("Could not create temporary EGL context");
-			if(!(pb = _eglCreatePbufferSurface(EDPY, config, pbAttribs)))
-				THROW("Could not create temporary EGL Pbuffer surface");
 			{
-				vglfaker::TempContextEGL tc(pb, pb, ctx);
+				vglfaker::TempContextEGL tc(ctx);
 
 				_glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
 				if(maxSamples > 0)
@@ -482,8 +471,12 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 					while(temp >>= 1) nsamps++;
 				}
 				else maxSamples = 0;
+
+				GLint dims[2] = { -1, -1 };
+				_glGetIntegerv(GL_MAX_VIEWPORT_DIMS, dims);
+				if(dims[0] > 0) maxPBWidth = max(dims[0], maxPBWidth);
+				if(dims[1] > 0) maxPBHeight = max(dims[1], maxPBHeight);
 			}
-			_eglDestroySurface(EDPY, pb);  pb = 0;
 			_eglDestroyContext(EDPY, ctx);  ctx = 0;
 
 			nConfigs =
@@ -534,11 +527,11 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 												ca[i].attr.stencilSize = stencil * 8;
 												ca[i].attr.samples = samples;
 
-												ca[i].cfg.egl = config;
 												ca[i].c_class = c_class;
 												ca[i].depth = depth;
 
-												ca[i].rboCtx = ecfghash.getRBOContext(config);
+												ca[i].maxPBWidth = maxPBWidth;
+												ca[i].maxPBHeight = maxPBHeight;
 
 												i++;
 											}
@@ -585,7 +578,7 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 					ca[i].attr.alphaSize = ca[i].attr.stencilSize = ca[i].attr.samples =
 						-1;
 				}
-				ca[i].cfg.glx = glxConfigs[i];
+				ca[i].glx = glxConfigs[i];
 			}
 		}
 
@@ -609,7 +602,6 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 	{
 		if(glxConfigs) _XFree(glxConfigs);
 		#ifdef EGLBACKEND
-		if(pb) _eglDestroySurface(EDPY, pb);
 		if(ctx) _eglDestroyContext(EDPY, ctx);
 		#endif
 		free(ca);
@@ -994,7 +986,7 @@ VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
 		{
 			for(int j = 0; j < caEntries; j++)
 			{
-				if(ca[j].cfg.glx == glxConfigs[i])
+				if(ca[j].glx == glxConfigs[i])
 				{
 					configs[i] = &ca[j];
 					break;

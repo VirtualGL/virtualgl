@@ -78,7 +78,8 @@ namespace vglfaker
 		return *(bool *)extData->private_data;
 	}
 
-	extern "C" int deletePrivate(XExtData *extData);
+	extern "C" int deleteCS(XExtData *extData);
+	extern "C" int deleteRBOContext(XExtData *extData);
 
 	INLINE vglutil::CriticalSection &getDisplayCS(Display *dpy)
 	{

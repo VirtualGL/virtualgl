@@ -20,13 +20,21 @@ using namespace vglutil;
 using namespace vglfaker;
 
 
+extern GLXDrawable getCurrentDrawable(void);
+extern GLXDrawable getCurrentReadDrawable(void);
+
+
+CriticalSection VGLPbuffer::idMutex;
+GLXDrawable VGLPbuffer::nextID = 1;
+
+
 VGLPbuffer::VGLPbuffer(Display *dpy_, VGLFBConfig config_,
-	const int *glxAttribs) : dpy(dpy_), config(config_), eglpb(0), fbo(0),
+	const int *glxAttribs) : dpy(dpy_), config(config_), id(0), fbo(0),
 	rbod(0), width(0), height(0)
 {
 	for(int i = 0; i < 4; i++) rboc[i] = 0;
 
-	if(!dpy || !config) THROW("Invalid argument");
+	if(!dpy || !VALID_CONFIG(config)) THROW("Invalid argument");
 
 	if(glxAttribs && glxAttribs[0] != None)
 	{
@@ -49,16 +57,10 @@ VGLPbuffer::VGLPbuffer(Display *dpy_, VGLFBConfig config_,
 
 	try
 	{
-		// Create a dummy 1x1 EGL Pbuffer surface so we have something to which to
-		// bind the FBO.
-		int eglAttribs[] = { EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
-		if(!_eglBindAPI(EGL_OPENGL_API))
-			THROW("Could not enable OpenGL API");
-		eglpb = _eglCreatePbufferSurface(EDPY, EGLFBC(config), eglAttribs);
-		if(!eglpb) THROW_EGL("eglCreatePbufferSurface()");
-
-		config->rboCtx->createContext();
+		getRBOContext(dpy).createContext();
 		createBuffer(true);
+		CriticalSection::SafeLock l(idMutex);
+		id = nextID++;
 	}
 	catch(std::exception &e)
 	{
@@ -74,20 +76,25 @@ VGLPbuffer::~VGLPbuffer(void)
 }
 
 
-void VGLPbuffer::createBuffer(bool useRBOContext)
+void VGLPbuffer::createBuffer(bool useRBOContext, bool ignoreReadDrawBufs)
 {
 	TempContextEGL *tc = NULL;
 	BufferState *bs = NULL;
 
-	CriticalSection::SafeLock l(config->rboCtx->getMutex());
+	CriticalSection::SafeLock l(getRBOContext(dpy).getMutex());
 
 	try
 	{
 		if(useRBOContext)
-			tc = new TempContextEGL(eglpb, eglpb, config->rboCtx->getContext());
+			tc = new TempContextEGL(getRBOContext(dpy).getContext());
 		else
-			bs = new BufferState(BS_DRAWFBO | BS_READFBO | BS_RBO | BS_DRAWBUFS |
-				BS_READBUF);
+		{
+			if(ignoreReadDrawBufs)
+				bs = new BufferState(BS_DRAWFBO | BS_READFBO | BS_RBO);
+			else
+				bs = new BufferState(BS_DRAWFBO | BS_READFBO | BS_RBO | BS_DRAWBUFS |
+					BS_READBUF);
+		}
 
 		TRY_GL();
 		if(fbo) _glDeleteFramebuffers(1, &fbo);
@@ -170,28 +177,17 @@ void VGLPbuffer::destroy(bool errorCheck)
 {
 	try
 	{
-		if(eglpb)
+		CriticalSection::SafeLock l(getRBOContext(dpy).getMutex());
+		TempContextEGL tc(getRBOContext(dpy).getContext());
+
+		_glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		_glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		for(int i = 0; i < 4; i++)
 		{
-			CriticalSection::SafeLock l(config->rboCtx->getMutex());
-			TempContextEGL tc(eglpb, eglpb, config->rboCtx->getContext());
-
-			_glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			_glBindRenderbuffer(GL_RENDERBUFFER, 0);
-			for(int i = 0; i < 4; i++)
-			{
-				if(rboc[i]) { _glDeleteRenderbuffers(1, &rboc[i]);  rboc[i] = 0; }
-			}
-			if(rbod) { _glDeleteRenderbuffers(1, &rbod);  rbod = 0; }
-			if(fbo) { _glDeleteFramebuffers(1, &fbo);  fbo = 0; }
-
-			if(!_eglBindAPI(EGL_OPENGL_API))
-				THROW("Could not enable OpenGL API");
-			if(!_eglDestroySurface(EDPY, eglpb))
-				THROW_EGL("eglDestroySurface()");
-			eglpb = 0;
-
-			config->rboCtx->destroyContext();
+			if(rboc[i]) { _glDeleteRenderbuffers(1, &rboc[i]);  rboc[i] = 0; }
 		}
+		if(rbod) { _glDeleteRenderbuffers(1, &rbod);  rbod = 0; }
+		if(fbo) { _glDeleteFramebuffers(1, &fbo);  fbo = 0; }
 	}
 	catch(std::exception &e)
 	{
@@ -206,7 +202,7 @@ void VGLPbuffer::swap(void)
 
 	if(_eglGetCurrentContext()) _glFlush();
 
-	CriticalSection::SafeLock l(config->rboCtx->getMutex());
+	CriticalSection::SafeLock l(getRBOContext(dpy).getMutex());
 
 	// 0 = front left, 1 = back left, 2 = front right, 3 = back right
 	if(rboc[0] && rboc[1])
@@ -230,16 +226,15 @@ void VGLPbuffer::swap(void)
 		_glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFBO);
 		GLuint oldFBO = fbo;
 
-		if(_eglGetCurrentSurface(EGL_DRAW) == eglpb
-			|| _eglGetCurrentSurface(EGL_READ) == eglpb)
+		if(getCurrentDrawable() == id || getCurrentReadDrawable() == id)
 			createBuffer(false);
 
-		if(_eglGetCurrentSurface(EGL_DRAW) == eglpb && drawFBO == (GLint)oldFBO)
+		if(getCurrentDrawable() == id && drawFBO == (GLint)oldFBO)
 		{
 			BufferState bs(BS_DRAWBUFS);
 			_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
 		}
-		if(_eglGetCurrentSurface(EGL_READ) == eglpb && readFBO == (GLint)oldFBO)
+		if(getCurrentReadDrawable() == id && readFBO == (GLint)oldFBO)
 		{
 			BufferState bs(BS_READBUF);
 			_glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);

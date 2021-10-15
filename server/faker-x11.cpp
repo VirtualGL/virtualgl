@@ -481,7 +481,7 @@ static void setupXDisplay(Display *dpy)
 		THROW("Memory allocation error");
 	extData->private_data = (XPointer)(new vglutil::CriticalSection());
 	extData->number = codes->extension;
-	extData->free_private = vglfaker::deletePrivate;
+	extData->free_private = vglfaker::deleteCS;
 	XAddToExtensionList(XEHeadOfExtensionList(obj), extData);
 
 	// Extension code 3 stores the visual attribute table for a Screen.
@@ -491,6 +491,17 @@ static void setupXDisplay(Display *dpy)
 	// Extension code 4 stores the FB config attribute table for a Screen.
 	if(!(codes = XAddExtension(dpy)))
 		THROW("Memory allocation error");
+
+	#ifdef EGLBACKEND
+	// Extension code 5 stores the RBO context instance for a Display
+	if(!(codes = XAddExtension(dpy))
+		|| !(extData = (XExtData *)calloc(1, sizeof(XExtData))))
+		THROW("Memory allocation error");
+	extData->private_data = (XPointer)(new vglfaker::EGLRBOContext());
+	extData->number = 5;
+	extData->free_private = vglfaker::deleteRBOContext;
+	XAddToExtensionList(XEHeadOfExtensionList(obj), extData);
+	#endif
 
 	if(!excludeDisplay && strlen(fconfig.vendor) > 0)
 	{

@@ -22,7 +22,6 @@
 typedef struct
 {
 	VGLFBConfig config;
-	EGLContext share;
 	GLsizei nDrawBufs;
 	GLenum drawBufs[16], readBuf;
 	GLuint drawFBO, readFBO;
@@ -51,13 +50,12 @@ namespace vglfaker
 
 			static bool isAlloc(void) { return instance != NULL; }
 
-			void add(EGLContext ctx, VGLFBConfig config, EGLContext share)
+			void add(EGLContext ctx, VGLFBConfig config)
 			{
 				if(!ctx || !config) THROW("Invalid argument");
 				EGLContextAttribs *attribs = NULL;
 				attribs = new EGLContextAttribs;
 				attribs->config = config;
-				attribs->share = share;
 				attribs->nDrawBufs = 0;
 				for(int i = 0; i < 16; i++) attribs->drawBufs[i] = GL_NONE;
 				attribs->readBuf = GL_NONE;
@@ -70,13 +68,6 @@ namespace vglfaker
 				EGLContextAttribs *attribs = HASH::find(ctx, NULL);
 				if(attribs) return attribs->config;
 				return 0;
-			}
-
-			EGLContext findShare(EGLContext ctx)
-			{
-				EGLContextAttribs *attribs = HASH::find(ctx, NULL);
-				if(attribs) return attribs->share;
-				return EGL_NO_CONTEXT;
 			}
 
 			void setDrawBuffers(EGLContext ctx, GLsizei n, const GLenum *bufs)

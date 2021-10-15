@@ -1,4 +1,4 @@
-// Copyright (C)2019-2020 D. R. Commander
+// Copyright (C)2019-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -28,9 +28,9 @@ namespace vglfaker
 			VGLPbuffer(Display *dpy, VGLFBConfig config, const int *glxAttribs);
 			~VGLPbuffer(void);
 
-			void createBuffer(bool useRBOContext);
+			void createBuffer(bool useRBOContext, bool ignoreReadDrawBufs = false);
 			Display *getDisplay(void) { return dpy; }
-			EGLSurface getEGLSurface(void) { return eglpb; }
+			GLXDrawable getID(void) { return id; }
 			VGLFBConfig getFBConfig(void) { return config; }
 			GLuint getFBO(void) { return fbo; }
 			int getWidth(void) { return width; }
@@ -46,10 +46,12 @@ namespace vglfaker
 
 			Display *dpy;
 			VGLFBConfig config;
-			EGLSurface eglpb;
+			GLXDrawable id;
 			// 0 = front left, 1 = back left, 2 = front right, 3 = back right
 			GLuint fbo, rboc[4], rbod;
 			int width, height;
+			static vglutil::CriticalSection idMutex;
+			static GLXDrawable nextID;
 	};
 }
 

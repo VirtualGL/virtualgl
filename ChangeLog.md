@@ -32,6 +32,11 @@ erroneously swapped the buffers of double-buffered Pixmaps.
 to be displayed on top of the rendered volume when "Display ROI" and depth
 peeling were both enabled.
 
+8. The EGL back end now supports OpenGL applications that simultaneously make
+the same GLX drawable current in more than one thread.  As a consequence, the
+EGL back end now requires the `EGL_KHR_no_config_context` and
+`EGL_KHR_surfaceless_context` extensions.
+
 
 2.6.90 (3.0 beta1)
 ==================

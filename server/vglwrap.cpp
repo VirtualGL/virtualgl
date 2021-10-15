@@ -13,12 +13,13 @@
 #include "vglwrap.h"
 #ifdef EGLBACKEND
 #include "EGLContextHash.h"
-#include "EGLPbufferHash.h"
+#include "VGLPbufferHash.h"
 #include "EGLError.h"
 #include "BufferState.h"
 #endif
 #include "PixmapHash.h"
 #include "glxvisual.h"
+#include "threadlocal.h"
 #include <X11/Xmd.h>
 #include <GL/glxproto.h>
 
@@ -44,34 +45,14 @@
 	} \
 
 
-static int CheckEGLErrors_NonFatal(void)
-{
-	// NOTE: The error codes that throw an exception should never occur except
-	// due to a bug in VirtualGL.
-	switch(_eglGetError())
-	{
-		case EGL_SUCCESS:
-			return Success;
-		case EGL_NOT_INITIALIZED:
-			THROW("EGL_NOT_INITIALIZED");
-		case EGL_BAD_ATTRIBUTE:
-			return GLX_BAD_ATTRIBUTE;
-		case EGL_BAD_CONFIG:
-			THROW("EGL_BAD_CONFIG");
-		case EGL_BAD_DISPLAY:
-			THROW("EGL_BAD_DISPLAY");
-		default:
-			THROW("EGL error");
-	}
-}
+VGL_THREAD_LOCAL(CurrentDrawable, GLXDrawable, None)
+VGL_THREAD_LOCAL(CurrentReadDrawable, GLXDrawable, None)
 
 
 static vglfaker::VGLPbuffer *getCurrentVGLPbuffer(EGLint readdraw)
 {
-	if(!_eglBindAPI(EGL_OPENGL_API))
-		THROW("Could not enable OpenGL API");
-	EGLSurface surface = _eglGetCurrentSurface(readdraw);
-	vglfaker::VGLPbuffer *pb = epbhash.find(surface);
+	vglfaker::VGLPbuffer *pb = vpbhash.find(readdraw == EGL_READ ?
+		getCurrentReadDrawable() : getCurrentDrawable());
 	if(pb)
 	{
 		GLint fbo = -1;
@@ -95,8 +76,7 @@ void VGLBindFramebuffer(GLenum target, GLuint framebuffer)
 		{
 			if(target == GL_DRAW_FRAMEBUFFER || target == GL_FRAMEBUFFER)
 			{
-				EGLSurface surface = _eglGetCurrentSurface(EGL_DRAW);
-				vglfaker::VGLPbuffer *pb = epbhash.find(surface);
+				vglfaker::VGLPbuffer *pb = vpbhash.find(getCurrentDrawable());
 				if(pb)
 				{
 					framebuffer = pb->getFBO();
@@ -105,8 +85,7 @@ void VGLBindFramebuffer(GLenum target, GLuint framebuffer)
 			}
 			if(target == GL_READ_FRAMEBUFFER || target == GL_FRAMEBUFFER)
 			{
-				EGLSurface surface = _eglGetCurrentSurface(EGL_READ);
-				vglfaker::VGLPbuffer *pb = epbhash.find(surface);
+				vglfaker::VGLPbuffer *pb = vpbhash.find(getCurrentReadDrawable());
 				if(pb)
 				{
 					framebuffer = pb->getFBO();
@@ -263,19 +242,19 @@ GLXContext VGLCreateContext(Display *dpy, VGLFBConfig config, GLXContext share,
 		}
 		try
 		{
+			if(!VALID_CONFIG(config))
+			{
+				vglfaker::sendGLXError(dpy, minorCode, GLXBadFBConfig, false);
+				return NULL;
+			}
 			if(!share)
 			{
-				if(config && config->rboCtx) config->rboCtx->createContext();
-				else
-				{
-					vglfaker::sendGLXError(dpy, minorCode, GLXBadFBConfig, false);
-					return NULL;
-				}
-				share = (GLXContext)config->rboCtx->getContext();
+				vglfaker::getRBOContext(dpy).createContext();
+				share = (GLXContext)vglfaker::getRBOContext(dpy).getContext();
 			}
 			if(!_eglBindAPI(EGL_OPENGL_API))
 				THROW("Could not enable OpenGL API");
-			GLXContext ctx = (GLXContext)_eglCreateContext(EDPY, EGLFBC(config),
+			GLXContext ctx = (GLXContext)_eglCreateContext(EDPY, (EGLConfig)0,
 				(EGLContext)share, egli ? eglAttribs : NULL);
 			EGLint eglError = _eglGetError();
 			// Some implementations of eglCreateContext() return NULL but do not set
@@ -285,7 +264,7 @@ GLXContext VGLCreateContext(Display *dpy, VGLFBConfig config, GLXContext share,
 				eglError = EGL_BAD_MATCH;
 			if(!ctx && eglError != EGL_SUCCESS)
 				throw(vglfaker::EGLError("eglCreateContext()", __LINE__, eglError));
-			if(ctx) ectxhash.add(ctx, config, (EGLContext)share);
+			if(ctx) ectxhash.add(ctx, config);
 			return ctx;
 		}
 		CATCH_EGL(minorCode)
@@ -314,9 +293,9 @@ GLXPbuffer VGLCreatePbuffer(Display *dpy, VGLFBConfig config,
 		{
 			vglfaker::VGLPbuffer *pb =
 				new vglfaker::VGLPbuffer(dpy, config, glxAttribs);
-			EGLSurface eglpb = pb->getEGLSurface();
-			if(eglpb) epbhash.add(eglpb, pb);
-			return (GLXPbuffer)eglpb;
+			GLXDrawable id = pb->getID();
+			if(id) vpbhash.add(id, pb);
+			return id;
 		}
 		CATCH_EGL(X_GLXCreatePbuffer)
 		return 0;
@@ -336,7 +315,6 @@ void VGLDestroyContext(Display *dpy, GLXContext ctx)
 		{
 			if(!ctx) return;
 			VGLFBConfig config = ectxhash.findConfig(ctx);
-			EGLContext share = ectxhash.findShare(ctx);
 			ectxhash.remove(ctx);
 			if(!_eglBindAPI(EGL_OPENGL_API))
 				THROW("Could not enable OpenGL API");
@@ -344,8 +322,6 @@ void VGLDestroyContext(Display *dpy, GLXContext ctx)
 				THROW_EGL("eglDestroyContext()");
 			if(!config)
 				vglfaker::sendGLXError(dpy, X_GLXDestroyContext, GLXBadContext, false);
-			else if(share && share == config->rboCtx->getContext())
-				config->rboCtx->destroyContext();
 		}
 		CATCH_EGL(X_GLXDestroyContext)
 	}
@@ -362,7 +338,7 @@ void VGLDestroyPbuffer(Display *dpy, GLXPbuffer pbuf)
 	{
 		try
 		{
-			epbhash.remove((EGLSurface)pbuf);
+			vpbhash.remove(pbuf);
 		}
 		CATCH_EGL(X_GLXDestroyPbuffer)
 	}
@@ -426,13 +402,8 @@ Display *VGLGetCurrentDisplay(void)
 	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
-		if(!_eglBindAPI(EGL_OPENGL_API))
-			THROW("Could not enable OpenGL API");
-		EGLSurface curDraw = _eglGetCurrentSurface(EGL_DRAW);
-		vglfaker::VGLPbuffer *pb;
-		if(curDraw && (pb = epbhash.find(curDraw)) != NULL)
-			return pb->getDisplay();
-		return NULL;
+		vglfaker::VGLPbuffer *pb = vpbhash.find(getCurrentDrawable());
+		return pb ? pb->getDisplay() : NULL;
 	}
 	else
 	#endif
@@ -444,11 +415,7 @@ GLXDrawable VGLGetCurrentDrawable(void)
 {
 	#ifdef EGLBACKEND
 	if(fconfig.egl)
-	{
-		if(!_eglBindAPI(EGL_OPENGL_API))
-			THROW("Could not enable OpenGL API");
-		return (GLXDrawable)_eglGetCurrentSurface(EGL_DRAW);
-	}
+		return getCurrentDrawable();
 	else
 	#endif
 		return _glXGetCurrentDrawable();
@@ -459,11 +426,7 @@ GLXDrawable VGLGetCurrentReadDrawable(void)
 {
 	#ifdef EGLBACKEND
 	if(fconfig.egl)
-	{
-		if(!_eglBindAPI(EGL_OPENGL_API))
-			THROW("Could not enable OpenGL API");
-		return (GLXDrawable)_eglGetCurrentSurface(EGL_READ);
-	}
+		return getCurrentReadDrawable();
 	else
 	#endif
 		return _glXGetCurrentReadDrawable();
@@ -553,27 +516,18 @@ int VGLGetFBConfigAttrib(Display *dpy, VGLFBConfig config, int attribute,
 				return Success;
 			case GLX_MAX_PBUFFER_WIDTH:
 			{
-				if(!_eglBindAPI(EGL_OPENGL_API))
-					THROW("Could not enable OpenGL API");
-				int ret = _eglGetConfigAttrib(EDPY, EGLFBC(config),
-					EGL_MAX_PBUFFER_WIDTH, value);
-				return ret == EGL_TRUE ? Success : CheckEGLErrors_NonFatal();
+				*value = config->maxPBWidth;
+				return EGL_TRUE;
 			}
 			case GLX_MAX_PBUFFER_HEIGHT:
 			{
-				if(!_eglBindAPI(EGL_OPENGL_API))
-					THROW("Could not enable OpenGL API");
-				int ret = _eglGetConfigAttrib(EDPY, EGLFBC(config),
-					EGL_MAX_PBUFFER_HEIGHT, value);
-				return ret == EGL_TRUE ? Success : CheckEGLErrors_NonFatal();
+				*value = config->maxPBHeight;
+				return EGL_TRUE;
 			}
 			case GLX_MAX_PBUFFER_PIXELS:
 			{
-				if(!_eglBindAPI(EGL_OPENGL_API))
-					THROW("Could not enable OpenGL API");
-				int ret = _eglGetConfigAttrib(EDPY, EGLFBC(config),
-					EGL_MAX_PBUFFER_PIXELS, value);
-				return ret == EGL_TRUE ? Success : CheckEGLErrors_NonFatal();
+				*value = config->maxPBWidth * config->maxPBHeight;
+				return EGL_TRUE;
 			}
 			case GLX_SAMPLE_BUFFERS:
 				*value = !!config->attr.samples;
@@ -689,20 +643,22 @@ Bool VGLMakeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		{
 			if(!_eglBindAPI(EGL_OPENGL_API))
 				THROW("Could not enable OpenGL API");
-			EGLBoolean ret = (Bool)_eglMakeCurrent(EDPY, (EGLSurface)draw,
-				(EGLSurface)read, (EGLContext)ctx);
+			EGLBoolean ret = (Bool)_eglMakeCurrent(EDPY, EGL_NO_SURFACE,
+				EGL_NO_SURFACE, (EGLContext)ctx);
 			if(!ret) THROW_EGL("eglMakeCurrent()");
+			setCurrentDrawable(draw);
+			setCurrentReadDrawable(read);
 			if(!ctx) return True;
 
 			vglfaker::VGLPbuffer *drawpb = NULL, *readpb = NULL;
-			drawpb = epbhash.find((EGLSurface)draw);
-			readpb = (read == draw ? drawpb : epbhash.find((EGLSurface)read));
+			drawpb = vpbhash.find(draw);
+			readpb = (read == draw ? drawpb : vpbhash.find(read));
 			GLint drawFBO = -1, readFBO = -1;
 			_glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFBO);
 			_glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFBO);
 
-			if(drawpb) drawpb->createBuffer(false);
-			if(readpb && readpb != drawpb) readpb->createBuffer(false);
+			if(drawpb) drawpb->createBuffer(false, true);
+			if(readpb && readpb != drawpb) readpb->createBuffer(false, true);
 
 			bool boundNewDrawFBO = false, boundNewReadFBO = false;
 			if(drawpb && (ectxhash.getDrawFBO(ctx) == 0 || drawFBO == 0))
@@ -870,7 +826,7 @@ void VGLQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 
 		if(!value) return;
 
-		if(!draw || (pb = epbhash.find((EGLSurface)draw)) == NULL)
+		if(!draw || (pb = vpbhash.find(draw)) == NULL)
 		{
 			vglfaker::sendGLXError(dpy, X_GLXGetDrawableAttributes, GLXBadDrawable,
 				false);
@@ -889,17 +845,7 @@ void VGLQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 				*value = 1;
 				return;
 			case GLX_LARGEST_PBUFFER:
-				try
-				{
-					if(!_eglBindAPI(EGL_OPENGL_API))
-						THROW("Could not enable OpenGL API");
-					EGLint eglValue;
-					if(!_eglQuerySurface(EDPY, pb->getEGLSurface(), EGL_LARGEST_PBUFFER,
-						&eglValue))
-						THROW_EGL("eglQuerySurface()");
-					*value = eglValue;
-				}
-				CATCH_EGL(X_GLXGetDrawableAttributes);
+				*value = 0;
 				return;
 			case GLX_FBCONFIG_ID:
 				*value = pb->getFBConfig() ? pb->getFBConfig()->id : 0;
@@ -1023,7 +969,7 @@ void VGLSwapBuffers(Display *dpy, GLXDrawable drawable)
 
 			vglfaker::VGLPbuffer *pb = NULL;
 
-			if(drawable && (pb = epbhash.find((EGLSurface)drawable)) != NULL)
+			if(drawable && (pb = vpbhash.find(drawable)) != NULL)
 				pb->swap();
 			else
 				vglfaker::sendGLXError(dpy, X_GLXSwapBuffers, GLXBadDrawable, false);

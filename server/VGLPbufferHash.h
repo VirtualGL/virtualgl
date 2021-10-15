@@ -1,5 +1,5 @@
 // Copyright (C)2004 Landmark Graphics Corporation
-// Copyright (C)2011, 2014, 2019-2020 D. R. Commander
+// Copyright (C)2011, 2014, 2019-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -11,56 +11,56 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // wxWindows Library License for more details.
 
-#ifndef __EGLPBUFFERHASH_H__
-#define __EGLPBUFFERHASH_H__
+#ifndef __VGLPBUFFERHASH_H__
+#define __VGLPBUFFERHASH_H__
 
 #include "VGLPbuffer.h"
 #include "Hash.h"
 
 
-#define HASH  Hash<EGLSurface, void *, VGLPbuffer *>
+#define HASH  Hash<GLXDrawable, void *, VGLPbuffer *>
 
-// This maps an EGLSurface handle to a VGLPbuffer instance
+// This maps a GLX drawable ID to a VGLPbuffer instance
 
 namespace vglfaker
 {
-	class EGLPbufferHash : public HASH
+	class VGLPbufferHash : public HASH
 	{
 		public:
 
-			static EGLPbufferHash *getInstance(void)
+			static VGLPbufferHash *getInstance(void)
 			{
 				if(instance == NULL)
 				{
 					vglutil::CriticalSection::SafeLock l(instanceMutex);
-					if(instance == NULL) instance = new EGLPbufferHash;
+					if(instance == NULL) instance = new VGLPbufferHash;
 				}
 				return instance;
 			}
 
 			static bool isAlloc(void) { return instance != NULL; }
 
-			void add(EGLSurface eglpb, VGLPbuffer *pb)
+			void add(GLXDrawable id, VGLPbuffer *pb)
 			{
-				if(!eglpb || !pb) THROW("Invalid argument");
-				HASH::add(eglpb, NULL, pb);
+				if(!id || !pb) THROW("Invalid argument");
+				HASH::add(id, NULL, pb);
 			}
 
-			VGLPbuffer *find(EGLSurface eglpb)
+			VGLPbuffer *find(GLXDrawable id)
 			{
-				if(!eglpb) return NULL;
-				return HASH::find(eglpb, NULL);
+				if(!id) return NULL;
+				return HASH::find(id, NULL);
 			}
 
-			void remove(EGLSurface eglpb)
+			void remove(GLXDrawable id)
 			{
-				if(!eglpb) THROW("Invalid argument");
-				HASH::remove(eglpb, NULL);
+				if(!id) THROW("Invalid argument");
+				HASH::remove(id, NULL);
 			}
 
 		private:
 
-			~EGLPbufferHash(void)
+			~VGLPbufferHash(void)
 			{
 				HASH::kill();
 			}
@@ -70,12 +70,12 @@ namespace vglfaker
 				if(entry) delete entry->value;
 			}
 
-			bool compare(EGLSurface key1, void *key2, HashEntry *entry)
+			bool compare(GLXDrawable key1, void *key2, HashEntry *entry)
 			{
 				return false;
 			}
 
-			static EGLPbufferHash *instance;
+			static VGLPbufferHash *instance;
 			static vglutil::CriticalSection instanceMutex;
 	};
 }
@@ -83,6 +83,6 @@ namespace vglfaker
 #undef HASH
 
 
-#define epbhash  (*(vglfaker::EGLPbufferHash::getInstance()))
+#define vpbhash  (*(vglfaker::VGLPbufferHash::getInstance()))
 
-#endif  // __EGLPBUFFERHASH_H__
+#endif  // __VGLPBUFFERHASH_H__

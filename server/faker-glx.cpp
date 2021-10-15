@@ -533,7 +533,7 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config_, Pixmap pm,
 		OPENTRACE(glXCreatePixmap);  PRARGD(dpy);  PRARGC(config);  PRARGX(pm);
 		STARTTRACE();
 
-	if(!config)
+	if(!VALID_CONFIG(config))
 	{
 		vglfaker::sendGLXError(dpy, X_GLXCreatePixmap, GLXBadFBConfig, false);
 		goto done;
@@ -600,7 +600,7 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config_, Window win,
 	DISABLE_FAKER();
 
 	XSync(dpy, False);
-	if(!config)
+	if(!VALID_CONFIG(config))
 	{
 		vglfaker::sendGLXError(dpy, X_GLXCreateWindow, GLXBadFBConfig, false);
 		win = 0;
@@ -1067,7 +1067,7 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config_, int attribute,
 	{
 		retval = GLX_NO_EXTENSION;  goto done;
 	}
-	if(!config)
+	if(!VALID_CONFIG(config))
 	{
 		retval = GLX_BAD_VISUAL;  goto done;
 	}
@@ -1473,7 +1473,7 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config_)
 		OPENTRACE(glXGetVisualFromFBConfig);  PRARGD(dpy);  PRARGC(config);
 		STARTTRACE();
 
-	if(!dpy || !config) goto done;
+	if(!dpy || !VALID_CONFIG(config)) goto done;
 	if(!config->visualID) goto done;
 	vis = glxvisual::visualFromID(dpy, config->screen, config->visualID);
 	if(!vis) goto done;

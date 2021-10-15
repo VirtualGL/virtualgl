@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2014, 2019-2020 D. R. Commander
+// Copyright (C)2014, 2019-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -29,23 +29,17 @@ typedef struct
 
 typedef struct _VGLFBConfig
 {
+	// GLX back end only
+	GLXFBConfig glx;
+
 	int id, screen, nConfigs;
 	VisualID visualID;
 	GLXAttrib attr;
-	union
-	{
-		// GLX back end only
-		GLXFBConfig glx;
-		#ifdef EGLBACKEND
-		// EGL back end only
-		EGLConfig egl;
-		#endif
-	} cfg;
 	int c_class, depth;
 	int bufSize;  // For sorting purposes only
-	#ifdef EGLBACKEND
-	EGLRBOContext *rboCtx;
-	#endif
+
+	// EGL back end only
+	int maxPBWidth, maxPBHeight;
 } *VGLFBConfig;
 
 
@@ -88,10 +82,9 @@ namespace glxvisual
 }
 
 
-#define GLXFBC(c)  ((c) ? (c)->cfg.glx : 0)
-#ifdef EGLBACKEND
-#define EGLFBC(c)  ((c) ? (c)->cfg.egl : 0)
-#endif
+#define GLXFBC(c)  ((c) ? (c)->glx : 0)
 #define FBCID(c)  ((c) ? (c)->id : 0)
+#define VALID_CONFIG(c) \
+	((c) && ((!fconfig.egl && (c)->glx) || (fconfig.egl && (c)->id > 0)))
 
 #endif  // __GLXVISUAL_H__

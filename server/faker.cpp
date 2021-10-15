@@ -16,9 +16,8 @@
 #include "Mutex.h"
 #include "ContextHash.h"
 #ifdef EGLBACKEND
-#include "EGLConfigHash.h"
 #include "EGLContextHash.h"
-#include "EGLPbufferHash.h"
+#include "VGLPbufferHash.h"
 #endif
 #include "GLXDrawableHash.h"
 #include "GlobalCriticalSection.h"
@@ -58,9 +57,8 @@ static void cleanup(void)
 	if(GLXDrawableHash::isAlloc()) glxdhash.kill();
 	if(WindowHash::isAlloc()) winhash.kill();
 	#ifdef EGLBACKEND
-	if(EGLPbufferHash::isAlloc()) epbhash.kill();
 	if(EGLContextHash::isAlloc()) ectxhash.kill();
-	if(EGLConfigHash::isAlloc()) ecfghash.kill();
+	if(VGLPbufferHash::isAlloc()) vpbhash.kill();
 	#endif
 	free(glExtensions);
 	unloadSymbols();
@@ -227,6 +225,12 @@ Display *init3D(void)
 					free(devices);  devices = NULL;
 					if(!_eglInitialize((EGLDisplay)dpy3D, &eglMajor, &eglMinor))
 						THROW("Could not initialize EGL");
+					if(!(exts = _eglQueryString((EGLDisplay)dpy3D, EGL_EXTENSIONS)))
+						THROW("Could not query EGL extensions");
+					if(!strstr(exts, "EGL_KHR_no_config_context"))
+						THROW("EGL_KHR_no_config_context extension not available");
+					if(!strstr(exts, "EGL_KHR_surfaceless_context"))
+						THROW("EGL_KHR_surfaceless_context extension not available");
 				}
 				catch(...)
 				{
@@ -277,11 +281,21 @@ bool isDisplayStringExcluded(char *name)
 
 extern "C" {
 
-int deletePrivate(XExtData *extData)
+int deleteCS(XExtData *extData)
 {
-	if(extData) delete extData->private_data;
+	if(extData) delete (vglutil::CriticalSection *)extData->private_data;
 	return 0;
 }
+
+#ifdef EGLBACKEND
+
+int deleteRBOContext(XExtData *extData)
+{
+	if(extData) delete (EGLRBOContext *)extData->private_data;
+	return 0;
+}
+
+#endif
 
 }
 
