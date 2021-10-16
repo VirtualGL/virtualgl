@@ -161,7 +161,8 @@ GLXContext VGLCreateContext(Display *dpy, VGLFBConfig config, GLXContext share,
 
 		int eglAttribs[256], egli = 0;
 		for(int i = 0; i < 256; i++) eglAttribs[i] = EGL_NONE;
-		bool majorVerSpecified = false;
+		bool majorVerSpecified = false, forwardCompatSpecified = false;
+		int majorVer = -1;
 
 		if(glxAttribs && glxAttribs[0] != None)
 		{
@@ -171,7 +172,7 @@ GLXContext VGLCreateContext(Display *dpy, VGLFBConfig config, GLXContext share,
 				{
 					case GLX_CONTEXT_MAJOR_VERSION_ARB:
 						eglAttribs[egli++] = EGL_CONTEXT_MAJOR_VERSION;
-						eglAttribs[egli++] = glxAttribs[glxi + 1];
+						eglAttribs[egli++] = majorVer = glxAttribs[glxi + 1];
 						majorVerSpecified = true;
 						break;
 					case GLX_CONTEXT_MINOR_VERSION_ARB:
@@ -190,11 +191,20 @@ GLXContext VGLCreateContext(Display *dpy, VGLFBConfig config, GLXContext share,
 						{
 							eglAttribs[egli++] = EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE;
 							eglAttribs[egli++] = EGL_TRUE;
+							forwardCompatSpecified = true;
 						}
 						if(flags & GLX_CONTEXT_ROBUST_ACCESS_BIT_ARB)
 						{
+							// For future expansion
 							eglAttribs[egli++] = EGL_CONTEXT_OPENGL_ROBUST_ACCESS;
 							eglAttribs[egli++] = EGL_TRUE;
+						}
+						if(flags & ~(GLX_CONTEXT_DEBUG_BIT_ARB |
+							GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB))
+						{
+							vglfaker::sendGLXError(dpy, X_GLXCreateContextAttribsARB,
+								BadValue, true);
+							return NULL;
 						}
 						break;
 					}
@@ -202,6 +212,14 @@ GLXContext VGLCreateContext(Display *dpy, VGLFBConfig config, GLXContext share,
 						// The mask bits are the same for GLX_ARB_create_context and EGL.
 						eglAttribs[egli++] = EGL_CONTEXT_OPENGL_PROFILE_MASK;
 						eglAttribs[egli++] = glxAttribs[glxi + 1];
+						if(glxAttribs[glxi + 1] != GLX_CONTEXT_CORE_PROFILE_BIT_ARB
+							&& glxAttribs[glxi + 1]
+								!= GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB)
+						{
+							vglfaker::sendGLXError(dpy, X_GLXCreateContextAttribsARB,
+								GLXBadProfileARB, false);
+							return NULL;
+						}
 						break;
 					case GLX_CONTEXT_RESET_NOTIFICATION_STRATEGY_ARB:
 						switch(glxAttribs[glxi + 1])
@@ -217,12 +235,32 @@ GLXContext VGLCreateContext(Display *dpy, VGLFBConfig config, GLXContext share,
 								eglAttribs[egli++] = EGL_LOSE_CONTEXT_ON_RESET;
 								break;
 						}
+						break;
+					default:
+						if(glxAttribs[glxi] == GLX_RENDER_TYPE
+							&& glxAttribs[glxi + 1] == GLX_COLOR_INDEX_TYPE)
+						{
+							vglfaker::sendGLXError(dpy, X_GLXCreateContextAttribsARB,
+								BadMatch, true);
+							return NULL;
+						}
+						else
+						{
+							vglfaker::sendGLXError(dpy, X_GLXCreateContextAttribsARB,
+								BadValue, true);
+						}
+						return NULL;
 				}
 			}
 		}
 
 		CARD16 minorCode = egli ? X_GLXCreateContextAttribsARB :
 			X_GLXCreateNewContext;
+		if(majorVerSpecified && forwardCompatSpecified && majorVer < 3)
+		{
+			vglfaker::sendGLXError(dpy, minorCode, BadMatch, true);
+			return NULL;
+		}
 		try
 		{
 			if(!share)
@@ -240,8 +278,12 @@ GLXContext VGLCreateContext(Display *dpy, VGLFBConfig config, GLXContext share,
 			GLXContext ctx = (GLXContext)_eglCreateContext(EDPY, EGLFBC(config),
 				(EGLContext)share, egli ? eglAttribs : NULL);
 			EGLint eglError = _eglGetError();
-			if(!ctx && eglError != EGL_SUCCESS
-				&& (eglError != EGL_BAD_MATCH || !majorVerSpecified))
+			// Some implementations of eglCreateContext() return NULL but do not set
+			// the EGL error if certain invalid OpenGL versions are passed to the
+			// function.  This is why we can't have nice things.
+			if(!ctx && eglError == EGL_SUCCESS && majorVerSpecified)
+				eglError = EGL_BAD_MATCH;
+			if(!ctx && eglError != EGL_SUCCESS)
 				throw(vglfaker::EGLError("eglCreateContext()", __LINE__, eglError));
 			if(ctx) ectxhash.add(ctx, config, (EGLContext)share);
 			return ctx;
