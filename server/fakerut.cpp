@@ -1791,7 +1791,7 @@ int multiThreadTest(int nThreads)
 	fflush(stdout);
 
 	for(i = 0; i < nThreads; i++) delete threads[i];
-	for(i = 0; i < nThreads; i++)	delete testThreads[i];
+	for(i = 0; i < nThreads; i++) delete testThreads[i];
 	if(vis) XFree(vis);
 	for(i = 0; i < nThreads; i++)
 	{

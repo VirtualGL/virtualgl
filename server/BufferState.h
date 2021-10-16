@@ -19,11 +19,11 @@
 #include <GL/gl.h>
 
 
-#define BS_DRAWFBO   1
-#define BS_READFBO   2
-#define BS_RBO       4
+#define BS_DRAWFBO  1
+#define BS_READFBO  2
+#define BS_RBO  4
 #define BS_DRAWBUFS  8
-#define BS_READBUF   16
+#define BS_READBUF  16
 
 
 namespace vglfaker
