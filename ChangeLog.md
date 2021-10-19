@@ -28,6 +28,10 @@ function returned no FB configs if the `GLX_DRAWABLE_TYPE` attribute was set to
 6. Fixed an issue in the EGL back end whereby the `glXSwapBuffers()` function
 erroneously swapped the buffers of double-buffered Pixmaps.
 
+7. Fixed an issue in the EGL back end that caused the bounding box in 3D Slicer
+to be displayed on top of the rendered volume when "Display ROI" and depth
+peeling were both enabled.
+
 
 2.6.90 (3.0 beta1)
 ==================
