@@ -1370,6 +1370,8 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		CHECK_FAKED(glFlush)
 		CHECK_FAKED(glDrawBuffer)
 		CHECK_FAKED(glDrawBuffers)
+		CHECK_FAKED(glDrawBuffersARB)
+		CHECK_FAKED(glDrawBuffersATI)
 		#ifdef GL_VERSION_4_5
 		CHECK_FAKED(glFramebufferDrawBufferEXT)
 		CHECK_FAKED(glFramebufferDrawBuffersEXT)
