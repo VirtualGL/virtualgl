@@ -199,6 +199,16 @@ void glDrawBuffers(GLsizei n, const GLenum *bufs)
 	CATCH();
 }
 
+void glDrawBuffersARB(GLsizei n, const GLenum *bufs)
+{
+	glDrawBuffers(n, bufs);
+}
+
+void glDrawBuffersATI(GLsizei n, const GLenum *bufs)
+{
+	glDrawBuffers(n, bufs);
+}
+
 
 const GLubyte *glGetString(GLenum name)
 {

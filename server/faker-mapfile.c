@@ -104,6 +104,8 @@
 		glFlush;
 		glDrawBuffer;
 		glDrawBuffers;
+		glDrawBuffersARB;
+		glDrawBuffersATI;
 		#ifdef GL_VERSION_4_5
 		glFramebufferDrawBufferEXT;
 		glFramebufferDrawBuffersEXT;
