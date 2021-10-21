@@ -3041,20 +3041,32 @@ int extensionQueryTest(void)
 }
 
 
-#define TEST_PROC_SYM(f) \
-	if((sym = (void *)glXGetProcAddressARB((const GLubyte *)#f)) == NULL) \
+#define TEST_PROC_SYM_OPT(f) \
+	if((sym1 = (void *)glXGetProcAddressARB((const GLubyte *)#f)) == NULL) \
 		THROW("glXGetProcAddressARB(\"" #f "\") returned NULL"); \
-	else if(sym != (void *)f) \
-		THROW("glXGetProcAddressARB(\"" #f "\")!=" #f);
+	if((sym2 = (void *)dlsym(RTLD_DEFAULT, #f)) == NULL) \
+		THROW("dlsym(RTLD_DEFAULT, \"" #f "\") returned NULL"); \
+	if(sym1 != sym2) \
+		THROW("glXGetProcAddressARB(\"" #f "\")!=dlsym(RTLD_DEFAULT, \"" #f "\")");
+
+#define TEST_PROC_SYM(f) \
+	TEST_PROC_SYM_OPT(f) \
+	if(sym1 != (void *)f) \
+		THROW("glXGetProcAddressARB(\"" #f "\")!=" #f); \
+	if(sym2 != (void *)f) \
+		THROW("dlsym(RTLD_DEFAULT, \"" #f "\")!=" #f);
 
 int procAddrTest(void)
 {
-	int retval = 1;  void *sym = NULL;
+	int retval = 1;  void *sym1 = NULL, *sym2 = NULL;
+	Display *dpy = NULL;
 
 	printf("glXGetProcAddress test:\n\n");
 
 	try
 	{
+		if(!(dpy = XOpenDisplay(0))) THROW("Could not open display");
+
 		// GLX 1.0
 		TEST_PROC_SYM(glXChooseVisual)
 		TEST_PROC_SYM(glXCopyContext)
@@ -3102,8 +3114,72 @@ int procAddrTest(void)
 		// GLX 1.4
 		TEST_PROC_SYM(glXGetProcAddress)
 
+		// GLX_ARB_create_context
+		if(GLX_EXTENSION_EXISTS(GLX_ARB_create_context))
+		{
+			TEST_PROC_SYM_OPT(glXCreateContextAttribsARB)
+		}
+
 		// GLX_ARB_get_proc_address
 		TEST_PROC_SYM(glXGetProcAddressARB)
+
+		// GLX_EXT_import_context
+		if(GLX_EXTENSION_EXISTS(GLX_EXT_import_context))
+		{
+			TEST_PROC_SYM_OPT(glXFreeContextEXT)
+			TEST_PROC_SYM_OPT(glXImportContextEXT)
+			TEST_PROC_SYM_OPT(glXQueryContextInfoEXT)
+		}
+		TEST_PROC_SYM_OPT(glXGetCurrentDisplayEXT)
+
+		// GLX_EXT_swap_control
+		TEST_PROC_SYM_OPT(glXSwapIntervalEXT)
+
+		// GLX_EXT_texture_from_pixmap
+		if(GLX_EXTENSION_EXISTS(GLX_EXT_texture_from_pixmap))
+		{
+			TEST_PROC_SYM_OPT(glXBindTexImageEXT)
+			TEST_PROC_SYM_OPT(glXReleaseTexImageEXT)
+		}
+
+		// GLX_SGI_make_current_read
+		TEST_PROC_SYM_OPT(glXGetCurrentReadDrawableSGI)
+		TEST_PROC_SYM_OPT(glXMakeCurrentReadSGI)
+
+		// GLX_NV_swap_group
+		if(GLX_EXTENSION_EXISTS(GLX_NV_swap_group))
+		{
+			TEST_PROC_SYM_OPT(glXBindSwapBarrierNV)
+			TEST_PROC_SYM_OPT(glXJoinSwapGroupNV)
+			TEST_PROC_SYM_OPT(glXQueryFrameCountNV)
+			TEST_PROC_SYM_OPT(glXQueryMaxSwapGroupsNV)
+			TEST_PROC_SYM_OPT(glXQuerySwapGroupNV)
+			TEST_PROC_SYM_OPT(glXResetFrameCountNV)
+		}
+
+		// GLX_SGI_swap_control
+		TEST_PROC_SYM_OPT(glXSwapIntervalSGI)
+
+		// GLX_SGIX_fbconfig
+		TEST_PROC_SYM(glXChooseFBConfigSGIX)
+		TEST_PROC_SYM(glXCreateContextWithConfigSGIX)
+		TEST_PROC_SYM(glXCreateGLXPixmapWithConfigSGIX)
+		TEST_PROC_SYM(glXGetFBConfigAttribSGIX)
+		TEST_PROC_SYM(glXGetFBConfigFromVisualSGIX)
+		TEST_PROC_SYM(glXGetVisualFromFBConfigSGIX)
+
+		// GLX_SGIX_pbuffer
+		TEST_PROC_SYM_OPT(glXCreateGLXPbufferSGIX)
+		TEST_PROC_SYM_OPT(glXDestroyGLXPbufferSGIX)
+		TEST_PROC_SYM_OPT(glXGetSelectedEventSGIX)
+		TEST_PROC_SYM_OPT(glXQueryGLXPbufferSGIX)
+		TEST_PROC_SYM_OPT(glXSelectEventSGIX)
+
+		// GLX_SUN_get_transparent_index
+		if(GLX_EXTENSION_EXISTS(GLX_SUN_get_transparent_index))
+		{
+			TEST_PROC_SYM_OPT(glXGetTransparentIndexSUN)
+		}
 
 		// OpenGL
 		TEST_PROC_SYM(glFinish)
@@ -3112,8 +3188,16 @@ int procAddrTest(void)
 		TEST_PROC_SYM(glDrawBuffers)
 		TEST_PROC_SYM(glDrawBuffersARB)
 		TEST_PROC_SYM(glDrawBuffersATI)
+		#ifdef GL_VERSION_4_5
+		TEST_PROC_SYM_OPT(glFramebufferDrawBufferEXT);
+		TEST_PROC_SYM_OPT(glFramebufferDrawBuffersEXT);
+		#endif
 		TEST_PROC_SYM(glGetString)
 		TEST_PROC_SYM(glGetStringi)
+		#ifdef GL_VERSION_4_5
+		TEST_PROC_SYM_OPT(glNamedFramebufferDrawBuffer);
+		TEST_PROC_SYM_OPT(glNamedFramebufferDrawBuffers);
+		#endif
 		TEST_PROC_SYM(glPopAttrib)
 		TEST_PROC_SYM(glViewport)
 
@@ -3124,6 +3208,7 @@ int procAddrTest(void)
 		printf("Failed! (%s)\n", e.getMessage());  retval = 0;
 	}
 	fflush(stdout);
+	if(dpy) XCloseDisplay(dpy);
 	return retval;
 }
 
