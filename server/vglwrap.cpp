@@ -593,7 +593,8 @@ void VGLGetIntegerv(GLenum pname, GLint *params)
 		}
 		else if(pname == GL_MAX_DRAW_BUFFERS)
 		{
-			*params = 16;
+			_glGetIntegerv(GL_MAX_DRAW_BUFFERS, params);
+			if(*params > 16) *params = 16;
 			return;
 		}
 		else if(pname == GL_READ_BUFFER)
