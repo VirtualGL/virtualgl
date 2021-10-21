@@ -508,8 +508,6 @@ static INLINE void (*_glXGetProcAddressARB(const GLubyte *procName))(void)
 VFUNCDEF2(glXFreeContextEXT, Display *, dpy, GLXContext, ctx,
 	glXFreeContextEXT)
 
-FUNCDEF0(Display *, glXGetCurrentDisplayEXT, glXGetCurrentDisplayEXT)
-
 FUNCDEF2(GLXContext, glXImportContextEXT, Display *, dpy,
 	GLXContextID, contextID, glXImportContextEXT)
 
@@ -787,8 +785,6 @@ VFUNCDEF6(glOrtho, GLdouble, left, GLdouble, right, GLdouble, bottom,
 VFUNCDEF2(glPixelStorei, GLenum, pname, GLint, param, NULL)
 
 VFUNCDEF0(glPopMatrix, NULL)
-
-VFUNCDEF1(glPushAttrib, GLbitfield, mask, NULL)
 
 VFUNCDEF0(glPushMatrix, NULL)
 
