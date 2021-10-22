@@ -16,12 +16,14 @@ if [ "$1" = "-check" ]; then exit 0; fi
 
 usage()
 {
-	echo "USAGE: $0 -s <server-side port on SSH tunnel>"
-	echo "       $0 -x <DISPLAY environment from client> <xauth MIT-MAGIC-COOKIE>"
+	echo "USAGE: $0 [-v] -s <server-side port on SSH tunnel>"
+	echo "       $0 [-v] -x <DISPLAY environment from client> <xauth MIT-MAGIC-COOKIE>"
 	exit 1
 }
 
 if [ "$1" = "" ]; then usage $0; fi
+
+[ "$1" = "-v" ] && VRUN=vglrun && shift || VRUN=
 
 if [ "$1" = "-s" ]; then
 
@@ -55,4 +57,4 @@ elif [ "$1" = "-x" ]; then
 	$XAUTH add $DISPLAY . $3
 fi
 
-exec $SHELL -l
+exec $VRUN $SHELL -l

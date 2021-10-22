@@ -25,6 +25,7 @@ CONNECT=1
 FORCE=0
 IPV6=0
 SSHCMD=ssh
+VRUN=
 
 usage()
 {
@@ -52,6 +53,7 @@ usage()
 	echo "-bindir <d> = Path in which the VGL executables and scripts are installed on"
 	echo "              the server (default: @CMAKE_INSTALL_DEFAULT_PREFIX@/bin).  Can also be set"
 	echo "              with the VGL_BINDIR environment variable on the client."
+	echo "-v = use vglrun to invoke SHELL."
 	echo
 	exit $1
 }
@@ -72,6 +74,7 @@ do
 	-k*) X11TUNNEL=0; VGLTUNNEL=0; CONNECT=0 ;;
 	-g*) SSHCMD=gsissh; GLOBUS=1 ;;
 	-e*) COMMAND=$2; shift ;;
+	-v*) VRUN=-v ;;
 	-h*) usage ;;
 	-?) usage ;;
 	*) break ;;
@@ -127,11 +130,11 @@ if [ $VGLTUNNEL = 1 ]; then
 	echo Making final SSH connection ...
 	if [ "$COMMAND" != "" ]; then
 		$SSHCMD -t -Y -R$REMOTEPORT:localhost:$PORT ${1+"$@"} <<EOF
-$VGL_BINDIR/vgllogin -s $REMOTEPORT
+$VGL_BINDIR/vgllogin $VRUN -s $REMOTEPORT
 $COMMAND
 EOF
 	else
-		$SSHCMD -t -Y -R$REMOTEPORT:localhost:$PORT ${1+"$@"} "$VGL_BINDIR/vgllogin -s "$REMOTEPORT
+		$SSHCMD -t -Y -R$REMOTEPORT:localhost:$PORT ${1+"$@"} "$VGL_BINDIR/vgllogin $VRUN -s "$REMOTEPORT
 	fi
 	exit 0
 fi
@@ -169,11 +172,11 @@ rm -f $XAUTHFILE
 if [ "$CONNECT" = "1" ]; then
 	if [ "$COMMAND" != "" ]; then
 		$SSHCMD -t -x ${1+"$@"} <<EOF
-$VGL_BINDIR/vgllogin -x $DISPLAY $XAUTHCOOKIE
+$VGL_BINDIR/vgllogin $VRUN -x $DISPLAY $XAUTHCOOKIE
 $COMMAND
 EOF
 	else
-		$SSHCMD -t -x ${1+"$@"} "exec $VGL_BINDIR/vgllogin -x "$DISPLAY" "$XAUTHCOOKIE
+		$SSHCMD -t -x ${1+"$@"} "exec $VGL_BINDIR/vgllogin $VRUN -x "$DISPLAY" "$XAUTHCOOKIE
 	fi
 else
 	DNUM=`echo $DISPLAY | sed 's/.*[:]//g'`
