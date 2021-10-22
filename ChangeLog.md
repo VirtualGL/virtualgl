@@ -1,5 +1,5 @@
-3.0 post-beta
-=============
+2.6.95 (3.0 rc1)
+================
 
 ### Significant changes relative to 3.0 beta1:
 
