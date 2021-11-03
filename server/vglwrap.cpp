@@ -67,7 +67,7 @@ static vglfaker::VGLPbuffer *getCurrentVGLPbuffer(EGLint readdraw)
 #endif
 
 
-void VGLBindFramebuffer(GLenum target, GLuint framebuffer)
+void VGLBindFramebuffer(GLenum target, GLuint framebuffer, bool ext)
 {
 	#ifdef EGLBACKEND
 	if(fconfig.egl)
@@ -102,7 +102,8 @@ void VGLBindFramebuffer(GLenum target, GLuint framebuffer)
 		}
 	}
 	#endif
-	_glBindFramebuffer(target, framebuffer);
+	if(ext) _glBindFramebufferEXT(target, framebuffer);
+	else _glBindFramebuffer(target, framebuffer);
 }
 
 

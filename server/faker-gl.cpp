@@ -133,7 +133,17 @@ void glBindFramebuffer(GLenum target, GLuint framebuffer)
 
 void glBindFramebufferEXT(GLenum target, GLuint framebuffer)
 {
-	glBindFramebuffer(target, framebuffer);
+	if(vglfaker::getExcludeCurrent())
+	{
+		_glBindFramebufferEXT(target, framebuffer);
+		return;
+	}
+
+	TRY();
+
+	VGLBindFramebuffer(target, framebuffer, true);
+
+	CATCH();
 }
 
 

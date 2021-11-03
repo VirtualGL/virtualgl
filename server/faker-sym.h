@@ -546,6 +546,9 @@ FUNCDEF2(GLXFBConfigSGIX, glXGetFBConfigFromVisualSGIX, Display *, dpy,
 VFUNCDEF2(glBindFramebuffer, GLenum, target, GLuint, framebuffer,
 	glBindFramebuffer)
 
+VFUNCDEF2(glBindFramebufferEXT, GLenum, target, GLuint, framebuffer,
+	glBindFramebufferEXT)
+
 VFUNCDEF2(glDeleteFramebuffers, GLsizei, n, const GLuint *, framebuffers,
 	glDeleteFramebuffers)
 
