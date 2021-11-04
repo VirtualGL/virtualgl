@@ -723,7 +723,7 @@ void VGLNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf, bool ext)
 	if(fconfig.egl)
 	{
 		vglfaker::VGLPbuffer *pb;
-		if(framebuffer == 0 && (pb = getCurrentVGLPbuffer(EGL_DRAW)) != NULL)
+		if(framebuffer == 0 && (pb = vpbhash.find(getCurrentDrawable())) != NULL)
 		{
 			pb->setDrawBuffer(buf, true);
 			return;
@@ -742,7 +742,7 @@ void VGLNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 	if(fconfig.egl)
 	{
 		vglfaker::VGLPbuffer *pb;
-		if(framebuffer == 0 && (pb = getCurrentVGLPbuffer(EGL_DRAW)) != NULL)
+		if(framebuffer == 0 && (pb = vpbhash.find(getCurrentDrawable())) != NULL)
 		{
 			pb->setDrawBuffers(n, bufs, true);
 			return;
@@ -760,7 +760,8 @@ void VGLNamedFramebufferReadBuffer(GLuint framebuffer, GLenum mode, bool ext)
 	if(fconfig.egl)
 	{
 		vglfaker::VGLPbuffer *pb;
-		if(framebuffer == 0 && (pb = getCurrentVGLPbuffer(EGL_READ)) != NULL)
+		if(framebuffer == 0
+			&& (pb = vpbhash.find(getCurrentReadDrawable())) != NULL)
 		{
 			pb->setReadBuffer(mode, true);
 			return;

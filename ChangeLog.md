@@ -1,5 +1,5 @@
-2.6.95 (3.0 rc1)
-================
+3.0
+===
 
 ### Significant changes relative to 3.0 beta1:
 
@@ -36,6 +36,10 @@ peeling were both enabled.
 the same GLX drawable current in more than one thread.  As a consequence, the
 EGL back end now requires the `EGL_KHR_no_config_context` and
 `EGL_KHR_surfaceless_context` extensions.
+
+9. Fixed an issue in the EGL back end whereby the OpenGL 4.5 and
+`GL_EXT_direct_state_access` named framebuffer functions did not work properly
+with the default framebuffer unless it was currently bound.
 
 
 2.6.90 (3.0 beta1)

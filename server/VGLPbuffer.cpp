@@ -408,7 +408,8 @@ void VGLPbuffer::setReadBuffer(GLenum readBuf, bool deferred)
 
 	// 0 = front left, 1 = back left, 2 = front right, 3 = back right
 	GLenum actualReadBuf = readBuf;
-	if(readBuf == GL_FRONT_LEFT || readBuf == GL_FRONT || readBuf == GL_LEFT)
+	if(readBuf == GL_FRONT_LEFT || readBuf == GL_FRONT || readBuf == GL_LEFT
+		|| readBuf == GL_FRONT_AND_BACK)
 		actualReadBuf = GL_COLOR_ATTACHMENT0;
 	else if(readBuf == GL_FRONT_RIGHT || readBuf == GL_RIGHT)
 		actualReadBuf = GL_COLOR_ATTACHMENT2;
