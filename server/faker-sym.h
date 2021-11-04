@@ -560,6 +560,15 @@ VFUNCDEF1(glDrawBuffer, GLenum, drawbuf, glDrawBuffer)
 
 VFUNCDEF2(glDrawBuffers, GLsizei, n, const GLenum *, bufs, glDrawBuffers)
 
+VFUNCDEF2(glFramebufferDrawBufferEXT, GLuint, framebuffer, GLenum, mode,
+	glFramebufferDrawBufferEXT)
+
+VFUNCDEF3(glFramebufferDrawBuffersEXT, GLuint, framebuffer, GLsizei, n,
+	const GLenum *, bufs, glFramebufferDrawBuffersEXT)
+
+VFUNCDEF2(glFramebufferReadBufferEXT, GLuint, framebuffer, GLenum, mode,
+	glFramebufferReadBufferEXT)
+
 VFUNCDEF2(glGetBooleanv, GLenum, pname, GLboolean *, data, glGetBooleanv)
 
 VFUNCDEF2(glGetDoublev, GLenum, pname, GLdouble *, data, glGetDoublev)

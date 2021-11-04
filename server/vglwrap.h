@@ -66,12 +66,14 @@ Bool VGLIsDirect(GLXContext ctx);
 Bool VGLMakeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	GLXContext ctx);
 
-void VGLNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf);
+void VGLNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf,
+	bool ext = false);
 
 void VGLNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
-	const GLenum *bufs);
+	const GLenum *bufs, bool ext = false);
 
-void VGLNamedFramebufferReadBuffer(GLuint framebuffer, GLenum mode);
+void VGLNamedFramebufferReadBuffer(GLuint framebuffer, GLenum mode,
+	bool ext = false);
 
 int VGLQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value);
 

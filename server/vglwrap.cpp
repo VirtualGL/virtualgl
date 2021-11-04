@@ -717,7 +717,7 @@ Bool VGLMakeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 }
 
 
-void VGLNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf)
+void VGLNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf, bool ext)
 {
 	#ifdef EGLBACKEND
 	if(fconfig.egl)
@@ -730,12 +730,13 @@ void VGLNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf)
 		}
 	}
 	#endif
-	_glNamedFramebufferDrawBuffer(framebuffer, buf);
+	if(ext) _glFramebufferDrawBufferEXT(framebuffer, buf);
+	else _glNamedFramebufferDrawBuffer(framebuffer, buf);
 }
 
 
 void VGLNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
-	const GLenum *bufs)
+	const GLenum *bufs, bool ext)
 {
 	#ifdef EGLBACKEND
 	if(fconfig.egl)
@@ -748,11 +749,12 @@ void VGLNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 		}
 	}
 	#endif
-	_glNamedFramebufferDrawBuffers(framebuffer, n, bufs);
+	if(ext) _glFramebufferDrawBuffersEXT(framebuffer, n, bufs);
+	else _glNamedFramebufferDrawBuffers(framebuffer, n, bufs);
 }
 
 
-void VGLNamedFramebufferReadBuffer(GLuint framebuffer, GLenum mode)
+void VGLNamedFramebufferReadBuffer(GLuint framebuffer, GLenum mode, bool ext)
 {
 	#ifdef EGLBACKEND
 	if(fconfig.egl)
@@ -765,7 +767,8 @@ void VGLNamedFramebufferReadBuffer(GLuint framebuffer, GLenum mode)
 		}
 	}
 	#endif
-	_glNamedFramebufferReadBuffer(framebuffer, mode);
+	if(ext) _glFramebufferReadBufferEXT(framebuffer, mode);
+	else _glNamedFramebufferReadBuffer(framebuffer, mode);
 }
 
 
