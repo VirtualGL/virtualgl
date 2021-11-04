@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011-2012, 2015, 2018-2020 D. R. Commander
+// Copyright (C)2009, 2011-2012, 2015, 2018-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -210,6 +210,93 @@ void glDrawBuffersATI(GLsizei n, const GLenum *bufs)
 }
 
 
+void glFramebufferDrawBufferEXT(GLuint framebuffer, GLenum mode)
+{
+	if(vglfaker::getExcludeCurrent())
+	{
+		_glFramebufferDrawBufferEXT(framebuffer, mode);
+		return;
+	}
+
+	TRY();
+
+		OPENTRACE(glFramebufferDrawBufferEXT);  PRARGI(framebuffer);  PRARGX(mode);
+		STARTTRACE();
+
+	VirtualWin *vw = NULL;
+	int before = -1, after = -1, rbefore = -1, rafter = -1;
+	GLXDrawable drawable = 0;
+
+	if(framebuffer == 0 && (drawable = _glXGetCurrentDrawable()) != 0
+		&& winhash.find(drawable, vw))
+	{
+		before = DrawingToFront();
+		rbefore = DrawingToRight();
+		_glFramebufferDrawBufferEXT(framebuffer, mode);
+		after = DrawingToFront();
+		rafter = DrawingToRight();
+		if(before && !after) vw->dirty = true;
+		if(rbefore && !rafter && vw->isStereo()) vw->rdirty = true;
+	}
+	else _glFramebufferDrawBufferEXT(framebuffer, mode);
+
+		STOPTRACE();
+		if(drawable && vw)
+		{
+			PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
+		}
+		CLOSETRACE();
+
+	CATCH();
+}
+
+
+void glFramebufferDrawBuffersEXT(GLuint framebuffer, GLsizei n,
+	const GLenum *bufs)
+{
+	if(vglfaker::getExcludeCurrent())
+	{
+		_glFramebufferDrawBuffersEXT(framebuffer, n, bufs);
+		return;
+	}
+
+	TRY();
+
+		OPENTRACE(glFramebufferDrawBuffersEXT);  PRARGI(framebuffer);  PRARGI(n);
+		if(n && bufs)
+		{
+			for(GLsizei i = 0; i < n; i++) PRARGX(bufs[i]);
+		}
+		STARTTRACE();
+
+	VirtualWin *vw = NULL;
+	int before = -1, after = -1, rbefore = -1, rafter = -1;
+	GLXDrawable drawable = 0;
+
+	if(framebuffer == 0 && (drawable = _glXGetCurrentDrawable()) != 0
+		&& winhash.find(drawable, vw))
+	{
+		before = DrawingToFront();
+		rbefore = DrawingToRight();
+		_glFramebufferDrawBuffersEXT(framebuffer, n, bufs);
+		after = DrawingToFront();
+		rafter = DrawingToRight();
+		if(before && !after) vw->dirty = true;
+		if(rbefore && !rafter && vw->isStereo()) vw->rdirty = true;
+	}
+	else _glFramebufferDrawBuffersEXT(framebuffer, n, bufs);
+
+		STOPTRACE();
+		if(drawable && vw)
+		{
+			PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
+		}
+		CLOSETRACE();
+
+	CATCH();
+}
+
+
 const GLubyte *glGetString(GLenum name)
 {
 	char *string = NULL;
@@ -309,11 +396,6 @@ void glNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf)
 	CATCH();
 }
 
-void glFramebufferDrawBufferEXT(GLuint framebuffer, GLenum buf)
-{
-	glNamedFramebufferDrawBuffer(framebuffer, buf);
-}
-
 
 void glNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 	const GLenum *bufs)
@@ -358,12 +440,6 @@ void glNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 		CLOSETRACE();
 
 	CATCH();
-}
-
-void glFramebufferDrawBuffersEXT(GLuint framebuffer, GLsizei n,
-	const GLenum *bufs)
-{
-	glNamedFramebufferDrawBuffers(framebuffer, n, bufs);
 }
 
 

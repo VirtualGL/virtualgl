@@ -563,6 +563,12 @@ VFUNCDEF1(glDrawBuffer, GLenum, drawbuf, glDrawBuffer)
 
 VFUNCDEF2(glDrawBuffers, GLsizei, n, const GLenum *, bufs, glDrawBuffers)
 
+VFUNCDEF2(glFramebufferDrawBufferEXT, GLuint, framebuffer, GLenum, mode,
+	glFramebufferDrawBufferEXT)
+
+VFUNCDEF3(glFramebufferDrawBuffersEXT, GLuint, framebuffer, GLsizei, n,
+	const GLenum *, bufs, glFramebufferDrawBuffersEXT)
+
 FUNCDEF1(const GLubyte *, glGetString, GLenum, name, glGetString)
 
 FUNCDEF2(const GLubyte *, glGetStringi, GLenum, name, GLuint, index,
