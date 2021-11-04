@@ -301,12 +301,12 @@ void VGLPbuffer::setDrawBuffers(GLsizei n, const GLenum *bufs, bool deferred)
 		_glDrawBuffers(n, bufs);
 		return;
 	}
-	if(n > 16)
+	GLint maxDrawBufs = 16;
+	_glGetIntegerv(GL_MAX_DRAW_BUFFERS, &maxDrawBufs);
+	if(n > min(maxDrawBufs, 16))
 	{
 		// Trigger GL_INVALID_VALUE by passing n > the real value of
 		// GL_MAX_DRAW_BUFFERS to the real glDrawBuffers() function.
-		GLint maxDrawBufs = 0;
-		_glGetIntegerv(GL_MAX_DRAW_BUFFERS, &maxDrawBufs);
 		_glDrawBuffers(maxDrawBufs + 1, bufs);
 		return;
 	}

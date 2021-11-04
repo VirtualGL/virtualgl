@@ -47,6 +47,7 @@ namespace vglfaker
 				{
 					GLint maxDrawBufs = 16;
 					_glGetIntegerv(GL_MAX_DRAW_BUFFERS, &maxDrawBufs);
+					if(maxDrawBufs > 16) maxDrawBufs = 16;
 					for(int i = 0; i < maxDrawBufs; i++)
 					{
 						GLint drawBuf = GL_NONE;
