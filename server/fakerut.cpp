@@ -486,7 +486,6 @@ int readbackTest(bool stereo, bool doNamedFB)
 			checkWindowColor(dpy, win1, clr.bits(-2));
 			if(stereo)
 				checkWindowColor(dpy, win1, sclr.bits(-2), true);
-			#ifdef GL_VERSION_4_5
 			GLint major = -1, minor = -1;
 			glGetIntegerv(GL_MAJOR_VERSION, &major);
 			glGetIntegerv(GL_MINOR_VERSION, &minor);
@@ -520,7 +519,6 @@ int readbackTest(bool stereo, bool doNamedFB)
 					checkWindowColor(dpy, win1, sclr.bits(-2), true);
 				glDrawBuffer(GL_FRONT);
 			}
-			#endif
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)
@@ -543,7 +541,6 @@ int readbackTest(bool stereo, bool doNamedFB)
 			checkWindowColor(dpy, win1, clr.bits(-2));
 			if(stereo)
 				checkWindowColor(dpy, win1, sclr.bits(-2), true);
-			#ifdef GL_VERSION_4_5
 			GLint major = -1, minor = -1;
 			glGetIntegerv(GL_MAJOR_VERSION, &major);
 			glGetIntegerv(GL_MINOR_VERSION, &minor);
@@ -575,7 +572,6 @@ int readbackTest(bool stereo, bool doNamedFB)
 					checkWindowColor(dpy, win1, sclr.bits(-2), true);
 				glDrawBuffer(GL_FRONT);
 			}
-			#endif
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)
@@ -3188,16 +3184,12 @@ int procAddrTest(void)
 		TEST_PROC_SYM(glDrawBuffers)
 		TEST_PROC_SYM(glDrawBuffersARB)
 		TEST_PROC_SYM(glDrawBuffersATI)
-		#ifdef GL_VERSION_4_5
 		TEST_PROC_SYM_OPT(glFramebufferDrawBufferEXT);
 		TEST_PROC_SYM_OPT(glFramebufferDrawBuffersEXT);
-		#endif
 		TEST_PROC_SYM(glGetString)
 		TEST_PROC_SYM(glGetStringi)
-		#ifdef GL_VERSION_4_5
 		TEST_PROC_SYM_OPT(glNamedFramebufferDrawBuffer);
 		TEST_PROC_SYM_OPT(glNamedFramebufferDrawBuffers);
-		#endif
 		TEST_PROC_SYM(glPopAttrib)
 		TEST_PROC_SYM(glViewport)
 
