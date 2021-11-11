@@ -546,6 +546,106 @@ int VGLGetFBConfigAttrib(Display *dpy, VGLFBConfig config, int attribute,
 }
 
 
+void VGLGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
+	GLenum pname, GLint *params)
+{
+	#ifdef EGLBACKEND
+	bool isDefault = false;
+
+	if(fconfig.egl)
+	{
+		if(!params)
+		{
+			_glGetFramebufferAttachmentParameteriv(target, attachment, pname,
+				params);
+			return;
+		}
+		else if((attachment >= GL_FRONT_LEFT && attachment <= GL_BACK_RIGHT)
+			|| (attachment >= GL_DEPTH && attachment <= GL_STENCIL))
+		{
+			vglfaker::VGLPbuffer *pb;
+			if(((target == GL_FRAMEBUFFER || target == GL_DRAW_FRAMEBUFFER)
+					&& (pb = getCurrentVGLPbuffer(EGL_DRAW)) != NULL)
+				|| (target == GL_READ_FRAMEBUFFER
+					&& (pb = getCurrentVGLPbuffer(EGL_READ)) != NULL))
+			{
+				switch(attachment)
+				{
+					case GL_FRONT_LEFT:
+						attachment = GL_COLOR_ATTACHMENT0;  isDefault = true;  break;
+					case GL_FRONT_RIGHT:
+						attachment = GL_COLOR_ATTACHMENT2;  isDefault = true;  break;
+					case GL_BACK_LEFT:
+						attachment = GL_COLOR_ATTACHMENT1;  isDefault = true;  break;
+					case GL_BACK_RIGHT:
+						attachment = GL_COLOR_ATTACHMENT3;  isDefault = true;  break;
+					case GL_DEPTH:
+					{
+						VGLFBConfig config = pb->getFBConfig();
+						if(config->attr.stencilSize && config->attr.depthSize)
+							attachment = GL_DEPTH_STENCIL_ATTACHMENT;
+						else
+							attachment = GL_DEPTH_ATTACHMENT;
+					  isDefault = true;  break;
+					}
+					case GL_STENCIL:
+					{
+						VGLFBConfig config = pb->getFBConfig();
+						if(config->attr.stencilSize && config->attr.depthSize)
+							attachment = GL_DEPTH_STENCIL_ATTACHMENT;
+						else
+							attachment = GL_STENCIL_ATTACHMENT;
+					  isDefault = true;  break;
+					}
+				}
+			}
+		}
+	}
+	#endif
+	_glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
+	#ifdef EGLBACKEND
+	if(fconfig.egl)
+	{
+		if(isDefault && *params == GL_RENDERBUFFER)
+			*params = GL_FRAMEBUFFER_DEFAULT;
+	}
+	#endif
+}
+
+
+void VGLGetFramebufferParameteriv(GLenum target, GLenum pname, GLint *params)
+{
+	#ifdef EGLBACKEND
+	if(fconfig.egl)
+	{
+		if(!params)
+		{
+			_glGetFramebufferParameteriv(target, pname, params);
+			return;
+		}
+		vglfaker::VGLPbuffer *pb;
+		if(((target == GL_FRAMEBUFFER || target == GL_DRAW_FRAMEBUFFER)
+				&& (pb = getCurrentVGLPbuffer(EGL_DRAW)) != NULL)
+			|| (target == GL_READ_FRAMEBUFFER
+				&& (pb = getCurrentVGLPbuffer(EGL_READ)) != NULL))
+		{
+			if(pname == GL_DOUBLEBUFFER)
+			{
+				*params = pb->getFBConfig()->attr.doubleBuffer;
+				return;
+			}
+			else if(pname == GL_STEREO)
+			{
+				*params = pb->getFBConfig()->attr.stereo;
+				return;
+			}
+		}
+	}
+	#endif
+	_glGetFramebufferParameteriv(target, pname, params);
+}
+
+
 void VGLGetIntegerv(GLenum pname, GLint *params)
 {
 	#ifdef EGLBACKEND
@@ -563,8 +663,12 @@ void VGLGetIntegerv(GLenum pname, GLint *params)
 		}
 		else if(pname == GL_DOUBLEBUFFER)
 		{
-			*params = config->attr.doubleBuffer;
-			return;
+			vglfaker::VGLPbuffer *pb = getCurrentVGLPbuffer(EGL_DRAW);
+			if(pb)
+			{
+				*params = config->attr.doubleBuffer;
+				return;
+			}
 		}
 		else if(pname == GL_DRAW_BUFFER)
 		{
@@ -615,12 +719,48 @@ void VGLGetIntegerv(GLenum pname, GLint *params)
 		}
 		else if(pname == GL_STEREO)
 		{
-			*params = config->attr.stereo;
-			return;
+			vglfaker::VGLPbuffer *pb = getCurrentVGLPbuffer(EGL_DRAW);
+			if(pb)
+			{
+				*params = config->attr.stereo;
+				return;
+			}
 		}
 	}
 	#endif
 	_glGetIntegerv(pname, params);
+}
+
+
+void VGLGetNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname,
+	GLint *param)
+{
+	#ifdef EGLBACKEND
+	if(fconfig.egl)
+	{
+		if(!param)
+		{
+			_glGetNamedFramebufferParameteriv(framebuffer, pname, param);
+			return;
+		}
+		vglfaker::VGLPbuffer *pb;
+		if(framebuffer == 0 && (pb = vpbhash.find(getCurrentDrawable())) != NULL)
+		{
+			if(pname == GL_DOUBLEBUFFER)
+			{
+				*param = pb->getFBConfig()->attr.doubleBuffer;
+				return;
+			}
+			else if(pname == GL_STEREO)
+			{
+				*param = pb->getFBConfig()->attr.stereo;
+				return;
+			}
+			else framebuffer = pb->getFBO();
+		}
+	}
+	#endif
+	_glGetNamedFramebufferParameteriv(framebuffer, pname, param);
 }
 
 

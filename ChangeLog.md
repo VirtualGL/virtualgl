@@ -41,6 +41,14 @@ EGL back end now requires the `EGL_KHR_no_config_context` and
 `GL_EXT_direct_state_access` named framebuffer functions did not work properly
 with the default framebuffer unless it was currently bound.
 
+10. Fixed issues in the EGL back end whereby
+`glGetFramebufferAttachmentParameteriv()`,
+`glGetFramebufferParameteriv(..., GL_DOUBLEBUFFER, ...)`,
+`glGetFramebufferParameteriv(..., GL_STEREO, ...)`, and
+`glGetNamedFramebufferParameteriv()` did not return correct values for the
+default framebuffer and whereby `glGet*(GL_DOUBLEBUFFER, ...)` and
+`glGet*(GL_STEREO, ...)` did not return correct values for framebuffer objects.
+
 
 2.6.90 (3.0 beta1)
 ==================

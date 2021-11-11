@@ -460,6 +460,38 @@ void glGetFloatv(GLenum pname, GLfloat *data)
 }
 
 
+void glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
+	GLenum pname, GLint *params)
+{
+	if(vglfaker::getExcludeCurrent())
+	{
+		_glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
+		return;
+	}
+
+	TRY();
+
+	VGLGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
+
+	CATCH();
+}
+
+
+void glGetFramebufferParameteriv(GLenum target, GLenum pname, GLint *params)
+{
+	if(vglfaker::getExcludeCurrent())
+	{
+		_glGetFramebufferParameteriv(target, pname, params);  return;
+	}
+
+	TRY();
+
+	VGLGetFramebufferParameteriv(target, pname, params);
+
+	CATCH();
+}
+
+
 void glGetIntegerv(GLenum pname, GLint *params)
 {
 	if(vglfaker::getExcludeCurrent()) { _glGetIntegerv(pname, params);  return; }
@@ -500,6 +532,22 @@ void glGetInteger64v(GLenum pname, GLint64 *data)
 		default:
 			_glGetInteger64v(pname, data);
 	}
+
+	CATCH();
+}
+
+
+void glGetNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname,
+	GLint *param)
+{
+	if(vglfaker::getExcludeCurrent())
+	{
+		_glGetNamedFramebufferParameteriv(framebuffer, pname, param);  return;
+	}
+
+	TRY()
+
+	VGLGetNamedFramebufferParameteriv(framebuffer, pname, param);
 
 	CATCH();
 }

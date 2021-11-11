@@ -59,7 +59,15 @@ GLXDrawable VGLGetCurrentReadDrawable(void);
 int VGLGetFBConfigAttrib(Display *dpy, VGLFBConfig config, int attribute,
 	int *value);
 
+void VGLGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
+	GLenum pname, GLint *params);
+
+void VGLGetFramebufferParameteriv(GLenum target, GLenum pname, GLint *params);
+
 void VGLGetIntegerv(GLenum pname, GLint *params);
+
+void VGLGetNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname,
+	GLint *param);
 
 Bool VGLIsDirect(GLXContext ctx);
 
