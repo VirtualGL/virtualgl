@@ -81,8 +81,8 @@ int main(void)
 	#error OpenGL 4.5 required
 	#endif
 }" OPENGL_4_5_AVAILABLE)
-if(OPENGL_4_5_AVAILABLE)
-	set(DEFINES ${DEFINES};-DGL_VERSION_4_5)
+if(NOT OPENGL_4_5_AVAILABLE)
+	message(FATAL_ERROR "VirtualGL must be built using OpenGL 4.5 or later.")
 endif()
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile

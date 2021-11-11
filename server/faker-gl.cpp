@@ -462,8 +462,6 @@ const GLubyte *glGetStringi(GLenum name, GLuint index)
 }
 
 
-#ifdef GL_VERSION_4_5
-
 void glNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf)
 {
 	if(vglfaker::getExcludeCurrent())
@@ -581,8 +579,6 @@ void glFramebufferReadBufferEXT(GLuint framebuffer, GLenum mode)
 {
 	glNamedFramebufferReadBuffer(framebuffer, mode);
 }
-
-#endif
 
 
 // glPopAttrib() can change the draw buffer state as well :|

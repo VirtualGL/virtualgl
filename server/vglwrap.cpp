@@ -717,8 +717,6 @@ Bool VGLMakeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 }
 
 
-#ifdef GL_VERSION_4_5
-
 void VGLNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf)
 {
 	#ifdef EGLBACKEND
@@ -769,8 +767,6 @@ void VGLNamedFramebufferReadBuffer(GLuint framebuffer, GLenum mode)
 	#endif
 	_glNamedFramebufferReadBuffer(framebuffer, mode);
 }
-
-#endif
 
 
 int VGLQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)

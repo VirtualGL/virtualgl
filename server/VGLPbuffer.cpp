@@ -284,11 +284,9 @@ void VGLPbuffer::setDrawBuffer(GLenum drawBuf, bool deferred)
 		actualBufs[nActualBufs++] = GL_COLOR_ATTACHMENT3;
 	if(nActualBufs == 0)
 		actualBufs[nActualBufs++] = drawBuf;
-	#ifdef GL_VERSION_4_5
 	if(deferred)
 		_glNamedFramebufferDrawBuffers(fbo, nActualBufs, actualBufs);
 	else
-	#endif
 		_glDrawBuffers(nActualBufs, actualBufs);
 	ectxhash.setDrawBuffers(_eglGetCurrentContext(), 1, &drawBuf);
 }
@@ -384,11 +382,9 @@ void VGLPbuffer::setDrawBuffers(GLsizei n, const GLenum *bufs, bool deferred)
 		if(bufs[i] == GL_NONE)
 			actualBufs[nActualBufs++] = bufs[i];
 	}
-	#ifdef GL_VERSION_4_5
 	if(deferred)
 		_glNamedFramebufferDrawBuffers(fbo, nActualBufs, actualBufs);
 	else
-	#endif
 		_glDrawBuffers(nActualBufs, actualBufs);
 	ectxhash.setDrawBuffers(_eglGetCurrentContext(), n, bufs);
 }
@@ -420,11 +416,9 @@ void VGLPbuffer::setReadBuffer(GLenum readBuf, bool deferred)
 		actualReadBuf = GL_COLOR_ATTACHMENT1;
 	else if(readBuf == GL_BACK_RIGHT)
 		actualReadBuf = GL_COLOR_ATTACHMENT3;
-	#ifdef GL_VERSION_4_5
 	if(deferred)
 		_glNamedFramebufferReadBuffer(fbo, actualReadBuf);
 	else
-	#endif
 		_glReadBuffer(actualReadBuf);
 	ectxhash.setReadBuffer(_eglGetCurrentContext(), readBuf);
 }

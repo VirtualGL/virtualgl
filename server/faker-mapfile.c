@@ -100,11 +100,9 @@
 		glDrawBuffers;
 		glDrawBuffersARB;
 		glDrawBuffersATI;
-		#ifdef GL_VERSION_4_5
 		glFramebufferDrawBufferEXT;
 		glFramebufferDrawBuffersEXT;
 		glFramebufferReadBufferEXT;
-		#endif
 		glGetBooleanv;
 		glGetDoublev;
 		glGetFloatv;
@@ -112,11 +110,9 @@
 		glGetInteger64v;
 		glGetString;
 		glGetStringi;
-		#ifdef GL_VERSION_4_5
 		glNamedFramebufferDrawBuffer;
 		glNamedFramebufferDrawBuffers;
 		glNamedFramebufferReadBuffer;
-		#endif
 		glPopAttrib;
 		glReadBuffer;
 		glReadPixels;

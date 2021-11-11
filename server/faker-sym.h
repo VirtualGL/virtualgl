@@ -575,8 +575,6 @@ FUNCDEF1(const GLubyte *, glGetString, GLenum, name, glGetString)
 FUNCDEF2(const GLubyte *, glGetStringi, GLenum, name, GLuint, index,
 	glGetStringi)
 
-#ifdef GL_VERSION_4_5
-
 VFUNCDEF2(glNamedFramebufferDrawBuffer, GLuint, framebuffer, GLenum, buf,
 	glNamedFramebufferDrawBuffer)
 
@@ -585,8 +583,6 @@ VFUNCDEF3(glNamedFramebufferDrawBuffers, GLuint, framebuffer, GLsizei, n,
 
 VFUNCDEF2(glNamedFramebufferReadBuffer, GLuint, framebuffer, GLenum, mode,
 	glNamedFramebufferReadBuffer)
-
-#endif
 
 VFUNCDEF0(glPopAttrib, glPopAttrib)
 
