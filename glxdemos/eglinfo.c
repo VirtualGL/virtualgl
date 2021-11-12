@@ -205,7 +205,8 @@ create_context_flags(EGLDisplay edpy, EGLConfig config, int major, int minor,
  * Try to create an EGL context of the newest version.
  */
 static EGLContext
-create_context_with_config(EGLDisplay edpy, EGLConfig config, Bool coreProfile)
+create_context_with_config(EGLDisplay edpy, EGLConfig config,
+                           GLboolean coreProfile)
 {
    EGLContext ctx = 0;
 
@@ -239,10 +240,11 @@ create_context_with_config(EGLDisplay edpy, EGLConfig config, Bool coreProfile)
 }
 
 
-static Bool
+static GLboolean
 print_display_info(EGLDisplay edpy,
                    const struct options *opts,
-                   Bool coreProfile, Bool limits, Bool coreWorked)
+                   GLboolean coreProfile, GLboolean limits,
+                   GLboolean coreWorked)
 {
    EGLSurface pb;
    EGLContext ctx = NULL;
@@ -260,7 +262,7 @@ print_display_info(EGLDisplay edpy,
    if (!ctx) {
       if (!coreProfile)
          CheckEGLError("eglCreateContext()");
-      return False;
+      return GL_FALSE;
    }
 
    /*
@@ -269,7 +271,7 @@ print_display_info(EGLDisplay edpy,
    pb = eglCreatePbufferSurface(edpy, config, pbattribs);
    if (pb == EGL_NO_SURFACE) {
       CheckEGLError("eglCreatePbufferSurface()");
-      return False;
+      return GL_FALSE;
    }
 
    if (eglMakeCurrent(edpy, pb, pb, ctx)) {
@@ -306,7 +308,7 @@ print_display_info(EGLDisplay edpy,
       if (coreProfile && extfuncs.GetStringi)
          glExtensions = build_core_profile_extension_list(&extfuncs);
       if (!glExtensions) {
-         coreProfile = False;
+         coreProfile = GL_FALSE;
          glExtensions = (char *) glGetString(GL_EXTENSIONS);
       }
 
@@ -361,7 +363,7 @@ print_display_info(EGLDisplay edpy,
 
    eglDestroyContext(edpy, ctx);
    eglDestroySurface(edpy, pb);
-   return True;
+   return GL_TRUE;
 }
 
 
@@ -404,7 +406,7 @@ caveat_string(int caveat)
 }
 
 
-static Bool
+static GLboolean
 get_config_attribs(EGLDisplay edpy, EGLConfig config,
                    struct config_attribs *attribs)
 {
@@ -453,7 +455,7 @@ get_config_attribs(EGLDisplay edpy, EGLConfig config,
       eglGetConfigAttrib(edpy, config, EGL_COLOR_COMPONENT_TYPE_EXT,
                          &colorComponentType);
       if (colorComponentType & EGL_COLOR_COMPONENT_TYPE_FLOAT_EXT)
-         attribs->floatComponents = True;
+         attribs->floatComponents = GL_TRUE;
    }
    eglGetConfigAttrib(edpy, config, EGL_BIND_TO_TEXTURE_RGB,
                       &attribs->bindToTextureRGB);
@@ -461,7 +463,7 @@ get_config_attribs(EGLDisplay edpy, EGLConfig config,
                       &attribs->bindToTextureRGBA);
    eglGetConfigAttrib(edpy, config, EGL_RENDERABLE_TYPE,
                       &attribs->renderableType);
-   return True;
+   return GL_TRUE;
 }
 
 
@@ -626,7 +628,7 @@ main(int argc, char *argv[])
    EGLDeviceEXT *devices = NULL;
    EGLDisplay edpy;
    struct options opts;
-   Bool coreWorked;
+   GLboolean coreWorked;
    PFNEGLQUERYDEVICESEXTPROC _eglQueryDevicesEXT;
    PFNEGLQUERYDEVICESTRINGEXTPROC _eglQueryDeviceStringEXT;
    PFNEGLGETPLATFORMDISPLAYEXTPROC _eglGetPlatformDisplayEXT;
@@ -740,8 +742,9 @@ main(int argc, char *argv[])
       return -1;
    }
 
-   coreWorked = print_display_info(edpy, &opts, True, opts.limits, False);
-   print_display_info(edpy, &opts, False, opts.limits, coreWorked);
+   coreWorked = print_display_info(edpy, &opts, GL_TRUE, opts.limits,
+                                   GL_FALSE);
+   print_display_info(edpy, &opts, GL_FALSE, opts.limits, coreWorked);
 
    printf("\n");
 
