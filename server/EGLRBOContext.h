@@ -52,10 +52,8 @@ class EGLRBOContext
 
 			if(ctx)
 			{
-				if(!_eglBindAPI(EGL_OPENGL_API))
-					THROW("Could not enable OpenGL API");
-				if(!_eglDestroyContext(EDPY, ctx))
-					THROW_EGL("eglDestroyContext()");
+				if(_eglBindAPI(EGL_OPENGL_API))
+					_eglDestroyContext(EDPY, ctx);
 				ctx = 0;
 			}
 		}
