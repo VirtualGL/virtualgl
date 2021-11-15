@@ -49,6 +49,13 @@ with the default framebuffer unless it was currently bound.
 default framebuffer and whereby `glGet*(GL_DOUBLEBUFFER, ...)` and
 `glGet*(GL_STEREO, ...)` did not return correct values for framebuffer objects.
 
+11. By default, VirtualGL now generates a 2048-bit RSA key for use with SSL
+encryption.  This fixes an error ("ee key too small") that occurred when
+attempting to launch the VirtualGL Client on systems configured with a default
+SSL/TLS security level of 2.  A new CMake variable (`VGL_SSLKEYLENGTH`) can be
+used to restore the behavior of previous releases of VirtualGL (generating a
+1024-bit RSA key) or to increase the key length for additional security.
+
 
 2.6.90 (3.0 beta1)
 ==================
