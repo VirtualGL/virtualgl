@@ -23,6 +23,13 @@ which is part of the `GLX_EXT_import_context` extension.  (The
 and 3D X server support it and if indirect OpenGL contexts are enabled using
 `VGL_ALLOWINDIRECT`.)
 
+4. By default, VirtualGL now generates a 2048-bit RSA key for use with SSL
+encryption.  This fixes an error ("ee key too small") that occurred when
+attempting to launch the VirtualGL Client on systems configured with a default
+SSL/TLS security level of 2.  A new CMake variable (`VGL_SSLKEYLENGTH`) can be
+used to restore the behavior of previous releases of VirtualGL (generating a
+1024-bit RSA key) or to increase the key length for additional security.
+
 
 2.6.5
 =====
