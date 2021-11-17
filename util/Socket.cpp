@@ -69,12 +69,15 @@ int Socket::instanceCount = 0;
 
 static EVP_PKEY *newPrivateKey(int bits)
 {
+	#if OPENSSL_VERSION_NUMBER < 0x30000000L
 	BIGNUM *bn = NULL;
 	RSA *rsa = NULL;
+	#endif
 	EVP_PKEY *pk = NULL;
 
 	try
 	{
+		#if OPENSSL_VERSION_NUMBER < 0x30000000L
 		if(!(bn = BN_new())) THROW_SSL();
 		if(!BN_set_word(bn, RSA_F4)) THROW_SSL();
 		if(!(rsa = RSA_new())) THROW_SSL();
@@ -82,12 +85,17 @@ static EVP_PKEY *newPrivateKey(int bits)
 		if(!(pk = EVP_PKEY_new())) THROW_SSL();
 		if(!EVP_PKEY_assign_RSA(pk, rsa)) THROW_SSL();
 		BN_free(bn);
+		#else
+		if(!(pk = EVP_RSA_gen(bits))) THROW_SSL();
+		#endif
 		return pk;
 	}
 	catch(...)
 	{
+		#if OPENSSL_VERSION_NUMBER < 0x30000000L
 		if(bn) BN_free(bn);
 		if(rsa) RSA_free(rsa);
+		#endif
 		if(pk) EVP_PKEY_free(pk);
 		throw;
 	}
@@ -294,6 +302,15 @@ void Socket::connect(char *serverName, unsigned short port)
 	if(doSSL)
 	{
 		if((sslctx = SSL_CTX_new(SSLv23_client_method())) == NULL) THROW_SSL();
+		#if OPENSSL_VERSION_NUMBER >= 0x10101000L
+		// TLS v1.3 does not support the RSA key exchange algorithm, so this is a
+		// quick & dirty hack to allow VirtualGL's built-in SSL encryption feature
+		// to work with OpenSSL v1.1.1 and later.  The RSA key exchange algorithm
+		// and TLS v1.2 have some known vulnerabilities, so if built-in SSL
+		// encryption is going to remain a feature in VGL, then it needs to be
+		// overhauled to use a different key exchange algorithm.
+		if(!SSL_CTX_set_max_proto_version(sslctx, TLS1_2_VERSION)) THROW_SSL();
+		#endif
 		if((ssl = SSL_new(sslctx)) == NULL) THROW_SSL();
 		if(!SSL_set_fd(ssl, (int)sd)) THROW_SSL();
 		int ret = SSL_connect(ssl);

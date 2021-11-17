@@ -30,6 +30,9 @@ SSL/TLS security level of 2.  A new CMake variable (`VGL_SSLKEYLENGTH`) can be
 used to restore the behavior of previous releases of VirtualGL (generating a
 1024-bit RSA key) or to increase the key length for additional security.
 
+5. VirtualGL's built-in SSL encryption feature now works with OpenSSL v1.1.1
+and later.
+
 
 2.6.5
 =====
