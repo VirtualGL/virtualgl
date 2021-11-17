@@ -124,6 +124,7 @@ for SCREEN in 0 1; do
 		echo \*\*\*\*\* Testing VGL Transport/IPv4, Screen $SCREEN \*\*\*\*\*
 		echo
 		$BIN/vglclient >vglclient.log 2>&1 & VGLCLIENTPID=$!
+		sleep 2
 		VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
 			$BIN/vglrun $NODL -c jpeg $WRAP $BIN/fakerut $FAKERUTARGS
 		if [ "$SSL" = "1" ]; then
@@ -143,6 +144,7 @@ for SCREEN in 0 1; do
 			echo \*\*\*\*\* Testing VGL Transport/IPv6, Screen $SCREEN \*\*\*\*\*
 			echo
 			$BIN/vglclient -ipv6 >vglclient.log 2>&1 & VGLCLIENTPID=$!
+			sleep 2
 			VGL_CLIENT=::1 LD_LIBRARY_PATH=$LIB \
 				$BIN/vglrun $NODL -c jpeg $WRAP $BIN/fakerut $FAKERUTARGS
 			if [ "$SSL" = "1" ]; then
