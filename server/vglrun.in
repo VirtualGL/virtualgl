@@ -155,6 +155,7 @@ do
 	+xcb)       VGL_FAKEXCB=1     ; export VGL_FAKEXCB  ;;
 	-xcb)       VGL_FAKEXCB=0     ; export VGL_FAKEXCB  ;;
 	-ld)        VGL_LIBRARY_PATH=$2 ; shift ;;
+	-ldp)       VGL_PRELOAD=$2 ; shift ;;
 	-h)         usage 0 ;;
 	--help)     usage 0 ;;
 	--)         shift   ; break ;;
@@ -247,6 +248,9 @@ if [ $__VGL_DL -eq 1 ]; then
 fi
 if [ $__VGL_GE -eq 1 ]; then
 	LD_PRELOAD=lib@VGL_GEFAKER_NAME@.so:$LD_PRELOAD
+fi
+if [ ! -z "$VGL_PRELOAD" ]; then
+	LD_PRELOAD=$VGL_PRELOAD:$LD_PRELOAD
 fi
 export LD_PRELOAD
 exec ${1+"$@"}
