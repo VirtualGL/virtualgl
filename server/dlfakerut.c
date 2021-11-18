@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2014-2015, 2017, 2019-2020 D. R. Commander
+ * Copyright (C)2009, 2014-2015, 2017, 2019-2021 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,6 +23,14 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#if defined(__has_feature)
+	#if __has_feature(address_sanitizer)
+		#define USING_ASAN  1
+	#endif
+#endif
+#if !defined(USING_ASAN) && defined(__SANITIZE_ADDRESS__)
+	#define USING_ASAN  1
+#endif
 
 #define THROW(m) \
 { \
@@ -238,7 +246,7 @@ static int nameMatchTest(void)
 #include "dlfakerut-test.c"
 
 
-#ifdef RTLD_DEEPBIND
+#if defined(RTLD_DEEPBIND) && !defined(USING_ASAN)
 /* Test whether libdlfaker.so properly circumvents RTLD_DEEPBIND */
 
 typedef void (*_testType)(const char *, int);
@@ -319,7 +327,7 @@ int main(int argc, char **argv)
 
 	unloadSymbols1();
 
-	#ifdef RTLD_DEEPBIND
+	#if defined(RTLD_DEEPBIND) && !defined(USING_ASAN)
 	fprintf(stderr, "\n");
 	TRY(deepBindTest());
 	#endif
