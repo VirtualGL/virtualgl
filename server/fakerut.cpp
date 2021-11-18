@@ -153,7 +153,7 @@ void checkWindowColor(Display *dpy, Window win, unsigned int color,
 	bool right = false)
 {
 	int fakerColor;
-	typedef unsigned int (*_vgl_getAutotestColorType)(Display *, Window, int);
+	typedef int (*_vgl_getAutotestColorType)(Display *, Window, int);
 	_vgl_getAutotestColorType _vgl_getAutotestColor;
 
 	_vgl_getAutotestColor =
@@ -176,7 +176,7 @@ void checkWindowColor(Display *dpy, Window win, unsigned int color,
 void checkFrame(Display *dpy, Window win, int desiredReadbacks, int &lastFrame)
 {
 	int frame;
-	typedef unsigned int (*_vgl_getAutotestFrameType)(Display *, Window);
+	typedef int (*_vgl_getAutotestFrameType)(Display *, Window);
 	_vgl_getAutotestFrameType _vgl_getAutotestFrame;
 
 	_vgl_getAutotestFrame =

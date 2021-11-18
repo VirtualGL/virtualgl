@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2014, 2017-2019 D. R. Commander
+// Copyright (C)2014, 2017-2019, 2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -182,7 +182,8 @@ void usage(char **argv)
 int main(int argc, char **argv)
 {
 	int server = 0;  char *serverName = NULL;
-	char *buf;  int i, j, size;
+	Socket *clientSocket = NULL;
+	char *buf = NULL;  int i, j, size;
 	bool doSSL = false, ipv6 = false, old = false;
 	Timer timer;
 	#if defined(sun) || defined(linux)
@@ -283,8 +284,6 @@ int main(int argc, char **argv)
 
 		if(server)
 		{
-			Socket *clientSocket = NULL;
-
 			printf("Listening on TCP port %d\n", PORT);
 			socket.listen(PORT, true);
 			clientSocket = socket.accept();
@@ -295,6 +294,7 @@ int main(int argc, char **argv)
 			if(buf[0] == 'V')
 			{
 				clientSocket->recv(&buf[1], 4);
+				buf[5] = 0;
 				if(strcmp(buf, "VGL22")) THROW("Invalid header");
 				while(1)
 				{
@@ -398,6 +398,8 @@ int main(int argc, char **argv)
 	catch(Error &e)
 	{
 		printf("Error in %s--\n%s\n", e.getMethod(), e.getMessage());
+		free(buf);
+		delete clientSocket;
 		return -1;
 	}
 	return 0;

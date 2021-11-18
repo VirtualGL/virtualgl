@@ -1,4 +1,4 @@
-/* Copyright (C)2017-2019 D. R. Commander
+/* Copyright (C)2017-2019, 2021 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -221,11 +221,14 @@
 		while(w--) \
 		{ \
 			*dstPixeli = \
-				srcPixel[PF_##srcid##_RINDEX] << (PF_##dstid##_RSHIFT + 2); \
+				(unsigned int)srcPixel[PF_##srcid##_RINDEX] << \
+				(PF_##dstid##_RSHIFT + 2); \
 			*dstPixeli |= \
-				srcPixel[PF_##srcid##_GINDEX] << (PF_##dstid##_GSHIFT + 2); \
+				(unsigned int)srcPixel[PF_##srcid##_GINDEX] << \
+				(PF_##dstid##_GSHIFT + 2); \
 			*dstPixeli |= \
-				srcPixel[PF_##srcid##_BINDEX] << (PF_##dstid##_BSHIFT + 2); \
+				(unsigned int)srcPixel[PF_##srcid##_BINDEX] << \
+				(PF_##dstid##_BSHIFT + 2); \
 			srcPixel += PF_##srcid##_SIZE;  dstPixeli++; \
 		} \
 		srcBuf += srcStride;  dstBuf += dstStride; \
@@ -474,8 +477,9 @@ static INLINE void getRGB_##id(unsigned char *pixel, int *r, int *g, int *b) \
 static INLINE void setRGB_##id(unsigned char *pixel, int r, int g, int b) \
 { \
 	unsigned int *p = (unsigned int *)pixel; \
-	*p = (r << PF_##id##_RSHIFT) | (g << PF_##id##_GSHIFT) | \
-		(b << PF_##id##_BSHIFT); \
+	*p = ((unsigned int)r << PF_##id##_RSHIFT) | \
+		((unsigned int)g << PF_##id##_GSHIFT) | \
+		((unsigned int)b << PF_##id##_BSHIFT); \
 } \
 \
 static PF __format_##id = \
@@ -504,8 +508,9 @@ static INLINE void getRGB_##id(unsigned char *pixel, int *r, int *g, int *b) \
 static INLINE void setRGB_##id(unsigned char *pixel, int r, int g, int b) \
 { \
 	unsigned int *p = (unsigned int *)pixel; \
-	*p = (r << PF_##id##_RSHIFT) | (g << PF_##id##_GSHIFT) | \
-		(b << PF_##id##_BSHIFT); \
+	*p = ((unsigned int)r << PF_##id##_RSHIFT) | \
+		((unsigned int)g << PF_##id##_GSHIFT) | \
+		((unsigned int)b << PF_##id##_BSHIFT); \
 } \
 \
 static PF __format_##id = \

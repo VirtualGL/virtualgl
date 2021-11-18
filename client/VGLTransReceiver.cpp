@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009-2011, 2014, 2018-2019 D. R. Commander
+// Copyright (C)2009-2011, 2014, 2018-2019, 2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -102,7 +102,7 @@ VGLTransReceiver::~VGLTransReceiver(void)
 	listenMutex.lock();
 	if(listenSocket) listenSocket->close();
 	listenMutex.unlock();
-	if(thread) { thread->stop();  thread = NULL; }
+	if(thread) { thread->stop();  delete thread;  thread = NULL; }
 }
 
 
