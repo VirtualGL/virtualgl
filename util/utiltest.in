@@ -24,6 +24,7 @@ BIN=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
 SSL=@VGL_USESSL@
 DEPTHS="24 30"
 IPV6=1
+SCREENS="0 1"
 WRAP=
 
 while [ $# -gt 0 ]; do
@@ -33,6 +34,9 @@ while [ $# -gt 0 ]; do
 		;;
 	-noipv6)
 		IPV6=0
+		;;
+	-onescreen)
+		SCREENS=0
 		;;
 	-wrap)
 		WRAP=$2; shift
@@ -62,7 +66,7 @@ for depth in $DEPTHS; do
 	echo Xvfb started as process $PID
 	echo
 	sleep 2
-	for SCREEN in 0 1; do
+	for SCREEN in $SCREENS; do
 		echo \*\*\*\*\* Testing 1920x1200x$depth, Screen $SCREEN \*\*\*\*\*
 		DISPLAY=:42.$SCREEN $WRAP $BIN/fbxtest $NOSHM -time 0.2
 		DISPLAY=:42.$SCREEN $WRAP $BIN/fbxtest $NOSHM -time 0.2 -mt
@@ -79,7 +83,7 @@ for depth in $DEPTHS; do
 	echo Xvfb started as process $PID
 	echo
 	sleep 2
-	for SCREEN in 0 1; do
+	for SCREEN in $SCREENS; do
 		echo \*\*\*\*\* Testing 1024x768x$depth, Screen $SCREEN \*\*\*\*\*
 		DISPLAY=:42.$SCREEN $WRAP $BIN/fbxtest $NOSHM -time 0.2
 		DISPLAY=:42.$SCREEN $WRAP $BIN/fbxtest $NOSHM -time 0.2 -mt
