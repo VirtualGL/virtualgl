@@ -113,16 +113,24 @@ for SCREEN in 0 1; do
 		echo
 		$BIN/vglclient >vglclient.log 2>&1 & VGLCLIENTPID=$!
 		sleep 2
+		echo "===== VGL Transport, JPEG compression, no encryption ====="
+		echo
 		VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
 			$BIN/vglrun $NODL -c jpeg $WRAP $BIN/fakerut $FAKERUTARGS
 		if [ "$SSL" = "1" ]; then
+			echo "===== VGL Transport, JPEG compression, SSL encryption ====="
+			echo
 			VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
 				$BIN/vglrun $NODL -c jpeg +s $WRAP $BIN/fakerut $FAKERUTARGS
 		fi
+		echo "===== VGL Transport, RGB encoding, 2 threads, no encryption ====="
+		echo
 		VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB VGL_READBACK=sync \
 			$BIN/vglrun $NODL -np 2 -c rgb $WRAP $BIN/fakerut $FAKERUTARGS
 		# (we can't test stereo here, because the transport plugin assumes
 		# quad-buffered, which isn't available with an X proxy.)
+		echo "===== VGL Transport plugin, JPEG compression, no encryption ====="
+		echo
 		VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
 			$BIN/vglrun $NODL -trans test $WRAP $BIN/fakerut -nostereo $FAKERUTARGS
 		kill $VGLCLIENTPID
@@ -133,12 +141,18 @@ for SCREEN in 0 1; do
 			echo
 			$BIN/vglclient -ipv6 >vglclient.log 2>&1 & VGLCLIENTPID=$!
 			sleep 2
+			echo "===== VGL Transport, JPEG compression, no encryption ====="
+			echo
 			VGL_CLIENT=::1 LD_LIBRARY_PATH=$LIB \
 				$BIN/vglrun $NODL -c jpeg $WRAP $BIN/fakerut $FAKERUTARGS
 			if [ "$SSL" = "1" ]; then
+				echo "===== VGL Transport, JPEG compression, SSL encryption ====="
+				echo
 				VGL_CLIENT=::1 LD_LIBRARY_PATH=$LIB \
 					$BIN/vglrun $NODL -c jpeg +s $WRAP $BIN/fakerut $FAKERUTARGS
 			fi
+			echo "===== VGL Transport plugin, JPEG compression, no encryption ====="
+			echo
 			VGL_CLIENT=[::1]:0 LD_LIBRARY_PATH=$LIB \
 				$BIN/vglrun $NODL -trans test $WRAP $BIN/fakerut -nostereo $FAKERUTARGS
 			kill $VGLCLIENTPID
@@ -152,6 +166,8 @@ for SCREEN in 0 1; do
 	LD_LIBRARY_PATH=$LIB \
 		$BIN/vglrun $NODL -c proxy $WRAP $BIN/fakerut $FAKERUTARGS
 	if [ $DEPTH = 24 ]; then
+		echo "===== X11 Transport plugin ====="
+		echo
 		LD_LIBRARY_PATH=$LIB \
 			$BIN/vglrun $NODL -trans test2 $WRAP $BIN/fakerut $FAKERUTARGS
 	fi
