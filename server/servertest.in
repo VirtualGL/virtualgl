@@ -34,10 +34,12 @@ NODL=
 FAKERUTARGS=
 DEPTH=24
 IPV6=1
+SCREENS="0 1"
 WRAP=
 XVFBARGS=
 VGLTRANS=1
 GLVND=0
+
 while [ $# -gt 0 ]; do
 	case "$1" in
 	-nodl)
@@ -60,6 +62,9 @@ while [ $# -gt 0 ]; do
 	-10bpc)
 		DEPTH=30
 		FAKERUTARGS=-nostereo
+		;;
+	-onescreen)
+		SCREENS=0
 		;;
 	-wrap)
 		WRAP=$2; shift
@@ -108,7 +113,7 @@ if [ "$FAKEOPENCL" = "1" -a ! "$EGLBACKEND" = "1" ]; then
 fi
 echo
 
-for SCREEN in 0 1; do
+for SCREEN in $SCREENS; do
 
 	export DISPLAY=:42.$SCREEN
 
