@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2006-2007 Sun Microsystems, Inc.
-// Copyright (C)2011, 2013-2014, 2016-2019 D. R. Commander
+// Copyright (C)2011, 2013-2014, 2016-2019, 2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -191,7 +191,9 @@ int main(int argc, char **argv)
 		else if(!stricmp(argv[i], "-wh") && i < argc - 1)
 		{
 			#ifdef _WIN32
-			if(sscanf(argv[++i], "%x", &wh) < 1 || wh <= 0) usage();
+			size_t temp = 0;
+			if(sscanf(argv[++i], "%zx", &temp) < 1 || temp <= 0) usage();
+			wh = (fbx_wh)temp;
 			#else
 			unsigned int temp = 0;
 			if(sscanf(argv[++i], "%x", &temp) < 1 || temp <= 0) usage();
@@ -260,7 +262,7 @@ int main(int argc, char **argv)
 	}
 	char temps[1024];
 	GetWindowText(wh, temps, 1024);
-	printf("Monitoring window 0x%.8x (%s)\n", wh, temps);
+	printf("Monitoring window 0x%.8zx (%s)\n", (size_t)wh, temps);
 
 	#else
 
