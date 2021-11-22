@@ -21,7 +21,6 @@ onexit()
 }
 
 BIN=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
-SSL=@VGL_USESSL@
 DEPTHS="24 30"
 IPV6=1
 SCREENS="0 1"
@@ -103,19 +102,6 @@ if [ "$IPV6" = "1" ]; then
 	echo
 	sleep 2
 	$WRAP $BIN/nettest -client ::1 -time 0.2
-fi
-
-if [ "$SSL" = "1" ]; then
-	echo
-	$WRAP $BIN/nettest -server -ssl &
-	sleep 2
-	$WRAP $BIN/nettest -client 127.0.0.1 -ssl -time 0.2
-	if [ "$IPV6" = "1" ]; then
-		echo
-		$WRAP $BIN/nettest -server -ipv6 -ssl &
-		sleep 2
-		$WRAP $BIN/nettest -client ::1 -ssl -time 0.2
-	fi
 fi
 
 SUCCESS=1

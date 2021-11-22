@@ -153,14 +153,8 @@ int cmpBuf(char *buf, int len)
 void usage(char **argv)
 {
 	fprintf(stderr, "\nUSAGE: %s -client <server name or IP>", argv[0]);
-	#ifdef USESSL
-	fprintf(stderr, " [-ssl]");
-	#endif
 	fprintf(stderr, " [-old] [-time <t>]");
 	fprintf(stderr, "\n or    %s -server [-ipv6]", argv[0]);
-	#ifdef USESSL
-	fprintf(stderr, " [-ssl]");
-	#endif
 	fprintf(stderr, "\n or    %s -findport\n", argv[0]);
 	#if defined(sun) || defined(linux)
 	fprintf(stderr, " or    %s -bench <interface> [interval]\n", argv[0]);
@@ -168,9 +162,6 @@ void usage(char **argv)
 	#endif
 	fprintf(stderr, "\n-findport = Display a free TCP port number and exit");
 	fprintf(stderr, "\n-old = Communicate with NetTest server v2.1.x or earlier\n");
-	#ifdef USESSL
-	fprintf(stderr, "-ssl = Use secure tunnel\n");
-	#endif
 	fprintf(stderr, "-ipv6 = Use IPv6 sockets\n");
 	fprintf(stderr, "-time <t> = Run each benchmark for <t> seconds (default: %.1f)\n",
 		benchTime);
@@ -184,7 +175,7 @@ int main(int argc, char **argv)
 	int server = 0;  char *serverName = NULL;
 	Socket *clientSocket = NULL;
 	char *buf = NULL;  int i, j, size;
-	bool doSSL = false, ipv6 = false, old = false;
+	bool ipv6 = false, old = false;
 	Timer timer;
 	#if defined(sun) || defined(linux)
 	int interval = 2;
@@ -201,13 +192,6 @@ int main(int argc, char **argv)
 			if(argc > 3) for(i = 3; i < argc; i++)
 			{
 				if(!stricmp(argv[i], "-h") || !strcmp(argv[i], "-?")) usage(argv);
-				#ifdef USESSL
-				else if(!stricmp(argv[i], "-ssl"))
-				{
-					printf("Using %s ...\n", SSLeay_version(SSLEAY_VERSION));
-					doSSL = true;
-				}
-				#endif
 				else if(!stricmp(argv[i], "-old"))
 				{
 					printf("Using old protocol\n");
@@ -227,13 +211,6 @@ int main(int argc, char **argv)
 			if(argc > 2) for(i = 2; i < argc; i++)
 			{
 				if(!stricmp(argv[i], "-h") || !strcmp(argv[i], "-?")) usage(argv);
-				#ifdef USESSL
-				else if(!stricmp(argv[i], "-ssl"))
-				{
-					doSSL = true;
-					printf("Using %s ...\n", SSLeay_version(SSLEAY_VERSION));
-				}
-				#endif
 				else if(!stricmp(argv[i], "-ipv6"))
 				{
 					ipv6 = true;
@@ -244,7 +221,7 @@ int main(int argc, char **argv)
 		}
 		else if(!stricmp(argv[1], "-findport"))
 		{
-			Socket socket(false, false);
+			Socket socket(false);
 			printf("%d\n", socket.findPort());
 			socket.close();
 			exit(0);
@@ -265,22 +242,11 @@ int main(int argc, char **argv)
 		#endif
 		else usage(argv);
 
-		Socket socket(doSSL, ipv6);
+		Socket socket(ipv6);
 		if((buf = (char *)malloc(sizeof(char) * MAXDATASIZE)) == NULL)
 		{
 			printf("Buffer allocation error.\n");  exit(1);
 		}
-
-		#ifdef USESSL
-		if(doSSL)
-		{
-			#if defined(OPENSSL_THREADS)
-			printf("OpenSSL threads supported\n");
-			#else
-			printf("OpenSSL threads not supported\n");
-			#endif
-		}
-		#endif
 
 		if(server)
 		{

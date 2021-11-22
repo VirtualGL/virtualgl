@@ -21,14 +21,6 @@
 #else
 	#include <netinet/in.h>
 #endif
-#ifdef USESSL
-	#define OPENSSL_NO_KRB5
-	#include <openssl/ssl.h>
-	#include <openssl/err.h>
-	#if !defined(HAVE_DEVURANDOM) && !defined(_WIN32)
-		#include <openssl/rand.h>
-	#endif
-#endif
 
 #include "Error.h"
 #include "Mutex.h"
@@ -62,74 +54,6 @@ namespace vglutil
 #define THROW_SOCK()  throw(SockError(__FUNCTION__, __LINE__))
 
 
-#ifdef USESSL
-
-namespace vglutil
-{
-	class SSLError : public Error
-	{
-		public:
-
-			SSLError(const char *method_, int line) :
-				Error(method_, (char *)NULL, line)
-			{
-				ERR_error_string_n(ERR_get_error(), &message[strlen(message)],
-					MLEN - strlen(message));
-			}
-
-			SSLError(const char *method_, SSL *ssl, int ret) :
-				Error(method_, (char *)NULL)
-			{
-				const char *errorString = NULL;
-
-				switch(SSL_get_error(ssl, ret))
-				{
-					case SSL_ERROR_NONE:
-						errorString = "SSL_ERROR_NONE";  break;
-					case SSL_ERROR_ZERO_RETURN:
-						errorString = "SSL_ERROR_ZERO_RETURN";  break;
-					case SSL_ERROR_WANT_READ:
-						errorString = "SSL_ERROR_WANT_READ";  break;
-					case SSL_ERROR_WANT_WRITE:
-						errorString = "SSL_ERROR_WANT_WRITE";  break;
-					case SSL_ERROR_WANT_CONNECT:
-						errorString = "SSL_ERROR_WANT_CONNECT";  break;
-					#ifdef SSL_ERROR_WANT_ACCEPT
-					case SSL_ERROR_WANT_ACCEPT:
-						errorString = "SSL_ERROR_WANT_ACCEPT";  break;
-					#endif
-					case SSL_ERROR_WANT_X509_LOOKUP:
-						errorString = "SSL_ERROR_WANT_X509_LOOKUP";  break;
-					case SSL_ERROR_SYSCALL:
-						#ifdef _WIN32
-						if(ret == -1)
-						{
-							if(!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL,
-								WSAGetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-								message, MLEN, NULL))
-								strncpy(message, "Error in FormatMessage()", MLEN);
-							return;
-						}
-						#else
-						if(ret == -1) errorString = strerror(errno);
-						#endif
-						else if(ret == 0)
-							errorString = "SSL_ERROR_SYSCALL (abnormal termination)";
-						else errorString = "SSL_ERROR_SYSCALL";
-						break;
-					case SSL_ERROR_SSL:
-						ERR_error_string_n(ERR_get_error(), message, MLEN);  return;
-				}
-				strncpy(message, errorString, MLEN);
-			}
-	};
-}
-
-#define THROW_SSL()  throw(SSLError(__FUNCTION__, __LINE__))
-
-#endif  // USESSL
-
-
 #ifndef _WIN32
 typedef int SOCKET;
 #endif
@@ -140,12 +64,8 @@ namespace vglutil
 	{
 		public:
 
-			Socket(bool doSSL, bool ipv6);
-			#ifdef USESSL
-			Socket(SOCKET sd, SSL *ssl);
-			#else
+			Socket(bool ipv6);
 			Socket(SOCKET sd);
-			#endif
 			~Socket(void);
 			void close(void);
 			void connect(char *serverName, unsigned short port);
@@ -159,25 +79,6 @@ namespace vglutil
 		private:
 
 			unsigned short setupListener(unsigned short port, bool reuseAddr);
-
-			#ifdef USESSL
-
-			#if OPENSSL_VERSION_NUMBER < 0x10100000L
-			static void lockingCallback(int mode, int type, const char *file,
-				int line)
-			{
-				if(mode & CRYPTO_LOCK) cryptoLock[type].lock();
-				else cryptoLock[type].unlock();
-			}
-			#endif
-
-			static bool sslInit;
-			#if OPENSSL_VERSION_NUMBER < 0x10100000L
-			static CriticalSection cryptoLock[CRYPTO_NUM_LOCKS];
-			#endif
-			bool doSSL;  SSL_CTX *sslctx;  SSL *ssl;
-
-			#endif
 
 			static const int MAXCONN = 1024;
 			static int instanceCount;

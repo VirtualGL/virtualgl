@@ -672,19 +672,6 @@ previous method:
 	[[#Application_Recipes][Application Recipes]] for a list of 3D applications
 	that are known to require this.
 
-| Environment Variable | {pcode: VGL_SSL = __0 \| 1__ } |
-| ''vglrun'' argument | ''-s'' / ''+s'' |
-| Summary | Disable/enable SSL encryption of the image transport |
-| Image Transports | VGL, Custom (if supported) |
-| Default Value | Disabled |
-#OPT: hiCol=first
-
-	Description :: Enabling this option causes the VGL Transport to be
-	tunneled through a secure socket layer (SSL.)
-
-	!!! This option has no effect unless both the VirtualGL Faker and VirtualGL
-	Client were built with OpenSSL support.
-
 {anchor: VGL_STEREO}
 | Environment Variable | \
 	{pcode: VGL_STEREO = __left \| right \| quad \| rc \| gm \| by \| i \| tb \| ss__ } |
@@ -1056,29 +1043,19 @@ those wishing to build additional infrastructure around VirtualGL.
 	Description :: Enabling this option will cause the VirtualGL Client to listen
 	on IPv6 sockets and to support both IPv4 and IPv6 connections.
 
-| Environment Variable | {pcode: VGLCLIENT_LISTEN = __sslonly \| nossl__ } |
-| ''vglclient'' argument | ''-sslonly'' / ''-nossl'' |
-| Summary | Accept only unencrypted or only SSL connections from the \
-	VirtualGL Faker |
-| Default Value | Accept both SSL and unencrypted connections |
-#OPT: hiCol=first
-
-	!!! This option is available only if the VirtualGL Client was built
-	with OpenSSL support.
-
 | Environment Variable | {pcode: VGLCLIENT_PORT = __{p}__ } |
 | ''vglclient'' argument | {pcode: -port __{p}__ } |
-| Summary | __''{p}''__ = TCP port on which to listen for unencrypted \
-	connections from the VirtualGL Faker |
+| Summary | __''{p}''__ = TCP port on which to listen for connections from \
+	the VirtualGL Faker |
 | Default Value | Automatically select a free port |
 #OPT: hiCol=first
 
 	Description :: The default behavior of the VirtualGL Client is to first try
-	listening for unencrypted connections on port 4242, to maintain backward
-	compatibility with VirtualGL v2.0.x.  If port 4242 is not available, then
-	the VirtualGL Client will try to find a free port in the range of 4200-4299.
-	If none of those ports is available, then the VirtualGL Client will request a
-	free port from the operating system.
+	listening for connections on port 4242, to maintain backward compatibility
+	with VirtualGL v2.0.x.  If port 4242 is not available, then the VirtualGL
+	Client will try to find a free port in the range of 4200-4299.  If none of
+	those ports is available, then the VirtualGL Client will request a free port
+	from the operating system.
 	{nl}{nl}
 	Setting this option circumvents the automatic behavior described above and
 	causes the VirtualGL Client to listen only on the specified TCP port.
@@ -1093,26 +1070,6 @@ those wishing to build additional infrastructure around VirtualGL.
 	various stages in its image pipelines.
 	{nl}{nl}
 	See {ref prefix="Chapter ": Perf_Measurement} for more details.
-
-| Environment Variable | {pcode: VGLCLIENT_SSLPORT = __{p}__ } |
-| ''vglclient'' argument | {pcode: -sslport __{p}__ } |
-| Summary | __''{p}''__ = TCP port on which to listen for SSL connections \
-	from the VirtualGL Faker |
-| Default Value | Automatically select a free port |
-#OPT: hiCol=first
-
-	Description :: The default behavior of the VirtualGL Client is to first try
-	listening for SSL connections on port 4243, to maintain backward
-	compatibility with VirtualGL v2.0.x.  If port 4243 is not available, then
-	the VirtualGL Client will try to find a free port in the range of 4200-4299.
-	If none of those ports is available, then the VirtualGL Client will request a
-	free port from the operating system.
-	{nl}{nl}
-	Setting this option circumvents the automatic behavior described above and
-	causes the VirtualGL Client to listen only on the specified TCP port.
-
-	!!! This option is available only if the VirtualGL Client was built
-	with OpenSSL support.
 
 | Environment Variable | {pcode: VGL_VERBOSE = __0 \| 1__ } |
 | Summary | Disable/enable verbose VirtualGL messages |

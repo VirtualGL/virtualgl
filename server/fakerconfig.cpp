@@ -434,7 +434,6 @@ void fconfig_reloadenv(void)
 	FETCHENV_INT("VGL_SAMPLES", samples, 0, 64);
 	FETCHENV_BOOL("VGL_SPOIL", spoil);
 	FETCHENV_BOOL("VGL_SPOILLAST", spoillast);
-	FETCHENV_BOOL("VGL_SSL", ssl);
 	{
 		if((env = getenv("VGL_STEREO")) != NULL && strlen(env) > 0)
 		{
@@ -509,16 +508,11 @@ void fconfig_setdefaultsfromdpy(Display *dpy)
 
 	if(fconfig.port < 0)
 	{
-		#ifdef USESSL
-		fconfig.port = fconfig.ssl ? RR_DEFAULTSSLPORT : RR_DEFAULTPORT;
-		#else
 		fconfig.port = RR_DEFAULTPORT;
-		#endif
 		Atom atom = None;  unsigned long n = 0, bytesLeft = 0;
 		int actualFormat = 0;  Atom actualType = None;
 		unsigned char *prop = NULL;
-		if((atom = XInternAtom(dpy,
-			fconfig.ssl ? "_VGLCLIENT_SSLPORT" : "_VGLCLIENT_PORT", True)) != None)
+		if((atom = XInternAtom(dpy, "_VGLCLIENT_PORT", True)) != None)
 		{
 			if(XGetWindowProperty(dpy, RootWindow(dpy, DefaultScreen(dpy)), atom, 0,
 				1, False, XA_INTEGER, &actualType, &actualFormat, &n, &bytesLeft,
@@ -634,7 +628,6 @@ void fconfig_print(FakerConfig &fc)
 	PRCONF_INT(samples);
 	PRCONF_INT(spoil);
 	PRCONF_INT(spoillast);
-	PRCONF_INT(ssl);
 	PRCONF_INT(stereo);
 	PRCONF_INT(subsamp);
 	PRCONF_INT(sync);

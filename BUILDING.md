@@ -10,9 +10,6 @@ Build Requirements
     OpenCL interposer enabled (this is the default on Linux and FreeBSD but can
     be changed using the `VGL_FAKEOPENCL` CMake variable.)
 
-- If building SSL support:
-  * [OpenSSL](http://www.OpenSSL.org) -- see "Building SSL Support" below
-
 - libjpeg-turbo SDK v1.2 or later
   * The libjpeg-turbo SDK binary packages can be downloaded from the "Files"
     area of <http://sourceforge.net/projects/libjpeg-turbo>.
@@ -115,86 +112,6 @@ Debug Build
 -----------
 
 Add `-DCMAKE_BUILD_TYPE=Debug` to the CMake command line.
-
-
-Building Secure Sockets Layer (SSL) Support
--------------------------------------------
-
-If built with SSL support, VirtualGL can use OpenSSL to encrypt the traffic it
-sends and receives via the VGL Transport.  This is only a marginally useful
-feature, however, since VirtualGL can also tunnel the VGL Transport through
-SSH.  To enable SSL support, set the `VGL_USESSL` CMake variable to `1`.
-
-In general, if you are building on a Unix-ish platform that has the OpenSSL
-link libraries and include files installed in the standard system locations,
-then the VirtualGL build system should detect the system version of OpenSSL
-automatically and link against it.  However, this produces a version of
-VirtualGL that depends on the OpenSSL dynamic libraries, and thus the VirtualGL
-binaries are not necessarily portable.  Thus, to build a fully portable,
-cross-compatible version of VirtualGL with SSL support, it is necessary on most
-systems to link against the OpenSSL static libraries.  The following sections
-describe how to do that on various platforms.
-
-
-### Linux
-
-There is generally no sane way to statically link with OpenSSL on Linux without
-building OpenSSL from source.  Some distributions of Linux ship with the
-OpenSSL static libraries, but these usually depend on Kerberos, which
-introduces a long list of dependencies, some of which aren't available in
-static library form.  To build OpenSSL from source:
-
-* Download the latest OpenSSL source tarball from <http://www.OpenSSL.org>
-* Extract the tarball
-* cd to the OpenSSL source directory and issue one of the following commands to
-  configure the OpenSSL build:
-
-    **64-bit:**
-
-      `./Configure linux-x86_64 shared no-krb5 no-dso`
-
-    **32-bit:**
-
-      `./Configure -m32 linux-generic32 shared no-krb5 no-dso`
-
-* `make`
-
-You can then manipulate the `OPENSSL_INCLUDE_DIR`, `OPENSSL_SSL_LIBRARY`, and
-`OPENSSL_CRYPTO_LIBRARY` CMake variables to link VirtualGL against your custom
-OpenSSL build.  For instance, adding
-
-    -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=~/openssl/include \
-      -DOPENSSL_SSL_LIBRARY=~/openssl/libssl.a \
-      -DOPENSSL_CRYPTO_LIBRARY=~/openssl/libcrypto.a
-
-to the CMake command line will cause VirtualGL to be statically linked against
-a custom build of OpenSSL that resides under **~/openssl**.
-
-
-### Mac
-
-Linking with the OpenSSL dynamic libraries is generally not a concern on
-OS X/macOS, since Apple ships several versions of these in order to retain
-backward compatibility with prior versions of OS X/macOS.
-
-
-### Solaris
-
-The easiest approach on Solaris is to install the OpenSSL development libraries
-from [OpenCSW](http://www.OpenCSW.org).  You can then add one of the following
-to the CMake command line to statically link VirtualGL with OpenSSL:
-
-  **64-bit:**
-
-    -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=/opt/csw/include \
-      -DOPENSSL_SSL_LIBRARY=/opt/csw/lib/64/libssl.a \
-      -DOPENSSL_CRYPTO_LIBRARY=/opt/csw/lib/64/libcrypto.a
-
-  **32-bit:**
-
-    -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=/opt/csw/include \
-      -DOPENSSL_SSL_LIBRARY=/opt/csw/lib/libssl.a \
-      -DOPENSSL_CRYPTO_LIBRARY=/opt/csw/lib/libcrypto.a
 
 
 Build Recipes

@@ -29,7 +29,7 @@ namespace vglclient
 	{
 		public:
 
-			VGLTransReceiver(bool doSSL, bool ipv6, int drawmethod);
+			VGLTransReceiver(bool ipv6, int drawmethod);
 			void listen(unsigned short port);
 			unsigned short getPort(void) { return port; }
 			virtual ~VGLTransReceiver(void);
@@ -43,7 +43,6 @@ namespace vglclient
 			vglutil::CriticalSection listenMutex;
 			vglutil::Thread *thread;
 			bool deadYet;
-			bool doSSL;
 			bool ipv6;
 			unsigned short port;
 

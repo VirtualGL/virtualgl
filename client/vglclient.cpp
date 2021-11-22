@@ -41,10 +41,6 @@ using namespace vglclient;
 bool restart;
 bool deadYet;
 unsigned short port = 0;
-#ifdef USESSL
-unsigned short sslPort = 0;
-bool doSSL = true, doNonSSL = true;
-#endif
 bool ipv6 = false;
 int drawMethod = RR_DRAWAUTO;
 Display *maindpy = NULL;
@@ -213,14 +209,8 @@ void usage(char **argv)
 	fprintf(stderr, "-display <d> = The X display to which to draw the rendered frames received from\n");
 	fprintf(stderr, "               the VirtualGL Faker\n");
 	fprintf(stderr, "               (default: read from the DISPLAY environment variable)\n");
-	fprintf(stderr, "-port <p> = TCP port to use for unencrypted connections from the VirtualGL\n");
-	fprintf(stderr, "            Faker (default: automatically select a free port)\n");
-	#ifdef USESSL
-	fprintf(stderr, "-sslport <p> = TCP port to use for encrypted connections from the VirtualGL\n");
-	fprintf(stderr, "               Faker (default: automatically select a free port)\n");
-	fprintf(stderr, "-sslonly = Only allow encrypted connections\n");
-	fprintf(stderr, "-nossl = Only allow unencrypted connections\n");
-	#endif
+	fprintf(stderr, "-port <p> = TCP port to use for connections from the VirtualGL Faker\n");
+	fprintf(stderr, "            (default: automatically select a free port)\n");
 	fprintf(stderr, "-ipv6 = Use IPv6 sockets\n");
 	fprintf(stderr, "-detach = Detach from console (used by vglconnect)\n");
 	fprintf(stderr, "-force = Force the VirtualGL Client to run, even if there is already another\n");
@@ -250,33 +240,6 @@ void daemonize(void)
 }
 
 
-#ifdef USESSL
-
-unsigned short instanceCheckSSL(Display *dpy)
-{
-	Atom atom = None;  unsigned short p = 0;
-	if((atom = XInternAtom(dpy, "_VGLCLIENT_SSLPORT", True)) != None)
-	{
-		unsigned char *prop = NULL;  unsigned long n = 0, bytesLeft = 0;
-		int actualFormat = 0;  Atom actualType = None;
-		if(XGetWindowProperty(dpy, DefaultRootWindow(dpy), atom, 0, 1, False,
-				XA_INTEGER, &actualType, &actualFormat, &n, &bytesLeft,
-				&prop) == Success
-			&& n >= 1 && actualFormat == 16 && actualType == XA_INTEGER && prop)
-			p = *(unsigned short *)prop;
-		if(prop) XFree(prop);
-		if(p != 0)
-		{
-			vglout.println("vglclient is already running on this X display and accepting SSL");
-			vglout.println("   connections on port %d.", p);
-		}
-	}
-	return p;
-}
-
-#endif
-
-
 unsigned short instanceCheck(Display *dpy)
 {
 	Atom atom = None;  unsigned short p = 0;
@@ -292,8 +255,8 @@ unsigned short instanceCheck(Display *dpy)
 		if(prop) XFree(prop);
 		if(p != 0)
 		{
-			vglout.println("vglclient is already running on this X display and accepting unencrypted");
-			vglout.println("   connections on port %d.", p);
+			vglout.println("vglclient is already running on this X display and accepting connections on");
+			vglout.println("   port %d.", p);
 		}
 	}
 	return p;
@@ -308,13 +271,6 @@ void getEnvironment(void)
 		if(!strnicmp(env, "o", 1)) drawMethod = RR_DRAWOGL;
 		else if(!strncmp(env, "x", 1)) drawMethod = RR_DRAWX11;
 	}
-	#ifdef USESSL
-	if((env = getenv("VGLCLIENT_LISTEN")) != NULL && strlen(env) > 0)
-	{
-		if(!strncmp(env, "n", 1)) { doSSL = false;  doNonSSL = true; }
-		else if(!strncmp(env, "s", 1)) { doSSL = true;  doNonSSL = false; }
-	}
-	#endif
 	if((env = getenv("VGLCLIENT_LOG")) != NULL && strlen(env) > 0)
 	{
 		logFile = env;
@@ -329,11 +285,6 @@ void getEnvironment(void)
 	if((env = getenv("VGLCLIENT_PORT")) != NULL && strlen(env) > 0
 		&& (temp = atoi(env)) > 0 && temp < 65536)
 		port = (unsigned short)temp;
-	#ifdef USESSL
-	if((env = getenv("VGLCLIENT_SSLPORT")) != NULL && strlen(env) > 0
-		&& (temp = atoi(env)) > 0 && temp < 65536)
-		sslPort = (unsigned short)temp;
-	#endif
 	if((env = getenv("VGLCLIENT_IPV6")) != NULL && strlen(env) > 0
 		&& (temp = atoi(env)) == 1)
 		ipv6 = true;
@@ -352,17 +303,6 @@ int main(int argc, char *argv[])
 		if(argc > 1) for(i = 1; i < argc; i++)
 		{
 			if(!stricmp(argv[i], "-h") || !strcmp(argv[i], "-?")) usage(argv);
-			#ifdef USESSL
-			else if(!stricmp(argv[i], "-sslonly"))
-			{
-				doSSL = true;  doNonSSL = false;
-			}
-			else if(!stricmp(argv[i], "-nossl")) { doSSL = false;  doNonSSL = true; }
-			else if(!stricmp(argv[i], "-sslport") && i < argc - 1)
-			{
-				sslPort = (unsigned short)atoi(argv[++i]);
-			}
-			#endif
 			else if(!stricmp(argv[i], "-ipv6")) ipv6 = true;
 			else if(!stricmp(argv[i], "-v")) printVersion = true;
 			else if(!stricmp(argv[i], "-force")) force = true;
@@ -416,10 +356,6 @@ int start(char *displayname)
 {
 	VGLTransReceiver *receiver = NULL;
 	Atom portAtom = None;  unsigned short actualPort = 0;
-	#ifdef USESSL
-	VGLTransReceiver *sslReceiver = NULL;
-	Atom sslPortAtom = None;  unsigned short actualSSLPort = 0;
-	#endif
 	bool newListener = false;
 	int retval = 0;
 
@@ -439,81 +375,38 @@ int start(char *displayname)
 		if((maindpy = XOpenDisplay(displayname)) == NULL)
 			THROW("Could not open display");
 
-		#ifdef USESSL
-		if(doSSL)
+		if(!force) actualPort = instanceCheck(maindpy);
+		if(actualPort == 0)
 		{
-			if(!force) actualSSLPort = instanceCheckSSL(maindpy);
-			if(actualSSLPort == 0)
+			receiver = new VGLTransReceiver(ipv6, drawMethod);
+			if(port == 0)
 			{
-				sslReceiver = new VGLTransReceiver(true, ipv6, drawMethod);
-				if(sslPort == 0)
+				bool success = false;  unsigned short i = RR_DEFAULTPORT;
+				do
 				{
-					bool success = false;  unsigned short i = RR_DEFAULTSSLPORT;
-					do
+					try
 					{
-						try
-						{
-							sslReceiver->listen(i);
-							success = true;
-						}
-						catch(...)
-						{
-							success = false;  if(i == 0) throw;
-						}
-						i++;
-						if(i > 4299) i = 4200;
-						if(i == RR_DEFAULTPORT) i = 0;
-					} while(!success);
-				}
-				else sslReceiver->listen(sslPort);
-				vglout.println("Listening for SSL connections on port %d%s",
-					actualSSLPort = sslReceiver->getPort(),
-					ipv6 ? " [IPv6 enabled]" : "");
-				if((sslPortAtom = XInternAtom(maindpy, "_VGLCLIENT_SSLPORT",
-					False)) == None)
-					THROW("Could not get _VGLCLIENT_SSLPORT atom");
-				XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
-					sslPortAtom, XA_INTEGER, 16, PropModeReplace,
-					(unsigned char *)&actualSSLPort, 1);
-				newListener = true;
-			}
-		}
-		if(doNonSSL)
-		#endif
-		{
-			if(!force) actualPort = instanceCheck(maindpy);
-			if(actualPort == 0)
-			{
-				receiver = new VGLTransReceiver(false, ipv6, drawMethod);
-				if(port == 0)
-				{
-					bool success = false;  unsigned short i = RR_DEFAULTPORT;
-					do
+						receiver->listen(i);
+						success = true;
+					}
+					catch(...)
 					{
-						try
-						{
-							receiver->listen(i);
-							success = true;
-						}
-						catch(...)
-						{
-							success = false;  if(i == 0) throw;
-						}
-						i++;  if(i == RR_DEFAULTSSLPORT) i++;
-						if(i > 4299) i = 4200;
-						if(i == RR_DEFAULTPORT) i = 0;
-					} while(!success);
-				}
-				else receiver->listen(port);
-				vglout.println("Listening for unencrypted connections on port %d%s",
-					actualPort = receiver->getPort(), ipv6 ? " [IPv6 enabled]" : "");
-				if((portAtom = XInternAtom(maindpy, "_VGLCLIENT_PORT", False)) == None)
-					THROW("Could not get _VGLCLIENT_PORT atom");
-				XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
-					portAtom, XA_INTEGER, 16, PropModeReplace,
-					(unsigned char *)&actualPort, 1);
-				newListener = true;
+						success = false;  if(i == 0) throw;
+					}
+					i++;
+					if(i > 4299) i = 4200;
+					if(i == RR_DEFAULTPORT) i = 0;
+				} while(!success);
 			}
+			else receiver->listen(port);
+			vglout.println("Listening for connections on port %d%s",
+				actualPort = receiver->getPort(), ipv6 ? " [IPv6 enabled]" : "");
+			if((portAtom = XInternAtom(maindpy, "_VGLCLIENT_PORT", False)) == None)
+				THROW("Could not get _VGLCLIENT_PORT atom");
+			XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
+				portAtom, XA_INTEGER, 16, PropModeReplace,
+				(unsigned char *)&actualPort, 1);
+			newListener = true;
 		}
 
 		if(logFile && newListener)
@@ -549,15 +442,6 @@ int start(char *displayname)
 	}
 
 	delete receiver;  receiver = NULL;
-	#ifdef USESSL
-	delete sslReceiver;  sslReceiver = NULL;
-	if(maindpy && sslPortAtom != None)
-	{
-		XDeleteProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
-			sslPortAtom);
-		sslPortAtom = None;
-	}
-	#endif
 	if(maindpy && portAtom != None)
 	{
 		XDeleteProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
@@ -569,9 +453,6 @@ int start(char *displayname)
 	if(restart)
 	{
 		deadYet = restart = false;  actualPort = 0;
-		#ifdef USESSL
-		actualSSLPort = 0;
-		#endif
 		goto start;
 	}
 

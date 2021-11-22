@@ -67,11 +67,6 @@ usage()
 	echo "            [default = 1x for JPEG/VGL Transport.  Has no effect with"
 	echo "             other built-in image transports or encoding types]"
 	echo
-	echo "+/-s      : Enable/disable SSL encryption of VGL Transport or custom"
-	echo "            image transport, if applicable."
-	echo "            [default = disabled.  Has no effect on the VGL Transport unless"
-	echo "             VirtualGL was built with OpenSSL support]"
-	echo
 	echo "+/-sp     : Turn on/off frame spoiling [default = enabled]"
 	echo
 	echo "-st <s>   : left = Read back/transport only left eye buffer of rendered stereo"
@@ -124,8 +119,6 @@ do
 	+sp*)       VGL_SPOIL=1       ; export VGL_SPOIL    ;;
 	-sp*)       VGL_SPOIL=0       ; export VGL_SPOIL    ;;
 	-sa*)       VGL_SUBSAMP=$2    ; export VGL_SUBSAMP  ; shift     ;;
-	-s*)        VGL_SSL=0         ; export VGL_SSL      ;;
-	+s*)        VGL_SSL=1         ; export VGL_SSL      ;;
 	-pr*)       VGL_PROFILE=0     ; export VGL_PROFILE  ;;
 	+pr*)       VGL_PROFILE=1     ; export VGL_PROFILE  ;;
 	-q*)        VGL_QUAL=$2       ; export VGL_QUAL     ; shift     ;;

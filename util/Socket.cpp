@@ -55,106 +55,11 @@ typedef struct
 	} u;
 } VGLSockAddr;
 
-#ifdef USESSL
-bool Socket::sslInit = false;
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-CriticalSection Socket::cryptoLock[CRYPTO_NUM_LOCKS];
-#endif
-#endif
 CriticalSection Socket::mutex;
 int Socket::instanceCount = 0;
 
 
-#ifdef USESSL
-
-static EVP_PKEY *newPrivateKey(int bits)
-{
-	#if OPENSSL_VERSION_NUMBER < 0x30000000L
-	BIGNUM *bn = NULL;
-	RSA *rsa = NULL;
-	#endif
-	EVP_PKEY *pk = NULL;
-
-	try
-	{
-		#if OPENSSL_VERSION_NUMBER < 0x30000000L
-		if(!(bn = BN_new())) THROW_SSL();
-		if(!BN_set_word(bn, RSA_F4)) THROW_SSL();
-		if(!(rsa = RSA_new())) THROW_SSL();
-		if(!RSA_generate_key_ex(rsa, bits, bn, NULL)) THROW_SSL();
-		if(!(pk = EVP_PKEY_new())) THROW_SSL();
-		if(!EVP_PKEY_assign_RSA(pk, rsa)) THROW_SSL();
-		BN_free(bn);
-		#else
-		if(!(pk = EVP_RSA_gen(bits))) THROW_SSL();
-		#endif
-		return pk;
-	}
-	catch(...)
-	{
-		#if OPENSSL_VERSION_NUMBER < 0x30000000L
-		if(bn) BN_free(bn);
-		if(rsa) RSA_free(rsa);
-		#endif
-		if(pk) EVP_PKEY_free(pk);
-		throw;
-	}
-}
-
-
-static X509 *newCert(EVP_PKEY *priv)
-{
-	X509 *cert = NULL;  X509_NAME *name = NULL;  int nid = NID_undef;
-	X509_PUBKEY *pub = NULL;  EVP_PKEY *pk = NULL;
-
-	try
-	{
-		if((cert = X509_new()) == NULL) THROW_SSL();
-		if(!X509_set_version(cert, 2)) THROW_SSL();
-		ASN1_INTEGER_set(X509_get_serialNumber(cert), 0L);
-
-		if((name = X509_NAME_new()) == NULL) THROW_SSL();
-		if((nid = OBJ_txt2nid("organizationName")) == NID_undef) THROW_SSL();
-		if(!X509_NAME_add_entry_by_NID(name, nid, MBSTRING_ASC,
-			(unsigned char *)"VirtualGL", -1, -1, 0)) THROW_SSL();
-		if((nid = OBJ_txt2nid("commonName")) == NID_undef) THROW_SSL();
-		if(!X509_NAME_add_entry_by_NID(name, nid, MBSTRING_ASC,
-			(unsigned char *)"localhost", -1, -1, 0)) THROW_SSL();
-		if(!X509_set_subject_name(cert, name)) THROW_SSL();
-		if(!X509_set_issuer_name(cert, name)) THROW_SSL();
-		X509_NAME_free(name);  name = NULL;
-
-		X509_gmtime_adj(X509_get_notBefore(cert), 0);
-		X509_gmtime_adj(X509_get_notAfter(cert), (long)60 * 60 * 24 * 365);
-
-		if((pub = X509_PUBKEY_new()) == NULL) THROW_SSL();
-		X509_PUBKEY_set(&pub, priv);
-		if((pk = X509_PUBKEY_get(pub)) == NULL) THROW_SSL();
-		X509_set_pubkey(cert, pk);
-		EVP_PKEY_free(pk);  pk = NULL;
-		X509_PUBKEY_free(pub);  pub = NULL;
-		if(X509_sign(cert, priv, EVP_md5()) <= 0) THROW_SSL();
-
-		return cert;
-	}
-	catch(...)
-	{
-		if(pub) X509_PUBKEY_free(pub);
-		if(pk) EVP_PKEY_free(pk);
-		if(name) X509_NAME_free(name);
-		if(cert) X509_free(cert);
-		throw;
-	}
-}
-
-#endif  // USESSL
-
-
-Socket::Socket(bool doSSL_, bool ipv6_) :
-#ifdef USESSL
-	doSSL(doSSL_),
-#endif
-	ipv6(ipv6_)
+Socket::Socket(bool ipv6_) : ipv6(ipv6_)
 {
 	CriticalSection::SafeLock l(mutex);
 
@@ -172,49 +77,10 @@ Socket::Socket(bool doSSL_, bool ipv6_) :
 	if(signal(SIGPIPE, SIG_IGN) == SIG_ERR) THROW_UNIX();
 	#endif
 
-	#ifdef USESSL
-	if(!sslInit && doSSL)
-	{
-		#if !defined(HAVE_DEVURANDOM) && !defined(_WIN32)
-		char buf[128];  int i;
-		srandom(getpid());
-		for(i = 0; i < 128; i++)
-			buf[i] = (char)((double)random() / (double)RAND_MAX * 254. + 1.0);
-		RAND_seed(buf, 128);
-		#endif
-		OpenSSL_add_all_algorithms();
-		SSL_load_error_strings();
-		ERR_load_crypto_strings();
-		CRYPTO_set_id_callback(Thread::threadID);
-		#if OPENSSL_VERSION_NUMBER < 0x10100000L
-		CRYPTO_set_locking_callback(lockingCallback);
-		#endif
-		SSL_library_init();
-		sslInit = true;
-		char *env = NULL;
-		if((env = getenv("VGL_VERBOSE")) != NULL && strlen(env) > 0
-			&& !strncmp(env, "1", 1))
-			fprintf(stderr, "[VGL] Using OpenSSL version %s\n",
-				SSLeay_version(SSLEAY_VERSION));
-	}
-	ssl = NULL;  sslctx = NULL;
-	#endif
-
 	sd = INVALID_SOCKET;
 }
 
 
-#ifdef USESSL
-Socket::Socket(SOCKET sd_, SSL *ssl_) :
-	sslctx(NULL), ssl(ssl_), sd(sd_)
-{
-	doSSL = ssl ? true : false;
-	#ifdef _WIN32
-	CriticalSection::SafeLock l(mutex);
-	instanceCount++;
-	#endif
-}
-#else
 Socket::Socket(SOCKET sd_) :
 	sd(sd_)
 {
@@ -223,7 +89,6 @@ Socket::Socket(SOCKET sd_) :
 	instanceCount++;
 	#endif
 }
-#endif
 
 
 Socket::~Socket(void)
@@ -239,16 +104,6 @@ Socket::~Socket(void)
 
 void Socket::close(void)
 {
-	#ifdef USESSL
-	if(ssl)
-	{
-		SSL_shutdown(ssl);  SSL_free(ssl);  ssl = NULL;
-	}
-	if(sslctx)
-	{
-		SSL_CTX_free(sslctx);  sslctx = NULL;
-	}
-	#endif
 	if(sd != INVALID_SOCKET)
 	{
 		#ifdef _WIN32
@@ -270,9 +125,6 @@ void Socket::connect(char *serverName, unsigned short port)
 
 	if(serverName == NULL || strlen(serverName) < 1) THROW("Invalid argument");
 	if(sd != INVALID_SOCKET) THROW("Already connected");
-	#ifdef USESSL
-	if(ssl && sslctx && doSSL) THROW("SSL already connected");
-	#endif
 
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;
@@ -297,27 +149,6 @@ void Socket::connect(char *serverName, unsigned short port)
 		freeaddrinfo(addr);
 		throw;
 	}
-
-	#ifdef USESSL
-	if(doSSL)
-	{
-		if((sslctx = SSL_CTX_new(SSLv23_client_method())) == NULL) THROW_SSL();
-		#if OPENSSL_VERSION_NUMBER >= 0x10101000L
-		// TLS v1.3 does not support the RSA key exchange algorithm, so this is a
-		// quick & dirty hack to allow VirtualGL's built-in SSL encryption feature
-		// to work with OpenSSL v1.1.1 and later.  The RSA key exchange algorithm
-		// and TLS v1.2 have some known vulnerabilities, so if built-in SSL
-		// encryption is going to remain a feature in VGL, then it needs to be
-		// overhauled to use a different key exchange algorithm.
-		if(!SSL_CTX_set_max_proto_version(sslctx, TLS1_2_VERSION)) THROW_SSL();
-		#endif
-		if((ssl = SSL_new(sslctx)) == NULL) THROW_SSL();
-		if(!SSL_set_fd(ssl, (int)sd)) THROW_SSL();
-		int ret = SSL_connect(ssl);
-		if(ret != 1) throw(SSLError("Socket::connect", ssl, ret));
-		SSL_set_connect_state(ssl);
-	}
-	#endif
 }
 
 
@@ -330,9 +161,6 @@ unsigned short Socket::setupListener(unsigned short port, bool reuseAddr)
 	VGLSockAddr myaddr;  SOCKLEN_T addrlen;
 
 	if(sd != INVALID_SOCKET) THROW("Already connected");
-	#ifdef USESSL
-	if(ssl && sslctx && doSSL) THROW("SSL already connected");
-	#endif
 
 	if((sd = socket(ipv6 ? AF_INET6 : AF_INET, SOCK_STREAM,
 		IPPROTO_TCP)) == INVALID_SOCKET)
@@ -377,38 +205,10 @@ unsigned short Socket::findPort(void)
 unsigned short Socket::listen(unsigned short port, bool reuseAddr)
 {
 	unsigned short actualPort = port;
-	#ifdef USESSL
-	X509 *cert = NULL;  EVP_PKEY *priv = NULL;
-	#endif
 
 	actualPort = setupListener(port, reuseAddr);
 
 	TRY_SOCK(::listen(sd, MAXCONN));
-
-	#ifdef USESSL
-	if(doSSL)
-	{
-		try
-		{
-			if((sslctx = SSL_CTX_new(SSLv23_server_method())) == NULL) THROW_SSL();
-			ERRIFNOT(priv = newPrivateKey(SSLKEYLENGTH));
-			ERRIFNOT(cert = newCert(priv));
-			if(SSL_CTX_use_certificate(sslctx, cert) <= 0)
-				THROW_SSL();
-			if(SSL_CTX_use_PrivateKey(sslctx, priv) <= 0)
-				THROW_SSL();
-			if(!SSL_CTX_check_private_key(sslctx)) THROW_SSL();
-			if(priv) EVP_PKEY_free(priv);
-			if(cert) X509_free(cert);
-		}
-		catch(...)
-		{
-			if(priv) EVP_PKEY_free(priv);
-			if(cert) X509_free(cert);
-			throw;
-		}
-	}
-	#endif
 
 	return actualPort;
 }
@@ -422,28 +222,12 @@ Socket *Socket::accept(void)
 	SOCKLEN_T addrlen = sizeof(struct sockaddr_storage);
 
 	if(sd == INVALID_SOCKET) THROW("Not connected");
-	#ifdef USESSL
-	if(!sslctx && doSSL) THROW("SSL not initialized");
-	#endif
 
 	TRY_SOCK(clientsd = ::accept(sd, &remoteaddr.u.sa, &addrlen));
 	TRY_SOCK(setsockopt(clientsd, IPPROTO_TCP, TCP_NODELAY, (char *)&m,
 		sizeof(int)));
 
-	#ifdef USESSL
-	SSL *tempssl = NULL;
-	if(doSSL)
-	{
-		if(!(tempssl = SSL_new(sslctx))) THROW_SSL();
-		if(!(SSL_set_fd(tempssl, (int)clientsd))) THROW_SSL();
-		int ret = SSL_accept(tempssl);
-		if(ret != 1) throw(SSLError("Socket::accept", tempssl, ret));
-		SSL_set_accept_state(tempssl);
-	}
-	return new Socket(clientsd, tempssl);
-	#else
 	return new Socket(clientsd);
-	#endif
 }
 
 
@@ -468,25 +252,12 @@ const char *Socket::remoteName(void)
 void Socket::send(char *buf, int len)
 {
 	if(sd == INVALID_SOCKET) THROW("Not connected");
-	#ifdef USESSL
-	if(doSSL && !ssl) THROW("SSL not connected");
-	#endif
 	int bytesSent = 0, retval;
 	while(bytesSent < len)
 	{
-		#ifdef USESSL
-		if(doSSL)
-		{
-			retval = SSL_write(ssl, &buf[bytesSent], len);
-			if(retval <= 0) throw(SSLError("Socket::send", ssl, retval));
-		}
-		else
-		#endif
-		{
-			retval = ::send(sd, &buf[bytesSent], len - bytesSent, 0);
-			if(retval == SOCKET_ERROR) THROW_SOCK();
-			if(retval == 0) break;
-		}
+		retval = ::send(sd, &buf[bytesSent], len - bytesSent, 0);
+		if(retval == SOCKET_ERROR) THROW_SOCK();
+		if(retval == 0) break;
 		bytesSent += retval;
 	}
 	if(bytesSent != len) THROW("Incomplete send");
@@ -496,25 +267,12 @@ void Socket::send(char *buf, int len)
 void Socket::recv(char *buf, int len)
 {
 	if(sd == INVALID_SOCKET) THROW("Not connected");
-	#ifdef USESSL
-	if(doSSL && !ssl) THROW("SSL not connected");
-	#endif
 	int bytesRead = 0, retval;
 	while(bytesRead < len)
 	{
-		#ifdef USESSL
-		if(doSSL)
-		{
-			retval = SSL_read(ssl, &buf[bytesRead], len);
-			if(retval <= 0) throw(SSLError("Socket::recv", ssl, retval));
-		}
-		else
-		#endif
-		{
-			retval = ::recv(sd, &buf[bytesRead], len - bytesRead, 0);
-			if(retval == SOCKET_ERROR) THROW_SOCK();
-			if(retval == 0) break;
-		}
+		retval = ::recv(sd, &buf[bytesRead], len - bytesRead, 0);
+		if(retval == SOCKET_ERROR) THROW_SOCK();
+		if(retval == 0) break;
 		bytesRead += retval;
 	}
 	if(bytesRead != len) THROW("Incomplete receive");

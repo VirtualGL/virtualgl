@@ -257,11 +257,6 @@ if(MAPFLAG)
 	set(VGLTRANS_TEST_LINK_FLAGS
 		"${VGLTRANS_TEST_LINK_FLAGS} ${MAPFLAG}${CMAKE_CURRENT_SOURCE_DIR}/testplugin-mapfile")
 endif()
-if(VGL_USESSL AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	# Work around this issue:
-	# http://rt.openssl.org/Ticket/Display.html?user=guest&pass=guest&id=1521
-	set(VGLTRANS_TEST_LINK_FLAGS "${VGLTRANS_TEST_LINK_FLAGS} -Wl,-Bsymbolic")
-endif()
 if(VGLTRANS_TEST_LINK_FLAGS)
 	set_target_properties(vgltrans_test PROPERTIES LINK_FLAGS
 		"${VGLTRANS_TEST_LINK_FLAGS}")

@@ -447,7 +447,7 @@ void VGLTrans::connect(char *displayName, unsigned short port)
 		{
 			free(serverName);  serverName = strdup("localhost");
 		}
-		socket = new Socket((bool)fconfig.ssl, true);
+		socket = new Socket(true);
 		try
 		{
 			socket->connect(serverName, port);

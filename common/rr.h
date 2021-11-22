@@ -140,11 +140,6 @@ enum rrstereo
 
 /* Other */
 #define RR_DEFAULTPORT  4242
-#ifdef USESSL
-#define RR_DEFAULTSSLPORT  4243
-#else
-#define RR_DEFAULTSSLPORT  RR_DEFAULTPORT
-#endif
 #define RR_DEFAULTTILESIZE  256
 
 /* Maximum threads that be can be used for parallel image compression */
@@ -193,7 +188,6 @@ typedef struct _FakerConfig
   int samples;
   char spoil;
   char spoillast;
-  char ssl;
   int stereo;
   int subsamp;
   char sync;

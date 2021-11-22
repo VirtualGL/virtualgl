@@ -82,32 +82,25 @@ problems with the system.
 
 NetTest is a network benchmark that uses the same network I/O classes as
 VirtualGL.  It can be used to test the latency and throughput of any TCP/IP
-connection, with or without SSL encryption.  ''nettest'' is installed in
-{file: /opt/VirtualGL/bin} by default.  For Windows users, a native Windows
-version of NetTest is included in the {file: VirtualGL-Utils} package, which
-is distributed alongside VirtualGL.
+connection.  ''nettest'' is installed in {file: /opt/VirtualGL/bin} by default.
+For Windows users, a native Windows version of NetTest is included in the
+{file: VirtualGL-Utils} package, which is distributed alongside VirtualGL.
 
 To use NetTest, first start up the NetTest server on one end of the
 connection:
 
 #Verb: <<---
-nettest -server [-ssl]
+nettest -server
 ---
-
-(Use ''-ssl'' if you want to test the performance of SSL encryption over this
-particular connection.  VirtualGL must have been compiled with OpenSSL support
-for this option to be available.)
 
 Next, start the NetTest client on the other end of the connection:
 
 #Pverb: <<---
-nettest -client __server__ [-ssl]
+nettest -client __server__
 ---
 
 Replace __''server''__ with the hostname or IP address of the machine on which
-the NetTest server is running.  (Use ''-ssl'' if the NetTest server is running
-in SSL mode.  VirtualGL must have been compiled with OpenSSL support for this
-option to be available.)
+the NetTest server is running.
 
 The NetTest client will produce output similar to the following:
 

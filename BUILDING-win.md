@@ -12,9 +12,6 @@ Build Requirements
 
 - [CMake](http://www.cmake.org) v2.8.12 or later
 
-- If building SSL support:
-  * [OpenSSL](http://www.OpenSSL.org) -- see "Building SSL Support" below
-
 - Microsoft Visual C++ 2005 or later
 
   If you don't already have Visual C++, then the easiest way to get it is by
@@ -99,50 +96,6 @@ Debug Build
 Add `-DCMAKE_BUILD_TYPE=Debug` to the CMake command line.  Or, if building with
 NMake, remove `-DCMAKE_BUILD_TYPE=Release` (Debug builds are the default with
 NMake.)
-
-
-Building Secure Sockets Layer (SSL) Support
--------------------------------------------
-
-If built with SSL support, NetTest can be used to test the performance of a
-particular OpenSSL implementation.  To enable SSL support, set the `VGL_USESSL`
-CMake variable to `1`.
-
-The easiest way to get OpenSSL is to install the Win32 OpenSSL or Win64 OpenSSL
-package from <http://www.slproweb.com/products/Win32OpenSSL.html>.
-
-You can then add one of the following to the CMake command line to statically
-link NetTest with OpenSSL:
-
-  **Win64 Release (Visual Studio):**
-
-    -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=c:\OpenSSL-Win64\include \
-      -DLIB_EAY_RELEASE=c:\OpenSSL-Win64\lib\VC\libeay32MT.lib \
-      -DSSL_EAY_RELEASE=c:\OpenSSL-Win64\lib\VC\ssleay32MT.lib
-
-  **Win64 Debug (Visual Studio):**
-
-    -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=c:\OpenSSL-Win64\include \
-      -DLIB_EAY_DEBUG=c:\OpenSSL-Win64\lib\VC\libeay32MTd.lib \
-      -DSSL_EAY_DEBUG=c:\OpenSSL-Win64\lib\VC\ssleay32MTd.lib
-
-  **Win32 Release (Visual Studio):**
-
-    -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=c:\OpenSSL-Win32\include \
-      -DLIB_EAY_RELEASE=c:\OpenSSL-Win32\lib\VC\libeay32MT.lib \
-      -DSSL_EAY_RELEASE=c:\OpenSSL-Win32\lib\VC\ssleay32MT.lib
-
-  **Win32 Debug (Visual Studio):**
-
-    -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=c:\OpenSSL-Win32\include \
-      -DLIB_EAY_DEBUG=c:\OpenSSL-Win32\lib\VC\libeay32MTd.lib \
-      -DSSL_EAY_DEBUG=c:\OpenSSL-Win32\lib\VC\ssleay32MTd.lib
-
-  **Win32 (MinGW):**
-
-    -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=c:/OpenSSL-Win32/include \
-      -DLIB_EAY=c:/OpenSSL-Win32/lib/MinGW/libeay32.a \
-      -DSSL_EAY=c:/OpenSSL-Win32/lib/MinGW/ssleay32.a
 
 
 Advanced CMake Options

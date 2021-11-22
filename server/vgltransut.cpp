@@ -35,12 +35,7 @@ void usage(char **argv)
 		fconfig.client : "read from DISPLAY environment");
 	fprintf(stderr, "-port <p> = TCP port on which the VirtualGL Client is listening\n");
 	fprintf(stderr, "            (default: %d)\n",
-		#ifdef USESSL
-		fconfig.port < 0 ? (fconfig.ssl ? RR_DEFAULTSSLPORT : RR_DEFAULTPORT) :
-		#else
-		fconfig.port < 0 ? RR_DEFAULTPORT :
-		#endif
-		fconfig.port);
+		fconfig.port < 0 ? RR_DEFAULTPORT : fconfig.port);
 	fprintf(stderr, "-samp <s> = JPEG chrominance subsampling factor: 0 (gray), 1, 2, or 4\n");
 	fprintf(stderr, "            (default: %d)\n", fconfig.subsamp);
 	fprintf(stderr, "-qual <q> = JPEG quality, 1 <= <q> <= 100 (default: %d)\n",
@@ -49,10 +44,6 @@ void usage(char **argv)
 	fprintf(stderr, "                comparison tile (default: %d x %d pixels)\n",
 		fconfig.tilesize, fconfig.tilesize);
 	fprintf(stderr, "-rgb = Use RGB (uncompressed) encoding (default is JPEG)\n");
-	#ifdef USESSL
-	fprintf(stderr, "-ssl = Use SSL tunnel (default: %s)\n",
-		fconfig.ssl ? "On" : "Off");
-	#endif
 	fprintf(stderr, "-np <n> = Number of threads to use for compression (default: %d)\n\n",
 		fconfig.np);
 	exit(1);
@@ -77,9 +68,6 @@ int main(int argc, char **argv)
 		if(argc > 2) for(i = 2; i < argc; i++)
 		{
 			if(!stricmp(argv[i], "-h") || !strcmp(argv[i], "-?")) usage(argv);
-			#ifdef USESSL
-			else if(!stricmp(argv[i], "-ssl")) fconfig.ssl = 1;
-			#endif
 			else if(!stricmp(argv[i], "-client") && i < argc - 1)
 			{
 				strncpy(fconfig.client, argv[++i], MAXSTR - 1);

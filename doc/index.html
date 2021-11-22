@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2021-11-22T12:27:21">
+<meta name="date" content="2021-11-22T14:39:09">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1591,27 +1591,25 @@ can simply reset the X server to clear the orphaned X window property.</p>
 
 <p>To retain compatibility with previous versions of VirtualGL, the first 
 VirtualGL Client instance on a given machine will attempt to listen on 
-port 4242 for unencrypted connections and 4243 for SSL connections (if 
-VirtualGL was built with OpenSSL support.)  If it fails to obtain one of 
-those ports, because another application or another VirtualGL Client 
-instance is already using them, then the VirtualGL Client will try to 
-obtain a free port in the range of 4200-4299.  Failing that, it will 
-request a free port from the operating system.</p>
+port 4242.  If it fails to obtain that port, because another application 
+or another VirtualGL Client instance is already using it, then the 
+VirtualGL Client will try to obtain a free port in the range of 
+4200-4299.  Failing that, it will request a free port from the operating 
+system.</p>
 
 <p>In a nutshell: if you only ever plan to run one X server at a time on 
 the client, which means that you&rsquo;ll only ever need one instance of 
 the VirtualGL Client at a time, then it is sufficient to open inbound 
-port 4242 (and 4243 if you plan to use SSL) in the client&rsquo;s 
-firewall.  If you plan to run multiple X servers on the client, which 
-means that you will need to run multiple VirtualGL Client instances, 
-then you may wish to open ports 4200-4299.  Similarly, if you are 
-running the VirtualGL Client on a multi-user X proxy server that has a 
-firewall, then you may wish to open ports 4200-4299 in the 
-server&rsquo;s firewall. Opening ports 4200-4299 will accommodate up to 
-100 separate VirtualGL Client instances (50 if OpenSSL support is 
-enabled.)  More instances than that cannot be accommodated on a 
-firewalled machine, unless the firewall is able to create rules based on 
-application executables instead of listening ports.</p>
+port 4242 in the client&rsquo;s firewall.  If you plan to run multiple X 
+servers on the client, which means that you will need to run multiple 
+VirtualGL Client instances, then you may wish to open ports 4200-4299.  
+Similarly, if you are running the VirtualGL Client on a multi-user X 
+proxy server that has a firewall, then you may wish to open ports 
+4200-4299 in the server&rsquo;s firewall.  Opening ports 4200-4299 will 
+accommodate up to 100 separate VirtualGL Client instances.  More 
+instances than that cannot be accommodated on a firewalled machine, 
+unless the firewall is able to create rules based on application 
+executables instead of listening ports.</p>
 
 <p>Note that it is not necessary to open any inbound ports in the firewall 
 to use the VGL Transport with <a href="#SSH_Tunneling">SSH 
@@ -2541,31 +2539,24 @@ performance problems with the system.</p>
 
 <p>NetTest is a network benchmark that uses the same network I/O classes as 
 VirtualGL.  It can be used to test the latency and throughput of any 
-TCP/IP connection, with or without SSL encryption.  <code>nettest</code> 
-is installed in <strong class="filename">/opt/VirtualGL/bin</strong> by 
-default.  For Windows users, a native Windows version of NetTest is 
-included in the <strong class="filename">VirtualGL-Utils</strong> 
-package, which is distributed alongside VirtualGL.</p>
+TCP/IP connection.  <code>nettest</code> is installed in 
+<strong class="filename">/opt/VirtualGL/bin</strong> by default. For 
+Windows users, a native Windows version of NetTest is included in the 
+<strong class="filename">VirtualGL-Utils</strong> package, which is 
+distributed alongside VirtualGL.</p>
 
 <p>To use NetTest, first start up the NetTest server on one end of the 
 connection:</p>
 
 <pre class="verbatim">
-nettest&nbsp;-server&nbsp;[-ssl]
+nettest&nbsp;-server
 </pre>
-
-<p>(Use <code>-ssl</code> if you want to test the performance of SSL 
-encryption over this particular connection.  VirtualGL must have been 
-compiled with OpenSSL support for this option to be available.)</p>
 
 <p>Next, start the NetTest client on the other end of the connection:</p>
 
-<pre class="verbatim">nettest -client <em>server</em> [-ssl]</pre>
+<pre class="verbatim">nettest -client <em>server</em></pre>
 <p>Replace <em><code>server</code></em> with the hostname or IP address of 
-the machine on which the NetTest server is running.  (Use 
-<code>-ssl</code> if the NetTest server is running in SSL mode.  
-VirtualGL must have been compiled with OpenSSL support for this option 
-to be available.)</p>
+the machine on which the NetTest server is running.</p>
 
 <p>The NetTest client will produce output similar to the following:</p>
 
@@ -4204,43 +4195,6 @@ Image transport plugins are free to handle or ignore any configuration option as
     </dd>
 </dl>
 
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>VGL_SSL = <em>0 | 1</em></code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard"><code>vglrun</code> argument</td>
-    <td class="standard"><code>-s</code> / <code>+s</code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">Disable/enable SSL encryption of the image transport</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Image Transports</td>
-    <td class="standard">VGL, Custom (if supported)</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Default Value</td>
-    <td class="standard">Disabled</td>
-  </tr>
-</table>
-</div>
-
-
-<dl class="Description">
-    <dt class="Description-1 Description">Description</dt>
-    <dd class="Description-1 Description">
-        Enabling this option causes the VGL Transport to be tunneled through a 
-        secure socket layer (SSL.)
-        <div class="important"><p class="important">
-        This option has no effect unless both the VirtualGL Faker and VirtualGL Client were built with OpenSSL support.
-        </p></div>
-    </dd>
-</dl>
-
 <p><a name="VGL_STEREO"></a></p>
 
 <div class="table">
@@ -4985,32 +4939,6 @@ infrastructure around VirtualGL.</p>
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>VGLCLIENT_LISTEN = <em>sslonly | nossl</em></code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard"><code>vglclient</code> argument</td>
-    <td class="standard"><code>-sslonly</code> / <code>-nossl</code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">Accept only unencrypted or only SSL connections from the VirtualGL Faker</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Default Value</td>
-    <td class="standard">Accept both SSL and unencrypted connections</td>
-  </tr>
-</table>
-</div>
-
-
-<div class="important"><p class="important">
-This option is available only if the VirtualGL Client was built with OpenSSL support.
-</p></div>
-
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Environment Variable</td>
     <td class="standard"><code>VGLCLIENT_PORT = <em>{p}</em></code></td>
   </tr>
   <tr class="standard">
@@ -5019,7 +4947,7 @@ This option is available only if the VirtualGL Client was built with OpenSSL sup
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard"><em><code>{p}</code></em> = TCP port on which to listen for unencrypted connections from the VirtualGL Faker</td>
+    <td class="standard"><em><code>{p}</code></em> = TCP port on which to listen for connections from the VirtualGL Faker</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
@@ -5033,13 +4961,13 @@ This option is available only if the VirtualGL Client was built with OpenSSL sup
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
         The default behavior of the VirtualGL Client is to first try listening 
-        for unencrypted connections on port 4242, to maintain backward 
-        compatibility with VirtualGL v2.0.x.  If port 4242 is not available, 
-        then the VirtualGL Client will try to find a free port in the range of 
-        4200-4299. If none of those ports is available, then the VirtualGL 
-        Client will request a free port from the operating system. <br /><br /> 
-        Setting this option circumvents the automatic behavior described above 
-        and causes the VirtualGL Client to listen only on the specified TCP port.
+        for connections on port 4242, to maintain backward compatibility with 
+        VirtualGL v2.0.x.  If port 4242 is not available, then the VirtualGL 
+        Client will try to find a free port in the range of 4200-4299.  If none 
+        of those ports is available, then the VirtualGL Client will request a 
+        free port from the operating system. <br /><br /> Setting this option 
+        circumvents the automatic behavior described above and causes the 
+        VirtualGL Client to listen only on the specified TCP port.
     </dd>
 </dl>
 
@@ -5068,45 +4996,6 @@ This option is available only if the VirtualGL Client was built with OpenSSL sup
         benchmark itself and periodically print out the throughput of various 
         stages in its image pipelines. <br /><br /> See Chapter 
         <a href="#Perf_Measurement" class="ref">17</a> for more details.
-    </dd>
-</dl>
-
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>VGLCLIENT_SSLPORT = <em>{p}</em></code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard"><code>vglclient</code> argument</td>
-    <td class="standard"><code>-sslport <em>{p}</em></code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard"><em><code>{p}</code></em> = TCP port on which to listen for SSL connections from the VirtualGL Faker</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Default Value</td>
-    <td class="standard">Automatically select a free port</td>
-  </tr>
-</table>
-</div>
-
-
-<dl class="Description">
-    <dt class="Description-1 Description">Description</dt>
-    <dd class="Description-1 Description">
-        The default behavior of the VirtualGL Client is to first try listening 
-        for SSL connections on port 4243, to maintain backward compatibility 
-        with VirtualGL v2.0.x.  If port 4243 is not available, then the 
-        VirtualGL Client will try to find a free port in the range of 4200-4299. 
-        If none of those ports is available, then the VirtualGL Client will 
-        request a free port from the operating system. <br /><br /> Setting this 
-        option circumvents the automatic behavior described above and causes the 
-        VirtualGL Client to listen only on the specified TCP port.
-        <div class="important"><p class="important">
-        This option is available only if the VirtualGL Client was built with OpenSSL support.
-        </p></div>
     </dd>
 </dl>
 

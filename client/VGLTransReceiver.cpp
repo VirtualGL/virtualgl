@@ -84,9 +84,9 @@ static unsigned short DisplayNumber(Display *dpy)
 }
 
 
-VGLTransReceiver::VGLTransReceiver(bool doSSL_, bool ipv6_, int drawMethod_) :
+VGLTransReceiver::VGLTransReceiver(bool ipv6_, int drawMethod_) :
 	drawMethod(drawMethod_), listenSocket(NULL), thread(NULL), deadYet(false),
-	doSSL(doSSL_), ipv6(ipv6_)
+	ipv6(ipv6_)
 {
 	char *env = NULL;
 
@@ -110,7 +110,7 @@ void VGLTransReceiver::listen(unsigned short port_)
 {
 	try
 	{
-		listenSocket = new Socket(doSSL, ipv6);
+		listenSocket = new Socket(ipv6);
 		port = listenSocket->listen(port_);
 	}
 	catch(...)
@@ -132,8 +132,7 @@ void VGLTransReceiver::run(void)
 		{
 			listener = NULL;  socket = NULL;
 			socket = listenSocket->accept();  if(deadYet) break;
-			vglout.println("++ %sConnection from %s.", doSSL ? "SSL " : "",
-				socket->remoteName());
+			vglout.println("++ Connection from %s.", socket->remoteName());
 			listener = new Listener(socket, drawMethod);
 			continue;
 		}

@@ -290,30 +290,6 @@ if(VGL_USEHELGRIND)
 	report_option(VGL_USEHELGRIND "Helgrind annotations")
 endif()
 
-option(VGL_USESSL
-	"Enable SSL (Secure Sockets Layer) encryption feature in the VGL Transport"
-	OFF)
-boolean_number(VGL_USESSL)
-report_option(VGL_USESSL "SSL (Secure Sockets Layer) encryption")
-if(VGL_USESSL)
-	include(FindOpenSSL)
-	if(NOT OPENSSL_FOUND)
-		message(STATUS "OpenSSL not found.  Disabling SSL support.")
-	else()
-		add_definitions(-DUSESSL)
-		include_directories(${OPENSSL_INCLUDE_DIR})
-	endif()
-	set(DEFAULT_VGL_SSLKEYLENGTH 2048)
-	set(VGL_SSLKEYLENGTH ${DEFAULT_VGL_SSLKEYLENGTH} CACHE STRING
-		"Private key length (in bits) for SSL encryption (default: ${DEFAULT_VGL_SSLKEYLENGTH})")
-	math(EXPR VALIDATE_SSLKEYLENGTH "${VGL_SSLKEYLENGTH} & (${VGL_SSLKEYLENGTH} - 1)")
-	if(NOT VALIDATE_SSLKEYLENGTH EQUAL 0)
-		message(FATAL_ERROR "VGL_SSLKEYLENGTH must be a power of two.")
-	endif()
-	message(STATUS "VGL_SSLKEYLENGTH = ${VGL_SSLKEYLENGTH}")
-	add_definitions(-DSSLKEYLENGTH=${VGL_SSLKEYLENGTH})
-endif()
-
 if(WIN32)
 
 set(VGL_USEXV 0)

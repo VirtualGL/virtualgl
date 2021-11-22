@@ -12,6 +12,15 @@ performance penalty.  `vglconnect -x` did not work with most modern operating
 systems, since most modern operating systems disable X11 TCP connections by
 default.
 
+2. SSL encryption of the VGL Transport has been retired in this version of
+VirtualGL and will continue to be maintained in the 3.0.x branch on a break/fix
+basis only.  That feature, which had not been included in official VirtualGL
+packages since VirtualGL 2.1.x, was not widely used.  Furthermore, SSL
+encryption of the VGL Transport had no performance advantages over SSH
+tunneling on modern systems, and it had some security disadvantages due to its
+reliance on the RSA key exchange algorithm (which made it incompatible with TLS
+v1.3.)
+
 
 3.0
 ===
