@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2022-01-13T16:33:43">
+<meta name="date" content="2022-01-13T17:01:04">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1511,9 +1511,10 @@ the server:</p>
 <pre class="verbatim">/opt/VirtualGL/bin/vglconnect -s <em>user</em>@<em>server</em></pre>
 <p><code>vglconnect</code> will make two SSH connections into the server, 
 the first to find an open port on the server and the second to create 
-the SSH tunnel for the VGL Transport and open the secure shell.  If you 
-are not using an SSH agent to enable password-less logins, then you will 
-have to enter your password twice.</p>
+the SSH tunnel for the VGL Transport and open the secure shell.  Because 
+of Cygwin limitations, when connecting from a Windows client, it will be 
+necessary to enter your SSH password twice unless you are using an SSH 
+agent to enable password-less logins.</p>
 
 <p><code>vglconnect&nbsp;-s</code> can be used to create multi-layered SSH 
 tunnels.  For instance, if the VirtualGL server is not directly 

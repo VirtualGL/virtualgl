@@ -87,8 +87,10 @@ pass a ''-s'' argument to ''vglconnect'' when connecting to the server:
 
 ''vglconnect'' will make two SSH connections into the server, the first to find
 an open port on the server and the second to create the SSH tunnel for the VGL
-Transport and open the secure shell.  If you are not using an SSH agent to
-enable password-less logins, then you will have to enter your password twice.
+Transport and open the secure shell.  Because of Cygwin limitations, when
+connecting from a Windows client, it will be necessary to enter your SSH
+password twice unless you are using an SSH agent to enable password-less
+logins.
 
 ''vglconnect -s'' can be used to create multi-layered SSH tunnels.  For
 instance, if the VirtualGL server is not directly accessible from the Internet,

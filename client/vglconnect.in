@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Copyright (C)2007 Sun Microsystems, Inc.
-# Copyright (C)2009-2011, 2014-2018, 2021 D. R. Commander
+# Copyright (C)2009-2011, 2014-2018, 2021-2022 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
 # the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -107,8 +107,21 @@ else
 fi
 
 if [ $VGLTUNNEL = 1 ]; then
+	CONTROLMASTERARG="-o ControlMaster=auto"
+	CONTROLPATHARG="-o ControlPath=\"~/.ssh/vglconnect-%r@%h:%p\""
+	CONTROLPERSISTARG="-o ControlPersist=60"
+	XFWDARG="-Y"
+	# Cygwin doesn't support ControlMaster (yet).
+	case "`uname -s`" in
+	CYGWIN*)
+		CONTROLMASTERARG=
+		CONTROLPATHARG=
+		CONTROLPERSISTARG=
+		XFWDARG="-x"
+		;;
+	esac
 	echo Making preliminary SSH connection to find a free port on the server ...
-	REMOTEPORT=`$SSHCMD ${1+"$@"} -x "$VGL_BINDIR/nettest -findport && $VGL_BINDIR/vgllogin -check"`
+	REMOTEPORT=`$SSHCMD ${1+"$@"} $CONTROLMASTERARG $CONTROLPATHARG $CONTROLPERSISTARG $XFWDARG "$VGL_BINDIR/nettest -findport && $VGL_BINDIR/vgllogin -check"`
 	if [ $? -ne 0 -o "$REMOTEPORT" = "" ]; then
 		echo "[VGL] ERROR: The server does not appear to have VirtualGL 2.1 or later"
 		echo "[VGL]    installed."
@@ -116,12 +129,12 @@ if [ $VGLTUNNEL = 1 ]; then
 	fi
 	echo Making final SSH connection ...
 	if [ "$COMMAND" != "" ]; then
-		$SSHCMD -t -Y -R$REMOTEPORT:localhost:$PORT ${1+"$@"} <<EOF
+		$SSHCMD $CONTROLPATHARG $CONTROLPERSISTARG -t -Y -R$REMOTEPORT:localhost:$PORT ${1+"$@"} <<EOF
 $VGL_BINDIR/vgllogin -s $REMOTEPORT
 $COMMAND
 EOF
 	else
-		$SSHCMD -t -Y -R$REMOTEPORT:localhost:$PORT ${1+"$@"} "$VGL_BINDIR/vgllogin -s "$REMOTEPORT
+		$SSHCMD $CONTROLPATHARG $CONTROLPERSISTARG -t -Y -R$REMOTEPORT:localhost:$PORT ${1+"$@"} "$VGL_BINDIR/vgllogin -s "$REMOTEPORT
 	fi
 	exit 0
 fi

@@ -27,6 +27,10 @@ use the EGL/X11 API instead of the GLX API.  As of this writing, VirtualGL does
 not support EGL pixmap surfaces or front buffer/single buffer rendering with
 EGL window surfaces.
 
+4. On Un*x and Mac clients, `vglconnect` now uses the OpenSSH `ControlMaster`
+option to avoid the need to authenticate with the server multiple times when
+tunneling the VGL Transport through SSH.
+
 
 3.0.1
 =====
