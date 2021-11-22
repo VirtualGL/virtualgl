@@ -215,7 +215,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	if(!(configs = glxvisual::configsFromVisAttribs(dpy, screen, attrib_list, n))
 		|| n < 1)
 	{
-		if(!alreadyWarned && fconfig.verbose)
+		if(!alreadyWarned && fconfig.verbose && !fconfig.egl)
 		{
 			alreadyWarned = true;
 			vglout.println("[VGL] WARNING: VirtualGL attempted and failed to obtain a true color visual on");
