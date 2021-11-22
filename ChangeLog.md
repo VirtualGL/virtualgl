@@ -1,3 +1,18 @@
+3.1 pre-beta
+============
+
+### Significant changes relative to 3.0:
+
+1. The `vglconnect -x` and `vglconnect -k` options have been retired in this
+version of VirtualGL and will continue to be maintained in the 3.0.x branch on
+a break/fix basis only.  Those options, which had been undocumented since
+VirtualGL 2.6.1, were a throwback to the early days of VirtualGL when SSH was
+not universally available and SSH X11 forwarding sometimes introduced a
+performance penalty.  `vglconnect -x` did not work with most modern operating
+systems, since most modern operating systems disable X11 TCP connections by
+default.
+
+
 3.0
 ===
 

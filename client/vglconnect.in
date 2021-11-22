@@ -20,7 +20,6 @@ maketemp()
 }
 
 VGLTUNNEL=0
-X11TUNNEL=1
 CONNECT=1
 FORCE=0
 IPV6=0
@@ -41,12 +40,6 @@ usage()
 	echo "-ipv6 = Use IPv6 sockets"
 	echo "-e <program> = Execute <program> on the VirtualGL server (if using the -s or -x"
 	echo "               options, <program> is executed after running vgllogin.)"
-	echo "-x = Do not forward X11 or tunnel VGL Transport through SSH, but create an"
-	echo "     xauth key and add it to the VirtualGL server's keyring so that the"
-	echo "     VirtualGL server (and any machines that share its home directory) can use"
-	echo "     the 2D X server on this machine"
-	echo "-k = Create an xauth key, as with -x, but do not connect to the VirtualGL"
-	echo "     server"
 	echo "-g = Use gsissh from Globus Toolkit to make all SSH connections"
 	echo "-force = Force a new vglclient instance (use with caution)"
 	echo "-bindir <d> = Path in which the VGL executables and scripts are installed on"
@@ -67,9 +60,7 @@ do
 	-b*) VGL_BINDIR=$2; shift ;;
 	-f*) FORCE=1 ;;
 	-ipv6) IPV6=1 ;;
-	-s*) X11TUNNEL=1; VGLTUNNEL=1; CONNECT=1 ;;
-	-x*) X11TUNNEL=0; VGLTUNNEL=0; CONNECT=1 ;;
-	-k*) X11TUNNEL=0; VGLTUNNEL=0; CONNECT=0 ;;
+	-s*) VGLTUNNEL=1; CONNECT=1 ;;
 	-g*) SSHCMD=gsissh; GLOBUS=1 ;;
 	-e*) COMMAND=$2; shift ;;
 	-h*) usage ;;
@@ -136,46 +127,10 @@ EOF
 	exit 0
 fi
 
-if [ $X11TUNNEL = 1 ]; then
-	if [ "$COMMAND" != "" ]; then
-		$SSHCMD -Y ${1+"$@"} <<EOF
+if [ "$COMMAND" != "" ]; then
+	$SSHCMD -Y ${1+"$@"} <<EOF
 $COMMAND
 EOF
-	else
-		$SSHCMD -Y ${1+"$@"}
-	fi
-	exit 0
-fi
-
-XAUTH=xauth
-if [ -x /usr/X11R6/bin/xauth ]; then
-	XAUTH=/usr/X11R6/bin/xauth
 else
-	if [ -x /usr/openwin/bin/xauth ]; then
-		XAUTH=/usr/openwin/bin/xauth
-	fi
-fi
-XAUTHFILE=`maketemp vglconnect`
-$XAUTH -f $XAUTHFILE generate $DISPLAY . trusted timeout 0
-if [ $? -ne 0 ]; then
-	echo "[VGL] ERROR: Could not generate xauth key, possibly because the X server does"
-	echo "[VGL]    not have the SECURITY extension or because the xauth command could "
-	echo "[VGL]    not be found."
-	rm -f $XAUTHFILE
-	exit 1
-fi
-XAUTHCOOKIE=`$XAUTH -f $XAUTHFILE list | sed "s/.*[ ]//g"`
-rm -f $XAUTHFILE
-if [ "$CONNECT" = "1" ]; then
-	if [ "$COMMAND" != "" ]; then
-		$SSHCMD -t -x ${1+"$@"} <<EOF
-$VGL_BINDIR/vgllogin -x $DISPLAY $XAUTHCOOKIE
-$COMMAND
-EOF
-	else
-		$SSHCMD -t -x ${1+"$@"} "exec $VGL_BINDIR/vgllogin -x "$DISPLAY" "$XAUTHCOOKIE
-	fi
-else
-	DNUM=`echo $DISPLAY | sed 's/.*[:]//g'`
-	xauth add `hostname`":"$DNUM . $XAUTHCOOKIE
+	$SSHCMD -Y ${1+"$@"}
 fi
