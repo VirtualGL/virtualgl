@@ -55,6 +55,10 @@ VirtualDrawable::OGLDrawable::OGLDrawable(Display *dpy_, int width_,
 {
 	if(!config_ || width_ < 1 || height_ < 1) THROW("Invalid argument");
 
+	#ifdef EGLBACKEND
+	edpy = EGL_NO_DISPLAY;
+	#endif
+
 	int pbattribs[] = { GLX_PBUFFER_WIDTH, width, GLX_PBUFFER_HEIGHT, height,
 		GLX_PRESERVED_CONTENTS, True, None };
 	glxDraw = backend::createPbuffer(dpy, config, pbattribs);
@@ -62,6 +66,38 @@ VirtualDrawable::OGLDrawable::OGLDrawable(Display *dpy_, int width_,
 
 	setVisAttribs();
 }
+
+
+// EGL Pbuffer constructor
+
+#ifdef EGLBACKEND
+
+VirtualDrawable::OGLDrawable::OGLDrawable(EGLDisplay edpy_, int width_,
+	int height_, EGLConfig config_, const EGLint *pbAttribs_) : cleared(false),
+	stereo(false), glxDraw(0), dpy(NULL), edpy(edpy_), width(width_),
+	height(height_), depth(0), config((VGLFBConfig)config_), glFormat(0), pm(0),
+	win(0), isPixmap(false)
+{
+	if(!edpy_ || width_ < 1 || height_ < 1 || !config_ || !pbAttribs_)
+		THROW("Invalid argument");
+
+	EGLint pbAttribs[MAX_ATTRIBS + 1];
+	int j = 0;
+	for(EGLint i = 0; pbAttribs_[i] != EGL_NONE && i < MAX_ATTRIBS - 2; i += 2)
+	{
+		pbAttribs[j++] = pbAttribs_[i];  pbAttribs[j++] = pbAttribs_[i + 1];
+	}
+	pbAttribs[j++] = EGL_WIDTH;  pbAttribs[j++] = width;
+	pbAttribs[j++] = EGL_HEIGHT;  pbAttribs[j++] = height;
+	pbAttribs[j] = EGL_NONE;
+
+	glxDraw = (GLXDrawable)_eglCreatePbufferSurface(edpy, config_, pbAttribs);
+	if(!glxDraw) THROW_EGL("eglCreatePbufferSurface()");
+
+	setVisAttribs();
+}
+
+#endif
 
 
 // Pixmap constructor
@@ -73,6 +109,10 @@ VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_, int depth_,
 {
 	if(!config_ || width_ < 1 || height_ < 1 || depth_ < 0)
 		THROW("Invalid argument");
+
+	#ifdef EGLBACKEND
+	edpy = EGL_NO_DISPLAY;
+	#endif
 
 	XVisualInfo *vis = NULL;
 	if((vis = _glXGetVisualFromFBConfig(DPY3D, GLXFBC(config))) == NULL)
@@ -97,13 +137,37 @@ VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_, int depth_,
 
 void VirtualDrawable::OGLDrawable::setVisAttribs(void)
 {
-	if(glxvisual::getFBConfigAttrib(dpy, config, GLX_STEREO))
-		stereo = true;
-	rgbSize = glxvisual::getFBConfigAttrib(dpy, config, GLX_RED_SIZE) +
-		glxvisual::getFBConfigAttrib(dpy, config, GLX_GREEN_SIZE) +
-		glxvisual::getFBConfigAttrib(dpy, config, GLX_BLUE_SIZE);
-	int pixelsize = rgbSize +
-		glxvisual::getFBConfigAttrib(dpy, config, GLX_ALPHA_SIZE);
+	int pixelsize;
+
+	#ifdef EGLBACKEND
+	if(edpy != EGL_NO_DISPLAY)
+	{
+		EGLint redSize, greenSize, blueSize, alphaSize;
+
+		if(!_eglGetConfigAttrib(edpy, (EGLConfig)config, EGL_RED_SIZE, &redSize))
+			THROW_EGL("eglGetConfigAttrib()");
+		if(!_eglGetConfigAttrib(edpy, (EGLConfig)config, EGL_GREEN_SIZE,
+			&greenSize))
+			THROW_EGL("eglGetConfigAttrib()");
+		if(!_eglGetConfigAttrib(edpy, (EGLConfig)config, EGL_BLUE_SIZE, &blueSize))
+			THROW_EGL("eglGetConfigAttrib()");
+		if(!_eglGetConfigAttrib(edpy, (EGLConfig)config, EGL_ALPHA_SIZE,
+			&alphaSize))
+			THROW_EGL("eglGetConfigAttrib()");
+		rgbSize = redSize + greenSize + blueSize;
+		pixelsize = rgbSize + alphaSize;
+	}
+	else
+	#endif
+	{
+		if(glxvisual::getFBConfigAttrib(dpy, config, GLX_STEREO))
+			stereo = true;
+		rgbSize = glxvisual::getFBConfigAttrib(dpy, config, GLX_RED_SIZE) +
+			glxvisual::getFBConfigAttrib(dpy, config, GLX_GREEN_SIZE) +
+			glxvisual::getFBConfigAttrib(dpy, config, GLX_BLUE_SIZE);
+		pixelsize = rgbSize +
+			glxvisual::getFBConfigAttrib(dpy, config, GLX_ALPHA_SIZE);
+	}
 
 	if(pixelsize == 32)
 	{
@@ -132,7 +196,12 @@ VirtualDrawable::OGLDrawable::~OGLDrawable(void)
 	}
 	else
 	{
-		backend::destroyPbuffer(dpy, glxDraw);
+		#ifdef EGLBACKEND
+		if(edpy != EGL_NO_DISPLAY)
+			_eglDestroySurface(edpy, (EGLSurface)glxDraw);
+		else
+		#endif
+			backend::destroyPbuffer(dpy, glxDraw);
 		glxDraw = 0;
 	}
 }
@@ -152,6 +221,9 @@ void VirtualDrawable::OGLDrawable::clear(void)
 
 void VirtualDrawable::OGLDrawable::swap(void)
 {
+	#ifdef EGLBACKEND
+	if(edpy != EGL_NO_DISPLAY) return;
+	#endif
 	if(isPixmap)
 		_glXSwapBuffers(DPY3D, glxDraw);
 	else
@@ -167,6 +239,9 @@ VirtualDrawable::VirtualDrawable(Display *dpy_, Drawable x11Draw_)
 	if(!dpy_ || !x11Draw_) THROW("Invalid argument");
 	dpy = dpy_;
 	x11Draw = x11Draw_;
+	#ifdef EGLBACKEND
+	edpy = EGL_NO_DISPLAY;
+	#endif
 	oglDraw = NULL;
 	profReadback.setName("Readback  ");
 	autotestFrameCount = 0;
@@ -187,7 +262,16 @@ VirtualDrawable::~VirtualDrawable(void)
 {
 	mutex.lock(false);
 	delete oglDraw;  oglDraw = NULL;
-	if(ctx) { backend::destroyContext(dpy, ctx);  ctx = 0; }
+	if(ctx)
+	{
+		#ifdef EGLBACKEND
+		if(edpy != EGL_NO_DISPLAY)
+			_eglDestroyContext(edpy, (EGLContext)ctx);
+		else
+		#endif
+			backend::destroyContext(dpy, ctx);
+		ctx = 0;
+	}
 	mutex.unlock(false);
 }
 
@@ -195,6 +279,11 @@ VirtualDrawable::~VirtualDrawable(void)
 int VirtualDrawable::init(int width, int height, VGLFBConfig config_)
 {
 	if(!config_ || width < 1 || height < 1) THROW("Invalid argument");
+
+	#ifdef EGLBACKEND
+	if(edpy != EGL_NO_DISPLAY)
+		THROW("VirtualDrawable::init() method not supported with EGL/X11");
+	#endif
 
 	CriticalSection::SafeLock l(mutex);
 	if(oglDraw && oglDraw->getWidth() == width && oglDraw->getHeight() == height
@@ -212,6 +301,11 @@ int VirtualDrawable::init(int width, int height, VGLFBConfig config_)
 
 void VirtualDrawable::setDirect(Bool direct_)
 {
+	#ifdef EGLBACKEND
+	if(edpy != EGL_NO_DISPLAY)
+		THROW("VirtualDrawable::setDirect() method not supported with EGL/X11");
+	#endif
+
 	if(direct_ != True && direct_ != False) return;
 	CriticalSection::SafeLock l(mutex);
 	if(direct_ != direct && ctx)
@@ -259,8 +353,22 @@ void VirtualDrawable::initReadbackContext(void)
 	{
 		if(!isInit())
 			THROW("VirtualDrawable instance has not been fully initialized");
-		if((ctx = backend::createContext(dpy, config, NULL, direct, NULL)) == 0)
-			THROW("Could not create OpenGL context for readback");
+		#ifdef EGLBACKEND
+		if(edpy != EGL_NO_DISPLAY)
+		{
+			EGLenum api = _eglQueryAPI();
+			_eglBindAPI(EGL_OPENGL_API);
+			if((ctx = (GLXContext)_eglCreateContext(edpy, (EGLConfig)config, NULL,
+				NULL)) == 0)
+				THROW_EGL("eglCreateContext()");
+			if(api != EGL_NONE) _eglBindAPI(api);
+		}
+		else
+		#endif
+		{
+			if((ctx = backend::createContext(dpy, config, NULL, direct, NULL)) == 0)
+				THROW("Could not create OpenGL context for readback");
+		}
 	}
 }
 
@@ -342,7 +450,12 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	if(!checkRenderMode()) return;
 
 	initReadbackContext();
+	#ifdef EGLBACKEND
+	TempContext tc(edpy != EGL_NO_DISPLAY ? (Display *)edpy : dpy,
+		getGLXDrawable(), getGLXDrawable(), ctx, edpy != EGL_NO_DISPLAY);
+	#else
 	TempContext tc(dpy, getGLXDrawable(), getGLXDrawable(), ctx);
+	#endif
 
 	backend::readBuffer(readBuf);
 
@@ -476,7 +589,12 @@ void VirtualDrawable::copyPixels(GLint srcX, GLint srcY, GLint width,
 	GLint drawBuf)
 {
 	initReadbackContext();
+	#ifdef EGLBACKEND
+	TempContext tc(edpy != EGL_NO_DISPLAY ? (Display *)edpy : dpy,
+		draw, getGLXDrawable(), ctx, edpy != EGL_NO_DISPLAY);
+	#else
 	TempContext tc(dpy, draw, getGLXDrawable(), ctx);
+	#endif
 
 	backend::readBuffer(readBuf);
 	backend::drawBuffer(drawBuf);

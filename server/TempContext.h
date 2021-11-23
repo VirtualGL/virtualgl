@@ -30,21 +30,48 @@ namespace faker
 		public:
 
 			TempContext(Display *dpy_, GLXDrawable draw, GLXDrawable read,
-				GLXContext ctx) : dpy(dpy_), oldctx(backend::getCurrentContext()),
-				oldread(backend::getCurrentReadDrawable()),
-				olddraw(backend::getCurrentDrawable()), ctxChanged(false)
+				GLXContext ctx, bool eglx_ = false) : dpy(dpy_), ctxChanged(false),
+				eglx(eglx_)
 			{
+				#ifdef EGLBACKEND
+				if(eglx)
+				{
+					oldctx = (GLXContext)_eglGetCurrentContext();
+					oldread = (GLXDrawable)_eglGetCurrentSurface(EGL_READ);
+					olddraw = (GLXDrawable)_eglGetCurrentSurface(EGL_DRAW);
+					oldapi = _eglQueryAPI();
+				}
+				else
+				#endif
+				{
+					oldctx = backend::getCurrentContext();
+					oldread = backend::getCurrentReadDrawable();
+					olddraw = backend::getCurrentDrawable();
+				}
+
 				if(!ctx) THROW("Invalid argument");
 				if((read || draw)
 					&& (oldread != read  || olddraw != draw || oldctx != ctx))
 				{
-					if(!backend::makeCurrent(dpy, draw, read, ctx))
-						THROW("Could not bind OpenGL context to window (window may have disappeared)");
+					#ifdef EGLBACKEND
+					if(eglx)
+					{
+						_eglBindAPI(EGL_OPENGL_API);
+						if(!_eglMakeCurrent((EGLDisplay)dpy, (EGLSurface)draw,
+							(EGLSurface)read, (EGLContext)ctx))
+							THROW("Could not bind OpenGL context to window (window may have disappeared)");
+					}
+					else
+					#endif
+					{
+						if(!backend::makeCurrent(dpy, draw, read, ctx))
+							THROW("Could not bind OpenGL context to window (window may have disappeared)");
+					}
 					// If oldctx has already been destroyed, then we don't want to
 					// restore it.  This can happen if the application is rendering to
 					// the front buffer and glXDestroyContext() is called to destroy the
 					// active context before glXMake*Current*() is called to switch it.
-					if((oldctx && ctxhash.findConfig(oldctx))
+					if((oldctx && (eglx || ctxhash.findConfig(oldctx)))
 						|| (!oldread && !olddraw && !oldctx))
 						ctxChanged = true;
 				}
@@ -54,7 +81,16 @@ namespace faker
 			{
 				if(ctxChanged)
 				{
-					backend::makeCurrent(dpy, olddraw, oldread, oldctx);
+					#ifdef EGLBACKEND
+					if(eglx)
+					{
+						_eglMakeCurrent((EGLDisplay)dpy, (EGLSurface)olddraw,
+							(EGLSurface)oldread, (EGLContext)oldctx);
+						if(oldapi != EGL_NONE) _eglBindAPI(oldapi);
+					}
+					else
+					#endif
+						backend::makeCurrent(dpy, olddraw, oldread, oldctx);
 					ctxChanged = false;
 				}
 			}
@@ -64,7 +100,11 @@ namespace faker
 			Display *dpy;
 			GLXContext oldctx;
 			GLXDrawable oldread, olddraw;
+			#ifdef EGLBACKEND
+			EGLenum oldapi;
+			#endif
 			bool ctxChanged;
+			bool eglx;
 	};
 }
 

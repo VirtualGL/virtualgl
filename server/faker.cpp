@@ -16,6 +16,8 @@
 #include "Mutex.h"
 #include "ContextHash.h"
 #ifdef EGLBACKEND
+#include "EGLXDisplayHash.h"
+#include "EGLXWindowHash.h"
 #include "ContextHashEGL.h"
 #include "PbufferHashEGL.h"
 #endif
@@ -47,6 +49,11 @@ VGL_THREAD_LOCAL(AutotestRColor, long, -1)
 VGL_THREAD_LOCAL(AutotestFrame, long, -1)
 VGL_THREAD_LOCAL(AutotestDisplay, Display *, NULL)
 VGL_THREAD_LOCAL(AutotestDrawable, long, 0)
+VGL_THREAD_LOCAL(EGLXContextCurrent, bool, false)
+#ifdef EGLBACKEND
+VGL_THREAD_LOCAL(EGLError, long, EGL_SUCCESS)
+VGL_THREAD_LOCAL(CurrentEGLXDisplay, EGLXDisplay *, NULL)
+#endif
 
 
 static void cleanup(void)
@@ -57,6 +64,8 @@ static void cleanup(void)
 	if(GLXDrawableHash::isAlloc()) glxdhash.kill();
 	if(WindowHash::isAlloc()) winhash.kill();
 	#ifdef EGLBACKEND
+	if(EGLXDisplayHash::isAlloc()) eglxdpyhash.kill();
+	if(EGLXWindowHash::isAlloc()) eglxwinhash.kill();
 	if(backend::ContextHashEGL::isAlloc()) ctxhashegl.kill();
 	if(backend::PbufferHashEGL::isAlloc()) pbhashegl.kill();
 	#endif

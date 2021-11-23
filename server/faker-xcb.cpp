@@ -14,6 +14,10 @@
 
 #include "WindowHash.h"
 #include "XCBConnHash.h"
+#ifdef EGLBACKEND
+#include "EGLXDisplayHash.h"
+#include "EGLXWindowHash.h"
+#endif
 #include "faker.h"
 #include "vglconfigLauncher.h"
 
@@ -152,6 +156,9 @@ xcb_glx_query_version_reply_t *
 static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *ev)
 {
 	faker::VirtualWin *vw = NULL;
+	#ifdef EGLBACKEND
+	faker::EGLXVirtualWin *eglxvw;
+	#endif
 
 	if(!ev || faker::deadYet || !fconfig.fakeXCB || faker::getFakerLevel() > 0)
 		return;
@@ -165,20 +172,34 @@ static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *ev)
 
 			if(!dpy || faker::isDisplayExcluded(dpy)) break;
 
-			vw = winhash.find(dpy, cne->window);
-			if(!vw) break;
+			if((vw = winhash.find(dpy, cne->window)) != NULL)
+			{
+				///////////////////////////////////////////////////////////////////////
+				OPENTRACE(handleXCBEvent);  PRARGX(cne->window);  PRARGI(cne->width);
+				PRARGI(cne->height);  STARTTRACE();
+				///////////////////////////////////////////////////////////////////////
 
-			/////////////////////////////////////////////////////////////////////////
-			OPENTRACE(handleXCBEvent);  PRARGX(cne->window);  PRARGI(cne->width);
-			PRARGI(cne->height);  STARTTRACE();
-			/////////////////////////////////////////////////////////////////////////
+				vw->resize(cne->width, cne->height);
 
-			vw->resize(cne->width, cne->height);
+				///////////////////////////////////////////////////////////////////////
+				STOPTRACE();  CLOSETRACE();
+				///////////////////////////////////////////////////////////////////////
+			}
+			#ifdef EGLBACKEND
+			if((eglxvw = eglxwinhash.find(dpy, cne->window)) != NULL)
+			{
+				///////////////////////////////////////////////////////////////////////
+				OPENTRACE(handleXCBEvent);  PRARGX(cne->window);  PRARGI(cne->width);
+				PRARGI(cne->height);  STARTTRACE();
+				///////////////////////////////////////////////////////////////////////
 
-			/////////////////////////////////////////////////////////////////////////
-			STOPTRACE();  CLOSETRACE();
-			/////////////////////////////////////////////////////////////////////////
+				eglxvw->resize(cne->width, cne->height);
 
+				///////////////////////////////////////////////////////////////////////
+				STOPTRACE();  CLOSETRACE();
+				///////////////////////////////////////////////////////////////////////
+			}
+			#endif
 			break;
 		}
 		case XCB_KEY_PRESS:
@@ -222,9 +243,12 @@ static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *ev)
 				|| faker::isDisplayExcluded(dpy))
 				break;
 
-			vw = winhash.find(dpy, cme->window);
-			if(!vw) break;
-			vw->wmDeleted();
+			if((vw = winhash.find(dpy, cme->window)) != NULL)
+				vw->wmDeleted();
+			#ifdef EGLBACKEND
+			if((eglxvw = eglxwinhash.find(dpy, cme->window)) != NULL)
+				eglxvw->wmDeleted();
+			#endif
 
 			break;
 		}

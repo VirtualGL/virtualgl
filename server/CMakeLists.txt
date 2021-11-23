@@ -118,8 +118,13 @@ if(VGL_USEXV)
 	set(FAKER_SOURCES ${FAKER_SOURCES};XVTrans.cpp)
 endif()
 if(VGL_EGLBACKEND)
+	# EGL back end
 	set(FAKER_SOURCES
 		${FAKER_SOURCES};ContextHashEGL.cpp;FakePbuffer.cpp;PbufferHashEGL.cpp)
+	# EGL front end
+	set(FAKER_SOURCES
+		${FAKER_SOURCES};faker-egl.cpp;EGLXDisplayHash.cpp;EGLXVirtualWin.cpp;
+		EGLXWindowHash.cpp)
 endif()
 
 set(FAKERLIBS ${VGL_FAKER_NAME};${VGL_FAKER_NAME}-nodl)

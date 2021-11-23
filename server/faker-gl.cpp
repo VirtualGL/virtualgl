@@ -17,8 +17,10 @@
 #include <math.h>
 #include "ContextHash.h"
 #include "WindowHash.h"
+#ifdef EGLBACKEND
+#include "EGLXWindowHash.h"
+#endif
 #include "faker.h"
-
 
 static void doGLReadback(bool spoilLast, bool sync)
 {
@@ -53,7 +55,10 @@ extern "C" {
 
 void glFinish(void)
 {
-	if(faker::getExcludeCurrent()) { _glFinish();  return; }
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glFinish();  return;
+	}
 
 	TRY();
 
@@ -76,7 +81,10 @@ void glFlush(void)
 {
 	static double lastTime = -1.;  double thisTime;
 
-	if(faker::getExcludeCurrent()) { _glFlush();  return; }
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glFlush();  return;
+	}
 
 	TRY();
 
@@ -106,7 +114,10 @@ void glFlush(void)
 
 void glXWaitGL(void)
 {
-	if(faker::getExcludeCurrent()) { _glXWaitGL();  return; }
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glXWaitGL();  return;
+	}
 
 	TRY();
 
@@ -128,7 +139,7 @@ void glXWaitGL(void)
 
 void glBindFramebuffer(GLenum target, GLuint framebuffer)
 {
-	if(faker::getExcludeCurrent())
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glBindFramebuffer(target, framebuffer);
 		return;
@@ -143,7 +154,7 @@ void glBindFramebuffer(GLenum target, GLuint framebuffer)
 
 void glBindFramebufferEXT(GLenum target, GLuint framebuffer)
 {
-	if(faker::getExcludeCurrent())
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glBindFramebufferEXT(target, framebuffer);
 		return;
@@ -159,7 +170,7 @@ void glBindFramebufferEXT(GLenum target, GLuint framebuffer)
 
 void glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers)
 {
-	if(faker::getExcludeCurrent())
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glDeleteFramebuffers(n, framebuffers);
 		return;
@@ -185,7 +196,10 @@ void glDeleteFramebuffersEXT(GLsizei n, const GLuint *framebuffers)
 
 void glDrawBuffer(GLenum mode)
 {
-	if(faker::getExcludeCurrent()) { _glDrawBuffer(mode);  return; }
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glDrawBuffer(mode);  return;
+	}
 
 	TRY();
 
@@ -224,7 +238,10 @@ void glDrawBuffer(GLenum mode)
 
 void glDrawBuffers(GLsizei n, const GLenum *bufs)
 {
-	if(faker::getExcludeCurrent()) { _glDrawBuffers(n, bufs);  return; }
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glDrawBuffers(n, bufs);  return;
+	}
 
 	TRY();
 
@@ -278,7 +295,7 @@ void glDrawBuffersATI(GLsizei n, const GLenum *bufs)
 
 void glFramebufferDrawBufferEXT(GLuint framebuffer, GLenum mode)
 {
-	if(faker::getExcludeCurrent())
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glFramebufferDrawBufferEXT(framebuffer, mode);
 		return;
@@ -324,7 +341,7 @@ void glFramebufferDrawBufferEXT(GLuint framebuffer, GLenum mode)
 void glFramebufferDrawBuffersEXT(GLuint framebuffer, GLsizei n,
 	const GLenum *bufs)
 {
-	if(faker::getExcludeCurrent())
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glFramebufferDrawBuffersEXT(framebuffer, n, bufs);
 		return;
@@ -373,7 +390,7 @@ void glFramebufferDrawBuffersEXT(GLuint framebuffer, GLsizei n,
 
 void glFramebufferReadBufferEXT(GLuint framebuffer, GLenum mode)
 {
-	if(faker::getExcludeCurrent())
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glFramebufferReadBufferEXT(framebuffer, mode);
 		return;
@@ -389,7 +406,8 @@ void glFramebufferReadBufferEXT(GLuint framebuffer, GLenum mode)
 
 void glGetBooleanv(GLenum pname, GLboolean *data)
 {
-	if(faker::getExcludeCurrent() || !data || !fconfig.egl)
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent() || !data
+		|| !fconfig.egl)
 	{
 		_glGetBooleanv(pname, data);  return;
 	}
@@ -422,7 +440,8 @@ void glGetBooleanv(GLenum pname, GLboolean *data)
 
 void glGetDoublev(GLenum pname, GLdouble *data)
 {
-	if(faker::getExcludeCurrent() || !data || !fconfig.egl)
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent() || !data
+		|| !fconfig.egl)
 	{
 		_glGetDoublev(pname, data);  return;
 	}
@@ -455,7 +474,8 @@ void glGetDoublev(GLenum pname, GLdouble *data)
 
 void glGetFloatv(GLenum pname, GLfloat *data)
 {
-	if(faker::getExcludeCurrent() || !data || !fconfig.egl)
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent() || !data
+		|| !fconfig.egl)
 	{
 		_glGetFloatv(pname, data);  return;
 	}
@@ -489,7 +509,7 @@ void glGetFloatv(GLenum pname, GLfloat *data)
 void glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 	GLenum pname, GLint *params)
 {
-	if(faker::getExcludeCurrent())
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
 		return;
@@ -505,7 +525,7 @@ void glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 
 void glGetFramebufferParameteriv(GLenum target, GLenum pname, GLint *params)
 {
-	if(faker::getExcludeCurrent())
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glGetFramebufferParameteriv(target, pname, params);  return;
 	}
@@ -520,7 +540,10 @@ void glGetFramebufferParameteriv(GLenum target, GLenum pname, GLint *params)
 
 void glGetIntegerv(GLenum pname, GLint *params)
 {
-	if(faker::getExcludeCurrent()) { _glGetIntegerv(pname, params);  return; }
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glGetIntegerv(pname, params);  return;
+	}
 
 	TRY();
 
@@ -532,7 +555,8 @@ void glGetIntegerv(GLenum pname, GLint *params)
 
 void glGetInteger64v(GLenum pname, GLint64 *data)
 {
-	if(faker::getExcludeCurrent() || !data || !fconfig.egl)
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent() || !data
+		|| !fconfig.egl)
 	{
 		_glGetInteger64v(pname, data);  return;
 	}
@@ -566,7 +590,7 @@ void glGetInteger64v(GLenum pname, GLint64 *data)
 void glGetNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname,
 	GLint *param)
 {
-	if(faker::getExcludeCurrent())
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glGetNamedFramebufferParameteriv(framebuffer, pname, param);  return;
 	}
@@ -583,7 +607,8 @@ const GLubyte *glGetString(GLenum name)
 {
 	char *string = NULL;
 
-	if(faker::getExcludeCurrent()) { return _glGetString(name); }
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+		return _glGetString(name);
 
 	TRY();
 
@@ -620,7 +645,8 @@ const GLubyte *glGetStringi(GLenum name, GLuint index)
 {
 	const GLubyte *string = NULL;
 
-	if(faker::getExcludeCurrent()) { return _glGetStringi(name, index); }
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+		return _glGetStringi(name, index);
 
 	TRY();
 
@@ -641,7 +667,7 @@ const GLubyte *glGetStringi(GLenum name, GLuint index)
 
 void glNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf)
 {
-	if(faker::getExcludeCurrent())
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glNamedFramebufferDrawBuffer(framebuffer, buf);
 		return;
@@ -687,7 +713,7 @@ void glNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf)
 void glNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 	const GLenum *bufs)
 {
-	if(faker::getExcludeCurrent())
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glNamedFramebufferDrawBuffers(framebuffer, n, bufs);
 		return;
@@ -736,7 +762,7 @@ void glNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 
 void glNamedFramebufferReadBuffer(GLuint framebuffer, GLenum mode)
 {
-	if(faker::getExcludeCurrent())
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glNamedFramebufferReadBuffer(framebuffer, mode);
 		return;
@@ -754,7 +780,10 @@ void glNamedFramebufferReadBuffer(GLuint framebuffer, GLenum mode)
 
 void glPopAttrib(void)
 {
-	if(faker::getExcludeCurrent()) { _glPopAttrib();  return; }
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glPopAttrib();  return;
+	}
 
 	TRY();
 
@@ -793,7 +822,10 @@ void glPopAttrib(void)
 
 void glReadBuffer(GLenum mode)
 {
-	if(faker::getExcludeCurrent()) { _glReadBuffer(mode);  return; }
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glReadBuffer(mode);  return;
+	}
 
 	TRY();
 
@@ -806,7 +838,7 @@ void glReadBuffer(GLenum mode)
 void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
 	GLenum format, GLenum type, GLvoid *pixels)
 {
-	if(faker::getExcludeCurrent())
+	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glReadPixels(x, y, width, height, format, type, pixels);
 		return;
@@ -833,41 +865,86 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 
 	TRY();
 
-	/////////////////////////////////////////////////////////////////////////////
-	OPENTRACE(glViewport);  PRARGI(x);  PRARGI(y);  PRARGI(width);
-	PRARGI(height);  STARTTRACE();
-	/////////////////////////////////////////////////////////////////////////////
-
-	GLXContext ctx = backend::getCurrentContext();
-	GLXDrawable draw = backend::getCurrentDrawable();
-	GLXDrawable read = backend::getCurrentReadDrawable();
-	Display *dpy = backend::getCurrentDisplay();
-	GLXDrawable newRead = 0, newDraw = 0;
-
-	if(dpy && (draw || read) && ctx && ctxhash.findConfig(ctx))
+	#ifdef EGLBACKEND
+	if(faker::getEGLXContextCurrent())
 	{
-		newRead = read, newDraw = draw;
-		faker::VirtualWin *drawVW = winhash.find(NULL, draw);
-		faker::VirtualWin *readVW = winhash.find(NULL, read);
-		if(drawVW) drawVW->checkResize();
-		if(readVW && readVW != drawVW) readVW->checkResize();
-		if(drawVW) newDraw = drawVW->updateGLXDrawable();
-		if(readVW) newRead = readVW->updateGLXDrawable();
-		if(newRead != read || newDraw != draw)
-		{
-			backend::makeCurrent(dpy, newDraw, newRead, ctx);
-			if(drawVW) { drawVW->clear();  drawVW->cleanup(); }
-			if(readVW) readVW->cleanup();
-		}
-	}
-	_glViewport(x, y, width, height);
+		///////////////////////////////////////////////////////////////////////////
+		OPENTRACE(glViewport);  PRARGI(x);  PRARGI(y);  PRARGI(width);
+		PRARGI(height);  STARTTRACE();
+		///////////////////////////////////////////////////////////////////////////
 
-	/////////////////////////////////////////////////////////////////////////////
-	STOPTRACE();
-	if(draw != newDraw) { PRARGX(draw);  PRARGX(newDraw); }
-	if(read != newRead) { PRARGX(read);  PRARGX(newRead); }
-	CLOSETRACE();
-	/////////////////////////////////////////////////////////////////////////////
+		EGLContext ctx = _eglGetCurrentContext();
+		EGLSurface draw = _eglGetCurrentSurface(EGL_DRAW);
+		EGLSurface read = _eglGetCurrentSurface(EGL_READ);
+		faker::EGLXDisplay *eglxdpy = faker::getCurrentEGLXDisplay();
+		EGLSurface newRead = 0, newDraw = 0;
+
+		if(eglxdpy && (draw || read) && ctx)
+		{
+			newRead = read, newDraw = draw;
+			faker::EGLXVirtualWin *drawEGLXVW =
+				eglxwinhash.findInternal(eglxdpy, draw);
+			faker::EGLXVirtualWin *readEGLXVW =
+				eglxwinhash.findInternal(eglxdpy, read);
+			if(drawEGLXVW) drawEGLXVW->checkResize();
+			if(readEGLXVW && readEGLXVW != drawEGLXVW) readEGLXVW->checkResize();
+			if(drawEGLXVW) newDraw = (EGLSurface)drawEGLXVW->updateGLXDrawable();
+			if(readEGLXVW) newRead = (EGLSurface)readEGLXVW->updateGLXDrawable();
+			if(newRead != read || newDraw != draw)
+			{
+				_eglMakeCurrent(eglxdpy->edpy, newDraw, newRead, ctx);
+				if(drawEGLXVW) { drawEGLXVW->clear();  drawEGLXVW->cleanup(); }
+				if(readEGLXVW) readEGLXVW->cleanup();
+			}
+		}
+		_glViewport(x, y, width, height);
+
+		///////////////////////////////////////////////////////////////////////////
+		STOPTRACE();
+		if(draw != newDraw) { PRARGX(draw);  PRARGX(newDraw); }
+		if(read != newRead) { PRARGX(read);  PRARGX(newRead); }
+		CLOSETRACE();
+		///////////////////////////////////////////////////////////////////////////
+	}
+	else
+	#endif
+	{
+		///////////////////////////////////////////////////////////////////////////
+		OPENTRACE(glViewport);  PRARGI(x);  PRARGI(y);  PRARGI(width);
+		PRARGI(height);  STARTTRACE();
+		///////////////////////////////////////////////////////////////////////////
+
+		GLXContext ctx = backend::getCurrentContext();
+		GLXDrawable draw = backend::getCurrentDrawable();
+		GLXDrawable read = backend::getCurrentReadDrawable();
+		Display *dpy = backend::getCurrentDisplay();
+		GLXDrawable newRead = 0, newDraw = 0;
+
+		if(dpy && (draw || read) && ctx && ctxhash.findConfig(ctx))
+		{
+			newRead = read, newDraw = draw;
+			faker::VirtualWin *drawVW = winhash.find(NULL, draw);
+			faker::VirtualWin *readVW = winhash.find(NULL, read);
+			if(drawVW) drawVW->checkResize();
+			if(readVW && readVW != drawVW) readVW->checkResize();
+			if(drawVW) newDraw = drawVW->updateGLXDrawable();
+			if(readVW) newRead = readVW->updateGLXDrawable();
+			if(newRead != read || newDraw != draw)
+			{
+				backend::makeCurrent(dpy, newDraw, newRead, ctx);
+				if(drawVW) { drawVW->clear();  drawVW->cleanup(); }
+				if(readVW) readVW->cleanup();
+			}
+		}
+		_glViewport(x, y, width, height);
+
+		///////////////////////////////////////////////////////////////////////////
+		STOPTRACE();
+		if(draw != newDraw) { PRARGX(draw);  PRARGX(newDraw); }
+		if(read != newRead) { PRARGX(read);  PRARGX(newRead); }
+		CLOSETRACE();
+		///////////////////////////////////////////////////////////////////////////
+	}
 
 	CATCH();
 }

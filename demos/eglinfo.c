@@ -28,7 +28,11 @@
 #include <assert.h>
 #include <GL/gl.h>
 #include <EGL/egl.h>
+#ifdef EGLX
+#include <GL/glx.h>
+#else
 #include <EGL/eglext.h>
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -48,6 +52,11 @@ struct config_attribs
 {
    /* EGL config attribs */
    int id;
+#ifdef EGLX
+   int nativeRenderable;
+   int vis_id;
+   int klass;
+#endif
    int surfaceType;
    int transparentType;
    int transparentRedValue;
@@ -315,7 +324,11 @@ print_display_info(EGLDisplay edpy,
       CheckError(__LINE__);
 
       if (!coreWorked) {
+#ifdef EGLX
+         printf("display: %s\n", opts->displayName);
+#else
          printf("device: %s\n", opts->displayName);
+#endif
          if (opts->mode != Brief) {
             printf("EGL client APIs string: %s\n", eglAPIs);
             printf("EGL vendor string: %s\n", eglVendor);
@@ -367,6 +380,74 @@ print_display_info(EGLDisplay edpy,
 }
 
 
+#ifdef EGLX
+
+static const char *
+visual_class_name(int cls)
+{
+   switch (cls) {
+      case StaticColor:
+         return "StaticColor";
+      case PseudoColor:
+         return "PseudoColor";
+      case StaticGray:
+         return "StaticGray";
+      case GrayScale:
+         return "GrayScale";
+      case TrueColor:
+         return "TrueColor";
+      case DirectColor:
+         return "DirectColor";
+      default:
+         return "Unknown";
+   }
+}
+
+static const char *
+visual_class_abbrev(int cls)
+{
+   switch (cls) {
+      case StaticColor:
+         return "sc";
+      case PseudoColor:
+         return "pc";
+      case StaticGray:
+         return "sg";
+      case GrayScale:
+         return "gs";
+      case TrueColor:
+         return "tc";
+      case DirectColor:
+         return "dc";
+      default:
+         return "??";
+   }
+}
+
+static int
+glx_token_to_visual_class(int visual_type)
+{
+   switch (visual_type) {
+   case GLX_TRUE_COLOR:
+      return TrueColor;
+   case GLX_DIRECT_COLOR:
+      return DirectColor;
+   case GLX_PSEUDO_COLOR:
+      return PseudoColor;
+   case GLX_STATIC_COLOR:
+      return StaticColor;
+   case GLX_GRAY_SCALE:
+      return GrayScale;
+   case GLX_STATIC_GRAY:
+      return StaticGray;
+   case GLX_NONE:
+   default:
+      return -1;
+   }
+}
+
+#endif
+
 static const char *
 config_surface_type(int type)
 {
@@ -411,10 +492,24 @@ get_config_attribs(EGLDisplay edpy, EGLConfig config,
                    struct config_attribs *attribs)
 {
    const char *ext = eglQueryString(edpy, EGL_EXTENSIONS);
+#ifdef EGLX
+   int visual_type;
+#endif
 
    memset(attribs, 0, sizeof(struct config_attribs));
 
    eglGetConfigAttrib(edpy, config, EGL_CONFIG_ID, &attribs->id);
+#ifdef EGLX
+   eglGetConfigAttrib(edpy, config, EGL_NATIVE_RENDERABLE,
+                      &attribs->nativeRenderable);
+   eglGetConfigAttrib(edpy, config, EGL_NATIVE_VISUAL_ID, &attribs->vis_id);
+   eglGetConfigAttrib(edpy, config, EGL_NATIVE_VISUAL_TYPE, &visual_type);
+   /* Some EGL implementations use the GLX_X_VISUAL_TYPE tokens. */
+   if (visual_type & 0x8000)
+     attribs->klass = glx_token_to_visual_class(visual_type);
+   else
+     attribs->klass = visual_type;
+#endif
 
    eglGetConfigAttrib(edpy, config, EGL_SURFACE_TYPE, &attribs->surfaceType);
    eglGetConfigAttrib(edpy, config, EGL_LEVEL, &attribs->level);
@@ -470,7 +565,13 @@ get_config_attribs(EGLDisplay edpy, EGLConfig config,
 static void
 print_config_attribs_verbose(const struct config_attribs *attribs)
 {
-   printf("Config ID: %x\n", attribs->id);
+#ifdef EGLX
+   if (attribs->nativeRenderable)
+      printf("Config ID: %x  Visual ID=%x  class=%s\n", attribs->id,
+             attribs->vis_id, visual_class_name(attribs->klass));
+   else
+#endif
+      printf("Config ID: %x\n", attribs->id);
    printf("    Surface Types=%s\n",
           config_surface_type(attribs->surfaceType));
    printf("    bufferSize=%d level=%d colorBufferType=%s\n",
@@ -512,9 +613,15 @@ print_config_attribs_verbose(const struct config_attribs *attribs)
 static void
 print_config_attribs_short_header(void)
 {
+#ifdef EGLX
+ printf("Cfg    Visual  tra buf lev buf colorbuffer   dep ste client APIs   ms  cav  surf\n");
+ printf("ID    ID    cl ns  sz  el  typ r  g  b  a  F th  ncl GL ES ES2 VG ns b eat  typ\n");
+ printf("--------------------------------------------------------------------------------\n");
+#else
  printf("Cfg   tra buf lev buf colorbuffer   dep ste client APIs   ms  cav  surf\n");
  printf("ID    ns  sz  el  typ r  g  b  a  F th  ncl GL ES ES2 VG ns b eat  typ\n");
  printf("-----------------------------------------------------------------------\n");
+#endif
 }
 
 
@@ -523,8 +630,17 @@ print_config_attribs_short(const struct config_attribs *attribs)
 {
    const char *caveat = caveat_string(attribs->configCaveat);
 
+#ifdef EGLX
+   printf("0x%03x 0x%03x %2s %c   %-3d %-3d %3s %-2d %-2d %-2d %-2d %c %-3d %-3d",
+#else
    printf("0x%03x %c   %-3d %-3d %3s %-2d %-2d %-2d %-2d %c %-3d %-3d",
+#endif
           attribs->id,
+#ifdef EGLX
+          attribs->vis_id,
+          attribs->nativeRenderable ?
+             visual_class_abbrev(attribs->klass) : "??",
+#endif
           attribs->transparentType != EGL_NONE ? 'y' : '.',
           attribs->bufferSize,
           attribs->level,
@@ -609,9 +725,14 @@ print_config_info(EGLDisplay edpy, InfoMode mode)
 static void
 usage(void)
 {
+#ifdef EGLX
+   printf("Usage: eglinfo [-display <display>] [-v] [-h] [-l] [-s]\n");
+   printf("\t-display <display>: Print EGL configs for the specified X server.\n");
+#else
    printf("Usage: eglinfo <device> [-v] [-h] [-l] [-s]\n");
    printf("\t<device>: Print EGL configs for the specified DRI device.\n");
    printf("\t          (\"egl\" = print EGL configs for the first DRI device)\n");
+#endif
    printf("\t-B: brief output, print only the basics.\n");
    printf("\t-v: Print config info in verbose form.\n");
    printf("\t-h: This information.\n");
@@ -623,20 +744,27 @@ usage(void)
 int
 main(int argc, char *argv[])
 {
+   int major, minor, i;
+#ifdef EGLX
+   Display *dpy;
+#else
    const char *exts;
-   int numDevices, major, minor, i;
+   int numDevices;
    EGLDeviceEXT *devices = NULL;
-   EGLDisplay edpy;
-   struct options opts;
-   GLboolean coreWorked;
    PFNEGLQUERYDEVICESEXTPROC _eglQueryDevicesEXT;
    PFNEGLQUERYDEVICESTRINGEXTPROC _eglQueryDeviceStringEXT;
    PFNEGLGETPLATFORMDISPLAYEXTPROC _eglGetPlatformDisplayEXT;
+#endif
+   EGLDisplay edpy;
+   struct options opts;
+   GLboolean coreWorked;
 
+#ifndef EGLX
    if (argc < 2) {
       usage();
       exit(0);
    }
+#endif
 
    opts.mode = Normal;
    opts.limits = GL_FALSE;
@@ -660,10 +788,32 @@ main(int argc, char *argv[])
       else if (strcmp(argv[i], "-s") == 0) {
          opts.singleLine = GL_TRUE;
       }
+#ifdef EGLX
+      else if (strcmp(argv[i], "-display") == 0 && i + 1 < argc) {
+         opts.displayName = argv[i + 1];
+         i++;
+      }
+#else
       else {
          opts.displayName = argv[i];
       }
+#endif
    }
+
+#ifdef EGLX
+   dpy = XOpenDisplay(opts.displayName);
+   if (!dpy) {
+      fprintf(stderr, "Error: unable to open display %s\n",
+              XDisplayName(opts.displayName));
+      return -1;
+   }
+   edpy = eglGetDisplay(dpy);
+   if (!edpy) {
+      fprintf(stderr, "Error: unable to open EGL display\n");
+      return -1;
+   }
+   opts.displayName = DisplayString(dpy);
+#else
    if (!opts.displayName) {
       usage();
       exit(0);
@@ -737,6 +887,7 @@ main(int argc, char *argv[])
       return -1;
    }
    free(devices);
+#endif
    if (!eglInitialize(edpy, &major, &minor)) {
       fprintf(stderr, "Error: could not initialize EGL\n");
       return -1;

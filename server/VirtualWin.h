@@ -31,11 +31,11 @@ namespace faker
 		public:
 
 			VirtualWin(Display *dpy, Window win);
-			~VirtualWin(void);
+			virtual ~VirtualWin(void);
 			void clear(void);
 			void cleanup(void);
 			GLXDrawable getGLXDrawable(void);
-			GLXDrawable updateGLXDrawable(void);
+			virtual GLXDrawable updateGLXDrawable(void);
 			void checkConfig(VGLFBConfig config);
 			void resize(int width, int height);
 			void checkResize(void);
@@ -50,7 +50,7 @@ namespace faker
 
 			bool dirty, rdirty;
 
-		private:
+		protected:
 
 			int init(int w, int h, VGLFBConfig config);
 			void readPixels(GLint x, GLint y, GLint width, GLint pitch, GLint height,

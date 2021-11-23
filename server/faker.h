@@ -27,6 +27,23 @@
 
 namespace faker
 {
+	#ifdef EGLBACKEND
+	// Unfortunately, we have to create our own EGLDisplay structure because
+	// there is no way to get multiple unique EGLDisplay handles for the same DRI
+	// device.  VirtualGL assumes that EGLDisplay handles returned by the
+	// underlying EGL implementation are pointers to opaque structures and thus
+	// uses a pointer hash (EGLXDisplayHash) to figure out whether an EGLDisplay
+	// handle passed by the 3D application was allocated by VirtualGL or by the
+	// underlying EGL implementation.
+	typedef struct
+	{
+		EGLDisplay edpy;
+		Display *x11dpy;
+		int screen;
+		bool isDefault, isInit;
+	} EGLXDisplay;
+	#endif
+
 	extern Display *dpy3D;
 	extern bool deadYet;
 	extern char *glExtensions;
@@ -54,6 +71,14 @@ namespace faker
 	extern void setAutotestDisplay(Display *dpy);
 	extern long getAutotestDrawable();
 	extern void setAutotestDrawable(long d);
+	extern bool getEGLXContextCurrent(void);
+	extern void setEGLXContextCurrent(bool isEGLXContextCurrent);
+	#ifdef EGLBACKEND
+	extern long getEGLError(void);
+	extern void setEGLError(long error);
+	extern EGLXDisplay *getCurrentEGLXDisplay(void);
+	extern void setCurrentEGLXDisplay(EGLXDisplay *display);
+	#endif
 
 	void *loadSymbol(const char *name, bool optional = false);
 	void unloadSymbols(void);

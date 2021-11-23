@@ -208,6 +208,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %{bindir}/cpustat
 %if %{eglbackend}
 	%{bindir}/eglinfo
+	%{bindir}/eglxinfo
 %endif
 %{bindir}/glxinfo
 %{bindir}/vglclient
@@ -221,6 +222,13 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 	%{bindir}/glxspheres64
 %else
 	%{bindir}/glxspheres
+%endif
+%if %{eglbackend}
+	%if "%{_bits}" == "64"
+		%{bindir}/eglspheres64
+	%else
+		%{bindir}/eglspheres
+	%endif
 %endif
 %if "%{bindir}" != "%{_bindir}" && %{binsymlinks}
 	%{_bindir}/vglclient

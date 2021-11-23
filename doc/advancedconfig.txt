@@ -137,13 +137,18 @@ previous method:
 #OPT: hiCol=first
 
 	Description :: Normally VirtualGL will call the ''eglGetProcAddress()''
-	function in the EGL library against which it was linked (usually {file:
-	libEGL.so.1}, in the system library path), and VGL will use that function to
-	load any other EGL functions that it needs to call.  You can use the
-	''VGL_EGLLIB'' environment variable to specify the path of a dynamic library
-	from which VirtualGL should load EGL functions.
+	function in the EGL library against which it or the 3D application was linked
+	(usually {file: libEGL.so.1}, in the system library path), and VGL will use
+	that function to load any other "real" EGL functions that it needs to call
+	("real" as opposed to the "fake", or "interposed", versions of those
+	functions that VirtualGL provides, which often modify the arguments or
+	perform other operations before calling the "real" functions.)  You can use
+	the ''VGL_EGLLIB'' environment variable to specify the path of a dynamic
+	library from which VirtualGL should load "real" EGL functions.
 	{nl}{nl}
-	You shouldn't need to change this unless something doesn't work.
+	You shouldn't need to change this unless something doesn't work.  However,
+	setting this environment variable is potentially useful if one wishes to
+	insert another EGL interposer between VirtualGL and the system's EGL library.
 
 | Environment Variable | \
 	{pcode: VGL_EXCLUDE = __{d1}[,{d2},{d3},\.\.\.]__ } |

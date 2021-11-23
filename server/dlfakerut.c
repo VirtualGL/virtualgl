@@ -45,6 +45,7 @@
 	} \
 }
 
+/* TODO */
 
 typedef XVisualInfo *(*_glXChooseVisualType)(Display *, int, int *);
 _glXChooseVisualType _glXChooseVisual = NULL;

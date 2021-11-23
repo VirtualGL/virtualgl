@@ -539,6 +539,198 @@ FUNCDEF2(GLXFBConfigSGIX, glXGetFBConfigFromVisualSGIX, Display *, dpy,
 	XVisualInfo *, vis, glXGetFBConfigFromVisualSGIX)
 
 
+#ifdef EGLBACKEND
+
+
+// EGL 1.0 functions
+
+FUNCDEF5(EGLBoolean, eglChooseConfig, EGLDisplay, display,
+	const EGLint *, attrib_list, EGLConfig *, configs, EGLint, config_size,
+	EGLint *, num_config, eglChooseConfig)
+
+FUNCDEF3(EGLBoolean, eglCopyBuffers, EGLDisplay, display, EGLSurface, surface,
+	NativePixmapType, native_pixmap, eglCopyBuffers)
+
+FUNCDEF4(EGLContext, eglCreateContext, EGLDisplay, display, EGLConfig, config,
+	EGLContext, share_context, const EGLint *, attrib_list, eglCreateContext)
+
+FUNCDEF3(EGLSurface, eglCreatePbufferSurface, EGLDisplay, display,
+	EGLConfig, config, const EGLint *, attrib_list, eglCreatePbufferSurface)
+
+FUNCDEF4(EGLSurface, eglCreatePixmapSurface, EGLDisplay, display,
+	EGLConfig, config, EGLNativePixmapType, native_pixmap,
+	const EGLint *, attrib_list, eglCreatePixmapSurface)
+
+FUNCDEF4(EGLSurface, eglCreateWindowSurface, EGLDisplay, display,
+	EGLConfig, config, NativeWindowType, native_window,
+	const EGLint *, attrib_list, eglCreateWindowSurface)
+
+FUNCDEF2(EGLBoolean, eglDestroySurface, EGLDisplay, display,
+	EGLSurface, surface, eglDestroySurface)
+
+FUNCDEF4(EGLBoolean, eglGetConfigAttrib, EGLDisplay, display,
+	EGLConfig, config, EGLint, attribute, EGLint *, value, eglGetConfigAttrib)
+
+FUNCDEF4(EGLBoolean, eglGetConfigs, EGLDisplay, display, EGLConfig *, configs,
+	EGLint, config_size, EGLint *, num_config, eglGetConfigs)
+
+FUNCDEF0(EGLDisplay, eglGetCurrentDisplay, eglGetCurrentDisplay)
+
+FUNCDEF1(EGLSurface, eglGetCurrentSurface, EGLint, readdraw,
+	eglGetCurrentSurface)
+
+FUNCDEF1(EGLDisplay, eglGetDisplay, EGLNativeDisplayType, native_display,
+	eglGetDisplay)
+
+FUNCDEF0(EGLint, eglGetError, eglGetError)
+
+typedef void (*(*_eglGetProcAddressType)(const char *))(void);
+SYMDEF(eglGetProcAddress);
+static INLINE void (*_eglGetProcAddress(const char *procName))(void)
+{
+	CHECKSYM(eglGetProcAddress, NULL);
+	return __eglGetProcAddress(procName);
+}
+
+FUNCDEF3(EGLBoolean, eglInitialize, EGLDisplay, display, EGLint *, major,
+	EGLint *, minor, eglInitialize)
+
+FUNCDEF4(EGLBoolean, eglMakeCurrent, EGLDisplay, display, EGLSurface, draw,
+	EGLSurface, read, EGLContext, context, eglMakeCurrent)
+
+FUNCDEF4(EGLBoolean, eglQueryContext, EGLDisplay, display, EGLContext, context,
+	EGLint, attribute, EGLint *, value, eglQueryContext)
+
+FUNCDEF2(const char *, eglQueryString, EGLDisplay, display, EGLint, name,
+	eglQueryString)
+
+FUNCDEF4(EGLBoolean, eglQuerySurface, EGLDisplay, display, EGLSurface, surface,
+	EGLint, attribute, EGLint *, value, eglQuerySurface)
+
+FUNCDEF2(EGLBoolean, eglSwapBuffers, EGLDisplay, display, EGLSurface, surface,
+	eglSwapBuffers)
+
+FUNCDEF1(EGLBoolean, eglTerminate, EGLDisplay, display, eglTerminate)
+
+
+// EGL 1.1 functions
+
+FUNCDEF3(EGLBoolean, eglBindTexImage, EGLDisplay, display, EGLSurface, surface,
+	EGLint, buffer, eglBindTexImage)
+
+FUNCDEF3(EGLBoolean, eglReleaseTexImage, EGLDisplay, display,
+	EGLSurface, surface, EGLint, buffer, eglReleaseTexImage)
+
+FUNCDEF4(EGLBoolean, eglSurfaceAttrib, EGLDisplay, display,
+	EGLSurface, surface, EGLint, attribute, EGLint, value, eglSurfaceAttrib)
+
+FUNCDEF2(EGLBoolean, eglSwapInterval, EGLDisplay, display, EGLint, interval,
+	eglSwapInterval)
+
+
+// EGL 1.2 functions
+
+FUNCDEF5(EGLSurface, eglCreatePbufferFromClientBuffer, EGLDisplay, display,
+	EGLenum, buftype, EGLClientBuffer, buffer, EGLConfig, config,
+	const EGLint *, attrib_list, eglCreatePbufferFromClientBuffer)
+
+
+// EGL 1.5 functions
+
+FUNCDEF4(EGLint, eglClientWaitSync, EGLDisplay, display, EGLSync, sync,
+	EGLint, flags, EGLTime, timeout, eglClientWaitSync)
+
+FUNCDEF5(EGLImage, eglCreateImage, EGLDisplay, display, EGLContext, context,
+	EGLenum, target, EGLClientBuffer, buffer, const EGLAttrib *, attrib_list,
+	eglCreateImage)
+
+FUNCDEF4(EGLSurface, eglCreatePlatformPixmapSurface, EGLDisplay, display,
+	EGLConfig, config, void *, native_pixmap, const EGLAttrib *, attrib_list,
+	eglCreatePlatformPixmapSurface)
+
+FUNCDEF3(EGLSync, eglCreateSync, EGLDisplay, display, EGLenum, type,
+	const EGLAttrib *, attrib_list, eglCreateSync)
+
+FUNCDEF2(EGLBoolean, eglDestroyImage, EGLDisplay, display, EGLImage, image,
+	eglDestroyImage)
+
+FUNCDEF2(EGLBoolean, eglDestroySync, EGLDisplay, display, EGLSync, sync,
+	eglDestroySync)
+
+FUNCDEF3(EGLDisplay, eglGetPlatformDisplay, EGLenum, platform,
+	void *, native_display, const EGLAttrib *, attrib_list,
+	eglGetPlatformDisplay)
+
+FUNCDEF4(EGLBoolean, eglGetSyncAttrib, EGLDisplay, display, EGLSync, sync,
+	EGLint, attribute, EGLAttrib *, value, eglGetSyncAttrib)
+
+FUNCDEF3(EGLBoolean, eglWaitSync, EGLDisplay, display, EGLSync, sync,
+	EGLint, flags, eglWaitSync)
+
+
+// EGL_EXT_device_query
+
+FUNCDEF3(EGLBoolean, eglQueryDisplayAttribEXT, EGLDisplay, display,
+	EGLint, attribute, EGLAttrib *, value, eglQueryDisplayAttribEXT)
+
+
+// EGL_EXT_platform_base
+
+FUNCDEF4(EGLSurface, eglCreatePlatformPixmapSurfaceEXT, EGLDisplay, display,
+	EGLConfig, config, void *, native_pixmap, const EGLint *, attrib_list,
+	eglCreatePlatformPixmapSurfaceEXT)
+
+FUNCDEF3(EGLDisplay, eglGetPlatformDisplayEXT, EGLenum, platform,
+	void *, native_display, const EGLint *, attrib_list,
+	eglGetPlatformDisplayEXT)
+
+
+// EGL_KHR_cl_event2
+
+FUNCDEF3(EGLSyncKHR, eglCreateSync64KHR, EGLDisplay, display, EGLenum, type,
+	const EGLAttribKHR *, attrib_list, eglCreateSync64KHR)
+
+
+// EGL_KHR_fence_sync
+
+FUNCDEF4(EGLint, eglClientWaitSyncKHR, EGLDisplay, display, EGLSyncKHR, sync,
+	EGLint, flags, EGLTimeKHR, timeout, eglClientWaitSyncKHR)
+
+FUNCDEF3(EGLSyncKHR, eglCreateSyncKHR, EGLDisplay, display, EGLenum, type,
+	const EGLint *, attrib_list, eglCreateSyncKHR)
+
+FUNCDEF2(EGLBoolean, eglDestroySyncKHR, EGLDisplay, display, EGLSyncKHR, sync,
+	eglDestroySyncKHR)
+
+FUNCDEF4(EGLBoolean, eglGetSyncAttribKHR, EGLDisplay, display,
+	EGLSyncKHR, sync, EGLint, attribute, EGLint *, value, eglGetSyncAttribKHR)
+
+
+// EGL_KHR_image
+
+FUNCDEF5(EGLImageKHR, eglCreateImageKHR, EGLDisplay, display,
+	EGLContext, context, EGLenum, target, EGLClientBuffer, buffer,
+	const EGLint *, attrib_list, eglCreateImageKHR)
+
+FUNCDEF2(EGLBoolean, eglDestroyImageKHR, EGLDisplay, display,
+	EGLImageKHR, image, eglDestroyImageKHR)
+
+
+// EGL_KHR_reusable_sync
+
+FUNCDEF3(EGLBoolean, eglSignalSyncKHR, EGLDisplay, display, EGLSyncKHR, sync,
+	EGLenum, mode, eglSignalSyncKHR)
+
+
+// EGL_KHR_wait_sync
+
+FUNCDEF3(EGLint, eglWaitSyncKHR, EGLDisplay, display, EGLSyncKHR, sync,
+	EGLint, flags, eglWaitSyncKHR)
+
+
+#endif
+
+
 // GL functions
 
 VFUNCDEF2(glBindFramebuffer, GLenum, target, GLuint, framebuffer,
@@ -820,32 +1012,10 @@ FUNCDEF1(GLboolean, glUnmapBuffer, GLenum, target, NULL)
 
 FUNCDEF1(EGLBoolean, eglBindAPI, EGLenum, api, NULL)
 
-FUNCDEF4(EGLContext, eglCreateContext, EGLDisplay, display, EGLConfig, config,
-	EGLContext, share_context, const EGLint *, attrib_list, NULL)
-
 FUNCDEF2(EGLBoolean, eglDestroyContext, EGLDisplay, display,
 	EGLContext, context, NULL)
 
 FUNCDEF0(EGLContext, eglGetCurrentContext, NULL)
-
-FUNCDEF0(EGLint, eglGetError, NULL)
-
-FUNCDEF3(EGLDisplay, eglGetPlatformDisplayEXT, EGLenum, platform, void *,
-	native_display, const EGLint *, attrib_list, NULL)
-
-typedef void (*(*_eglGetProcAddressType)(const char *))(void);
-SYMDEF(eglGetProcAddress);
-static INLINE void (*_eglGetProcAddress(const char *procName))(void)
-{
-	CHECKSYM(eglGetProcAddress, NULL);
-	return __eglGetProcAddress(procName);
-}
-
-FUNCDEF3(EGLBoolean, eglInitialize, EGLDisplay, display, EGLint *, major,
-	EGLint *, minor, NULL)
-
-FUNCDEF4(EGLBoolean, eglMakeCurrent, EGLDisplay, display, EGLSurface, draw,
-	EGLSurface, read, EGLContext, context, NULL)
 
 FUNCDEF3(EGLBoolean, eglQueryDevicesEXT, EGLint, max_devices, EGLDeviceEXT *,
 	devices, EGLint *, num_devices, NULL)
@@ -853,10 +1023,7 @@ FUNCDEF3(EGLBoolean, eglQueryDevicesEXT, EGLint, max_devices, EGLDeviceEXT *,
 FUNCDEF2(const char *, eglQueryDeviceStringEXT, EGLDeviceEXT, device, EGLint,
 	name, NULL)
 
-FUNCDEF2(char const *, eglQueryString, EGLDisplay, display, EGLint, name,
-	NULL)
-
-FUNCDEF1(EGLBoolean, eglTerminate, EGLDisplay, display, NULL)
+FUNCDEF0(EGLenum, eglQueryAPI, NULL)
 
 #endif
 

@@ -20,6 +20,9 @@
 #ifdef FAKEXCB
 #include "XCBConnHash.h"
 #endif
+#ifdef EGLBACKEND
+#include "EGLXWindowHash.h"
+#endif
 #include "keycodetokeysym.h"
 
 
@@ -375,8 +378,15 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 	}
 	ret = _XGetGeometry(dpy, drawable, root, x, y, &width, &height, border_width,
 		depth);
+
 	if((vw = winhash.find(dpy, drawable)) != NULL && width > 0 && height > 0)
 		vw->resize(width, height);
+	#ifdef EGLBACKEND
+	faker::EGLXVirtualWin *eglxvw;
+	if((eglxvw = eglxwinhash.find(dpy, drawable)) != NULL && width > 0
+		&& height > 0)
+		eglxvw->resize(width, height);
+	#endif
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();  if(root) PRARGX(*root);  if(x) PRARGI(*x);  if(y) PRARGI(*y);
@@ -682,6 +692,9 @@ char *XServerVendor(Display *dpy)
 static void handleEvent(Display *dpy, XEvent *xe)
 {
 	faker::VirtualWin *vw;
+	#ifdef EGLBACKEND
+	faker::EGLXVirtualWin *eglxvw;
+	#endif
 
 	if(IS_EXCLUDED(dpy))
 		return;
@@ -702,6 +715,22 @@ static void handleEvent(Display *dpy, XEvent *xe)
 			STOPTRACE();  CLOSETRACE();
 			/////////////////////////////////////////////////////////////////////////
 		}
+		#ifdef EGLBACKEND
+		if((eglxvw = eglxwinhash.find(dpy, xe->xconfigure.window)) != NULL)
+		{
+			/////////////////////////////////////////////////////////////////////////
+			OPENTRACE(handleEvent);  PRARGI(xe->xconfigure.width);
+			PRARGI(xe->xconfigure.height);  PRARGX(xe->xconfigure.window);
+			STARTTRACE();
+			/////////////////////////////////////////////////////////////////////////
+
+			eglxvw->resize(xe->xconfigure.width, xe->xconfigure.height);
+
+			/////////////////////////////////////////////////////////////////////////
+			STOPTRACE();  CLOSETRACE();
+			/////////////////////////////////////////////////////////////////////////
+		}
+		#endif
 	}
 	else if(xe && xe->type == KeyPress)
 	{
@@ -723,9 +752,15 @@ static void handleEvent(Display *dpy, XEvent *xe)
 		Atom protoAtom = XInternAtom(dpy, "WM_PROTOCOLS", True);
 		Atom deleteAtom = XInternAtom(dpy, "WM_DELETE_WINDOW", True);
 		if(protoAtom && deleteAtom && cme->message_type == protoAtom
-			&& cme->data.l[0] == (long)deleteAtom
-			&& (vw = winhash.find(dpy, cme->window)) != NULL)
-			vw->wmDeleted();
+			&& cme->data.l[0] == (long)deleteAtom)
+		{
+			if((vw = winhash.find(dpy, cme->window)) != NULL)
+				vw->wmDeleted();
+			#ifdef EGLBACKEND
+			if((eglxvw = eglxwinhash.find(dpy, cme->window)) != NULL)
+				eglxvw->wmDeleted();
+			#endif
+		}
 	}
 }
 
@@ -803,6 +838,12 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 	if((vw = winhash.find(dpy, win)) != NULL && values)
 		vw->resize(value_mask & CWWidth ? values->width : 0,
 			value_mask & CWHeight ? values->height : 0);
+	#ifdef EGLBACKEND
+	faker::EGLXVirtualWin *eglxvw;
+	if((eglxvw = eglxwinhash.find(dpy, win)) != NULL && values)
+		eglxvw->resize(value_mask & CWWidth ? values->width : 0,
+			value_mask & CWHeight ? values->height : 0);
+	#endif
 	retval = _XConfigureWindow(dpy, win, value_mask, values);
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -844,6 +885,11 @@ int XMoveResizeWindow(Display *dpy, Window win, int x, int y,
 	faker::VirtualWin *vw;
 	if((vw = winhash.find(dpy, win)) != NULL)
 		vw->resize(width, height);
+	#ifdef EGLBACKEND
+	faker::EGLXVirtualWin *eglxvw;
+	if((eglxvw = eglxwinhash.find(dpy, win)) != NULL)
+		eglxvw->resize(width, height);
+	#endif
 	retval = _XMoveResizeWindow(dpy, win, x, y, width, height);
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -885,6 +931,11 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width,
 	faker::VirtualWin *vw;
 	if((vw = winhash.find(dpy, win)) != NULL)
 		vw->resize(width, height);
+	#ifdef EGLBACKEND
+	faker::EGLXVirtualWin *eglxvw;
+	if((eglxvw = eglxwinhash.find(dpy, win)) != NULL)
+		eglxvw->resize(width, height);
+	#endif
 	retval = _XResizeWindow(dpy, win, width, height);
 
 	/////////////////////////////////////////////////////////////////////////////

@@ -80,8 +80,11 @@ VirtualWin::VirtualWin(Display *dpy_, Window win) :
 			vglout.println("[VGL] Selecting structure notify events in window 0x%.8x",
 				win);
 	}
-	stereoVisual = glxvisual::visAttrib(dpy, DefaultScreen(dpy),
-		xwa.visual->visualid, GLX_STEREO);
+	#ifdef EGLBACKEND
+	if(edpy != EGL_NO_DISPLAY)
+	#endif
+		stereoVisual = glxvisual::visAttrib(dpy, DefaultScreen(dpy),
+			xwa.visual->visualid, GLX_STEREO);
 }
 
 
@@ -169,6 +172,11 @@ void VirtualWin::cleanup(void)
 
 void VirtualWin::initFromWindow(VGLFBConfig config_)
 {
+	#ifdef EGLBACKEND
+	if(edpy != EGL_NO_DISPLAY)
+		THROW("VirtualWin::initFromWindow() method not supported with EGL/X11");
+	#endif
+
 	XSync(dpy, False);
 	XWindowAttributes xwa;
 	XGetWindowAttributes(dpy, x11Draw, &xwa);
@@ -208,6 +216,11 @@ void VirtualWin::checkResize(void)
 
 GLXDrawable VirtualWin::updateGLXDrawable(void)
 {
+	#ifdef EGLBACKEND
+	if(edpy != EGL_NO_DISPLAY)
+		THROW("VirtualWin::updateGLXDrawable() method not supported with EGL/X11");
+	#endif
+
 	GLXDrawable retval = 0;
 	CriticalSection::SafeLock l(mutex);
 	if(deletedByWM) THROW("Window has been deleted by window manager");
@@ -230,6 +243,11 @@ GLXDrawable VirtualWin::updateGLXDrawable(void)
 
 void VirtualWin::swapBuffers(void)
 {
+	#ifdef EGLBACKEND
+	if(edpy != EGL_NO_DISPLAY)
+		THROW("VirtualWin::swapBuffers() method not supported with EGL/X11");
+	#endif
+
 	CriticalSection::SafeLock l(mutex);
 	if(deletedByWM) THROW("Window has been deleted by window manager");
 	if(oglDraw)
@@ -369,7 +387,12 @@ TempContext *VirtualWin::setupPluginTempContext(GLint drawBuf)
 	else
 	{
 		initReadbackContext();
+		#ifdef EGLBACKEND
+		tc = new TempContext(edpy != EGL_NO_DISPLAY ? (Display *)edpy : dpy,
+			getGLXDrawable(), getGLXDrawable(), ctx, edpy != EGL_NO_DISPLAY);
+		#else
 		tc = new TempContext(dpy, getGLXDrawable(), getGLXDrawable(), ctx);
+		#endif
 		backend::readBuffer(drawBuf);
 	}
 

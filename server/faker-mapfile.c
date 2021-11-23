@@ -89,6 +89,82 @@
 		glXQueryGLXPbufferSGIX;
 		glXSelectEventSGIX;
 
+		#ifdef EGLBACKEND
+
+		/* EGL 1.0 */
+		eglChooseConfig;
+		eglCopyBuffers;
+		eglCreateContext;
+		eglCreatePbufferSurface;
+		eglCreatePixmapSurface;
+		eglCreateWindowSurface;
+		eglDestroyContext;
+		eglDestroySurface;
+		eglGetConfigAttrib;
+		eglGetConfigs;
+		eglGetCurrentDisplay;
+		eglGetCurrentSurface;
+		eglGetDisplay;
+		eglGetError;
+		eglGetProcAddress;
+		eglInitialize;
+		eglMakeCurrent;
+		eglQueryContext;
+		eglQueryString;
+		eglQuerySurface;
+		eglSwapBuffers;
+		eglTerminate;
+
+		/* EGL 1.1 */
+		eglBindTexImage;
+		eglReleaseTexImage;
+		eglSurfaceAttrib;
+		eglSwapInterval;
+
+		/* EGL 1.2 */
+		eglCreatePbufferFromClientBuffer;
+
+		/* EGL 1.5 */
+		eglClientWaitSync;
+		eglCreateImage;
+		eglCreatePlatformPixmapSurface;
+		eglCreatePlatformWindowSurface;
+		eglCreateSync;
+		eglDestroyImage;
+		eglDestroySync;
+		eglGetPlatformDisplay;
+		eglGetSyncAttrib;
+		eglWaitSync;
+
+		/* EGL_EXT_device_query */
+		eglQueryDisplayAttribEXT;
+
+		/* EGL_EXT_platform_base */
+		eglCreatePlatformPixmapSurfaceEXT;
+		eglCreatePlatformWindowSurfaceEXT;
+		eglGetPlatformDisplayEXT;
+
+		/* EGL_KHR_cl_event2 */
+		eglCreateSync64KHR;
+
+		/* EGL_KHR_fence_sync */
+		eglClientWaitSyncKHR;
+		eglCreateSyncKHR;
+		eglDestroySyncKHR;
+		eglGetSyncAttribKHR;
+
+		/* EGL_KHR_image */
+		eglCreateImageKHR;
+		eglDestroyImageKHR;
+
+		/* EGL_KHR_reusable_sync */
+		eglSignalSyncKHR;
+
+		/* EGL_KHR_wait_sync */
+		eglWaitSyncKHR;
+
+		#endif
+
 		/* OpenGL */
 		glBindFramebuffer;
 		glBindFramebufferEXT;

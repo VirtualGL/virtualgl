@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2021-11-22T14:39:09">
+<meta name="date" content="2021-11-22T17:27:53">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3154,13 +3154,20 @@ Image transport plugins are free to handle or ignore any configuration option as
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
         Normally VirtualGL will call the <code>eglGetProcAddress()</code> 
-        function in the EGL library against which it was linked (usually 
-        <strong class="filename">libEGL.so.1</strong>, in the system library 
-        path), and VGL will use that function to load any other EGL functions 
-        that it needs to call.  You can use the <code>VGL_EGLLIB</code> 
-        environment variable to specify the path of a dynamic library from which 
-        VirtualGL should load EGL functions. <br /><br /> You shouldn&rsquo;t 
-        need to change this unless something doesn&rsquo;t work.
+        function in the EGL library against which it or the 3D application was 
+        linked (usually <strong class="filename">libEGL.so.1</strong>, in the 
+        system library path), and VGL will use that function to load any other 
+        &ldquo;real&rdquo; EGL functions that it needs to call 
+        (&ldquo;real&rdquo; as opposed to the &ldquo;fake&rdquo;, or 
+        &ldquo;interposed&rdquo;, versions of those functions that VirtualGL 
+        provides, which often modify the arguments or perform other operations 
+        before calling the &ldquo;real&rdquo; functions.)  You can use the 
+        <code>VGL_EGLLIB</code> environment variable to specify the path of a 
+        dynamic library from which VirtualGL should load &ldquo;real&rdquo; EGL 
+        functions. <br /><br /> You shouldn&rsquo;t need to change this unless 
+        something doesn&rsquo;t work.  However, setting this environment 
+        variable is potentially useful if one wishes to insert another EGL 
+        interposer between VirtualGL and the system&rsquo;s EGL library.
     </dd>
 </dl>
 
