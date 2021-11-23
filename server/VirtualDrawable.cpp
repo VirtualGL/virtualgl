@@ -17,7 +17,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "glxvisual.h"
-#include "glext-vgl.h"
 #include "TempContext.h"
 #include "vglutil.h"
 #include "faker.h"

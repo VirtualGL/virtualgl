@@ -30,7 +30,6 @@
 #include <unistd.h>
 #include "Error.h"
 #include "Thread.h"
-#include "glext-vgl.h"
 #include <X11/Xmd.h>
 #include <GL/glxproto.h>
 #ifdef USEHELGRIND
