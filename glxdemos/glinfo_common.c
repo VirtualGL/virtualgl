@@ -965,10 +965,10 @@ parse_args(int argc, char *argv[], struct options *options)
          usage();
          exit(0);
       }
-      else if(strcmp(argv[i], "-s") == 0) {
+      else if (strcmp(argv[i], "-s") == 0) {
          options->singleLine = GL_TRUE;
       }
-      else if(strcmp(argv[i], "-c") == 0) {
+      else if (strcmp(argv[i], "-c") == 0) {
          options->fbConfigs = GL_TRUE;
       }
       else {

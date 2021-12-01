@@ -657,7 +657,7 @@ main(int argc, char *argv[])
          usage();
          exit(0);
       }
-      else if(strcmp(argv[i], "-s") == 0) {
+      else if (strcmp(argv[i], "-s") == 0) {
          opts.singleLine = GL_TRUE;
       }
       else {
