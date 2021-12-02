@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011, 2013-2016, 2018-2019 D. R. Commander
+// Copyright (C)2009, 2011, 2013-2016, 2018-2019, 2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -75,6 +75,8 @@ namespace vglfaker
 	(drawbuf == GL_RIGHT || drawbuf == GL_FRONT_RIGHT \
 		|| drawbuf == GL_BACK_RIGHT)
 
+#define MAX_ATTRIBS  256
+
 
 #define DIE(f, m) \
 { \
@@ -115,7 +117,7 @@ namespace vglfaker
 #define PRARGAL11(a)  if(a) \
 { \
 	vglout.print(#a "=["); \
-	for(int __an = 0; a[__an] != None; __an++) \
+	for(int __an = 0; a[__an] != None && __an < MAX_ATTRIBS; __an++) \
 	{ \
 		vglout.print("0x%.4x", a[__an]); \
 		if(a[__an] != GLX_USE_GL && a[__an] != GLX_DOUBLEBUFFER \
@@ -129,7 +131,7 @@ namespace vglfaker
 #define PRARGAL13(a)  if(a != NULL) \
 { \
 	vglout.print(#a "=["); \
-	for(int __an = 0; a[__an] != None; __an += 2) \
+	for(int __an = 0; a[__an] != None && __an < MAX_ATTRIBS; __an += 2) \
 	{ \
 		vglout.print("0x%.4x=0x%.4x ", a[__an], a[__an + 1]); \
 	} \
