@@ -119,6 +119,8 @@ namespace vglfaker
 	(drawbuf == GL_RIGHT || drawbuf == GL_FRONT_RIGHT \
 		|| drawbuf == GL_BACK_RIGHT)
 
+#define MAX_ATTRIBS  256
+
 
 static INLINE int DrawingToFront(void)
 {
@@ -199,7 +201,7 @@ static INLINE int DrawingToRight(void)
 #define PRARGAL11(a)  if(a) \
 { \
 	vglout.print(#a "=["); \
-	for(int __an = 0; a[__an] != None; __an++) \
+	for(int __an = 0; a[__an] != None && __an < MAX_ATTRIBS; __an++) \
 	{ \
 		vglout.print("0x%.4x", a[__an]); \
 		if(a[__an] != GLX_USE_GL && a[__an] != GLX_DOUBLEBUFFER \
@@ -213,7 +215,7 @@ static INLINE int DrawingToRight(void)
 #define PRARGAL13(a)  if(a != NULL) \
 { \
 	vglout.print(#a "=["); \
-	for(int __an = 0; a[__an] != None; __an += 2) \
+	for(int __an = 0; a[__an] != None && __an < MAX_ATTRIBS; __an += 2) \
 	{ \
 		vglout.print("0x%.4x=0x%.4x ", a[__an], a[__an + 1]); \
 	} \

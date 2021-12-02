@@ -613,14 +613,14 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 VGLFBConfig *configsFromVisAttribs(Display *dpy, int screen,
 	const int attribs[], int &nElements, bool glx13)
 {
-	int glxattribs[257], j = 0;
+	int glxattribs[MAX_ATTRIBS + 1], j = 0;
 	int doubleBuffer = glx13 ? -1 : 0, redSize = -1, greenSize = -1,
 		blueSize = -1, alphaSize = -1, samples = -1, stereo = 0,
 		renderType = glx13 ? -1 : GLX_COLOR_INDEX_BIT,
 		drawableType = glx13 ? -1 : GLX_WINDOW_BIT | GLX_PIXMAP_BIT,
 		visualType = -1;
 
-	for(int i = 0; attribs[i] != None && i <= 254; i++)
+	for(int i = 0; attribs[i] != None && i < MAX_ATTRIBS; i++)
 	{
 		if(attribs[i] == GLX_DOUBLEBUFFER)
 		{
@@ -868,7 +868,7 @@ VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
 		buildCfgAttribTable(dpy, screen);
 		GET_CA_TABLE()
 
-		for(int i = 0; attribs[i] != None; i++)
+		for(int i = 0; attribs[i] != None && i < MAX_ATTRIBS; i++)
 		{
 			switch(attribs[i])
 			{

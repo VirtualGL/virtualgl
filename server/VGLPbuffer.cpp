@@ -38,7 +38,7 @@ VGLPbuffer::VGLPbuffer(Display *dpy_, VGLFBConfig config_,
 
 	if(glxAttribs && glxAttribs[0] != None)
 	{
-		for(int glxi = 0; glxAttribs[glxi]; glxi += 2)
+		for(int glxi = 0; glxAttribs[glxi] && glxi < MAX_ATTRIBS; glxi += 2)
 		{
 			switch(glxAttribs[glxi])
 			{

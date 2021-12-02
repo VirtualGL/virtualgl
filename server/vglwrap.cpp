@@ -139,14 +139,14 @@ GLXContext VGLCreateContext(Display *dpy, VGLFBConfig config, GLXContext share,
 	{
 		if(!direct) return NULL;
 
-		int eglAttribs[256], egli = 0;
-		for(int i = 0; i < 256; i++) eglAttribs[i] = EGL_NONE;
+		int eglAttribs[MAX_ATTRIBS + 1], egli = 0;
+		for(int i = 0; i < MAX_ATTRIBS + 1; i++) eglAttribs[i] = EGL_NONE;
 		bool majorVerSpecified = false, forwardCompatSpecified = false;
 		int majorVer = -1;
 
 		if(glxAttribs && glxAttribs[0] != None)
 		{
-			for(int glxi = 0; glxAttribs[glxi] && egli < 256; glxi += 2)
+			for(int glxi = 0; glxAttribs[glxi] && egli < MAX_ATTRIBS; glxi += 2)
 			{
 				switch(glxAttribs[glxi])
 				{

@@ -118,7 +118,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 
 	if(attrib_list)
 	{
-		for(int i = 0; attrib_list[i] != None && i <= 254; i += 2)
+		for(int i = 0; attrib_list[i] != None && i < MAX_ATTRIBS; i += 2)
 		{
 			if(attrib_list[i] == GLX_FBCONFIG_ID) fbcidreq = true;
 			if(attrib_list[i] == GLX_DRAWABLE_TYPE)
@@ -453,10 +453,10 @@ GLXPbuffer glXCreatePbuffer(Display *dpy, GLXFBConfig config_,
 GLXPbuffer glXCreateGLXPbufferSGIX(Display *dpy, GLXFBConfigSGIX config,
 	unsigned int width, unsigned int height, int *attrib_list)
 {
-	int attribs[257], j = 0;
+	int attribs[MAX_ATTRIBS + 1], j = 0;
 	if(attrib_list)
 	{
-		for(int i = 0; attrib_list[i] != None && i <= 254; i += 2)
+		for(int i = 0; attrib_list[i] != None && i < MAX_ATTRIBS - 2; i += 2)
 		{
 			attribs[j++] = attrib_list[i];  attribs[j++] = attrib_list[i + 1];
 		}
