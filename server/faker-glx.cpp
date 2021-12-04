@@ -126,8 +126,10 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 		}
 	}
 
-		OPENTRACE(glXChooseFBConfig);  PRARGD(dpy);  PRARGI(screen);
-		PRARGAL13(attrib_list);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXChooseFBConfig);  PRARGD(dpy);  PRARGI(screen);
+	PRARGAL13(attrib_list);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	int temp;
 	if(!nelements) nelements = &temp;
@@ -169,16 +171,18 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 	}
 
 	done:
-		STOPTRACE();
-		if(configs && nelements)
-		{
-			if(*nelements)
-				for(int i = 0; i < *nelements; i++)
-					vglout.print("configs[%d]=0x%.8lx(0x%.2x) ", i,
-						(unsigned long)configs[i], FBCID(configs[i]));
-			PRARGI(*nelements);
-		}
-		CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();
+	if(configs && nelements)
+	{
+		if(*nelements)
+			for(int i = 0; i < *nelements; i++)
+				vglout.print("configs[%d]=0x%.8lx(0x%.2x) ", i,
+					(unsigned long)configs[i], FBCID(configs[i]));
+		PRARGI(*nelements);
+	}
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return (GLXFBConfig *)configs;
@@ -205,8 +209,10 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	if(IS_EXCLUDED(dpy))
 		return _glXChooseVisual(dpy, screen, attrib_list);
 
-		OPENTRACE(glXChooseVisual);  PRARGD(dpy);  PRARGI(screen);
-		PRARGAL11(attrib_list);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXChooseVisual);  PRARGD(dpy);  PRARGI(screen);
+	PRARGAL11(attrib_list);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	// Use the specified set of GLX attributes to obtain an FB config on the 3D X
 	// server suitable for off-screen rendering
@@ -255,7 +261,9 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	vishash.add(dpy, vis, config);
 
 	done:
-		STOPTRACE();  PRARGV(vis);  PRARGC(config);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGV(vis);  PRARGC(config);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return vis;
@@ -298,8 +306,10 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 
 	if(!fconfig.allowindirect) direct = True;
 
-		OPENTRACE(glXCreateContext);  PRARGD(dpy);  PRARGV(vis);
-		PRARGX(share_list);  PRARGI(direct);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXCreateContext);  PRARGD(dpy);  PRARGV(vis);  PRARGX(share_list);
+	PRARGI(direct);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	if(!(config = matchConfig(dpy, vis)))
 	{
@@ -325,7 +335,9 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 	}
 
 	done:
-		STOPTRACE();  PRARGC(config);  PRARGX(ctx);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGC(config);  PRARGX(ctx);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return ctx;
@@ -346,9 +358,10 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config_,
 
 	if(!fconfig.allowindirect) direct = True;
 
-		OPENTRACE(glXCreateContextAttribsARB);  PRARGD(dpy);  PRARGC(config);
-		PRARGX(share_context);  PRARGI(direct);  PRARGAL13(attribs);
-		STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXCreateContextAttribsARB);  PRARGD(dpy);  PRARGC(config);
+	PRARGX(share_context);  PRARGI(direct);  PRARGAL13(attribs);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	ctx = VGLCreateContext(dpy, config, share_context, direct, attribs);
 	if(ctx)
@@ -366,7 +379,9 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config_,
 		ctxhash.add(ctx, config, newctxIsDirect);
 	}
 
-		STOPTRACE();  PRARGX(ctx);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGX(ctx);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return ctx;
@@ -386,8 +401,10 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config_,
 
 	if(!fconfig.allowindirect) direct = True;
 
-		OPENTRACE(glXCreateNewContext);  PRARGD(dpy);  PRARGC(config);
-		PRARGI(render_type);  PRARGX(share_list);  PRARGI(direct);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXCreateNewContext);  PRARGD(dpy);  PRARGC(config);
+	PRARGI(render_type);  PRARGX(share_list);  PRARGI(direct);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	ctx = VGLCreateContext(dpy, config, share_list, direct, NULL);
 	if(ctx)
@@ -405,7 +422,9 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config_,
 		ctxhash.add(ctx, config, newctxIsDirect);
 	}
 
-		STOPTRACE();  PRARGX(ctx);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGX(ctx);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return ctx;
@@ -438,13 +457,17 @@ GLXPbuffer glXCreatePbuffer(Display *dpy, GLXFBConfig config_,
 	if(IS_EXCLUDED(dpy))
 		return _glXCreatePbuffer(dpy, config_, attrib_list);
 
-		OPENTRACE(glXCreatePbuffer);  PRARGD(dpy);  PRARGC(config);
-		PRARGAL13(attrib_list);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXCreatePbuffer);  PRARGD(dpy);  PRARGC(config);
+	PRARGAL13(attrib_list);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	pb = VGLCreatePbuffer(dpy, config, attrib_list);
 	if(dpy && pb) glxdhash.add(pb, dpy);
 
-		STOPTRACE();  PRARGX(pb);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGX(pb);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return pb;
@@ -483,8 +506,10 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 	if(IS_EXCLUDED(dpy))
 		return _glXCreateGLXPixmap(dpy, vis, pm);
 
-		OPENTRACE(glXCreateGLXPixmap);  PRARGD(dpy);  PRARGV(vis);  PRARGX(pm);
-		STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXCreateGLXPixmap);  PRARGD(dpy);  PRARGV(vis);  PRARGX(pm);
+	STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	Window root;  unsigned int bw;
 	if(!(config = matchConfig(dpy, vis)))
@@ -509,8 +534,10 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 	}
 
 	done:
-		STOPTRACE();  PRARGI(x);  PRARGI(y);  PRARGI(width);  PRARGI(height);
-		PRARGI(depth);  PRARGC(config);  PRARGX(drawable);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGI(x);  PRARGI(y);  PRARGI(width);  PRARGI(height);
+	PRARGI(depth);  PRARGC(config);  PRARGX(drawable);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return drawable;
@@ -530,8 +557,10 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config_, Pixmap pm,
 	if(IS_EXCLUDED(dpy))
 		return _glXCreatePixmap(dpy, config_, pm, attribs);
 
-		OPENTRACE(glXCreatePixmap);  PRARGD(dpy);  PRARGC(config);  PRARGX(pm);
-		STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXCreatePixmap);  PRARGD(dpy);  PRARGC(config);  PRARGX(pm);
+	STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	if(!VALID_CONFIG(config))
 	{
@@ -566,8 +595,10 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config_, Pixmap pm,
 	}
 
 	done:
-		STOPTRACE();  PRARGI(x);  PRARGI(y);  PRARGI(w);  PRARGI(h);
-		PRARGI(d);  PRARGX(drawable);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGI(x);  PRARGI(y);  PRARGI(w);  PRARGI(h);  PRARGI(d);
+	PRARGX(drawable);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return drawable;
@@ -594,8 +625,10 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config_, Window win,
 	if(IS_EXCLUDED(dpy))
 		return _glXCreateWindow(dpy, config_, win, attrib_list);
 
-		OPENTRACE(glXCreateWindow);  PRARGD(dpy);  PRARGC(config);  PRARGX(win);
-		STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXCreateWindow);  PRARGD(dpy);  PRARGC(config);  PRARGX(win);
+	STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	DISABLE_FAKER();
 
@@ -636,8 +669,10 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config_, Window win,
 		THROW("Cannot create virtual window for specified X window");
 
 	done:
-		STOPTRACE();  if(vw) { PRARGX(vw->getGLXDrawable()); }
-		CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  if(vw) { PRARGX(vw->getGLXDrawable()); }
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	ENABLE_FAKER();
@@ -657,12 +692,16 @@ void glXDestroyContext(Display *dpy, GLXContext ctx)
 		_glXDestroyContext(dpy, ctx);  return;
 	}
 
-		OPENTRACE(glXDestroyContext);  PRARGD(dpy);  PRARGX(ctx);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXDestroyContext);  PRARGD(dpy);  PRARGX(ctx);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	ctxhash.remove(ctx);
 	VGLDestroyContext(dpy, ctx);
 
-		STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 }
@@ -677,12 +716,16 @@ void glXDestroyPbuffer(Display *dpy, GLXPbuffer pbuf)
 
 	if(IS_EXCLUDED(dpy)) { _glXDestroyPbuffer(dpy, pbuf);  return; }
 
-		OPENTRACE(glXDestroyPbuffer);  PRARGD(dpy);  PRARGX(pbuf);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXDestroyPbuffer);  PRARGD(dpy);  PRARGX(pbuf);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	VGLDestroyPbuffer(dpy, pbuf);
 	if(pbuf) glxdhash.remove(pbuf);
 
-		STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 }
@@ -706,7 +749,9 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 		_glXDestroyGLXPixmap(dpy, pix);  return;
 	}
 
-		OPENTRACE(glXDestroyGLXPixmap);  PRARGD(dpy);  PRARGX(pix);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXDestroyGLXPixmap);  PRARGD(dpy);  PRARGX(pix);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	DISABLE_FAKER();
 
@@ -716,7 +761,9 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 	if(pix) glxdhash.remove(pix);
 	if(dpy && pix) pmhash.remove(dpy, pix);
 
-		STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	ENABLE_FAKER();
@@ -732,7 +779,9 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 		_glXDestroyPixmap(dpy, pix);  return;
 	}
 
-		OPENTRACE(glXDestroyPixmap);  PRARGD(dpy);  PRARGX(pix);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXDestroyPixmap);  PRARGD(dpy);  PRARGX(pix);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	DISABLE_FAKER();
 
@@ -742,7 +791,9 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 	if(pix) glxdhash.remove(pix);
 	if(dpy && pix) pmhash.remove(dpy, pix);
 
-		STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	ENABLE_FAKER();
@@ -761,13 +812,17 @@ void glXDestroyWindow(Display *dpy, GLXWindow win)
 		_glXDestroyWindow(dpy, win);  return;
 	}
 
-		OPENTRACE(glXDestroyWindow);  PRARGD(dpy);  PRARGX(win);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXDestroyWindow);  PRARGD(dpy);  PRARGX(win);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	DISABLE_FAKER();
 
 	winhash.remove(dpy, win);
 
-		STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	ENABLE_FAKER();
@@ -912,8 +967,10 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 	if(!vis) return GLX_BAD_VISUAL;
 	if(!value) return GLX_BAD_VALUE;
 
-		OPENTRACE(glXGetConfig);  PRARGD(dpy);  PRARGV(vis);  PRARGIX(attrib);
-		STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXGetConfig);  PRARGD(dpy);  PRARGV(vis);  PRARGIX(attrib);
+	STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	if((config = matchConfig(dpy, vis)) != 0)
 	{
@@ -937,8 +994,10 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 		if(attrib != GLX_USE_GL) retval = GLX_BAD_VISUAL;
 	}
 
-		STOPTRACE();  if(value) { PRARGIX(*value); }  else { PRARGX(value); }
-		CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  if(value) { PRARGIX(*value); }  else { PRARGX(value); }
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return retval;
@@ -953,11 +1012,15 @@ GLXContext glXGetCurrentContext(void)
 
 	TRY();
 
-		OPENTRACE(glXGetCurrentContext);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXGetCurrentContext);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	ctx = VGLGetCurrentContext();
 
-		STOPTRACE();  PRARGX(ctx);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGX(ctx);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return ctx;
@@ -977,7 +1040,9 @@ Display *glXGetCurrentDisplay(void)
 
 	TRY();
 
-		OPENTRACE(glXGetCurrentDisplay);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXGetCurrentDisplay);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	GLXDrawable curdraw = VGLGetCurrentDrawable();
 	if((vw = winhash.find(NULL, curdraw)) != NULL)
@@ -985,7 +1050,9 @@ Display *glXGetCurrentDisplay(void)
 	else if(curdraw)
 		dpy = glxdhash.getCurrentDisplay(curdraw);
 
-		STOPTRACE();  PRARGD(dpy);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGD(dpy);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return dpy;
@@ -1009,13 +1076,17 @@ GLXDrawable glXGetCurrentDrawable(void)
 
 	TRY();
 
-		OPENTRACE(glXGetCurrentDrawable);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXGetCurrentDrawable);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	draw = VGLGetCurrentDrawable();
 	if((vw = winhash.find(NULL, draw)) != NULL)
 		draw = vw->getX11Drawable();
 
-		STOPTRACE();  PRARGX(draw);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGX(draw);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return draw;
@@ -1029,13 +1100,17 @@ GLXDrawable glXGetCurrentReadDrawable(void)
 
 	TRY();
 
-		OPENTRACE(glXGetCurrentReadDrawable);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXGetCurrentReadDrawable);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	read = VGLGetCurrentReadDrawable();
 	if((vw = winhash.find(NULL, read)) != NULL)
 		read = vw->getX11Drawable();
 
-		STOPTRACE();  PRARGX(read);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGX(read);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return read;
@@ -1060,8 +1135,10 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config_, int attribute,
 	if(IS_EXCLUDED(dpy))
 		return _glXGetFBConfigAttrib(dpy, config_, attribute, value);
 
-		OPENTRACE(glXGetFBConfigAttrib);  PRARGD(dpy);  PRARGC(config);
-		PRARGIX(attribute);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXGetFBConfigAttrib);  PRARGD(dpy);  PRARGC(config);
+	PRARGIX(attribute);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	if(!dpy)
 	{
@@ -1104,8 +1181,10 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config_, int attribute,
 	}
 
 	done:
-		STOPTRACE();  if(value) { PRARGIX(*value); }  else { PRARGX(value); }
-		CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  if(value) { PRARGIX(*value); }  else { PRARGX(value); }
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return retval;
@@ -1144,13 +1223,16 @@ GLXFBConfig *glXGetFBConfigs(Display *dpy, int screen, int *nelements)
 	if(IS_EXCLUDED(dpy))
 		return _glXGetFBConfigs(dpy, screen, nelements);
 
-		OPENTRACE(glXGetFBConfigs);  PRARGD(dpy);  PRARGI(screen);
-		STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXGetFBConfigs);  PRARGD(dpy);  PRARGI(screen);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	configs = (GLXFBConfig *)glxvisual::getFBConfigs(dpy, screen, *nelements);
 
-		STOPTRACE();  if(configs && nelements) PRARGI(*nelements);
-		CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  if(configs && nelements) PRARGI(*nelements);
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return configs;
@@ -1175,8 +1257,10 @@ void glXBindTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer,
 	// TODO: Is there a way to implement this with EGL?
 	if(fconfig.egl) THROW("glXBindTexImageEXT() requires the GLX back end");
 
-		OPENTRACE(glXBindTexImageEXT);  PRARGD(dpy);  PRARGX(drawable);
-		PRARGI(buffer);  PRARGAL13(attrib_list);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXBindTexImageEXT);  PRARGD(dpy);  PRARGX(drawable);
+	PRARGI(buffer);  PRARGAL13(attrib_list);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	vglfaker::VirtualPixmap *vpm = NULL;
 	if((vpm = pmhash.find(dpy, drawable)) == NULL)
@@ -1208,7 +1292,9 @@ void glXBindTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer,
 	_glXBindTexImageEXT(DPY3D, drawable, buffer, attrib_list);
 
 	done:
-		STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 }
@@ -1224,12 +1310,16 @@ void glXReleaseTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer)
 	// TODO: Is there a way to implement this with EGL?
 	if(fconfig.egl) THROW("glXReleaseTexImageEXT() requires the GLX back end");
 
-		OPENTRACE(glXReleaseTexImageEXT);  PRARGD(dpy);  PRARGX(drawable);
-		PRARGI(buffer);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXReleaseTexImageEXT);  PRARGD(dpy);  PRARGX(drawable);
+	PRARGI(buffer);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	_glXReleaseTexImageEXT(DPY3D, drawable, buffer);
 
-		STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 }
@@ -1268,7 +1358,9 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 
 	if(vglfaker::getExcludeCurrent()) return _glXGetProcAddressARB(procName);
 
-		OPENTRACE(glXGetProcAddressARB);  PRARGS((char *)procName);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXGetProcAddressARB);  PRARGS((char *)procName);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	if(procName)
 	{
@@ -1408,7 +1500,9 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		}
 	}
 
-		STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	return retval;
 }
@@ -1471,8 +1565,10 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config_)
 	if(IS_EXCLUDED(dpy))
 		return _glXGetVisualFromFBConfig(dpy, config_);
 
-		OPENTRACE(glXGetVisualFromFBConfig);  PRARGD(dpy);  PRARGC(config);
-		STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXGetVisualFromFBConfig);  PRARGD(dpy);  PRARGC(config);
+	STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	if(!dpy || !VALID_CONFIG(config)) goto done;
 	if(!config->visualID) goto done;
@@ -1481,7 +1577,9 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config_)
 	vishash.add(dpy, vis, config);
 
 	done:
-		STOPTRACE();  PRARGV(vis);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGV(vis);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return vis;
@@ -1523,12 +1621,15 @@ Bool glXIsDirect(Display *dpy, GLXContext ctx)
 	if(IS_EXCLUDED(dpy))
 		return _glXIsDirect(dpy, ctx);
 
-		OPENTRACE(glXIsDirect);  PRARGD(dpy);  PRARGX(ctx);
-		STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXIsDirect);  PRARGD(dpy);  PRARGX(ctx);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	direct = VGLIsDirect(ctx);
 
-		STOPTRACE();  PRARGI(direct);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGI(direct);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return direct;
@@ -1557,8 +1658,10 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	}
 	vglfaker::setExcludeCurrent(false);
 
-		OPENTRACE(glXMakeCurrent);  PRARGD(dpy);  PRARGX(drawable);  PRARGX(ctx);
-		STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXMakeCurrent);  PRARGD(dpy);  PRARGX(drawable);  PRARGX(ctx);
+	STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	DISABLE_FAKER();
 
@@ -1646,8 +1749,10 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	}
 
 	done:
-		STOPTRACE();  PRARGC(config);  PRARGX(drawable);  PRARGS(renderer);
-		CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGC(config);  PRARGX(drawable);  PRARGS(renderer);
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	ENABLE_FAKER();
@@ -1674,8 +1779,10 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	}
 	vglfaker::setExcludeCurrent(false);
 
-		OPENTRACE(glXMakeContextCurrent);  PRARGD(dpy);  PRARGX(draw);
-		PRARGX(read);  PRARGX(ctx);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXMakeContextCurrent);  PRARGD(dpy);  PRARGX(draw);  PRARGX(read);
+	PRARGX(ctx);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	DISABLE_FAKER();
 
@@ -1794,8 +1901,10 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	}
 
 	done:
-		STOPTRACE();  PRARGC(config);  PRARGX(draw);  PRARGX(read);
-		PRARGS(renderer);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGC(config);  PRARGX(draw);  PRARGX(read);
+	PRARGS(renderer);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	ENABLE_FAKER();
@@ -1821,8 +1930,10 @@ int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 	if(IS_EXCLUDED(dpy))
 		return _glXQueryContext(dpy, ctx, attribute, value);
 
-		OPENTRACE(glXQueryContext);  PRARGD(dpy);  PRARGX(ctx);
-		PRARGIX(attribute);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXQueryContext);  PRARGD(dpy);  PRARGX(ctx);  PRARGIX(attribute);
+	STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	VGLFBConfig config;
 
@@ -1834,7 +1945,9 @@ int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 	}
 	else retval = VGLQueryContext(dpy, ctx, attribute, value);
 
-		STOPTRACE();  if(value) PRARGIX(*value);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  if(value) PRARGIX(*value);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return retval;
@@ -1851,8 +1964,10 @@ int glXQueryContextInfoEXT(Display *dpy, GLXContext ctx, int attribute,
 	if(IS_EXCLUDED(dpy))
 		return _glXQueryContextInfoEXT(dpy, ctx, attribute, value);
 
-		OPENTRACE(glXQueryContextInfoEXT);  PRARGD(dpy);  PRARGX(ctx);
-		PRARGIX(attribute);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXQueryContextInfoEXT);  PRARGD(dpy);  PRARGX(ctx);
+	PRARGIX(attribute);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	VGLFBConfig config;
 
@@ -1872,7 +1987,9 @@ int glXQueryContextInfoEXT(Display *dpy, GLXContext ctx, int attribute,
 	}
 	else retval = _glXQueryContextInfoEXT(DPY3D, ctx, attribute, value);
 
-		STOPTRACE();  if(value) PRARGIX(*value);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  if(value) PRARGIX(*value);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return retval;
@@ -1896,8 +2013,10 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 		return;
 	}
 
-		OPENTRACE(glXQueryDrawable);  PRARGD(dpy);  PRARGX(draw);
-		PRARGIX(attribute);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXQueryDrawable);  PRARGD(dpy);  PRARGX(draw);
+	PRARGIX(attribute);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	if(!value) goto done;
 
@@ -1929,9 +2048,11 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 	}
 
 	done:
-		STOPTRACE();  PRARGX(glxDraw);
-		if(value) { PRARGIX(*value); }  else { PRARGX(value); }
-		CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGX(glxDraw);
+	if(value) { PRARGIX(*value); }  else { PRARGX(value); }
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 }
@@ -2084,7 +2205,9 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
 		return;
 	}
 
-		OPENTRACE(glXSwapBuffers);  PRARGD(dpy);  PRARGX(drawable);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXSwapBuffers);  PRARGD(dpy);  PRARGX(drawable);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	DISABLE_FAKER();
 
@@ -2115,8 +2238,10 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
 	}
 	else VGLSwapBuffers(dpy, drawable);
 
-		STOPTRACE();  if(vw) { PRARGX(vw->getGLXDrawable()); }
-		CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  if(vw) { PRARGX(vw->getGLXDrawable()); }
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	ENABLE_FAKER();
@@ -2138,8 +2263,10 @@ void glXSwapIntervalEXT(Display *dpy, GLXDrawable drawable, int interval)
 		return;
 	}
 
-		OPENTRACE(glXSwapIntervalEXT);  PRARGD(dpy);  PRARGX(drawable);
-		PRARGI(interval);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXSwapIntervalEXT);  PRARGD(dpy);  PRARGX(drawable);
+	PRARGI(interval);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	if(interval > VGL_MAX_SWAP_INTERVAL) interval = VGL_MAX_SWAP_INTERVAL;
 	if(interval < 0)
@@ -2154,7 +2281,9 @@ void glXSwapIntervalEXT(Display *dpy, GLXDrawable drawable, int interval)
 	// isn't a GLX window, but nVidia's implementation doesn't, so we emulate
 	// their behavior.
 
-		STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 }
@@ -2169,7 +2298,9 @@ int glXSwapIntervalSGI(int interval)
 
 	if(vglfaker::getExcludeCurrent()) return _glXSwapIntervalSGI(interval);
 
-		OPENTRACE(glXSwapIntervalSGI);  PRARGI(interval);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXSwapIntervalSGI);  PRARGI(interval);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	TRY();
 
@@ -2181,7 +2312,9 @@ int glXSwapIntervalSGI(int interval)
 
 	CATCH();
 
-		STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	return retval;
 }
@@ -2200,14 +2333,18 @@ void glXUseXFont(Font font, int first, int count, int list_base)
 
 	TRY();
 
-		OPENTRACE(glXUseXFont);  PRARGX(font);  PRARGI(first);  PRARGI(count);
-		PRARGI(list_base);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glXUseXFont);  PRARGX(font);  PRARGI(first);  PRARGI(count);
+	PRARGI(list_base);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	DISABLE_FAKER();
 
 	Fake_glXUseXFont(font, first, count, list_base);
 
-		STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	ENABLE_FAKER();

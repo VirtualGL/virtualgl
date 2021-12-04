@@ -30,12 +30,16 @@ static void doGLReadback(bool spoilLast, bool sync)
 	{
 		if(DrawingToFront() || vw->dirty)
 		{
-				OPENTRACE(doGLReadback);  PRARGX(vw->getGLXDrawable());
-				PRARGI(sync);  PRARGI(spoilLast);  STARTTRACE();
+			/////////////////////////////////////////////////////////////////////////
+			OPENTRACE(doGLReadback);  PRARGX(vw->getGLXDrawable());  PRARGI(sync);
+			PRARGI(spoilLast);  STARTTRACE();
+			/////////////////////////////////////////////////////////////////////////
 
 			vw->readback(GL_FRONT, spoilLast, sync);
 
-				STOPTRACE();  CLOSETRACE();
+			/////////////////////////////////////////////////////////////////////////
+			STOPTRACE();  CLOSETRACE();
+			/////////////////////////////////////////////////////////////////////////
 		}
 	}
 }
@@ -53,7 +57,9 @@ void glFinish(void)
 
 	TRY();
 
-		if(fconfig.trace) vglout.print("[VGL] glFinish()\n");
+	/////////////////////////////////////////////////////////////////////////////
+	if(fconfig.trace) vglout.print("[VGL] glFinish()\n");
+	/////////////////////////////////////////////////////////////////////////////
 
 	DISABLE_FAKER();
 
@@ -74,7 +80,9 @@ void glFlush(void)
 
 	TRY();
 
-		if(fconfig.trace) vglout.print("[VGL] glFlush()\n");
+	/////////////////////////////////////////////////////////////////////////////
+	if(fconfig.trace) vglout.print("[VGL] glFlush()\n");
+	/////////////////////////////////////////////////////////////////////////////
 
 	DISABLE_FAKER();
 
@@ -102,7 +110,9 @@ void glXWaitGL(void)
 
 	TRY();
 
-		if(fconfig.trace) vglout.print("[VGL] glXWaitGL()\n");
+	/////////////////////////////////////////////////////////////////////////////
+	if(fconfig.trace) vglout.print("[VGL] glXWaitGL()\n");
+	/////////////////////////////////////////////////////////////////////////////
 
 	DISABLE_FAKER();
 
@@ -179,7 +189,9 @@ void glDrawBuffer(GLenum mode)
 
 	TRY();
 
-		OPENTRACE(glDrawBuffer);  PRARGX(mode);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glDrawBuffer);  PRARGX(mode);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	vglfaker::VirtualWin *vw;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
@@ -197,12 +209,14 @@ void glDrawBuffer(GLenum mode)
 	}
 	else VGLDrawBuffer(mode);
 
-		STOPTRACE();
-		if(drawable && vw)
-		{
-			PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
-		}
-		CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();
+	if(drawable && vw)
+	{
+		PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
+	}
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 }
@@ -214,12 +228,14 @@ void glDrawBuffers(GLsizei n, const GLenum *bufs)
 
 	TRY();
 
-		OPENTRACE(glDrawBuffers);  PRARGI(n);
-		if(n && bufs)
-		{
-			for(GLsizei i = 0; i < n; i++) PRARGX(bufs[i]);
-		}
-		STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glDrawBuffers);  PRARGI(n);
+	if(n && bufs)
+	{
+		for(GLsizei i = 0; i < n; i++) PRARGX(bufs[i]);
+	}
+	STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	vglfaker::VirtualWin *vw = NULL;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
@@ -237,12 +253,14 @@ void glDrawBuffers(GLsizei n, const GLenum *bufs)
 	}
 	else VGLDrawBuffers(n, bufs);
 
-		STOPTRACE();
-		if(drawable && vw)
-		{
-			PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
-		}
-		CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();
+	if(drawable && vw)
+	{
+		PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
+	}
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 }
@@ -268,8 +286,10 @@ void glFramebufferDrawBufferEXT(GLuint framebuffer, GLenum mode)
 
 	TRY();
 
-		OPENTRACE(glFramebufferDrawBufferEXT);  PRARGI(framebuffer);  PRARGX(mode);
-		STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glFramebufferDrawBufferEXT);  PRARGI(framebuffer);  PRARGX(mode);
+	STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	vglfaker::VirtualWin *vw = NULL;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
@@ -288,12 +308,14 @@ void glFramebufferDrawBufferEXT(GLuint framebuffer, GLenum mode)
 	}
 	else VGLNamedFramebufferDrawBuffer(framebuffer, mode, true);
 
-		STOPTRACE();
-		if(drawable && vw)
-		{
-			PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
-		}
-		CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();
+	if(drawable && vw)
+	{
+		PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
+	}
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 }
@@ -310,12 +332,14 @@ void glFramebufferDrawBuffersEXT(GLuint framebuffer, GLsizei n,
 
 	TRY();
 
-		OPENTRACE(glFramebufferDrawBuffersEXT);  PRARGI(framebuffer);  PRARGI(n);
-		if(n && bufs)
-		{
-			for(GLsizei i = 0; i < n; i++) PRARGX(bufs[i]);
-		}
-		STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glFramebufferDrawBuffersEXT);  PRARGI(framebuffer);  PRARGI(n);
+	if(n && bufs)
+	{
+		for(GLsizei i = 0; i < n; i++) PRARGX(bufs[i]);
+	}
+	STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	vglfaker::VirtualWin *vw = NULL;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
@@ -334,12 +358,14 @@ void glFramebufferDrawBuffersEXT(GLuint framebuffer, GLsizei n,
 	}
 	else VGLNamedFramebufferDrawBuffers(framebuffer, n, bufs, true);
 
-		STOPTRACE();
-		if(drawable && vw)
-		{
-			PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
-		}
-		CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();
+	if(drawable && vw)
+	{
+		PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
+	}
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 }
@@ -623,8 +649,10 @@ void glNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf)
 
 	TRY();
 
-		OPENTRACE(glNamedFramebufferDrawBuffer);  PRARGI(framebuffer);
-		PRARGX(buf);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glNamedFramebufferDrawBuffer);  PRARGI(framebuffer);  PRARGX(buf);
+	STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	vglfaker::VirtualWin *vw = NULL;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
@@ -643,12 +671,14 @@ void glNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf)
 	}
 	else VGLNamedFramebufferDrawBuffer(framebuffer, buf);
 
-		STOPTRACE();
-		if(drawable && vw)
-		{
-			PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
-		}
-		CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();
+	if(drawable && vw)
+	{
+		PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
+	}
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 }
@@ -665,12 +695,14 @@ void glNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 
 	TRY();
 
-		OPENTRACE(glNamedFramebufferDrawBuffers);  PRARGI(framebuffer);  PRARGI(n);
-		if(n && bufs)
-		{
-			for(GLsizei i = 0; i < n; i++) PRARGX(bufs[i]);
-		}
-		STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glNamedFramebufferDrawBuffers);  PRARGI(framebuffer);  PRARGI(n);
+	if(n && bufs)
+	{
+		for(GLsizei i = 0; i < n; i++) PRARGX(bufs[i]);
+	}
+	STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	vglfaker::VirtualWin *vw = NULL;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
@@ -689,12 +721,14 @@ void glNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 	}
 	else VGLNamedFramebufferDrawBuffers(framebuffer, n, bufs);
 
-		STOPTRACE();
-		if(drawable && vw)
-		{
-			PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
-		}
-		CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();
+	if(drawable && vw)
+	{
+		PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
+	}
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 }
@@ -724,7 +758,9 @@ void glPopAttrib(void)
 
 	TRY();
 
-		OPENTRACE(glPopAttrib);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glPopAttrib);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	vglfaker::VirtualWin *vw;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
@@ -742,12 +778,14 @@ void glPopAttrib(void)
 	}
 	else _glPopAttrib();
 
-		STOPTRACE();
-		if(drawable && vw)
-		{
-			PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
-		}
-		CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();
+	if(drawable && vw)
+	{
+		PRARGI(vw->dirty);  PRARGI(vw->rdirty);  PRARGX(vw->getGLXDrawable());
+	}
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 }
@@ -795,8 +833,10 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 
 	TRY();
 
-		OPENTRACE(glViewport);  PRARGI(x);  PRARGI(y);  PRARGI(width);
-		PRARGI(height);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(glViewport);  PRARGI(x);  PRARGI(y);  PRARGI(width);
+	PRARGI(height);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	GLXContext ctx = VGLGetCurrentContext();
 	GLXDrawable draw = VGLGetCurrentDrawable();
@@ -822,10 +862,12 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 	}
 	_glViewport(x, y, width, height);
 
-		STOPTRACE();
-		if(draw != newDraw) { PRARGX(draw);  PRARGX(newDraw); }
-		if(read != newRead) { PRARGX(read);  PRARGX(newRead); }
-		CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();
+	if(draw != newDraw) { PRARGX(draw);  PRARGX(newDraw); }
+	if(read != newRead) { PRARGX(read);  PRARGX(newRead); }
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 }
