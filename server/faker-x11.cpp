@@ -47,7 +47,9 @@ int XCloseDisplay(Display *dpy)
 	int retval = 0;
 	TRY();
 
-		OPENTRACE(XCloseDisplay);  PRARGD(dpy);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(XCloseDisplay);  PRARGD(dpy);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	DISABLE_FAKER();
 
@@ -73,7 +75,9 @@ int XCloseDisplay(Display *dpy)
 	dpyhash.remove(dpy);
 	retval = _XCloseDisplay(dpy);
 
-		STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	ENABLE_FAKER();
@@ -101,9 +105,11 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 
 	if(src == 0 || dst == 0) return BadDrawable;
 
-		OPENTRACE(XCopyArea);  PRARGD(dpy);  PRARGX(src);  PRARGX(dst);
-		PRARGX(gc);  PRARGI(src_x);  PRARGI(src_y);  PRARGI(width);
-		PRARGI(height);  PRARGI(dest_x);  PRARGI(dest_y);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(XCopyArea);  PRARGD(dpy);  PRARGX(src);  PRARGX(dst);  PRARGX(gc);
+	PRARGI(src_x);  PRARGI(src_y);  PRARGI(width);  PRARGI(height);
+	PRARGI(dest_x);  PRARGI(dest_y);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	if(!(srcVW = (VirtualDrawable *)pmhash.find(dpy, src)))
 	{
@@ -177,8 +183,10 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 			((VirtualWin *)dstVW)->readback(GL_FRONT, false, fconfig.sync);
 	}
 
-		STOPTRACE();  if(copy3d) PRARGX(glxsrc);  if(copy3d) PRARGX(glxdst);
-		CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  if(copy3d) PRARGX(glxsrc);  if(copy3d) PRARGX(glxdst);
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	ENABLE_FAKER();
@@ -211,14 +219,18 @@ Window XCreateSimpleWindow(Display *dpy, Window parent, int x, int y,
 		return _XCreateSimpleWindow(dpy, parent, x, y, width, height, border_width,
 			border, background);
 
-		OPENTRACE(XCreateSimpleWindow);  PRARGD(dpy);  PRARGX(parent);  PRARGI(x);
-		PRARGI(y);  PRARGI(width);  PRARGI(height);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(XCreateSimpleWindow);  PRARGD(dpy);  PRARGX(parent);  PRARGI(x);
+	PRARGI(y);  PRARGI(width);  PRARGI(height);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	win = _XCreateSimpleWindow(dpy, parent, x, y, width, height, border_width,
 		border, background);
 	if(win) winhash.add(dpy, win);
 
-		STOPTRACE();  PRARGX(win);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGX(win);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return win;
@@ -237,15 +249,19 @@ Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 		return _XCreateWindow(dpy, parent, x, y, width, height, border_width,
 			depth, c_class, visual, valuemask, attributes);
 
-		OPENTRACE(XCreateWindow);  PRARGD(dpy);  PRARGX(parent);  PRARGI(x);
-		PRARGI(y);  PRARGI(width);  PRARGI(height);  PRARGI(depth);
-		PRARGI(c_class);  PRARGV(visual);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(XCreateWindow);  PRARGD(dpy);  PRARGX(parent);  PRARGI(x);
+	PRARGI(y);  PRARGI(width);  PRARGI(height);  PRARGI(depth);  PRARGI(c_class);
+	PRARGV(visual);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	win = _XCreateWindow(dpy, parent, x, y, width, height, border_width, depth,
 		c_class, visual, valuemask, attributes);
 	if(win) winhash.add(dpy, win);
 
-		STOPTRACE();  PRARGX(win);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGX(win);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return win;
@@ -278,14 +294,18 @@ int XDestroySubwindows(Display *dpy, Window win)
 	if(IS_EXCLUDED(dpy))
 		return _XDestroySubwindows(dpy, win);
 
-		OPENTRACE(XDestroySubwindows);  PRARGD(dpy);  PRARGX(win);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(XDestroySubwindows);  PRARGD(dpy);  PRARGX(win);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	DISABLE_FAKER();
 
 	if(dpy && win) DeleteWindow(dpy, win, true);
 	retval = _XDestroySubwindows(dpy, win);
 
-		STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	ENABLE_FAKER();
@@ -301,14 +321,18 @@ int XDestroyWindow(Display *dpy, Window win)
 	if(IS_EXCLUDED(dpy))
 		return _XDestroyWindow(dpy, win);
 
-		OPENTRACE(XDestroyWindow);  PRARGD(dpy);  PRARGX(win);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(XDestroyWindow);  PRARGD(dpy);  PRARGX(win);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	DISABLE_FAKER();
 
 	if(dpy && win) DeleteWindow(dpy, win);
 	retval = _XDestroyWindow(dpy, win);
 
-		STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	ENABLE_FAKER();
@@ -348,7 +372,9 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 		return _XGetGeometry(dpy, drawable, root, x, y, width_return,
 			height_return, border_width, depth);
 
-		OPENTRACE(XGetGeometry);  PRARGD(dpy);  PRARGX(drawable);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(XGetGeometry);  PRARGD(dpy);  PRARGX(drawable);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	VirtualWin *vw = NULL;
 	if(winhash.find(drawable, vw))
@@ -364,9 +390,12 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 	if(winhash.find(dpy, drawable, vw) && width > 0 && height > 0)
 		vw->resize(width, height);
 
-		STOPTRACE();  if(root) PRARGX(*root);  if(x) PRARGI(*x);  if(y) PRARGI(*y);
-		PRARGI(width);  PRARGI(height);  if(border_width) PRARGI(*border_width);
-		if(depth) PRARGI(*depth);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  if(root) PRARGX(*root);  if(x) PRARGI(*x);  if(y) PRARGI(*y);
+	PRARGI(width);  PRARGI(height);  if(border_width) PRARGI(*border_width);
+	if(depth) PRARGI(*depth);
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	if(width_return) *width_return = width;
 	if(height_return) *height_return = height;
@@ -390,9 +419,11 @@ XImage *XGetImage(Display *dpy, Drawable drawable, int x, int y,
 	if(IS_EXCLUDED(dpy))
 		return _XGetImage(dpy, drawable, x, y, width, height, plane_mask, format);
 
-		OPENTRACE(XGetImage);  PRARGD(dpy);  PRARGX(drawable);  PRARGI(x);
-		PRARGI(y);  PRARGI(width);  PRARGI(height);  PRARGX(plane_mask);
-		PRARGI(format);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(XGetImage);  PRARGD(dpy);  PRARGX(drawable);  PRARGI(x);
+	PRARGI(y);  PRARGI(width);  PRARGI(height);  PRARGX(plane_mask);
+	PRARGI(format);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	DISABLE_FAKER();
 
@@ -401,7 +432,9 @@ XImage *XGetImage(Display *dpy, Drawable drawable, int x, int y,
 
 	xi = _XGetImage(dpy, drawable, x, y, width, height, plane_mask, format);
 
-		STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	ENABLE_FAKER();
@@ -421,7 +454,9 @@ char **XListExtensions(Display *dpy, int *next)
 	if(IS_EXCLUDED(dpy))
 		return _XListExtensions(dpy, next);
 
-		OPENTRACE(XListExtensions);  PRARGD(dpy);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(XListExtensions);  PRARGD(dpy);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	list = _XListExtensions(dpy, &n);
 	if(list && n > 0)
@@ -462,7 +497,9 @@ char **XListExtensions(Display *dpy, int *next)
 		list = newList;  n++;
 	}
 
-		STOPTRACE();  PRARGI(n);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGI(n);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 
@@ -501,12 +538,16 @@ Display *XOpenDisplay(_Xconst char *name)
 
 	vglfaker::init();
 
-		OPENTRACE(XOpenDisplay);  PRARGS(name);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(XOpenDisplay);  PRARGS(name);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	dpy = _XOpenDisplay(name);
 	if(dpy) setupXDisplay(dpy);
 
-		STOPTRACE();  PRARGD(dpy);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGD(dpy);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return dpy;
@@ -530,17 +571,22 @@ Display *XkbOpenDisplay(char *display_name, int *event_rtrn, int *error_rtrn,
 
 	vglfaker::init();
 
-		OPENTRACE(XkbOpenDisplay);  PRARGS(display_name);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(XkbOpenDisplay);  PRARGS(display_name);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	dpy = _XkbOpenDisplay(display_name, event_rtrn, error_rtrn, major_in_out,
 		minor_in_out, reason_rtrn);
 	if(dpy) setupXDisplay(dpy);
 
-		STOPTRACE();  PRARGD(dpy);  if(event_rtrn) PRARGI(*event_rtrn);
-		if(error_rtrn) PRARGI(*error_rtrn);
-		if(major_in_out) PRARGI(*major_in_out);
-		if(minor_in_out) PRARGI(*minor_in_out);
-		if(reason_rtrn) PRARGI(*reason_rtrn);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  PRARGD(dpy);  if(event_rtrn) PRARGI(*event_rtrn);
+	if(error_rtrn) PRARGI(*error_rtrn);
+	if(major_in_out) PRARGI(*major_in_out);
+	if(minor_in_out) PRARGI(*minor_in_out);
+	if(reason_rtrn) PRARGI(*reason_rtrn);
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return dpy;
@@ -557,14 +603,19 @@ Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
 	if(IS_EXCLUDED(dpy))
 		return _XQueryExtension(dpy, name, major_opcode, first_event, first_error);
 
-		OPENTRACE(XQueryExtension);  PRARGD(dpy);  PRARGS(name);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(XQueryExtension);  PRARGD(dpy);  PRARGS(name);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	if(!strcmp(name, "GLX")) dpy = DPY3D;
 	retval = _XQueryExtension(dpy, name, major_opcode, first_event, first_error);
 
-		STOPTRACE();  if(major_opcode) PRARGI(*major_opcode);
-		if(first_event) PRARGI(*first_event);
-		if(first_error) PRARGI(*first_error);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  if(major_opcode) PRARGI(*major_opcode);
+	if(first_event) PRARGI(*first_event);
+	if(first_error) PRARGI(*first_error);
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	return retval;
 }
@@ -603,13 +654,17 @@ static void handleEvent(Display *dpy, XEvent *xe)
 	{
 		if(winhash.find(dpy, xe->xconfigure.window, vw))
 		{
-				OPENTRACE(handleEvent);  PRARGI(xe->xconfigure.width);
-				PRARGI(xe->xconfigure.height);  PRARGX(xe->xconfigure.window);
-				STARTTRACE();
+			/////////////////////////////////////////////////////////////////////////
+			OPENTRACE(handleEvent);  PRARGI(xe->xconfigure.width);
+			PRARGI(xe->xconfigure.height);  PRARGX(xe->xconfigure.window);
+			STARTTRACE();
+			/////////////////////////////////////////////////////////////////////////
 
 			vw->resize(xe->xconfigure.width, xe->xconfigure.height);
 
-				STOPTRACE();  CLOSETRACE();
+			/////////////////////////////////////////////////////////////////////////
+			STOPTRACE();  CLOSETRACE();
+			/////////////////////////////////////////////////////////////////////////
 		}
 	}
 	else if(xe && xe->type == KeyPress)
@@ -701,10 +756,12 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 	if(IS_EXCLUDED(dpy))
 		return _XConfigureWindow(dpy, win, value_mask, values);
 
-		OPENTRACE(XConfigureWindow);  PRARGD(dpy);  PRARGX(win);
-		if(values && (value_mask & CWWidth)) { PRARGI(values->width); }
-		if(values && (value_mask & CWHeight)) { PRARGI(values->height); }
-		STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(XConfigureWindow);  PRARGD(dpy);  PRARGX(win);
+	if(values && (value_mask & CWWidth)) { PRARGI(values->width); }
+	if(values && (value_mask & CWHeight)) { PRARGI(values->height); }
+	STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	VirtualWin *vw = NULL;
 	if(winhash.find(dpy, win, vw) && values)
@@ -712,7 +769,9 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 			value_mask & CWHeight ? values->height : 0);
 	retval = _XConfigureWindow(dpy, win, value_mask, values);
 
-		STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return retval;
@@ -741,14 +800,18 @@ int XMoveResizeWindow(Display *dpy, Window win, int x, int y,
 	if(IS_EXCLUDED(dpy))
 		return _XMoveResizeWindow(dpy, win, x, y, width, height);
 
-		OPENTRACE(XMoveResizeWindow);  PRARGD(dpy);  PRARGX(win);  PRARGI(x);
-		PRARGI(y);  PRARGI(width);  PRARGI(height);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(XMoveResizeWindow);  PRARGD(dpy);  PRARGX(win);  PRARGI(x);
+	PRARGI(y);  PRARGI(width);  PRARGI(height);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	VirtualWin *vw = NULL;
 	if(winhash.find(dpy, win, vw)) vw->resize(width, height);
 	retval = _XMoveResizeWindow(dpy, win, x, y, width, height);
 
-		STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return retval;
@@ -777,14 +840,18 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width,
 	if(IS_EXCLUDED(dpy))
 		return _XResizeWindow(dpy, win, width, height);
 
-		OPENTRACE(XResizeWindow);  PRARGD(dpy);  PRARGX(win);  PRARGI(width);
-		PRARGI(height);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(XResizeWindow);  PRARGD(dpy);  PRARGX(win);  PRARGI(width);
+	PRARGI(height);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	VirtualWin *vw = NULL;
 	if(winhash.find(dpy, win, vw)) vw->resize(width, height);
 	retval = _XResizeWindow(dpy, win, width, height);
 
-		STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 	return retval;

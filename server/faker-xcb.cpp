@@ -42,21 +42,25 @@ const xcb_query_extension_reply_t *
 		&& vglfaker::getFakerLevel() == 0
 		&& !dpyhash.find(xcbconnhash.getX11Display(conn)))
 	{
-			OPENTRACE(xcb_get_extension_data);  PRARGX(conn);  PRARGS(ext->name);
-			PRARGI(ext->global_id);  STARTTRACE();
+		///////////////////////////////////////////////////////////////////////////
+		OPENTRACE(xcb_get_extension_data);  PRARGX(conn);  PRARGS(ext->name);
+		PRARGI(ext->global_id);  STARTTRACE();
+		///////////////////////////////////////////////////////////////////////////
 
 		xcb_connection_t *conn3D = _XGetXCBConnection(DPY3D);
 		if(conn3D != NULL)
 			reply = _xcb_get_extension_data(conn3D, _xcb_glx_id());
 
-			STOPTRACE();
-			if(reply)
-			{
-				PRARGI(reply->present);  PRARGI(reply->major_opcode);
-				PRARGI(reply->first_event);  PRARGI(reply->first_error);
-			}
-			else PRARGX(reply);
-			CLOSETRACE();
+		///////////////////////////////////////////////////////////////////////////
+		STOPTRACE();
+		if(reply)
+		{
+			PRARGI(reply->present);  PRARGI(reply->major_opcode);
+			PRARGI(reply->first_event);  PRARGI(reply->first_error);
+		}
+		else PRARGX(reply);
+		CLOSETRACE();
+		///////////////////////////////////////////////////////////////////////////
 	}
 	else
 		reply = _xcb_get_extension_data(conn, ext);
@@ -82,14 +86,18 @@ xcb_glx_query_version_cookie_t
 		|| dpyhash.find(xcbconnhash.getX11Display(conn)))
 		return _xcb_glx_query_version(conn, major_version, minor_version);
 
-		OPENTRACE(xcb_glx_query_version);  PRARGX(conn);  PRARGI(major_version);
-		PRARGI(minor_version);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(xcb_glx_query_version);  PRARGX(conn);  PRARGI(major_version);
+	PRARGI(minor_version);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	xcb_connection_t *conn3D = _XGetXCBConnection(DPY3D);
 	if(conn3D != NULL)
 		cookie = _xcb_glx_query_version(conn3D, major_version, minor_version);
 
-		STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 
@@ -109,25 +117,28 @@ xcb_glx_query_version_reply_t *
 		|| dpyhash.find(xcbconnhash.getX11Display(conn)))
 		return _xcb_glx_query_version_reply(conn, cookie, error);
 
-		OPENTRACE(xcb_glx_query_version_reply);  PRARGX(conn);
-		STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(xcb_glx_query_version_reply);  PRARGX(conn);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	xcb_connection_t *conn3D = _XGetXCBConnection(DPY3D);
 	if(conn3D != NULL)
 		reply = _xcb_glx_query_version_reply(conn3D, cookie, error);
 
-		STOPTRACE();
-		if(error)
-		{
-			if(*error) PRARGERR(*error)  else PRARGX(*error);
-		}
-		else PRARGX(error);
-		if(reply)
-		{
-			PRARGI(reply->major_version);  PRARGI(reply->minor_version);
-		}
-		else PRARGX(reply);
-		CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();
+	if(error)
+	{
+		if(*error) PRARGERR(*error)  else PRARGX(*error);
+	}
+	else PRARGX(error);
+	if(reply)
+	{
+		PRARGI(reply->major_version);  PRARGI(reply->minor_version);
+	}
+	else PRARGX(reply);
+	CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 
@@ -159,12 +170,16 @@ static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *ev)
 			vw = winhash.find(dpy, cne->window);
 			if(!vw) break;
 
-				OPENTRACE(handleXCBEvent);  PRARGX(cne->window);
-				PRARGI(cne->width);  PRARGI(cne->height);  STARTTRACE();
+			/////////////////////////////////////////////////////////////////////////
+			OPENTRACE(handleXCBEvent);  PRARGX(cne->window);  PRARGI(cne->width);
+			PRARGI(cne->height);  STARTTRACE();
+			/////////////////////////////////////////////////////////////////////////
 
 			vw->resize(cne->width, cne->height);
 
-				STOPTRACE();  CLOSETRACE();
+			/////////////////////////////////////////////////////////////////////////
+			STOPTRACE();  CLOSETRACE();
+			/////////////////////////////////////////////////////////////////////////
 
 			break;
 		}
@@ -273,8 +288,9 @@ void XSetEventQueueOwner(Display *dpy, enum XEventQueueOwner owner)
 	if(vglfaker::deadYet || dpyhash.find(dpy))
 		return _XSetEventQueueOwner(dpy, owner);
 
-		OPENTRACE(XSetEventQueueOwner);  PRARGD(dpy);  PRARGI(owner);
-		STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(XSetEventQueueOwner);  PRARGD(dpy);  PRARGI(owner);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	if(fconfig.fakeXCB)
 	{
@@ -287,7 +303,9 @@ void XSetEventQueueOwner(Display *dpy, enum XEventQueueOwner owner)
 	}
 	_XSetEventQueueOwner(dpy, owner);
 
-		STOPTRACE();  if(fconfig.fakeXCB) PRARGX(conn);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  if(fconfig.fakeXCB) PRARGX(conn);  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
 
 	CATCH();
 }
