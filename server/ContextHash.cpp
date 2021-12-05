@@ -1,4 +1,4 @@
-// Copyright (C)2014, 2020 D. R. Commander
+// Copyright (C)2014, 2020-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -12,7 +12,7 @@
 
 #include "ContextHash.h"
 
-using namespace vglfaker;
+using namespace faker;
 
 ContextHash *ContextHash::instance = NULL;
-vglutil::CriticalSection ContextHash::instanceMutex;
+util::CriticalSection ContextHash::instanceMutex;

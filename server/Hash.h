@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2011, 2014, 2019-2020 D. R. Commander
+// Copyright (C)2011, 2014, 2019-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -21,7 +21,7 @@
 
 // Generic hash table template class
 
-namespace vglfaker
+namespace faker
 {
 	template <class HashKeyType1, class HashKeyType2, class HashValueType>
 	class Hash
@@ -39,7 +39,7 @@ namespace vglfaker
 
 			void kill(void)
 			{
-				vglutil::CriticalSection::SafeLock l(mutex);
+				util::CriticalSection::SafeLock l(mutex);
 				while(start != NULL) killEntry(start);
 			}
 
@@ -62,7 +62,7 @@ namespace vglfaker
 				HashEntry *entry = NULL;
 
 				if(!key1) THROW("Invalid argument");
-				vglutil::CriticalSection::SafeLock l(mutex);
+				util::CriticalSection::SafeLock l(mutex);
 
 				if((entry = findEntry(key1, key2)) != NULL)
 				{
@@ -84,7 +84,7 @@ namespace vglfaker
 			HashValueType find(HashKeyType1 key1, HashKeyType2 key2)
 			{
 				HashEntry *entry = NULL;
-				vglutil::CriticalSection::SafeLock l(mutex);
+				util::CriticalSection::SafeLock l(mutex);
 
 				if((entry = findEntry(key1, key2)) != NULL)
 				{
@@ -97,7 +97,7 @@ namespace vglfaker
 			void remove(HashKeyType1 key1, HashKeyType2 key2, bool useRef = false)
 			{
 				HashEntry *entry = NULL;
-				vglutil::CriticalSection::SafeLock l(mutex);
+				util::CriticalSection::SafeLock l(mutex);
 
 				if((entry = findEntry(key1, key2)) != NULL)
 				{
@@ -111,7 +111,7 @@ namespace vglfaker
 			HashEntry *findEntry(HashKeyType1 key1, HashKeyType2 key2)
 			{
 				HashEntry *entry = NULL;
-				vglutil::CriticalSection::SafeLock l(mutex);
+				util::CriticalSection::SafeLock l(mutex);
 
 				entry = start;
 				while(entry != NULL)
@@ -128,7 +128,7 @@ namespace vglfaker
 
 			void killEntry(HashEntry *entry)
 			{
-				vglutil::CriticalSection::SafeLock l(mutex);
+				util::CriticalSection::SafeLock l(mutex);
 
 				if(entry->prev) entry->prev->next = entry->next;
 				if(entry->next) entry->next->prev = entry->prev;
@@ -151,7 +151,7 @@ namespace vglfaker
 
 			int count;
 			HashEntry *start, *end;
-			vglutil::CriticalSection mutex;
+			util::CriticalSection mutex;
 	};
 }
 

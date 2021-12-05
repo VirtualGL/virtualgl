@@ -1,5 +1,5 @@
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2014, 2017-2019 D. R. Commander
+// Copyright (C)2014, 2017-2019, 2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -18,8 +18,8 @@
 #include "Log.h"
 #include "vglutil.h"
 
-using namespace vglutil;
-using namespace vglcommon;
+using namespace util;
+using namespace common;
 
 
 static int tjpf[PIXELFORMATS] =

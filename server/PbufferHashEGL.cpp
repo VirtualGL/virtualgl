@@ -1,4 +1,4 @@
-// Copyright (C)2014, 2020 D. R. Commander
+// Copyright (C)2014, 2020-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -10,9 +10,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // wxWindows Library License for more details.
 
-#include "EGLContextHash.h"
+#include "PbufferHashEGL.h"
 
-using namespace vglfaker;
+using namespace backend;
 
-EGLContextHash *EGLContextHash::instance = NULL;
-vglutil::CriticalSection EGLContextHash::instanceMutex;
+PbufferHashEGL *PbufferHashEGL::instance = NULL;
+util::CriticalSection PbufferHashEGL::instanceMutex;

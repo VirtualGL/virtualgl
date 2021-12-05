@@ -17,7 +17,7 @@
 
 #include "faker-sym.h"
 #ifdef EGLBACKEND
-#include "EGLRBOContext.h"
+#include "RBOContext.h"
 #endif
 
 
@@ -57,12 +57,12 @@ namespace glxvisual
 	// 2D X server.)
 	int visAttrib(Display *dpy, int screen, VisualID vid, int attribute);
 
-	// This just wraps VGLGetFBConfigAttrib() to allow an FB config attribute to
-	// be obtained with a one-liner.
+	// This just wraps backend::getFBConfigAttrib() to allow an FB config
+	// attribute to be obtained with a one-liner.
 	int INLINE getFBConfigAttrib(Display *dpy, VGLFBConfig config, int attribute)
 	{
 		int value = 0;
-		VGLGetFBConfigAttrib(dpy, config, attribute, &value);
+		backend::getFBConfigAttrib(dpy, config, attribute, &value);
 		return value;
 	}
 

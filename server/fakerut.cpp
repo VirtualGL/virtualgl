@@ -36,7 +36,7 @@
 	#include <valgrind/helgrind.h>
 #endif
 
-using namespace vglutil;
+using namespace util;
 
 
 #define CLEAR_BUFFER(buffer, r, g, b, a) \

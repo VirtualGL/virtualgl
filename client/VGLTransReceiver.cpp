@@ -15,9 +15,9 @@
 #include "VGLTransReceiver.h"
 #include "vglutil.h"
 
-using namespace vglutil;
-using namespace vglcommon;
-using namespace vglclient;
+using namespace util;
+using namespace common;
+using namespace client;
 
 
 extern Display *maindpy;

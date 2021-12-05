@@ -31,7 +31,7 @@
 	#include <X11/extensions/XTest.h>
 #endif
 
-using namespace vglutil;
+using namespace util;
 
 
 #define THROW(f, l, m) \

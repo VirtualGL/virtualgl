@@ -21,7 +21,7 @@
 #include <kstat.h>
 #endif
 
-using namespace vglutil;
+using namespace util;
 
 
 #define PORT  1972

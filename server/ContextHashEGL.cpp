@@ -10,9 +10,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // wxWindows Library License for more details.
 
-#include "VGLPbufferHash.h"
+#include "ContextHashEGL.h"
 
-using namespace vglfaker;
+using namespace backend;
 
-VGLPbufferHash *VGLPbufferHash::instance = NULL;
-vglutil::CriticalSection VGLPbufferHash::instanceMutex;
+ContextHashEGL *ContextHashEGL::instance = NULL;
+util::CriticalSection ContextHashEGL::instanceMutex;

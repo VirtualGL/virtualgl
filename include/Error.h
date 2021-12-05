@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2014, 2019-2020 D. R. Commander
+// Copyright (C)2014, 2019-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -27,11 +27,11 @@
 
 
 #define GET_METHOD(e) \
-	(dynamic_cast <const vglutil::Error *>(&e) ? \
-		((vglutil::Error &)e).getMethod() : "C++")
+	(dynamic_cast <const util::Error *>(&e) ? \
+		((util::Error &)e).getMethod() : "C++")
 
 
-namespace vglutil
+namespace util
 {
 	class Error : public std::exception
 	{
@@ -91,13 +91,13 @@ namespace vglutil
 #if defined(sgi)
 #define __FUNCTION__  __FILE__
 #endif
-#define THROW(m)  throw(vglutil::Error(__FUNCTION__, m, __LINE__))
+#define THROW(m)  throw(util::Error(__FUNCTION__, m, __LINE__))
 #define ERRIFNOT(f)  { if(!(f)) THROW("Unexpected NULL condition"); }
 
 
 #ifdef _WIN32
 
-namespace vglutil
+namespace util
 {
 	class W32Error : public Error
 	{
@@ -121,13 +121,13 @@ namespace vglutil
 	};
 }
 
-#define THROW_W32()  throw(vglutil::W32Error(__FUNCTION__, __LINE__))
+#define THROW_W32()  throw(util::W32Error(__FUNCTION__, __LINE__))
 #define TRY_W32(f)  { if(!(f)) THROW_W32(); }
 
 #endif  // _WIN32
 
 
-namespace vglutil
+namespace util
 {
 	class UnixError : public Error
 	{
@@ -139,24 +139,24 @@ namespace vglutil
 	};
 }
 
-#define THROW_UNIX()  throw(vglutil::UnixError(__FUNCTION__, __LINE__))
+#define THROW_UNIX()  throw(util::UnixError(__FUNCTION__, __LINE__))
 #define TRY_UNIX(f)  { if((f) == -1) THROW_UNIX(); }
 
 
 #define TRY_FBX(f) \
 { \
 	if((f) == -1) \
-		throw(vglutil::Error("FBX", fbx_geterrmsg(), fbx_geterrline())); \
+		throw(util::Error("FBX", fbx_geterrmsg(), fbx_geterrline())); \
 }
 #define TRY_FBXV(f) \
 { \
 	if((f) == -1) \
-		throw(vglutil::Error("FBXV", fbxv_geterrmsg(), fbxv_geterrline())); \
+		throw(util::Error("FBXV", fbxv_geterrmsg(), fbxv_geterrline())); \
 }
 #define TRY_TJ(f) \
 { \
 	if((f) == -1) \
-		throw(vglutil::Error(__FUNCTION__, tjGetErrorStr(), __LINE__)); \
+		throw(util::Error(__FUNCTION__, tjGetErrorStr(), __LINE__)); \
 }
 
 #endif  // __ERROR_H__

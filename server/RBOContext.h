@@ -10,28 +10,28 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // wxWindows Library License for more details.
 
-#ifndef __EGLRBOCONTEXT_H__
-#define __EGLRBOCONTEXT_H__
+#ifndef __RBOCONTEXT_H__
+#define __RBOCONTEXT_H__
 
 #include "faker-sym.h"
 #include "EGLError.h"
 #include "Mutex.h"
 
 
-namespace vglfaker
+namespace backend
 {
 
-class EGLRBOContext
+class RBOContext
 {
 	public:
 
-		EGLRBOContext() : ctx(0)
+		RBOContext() : ctx(0)
 		{
 		}
 
 		void createContext(void)
 		{
-			vglutil::CriticalSection::SafeLock l(mutex);
+			util::CriticalSection::SafeLock l(mutex);
 
 			if(!ctx)
 			{
@@ -44,11 +44,11 @@ class EGLRBOContext
 
 		EGLContext getContext(void) { return ctx; }
 
-		vglutil::CriticalSection &getMutex(void) { return mutex; }
+		util::CriticalSection &getMutex(void) { return mutex; }
 
-		~EGLRBOContext()
+		~RBOContext()
 		{
-			vglutil::CriticalSection::SafeLock l(mutex);
+			util::CriticalSection::SafeLock l(mutex);
 
 			if(ctx)
 			{
@@ -77,17 +77,17 @@ class EGLRBOContext
 		// context handle above, or any operations that occur while the RBO context
 		// is current (an OpenGL context can only be current in one thread at a
 		// time.)
-		vglutil::CriticalSection mutex;
+		util::CriticalSection mutex;
 };
 
 
-INLINE EGLRBOContext &getRBOContext(Display *dpy)
+INLINE RBOContext &getRBOContext(Display *dpy)
 {
 	XEDataObject obj = { dpy };
 	XExtData *extData;
 
 	if(!fconfig.egl)
-		THROW("vglfaker::getRBOContext() called while using the GLX back end (this should never happen)");
+		THROW("backend::getRBOContext() called while using the GLX back end (this should never happen)");
 	int minExtensionNumber =
 		XFindOnExtensionList(XEHeadOfExtensionList(obj), 0) ? 0 : 1;
 	extData = XFindOnExtensionList(XEHeadOfExtensionList(obj),
@@ -95,7 +95,7 @@ INLINE EGLRBOContext &getRBOContext(Display *dpy)
 	ERRIFNOT(extData);
 	ERRIFNOT(extData->private_data);
 
-	return *(vglfaker::EGLRBOContext *)extData->private_data;
+	return *(backend::RBOContext *)extData->private_data;
 }
 
 }  // namespace

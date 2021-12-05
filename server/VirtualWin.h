@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2009-2014, 2017-2020 D. R. Commander
+// Copyright (C)2009-2014, 2017-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -24,7 +24,7 @@
 #include "TempContext.h"
 
 
-namespace vglfaker
+namespace faker
 {
 	class VirtualWin : public VirtualDrawable
 	{
@@ -43,8 +43,8 @@ namespace vglfaker
 			void readback(GLint drawBuf, bool spoilLast, bool sync);
 			void swapBuffers(void);
 			bool isStereo(void);
-			void wmDelete(void);
-			void vglWMDelete(void);
+			void wmDeleted(void);
+			void enableWMDeleteHandler(void);
 			int getSwapInterval(void) { return swapInterval; }
 			void setSwapInterval(int swapInterval_) { swapInterval = swapInterval_; }
 
@@ -55,8 +55,8 @@ namespace vglfaker
 			int init(int w, int h, VGLFBConfig config);
 			void readPixels(GLint x, GLint y, GLint width, GLint pitch, GLint height,
 				GLenum glFormat, PF *pf, GLubyte *bits, GLint buf, bool stereo);
-			void makeAnaglyph(vglcommon::Frame *f, int drawBuf, int stereoMode);
-			void makePassive(vglcommon::Frame *f, int drawBuf, GLenum glFormat,
+			void makeAnaglyph(common::Frame *f, int drawBuf, int stereoMode);
+			void makePassive(common::Frame *f, int drawBuf, GLenum glFormat,
 				int stereoMode);
 			void sendVGL(GLint drawBuf, bool spoilLast, bool doStereo,
 				int stereoMode, int compress, int qual, int subsamp);
@@ -73,18 +73,18 @@ namespace vglfaker
 			Display *eventdpy;
 			OGLDrawable *oldDraw;
 			int newWidth, newHeight;
-			vglserver::X11Trans *x11trans;
+			server::X11Trans *x11trans;
 			#ifdef USEXV
-			vglserver::XVTrans *xvtrans;
+			server::XVTrans *xvtrans;
 			#endif
-			vglserver::VGLTrans *vglconn;
-			vglcommon::Profiler profGamma, profAnaglyph, profPassive;
+			server::VGLTrans *vglconn;
+			common::Profiler profGamma, profAnaglyph, profPassive;
 			bool syncdpy;
-			vglserver::TransPlugin *plugin;
+			server::TransPlugin *plugin;
 			bool stereoVisual;
-			vglcommon::Frame rFrame, gFrame, bFrame, frame, stereoFrame;
-			bool doWMDelete;
-			bool doVGLWMDelete;
+			common::Frame rFrame, gFrame, bFrame, frame, stereoFrame;
+			bool deletedByWM;
+			bool handleWMDelete;
 			bool newConfig;
 			int swapInterval;
 			bool alreadyWarnedPluginRenderMode;

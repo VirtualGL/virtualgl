@@ -39,7 +39,7 @@ int XCloseDisplay(Display *dpy)
 	// down, so we cannot access fconfig or vglout or winh without causing
 	// deadlocks or other issues.  At this point, all we can safely do is hand
 	// off to libX11.
-	if(vglfaker::deadYet || vglfaker::getFakerLevel() > 0)
+	if(faker::deadYet || faker::getFakerLevel() > 0)
 		return _XCloseDisplay(dpy);
 
 	int retval = 0;
@@ -95,7 +95,7 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 
 	DISABLE_FAKER();
 
-	vglfaker::VirtualDrawable *srcVW = NULL, *dstVW = NULL;
+	faker::VirtualDrawable *srcVW = NULL, *dstVW = NULL;
 	bool srcWin = false, dstWin = false;
 	bool copy2d = true, copy3d = false, triggerRB = false;
 	GLXDrawable glxsrc = 0, glxdst = 0;
@@ -108,9 +108,9 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 	PRARGI(dest_x);  PRARGI(dest_y);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	if(!(srcVW = (vglfaker::VirtualDrawable *)pmhash.find(dpy, src)))
+	if(!(srcVW = (faker::VirtualDrawable *)pmhash.find(dpy, src)))
 	{
-		srcVW = (vglfaker::VirtualDrawable *)winhash.find(dpy, src);
+		srcVW = (faker::VirtualDrawable *)winhash.find(dpy, src);
 		if(srcVW) srcWin = true;
 	}
 	if(srcVW && !srcVW->isInit())
@@ -120,9 +120,9 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 		srcVW = NULL;
 		srcWin = false;
 	}
-	if(!(dstVW = (vglfaker::VirtualDrawable *)pmhash.find(dpy, dst)))
+	if(!(dstVW = (faker::VirtualDrawable *)pmhash.find(dpy, dst)))
 	{
-		dstVW = (vglfaker::VirtualDrawable *)winhash.find(dpy, dst);
+		dstVW = (faker::VirtualDrawable *)winhash.find(dpy, dst);
 		if(dstVW) dstWin = true;
 	}
 	if(dstVW && !dstVW->isInit())
@@ -135,7 +135,7 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 	// Sync pixels from the 3D pixmap (on the 3D X Server) to the corresponding
 	// 2D pixmap (on the 2D X Server) and let the "real" XCopyArea() do the rest.
 	if(srcVW && !srcWin && !dstVW)
-		((vglfaker::VirtualPixmap *)srcVW)->readback();
+		((faker::VirtualPixmap *)srcVW)->readback();
 
 	// non-GLX (2D) drawable --> non-GLX (2D) drawable
 	// Source and destination are not backed by a drawable on the 3D X Server, so
@@ -178,7 +178,7 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 		glxdst = dstVW->getGLXDrawable();
 		srcVW->copyPixels(src_x, src_y, width, height, dest_x, dest_y, glxdst);
 		if(triggerRB)
-			((vglfaker::VirtualWin *)dstVW)->readback(GL_FRONT, false, fconfig.sync);
+			((faker::VirtualWin *)dstVW)->readback(GL_FRONT, false, fconfig.sync);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -336,7 +336,7 @@ int XFree(void *data)
 	int ret = 0;
 	TRY();
 	ret = _XFree(data);
-	if(data && !vglfaker::deadYet) vishash.remove(NULL, (XVisualInfo *)data);
+	if(data && !faker::deadYet) vishash.remove(NULL, (XVisualInfo *)data);
 	CATCH();
 	return ret;
 }
@@ -364,7 +364,7 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 	OPENTRACE(XGetGeometry);  PRARGD(dpy);  PRARGX(drawable);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	vglfaker::VirtualWin *vw;
+	faker::VirtualWin *vw;
 	if((vw = winhash.find(NULL, drawable)) != NULL)
 	{
 		// Apparently drawable is a GLX drawable ID that backs a window, so we need
@@ -415,7 +415,7 @@ XImage *XGetImage(Display *dpy, Drawable drawable, int x, int y,
 
 	DISABLE_FAKER();
 
-	vglfaker::VirtualPixmap *vpm = pmhash.find(dpy, drawable);
+	faker::VirtualPixmap *vpm = pmhash.find(dpy, drawable);
 	if(vpm) vpm->readback();
 
 	xi = _XGetImage(dpy, drawable, x, y, width, height, plane_mask, format);
@@ -501,7 +501,7 @@ static void setupXDisplay(Display *dpy)
 	XExtCodes *codes;
 	XEDataObject obj = { dpy };
 	XExtData *extData;
-	bool excludeDisplay = vglfaker::isDisplayStringExcluded(DisplayString(dpy));
+	bool excludeDisplay = faker::isDisplayStringExcluded(DisplayString(dpy));
 
 	// Extension code 1 stores the excluded status for a Display.
 	if(!(codes = XAddExtension(dpy))
@@ -516,9 +516,9 @@ static void setupXDisplay(Display *dpy)
 	if(!(codes = XAddExtension(dpy))
 		|| !(extData = (XExtData *)calloc(1, sizeof(XExtData))))
 		THROW("Memory allocation error");
-	extData->private_data = (XPointer)(new vglutil::CriticalSection());
+	extData->private_data = (XPointer)(new util::CriticalSection());
 	extData->number = codes->extension;
-	extData->free_private = vglfaker::deleteCS;
+	extData->free_private = faker::deleteCS;
 	XAddToExtensionList(XEHeadOfExtensionList(obj), extData);
 
 	// Extension code 3 stores the visual attribute table for a Screen.
@@ -534,9 +534,9 @@ static void setupXDisplay(Display *dpy)
 	if(!(codes = XAddExtension(dpy))
 		|| !(extData = (XExtData *)calloc(1, sizeof(XExtData))))
 		THROW("Memory allocation error");
-	extData->private_data = (XPointer)(new vglfaker::EGLRBOContext());
+	extData->private_data = (XPointer)(new backend::RBOContext());
 	extData->number = 5;
-	extData->free_private = vglfaker::deleteRBOContext;
+	extData->free_private = faker::deleteRBOContext;
 	XAddToExtensionList(XEHeadOfExtensionList(obj), extData);
 	#endif
 
@@ -561,10 +561,10 @@ Display *XOpenDisplay(_Xconst char *name)
 
 	TRY();
 
-	if(vglfaker::deadYet || vglfaker::getFakerLevel() > 0)
+	if(faker::deadYet || faker::getFakerLevel() > 0)
 		return _XOpenDisplay(name);
 
-	vglfaker::init();
+	faker::init();
 
 	/////////////////////////////////////////////////////////////////////////////
 	OPENTRACE(XOpenDisplay);  PRARGS(name);  STARTTRACE();
@@ -593,11 +593,11 @@ Display *XkbOpenDisplay(char *display_name, int *event_rtrn, int *error_rtrn,
 
 	TRY();
 
-	if(vglfaker::deadYet || vglfaker::getFakerLevel() > 0)
+	if(faker::deadYet || faker::getFakerLevel() > 0)
 		return _XkbOpenDisplay(display_name, event_rtrn, error_rtrn, major_in_out,
 			minor_in_out, reason_rtrn);
 
-	vglfaker::init();
+	faker::init();
 
 	/////////////////////////////////////////////////////////////////////////////
 	OPENTRACE(XkbOpenDisplay);  PRARGS(display_name);  STARTTRACE();
@@ -638,7 +638,8 @@ Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
 	/////////////////////////////////////////////////////////////////////////////
 
 	if(!strcmp(name, "GLX"))
-		retval = VGLQueryExtension(dpy, major_opcode, first_event, first_error);
+		retval = backend::queryExtension(dpy, major_opcode, first_event,
+			first_error);
 	else
 		retval = _XQueryExtension(dpy, name, major_opcode, first_event,
 			first_error);
@@ -680,7 +681,7 @@ char *XServerVendor(Display *dpy)
 
 static void handleEvent(Display *dpy, XEvent *xe)
 {
-	vglfaker::VirtualWin *vw;
+	faker::VirtualWin *vw;
 
 	if(IS_EXCLUDED(dpy))
 		return;
@@ -724,7 +725,7 @@ static void handleEvent(Display *dpy, XEvent *xe)
 		if(protoAtom && deleteAtom && cme->message_type == protoAtom
 			&& cme->data.l[0] == (long)deleteAtom
 			&& (vw = winhash.find(dpy, cme->window)) != NULL)
-			vw->wmDelete();
+			vw->wmDeleted();
 	}
 }
 
@@ -798,7 +799,7 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 	STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	vglfaker::VirtualWin *vw;
+	faker::VirtualWin *vw;
 	if((vw = winhash.find(dpy, win)) != NULL && values)
 		vw->resize(value_mask & CWWidth ? values->width : 0,
 			value_mask & CWHeight ? values->height : 0);
@@ -840,7 +841,7 @@ int XMoveResizeWindow(Display *dpy, Window win, int x, int y,
 	PRARGI(y);  PRARGI(width);  PRARGI(height);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	vglfaker::VirtualWin *vw;
+	faker::VirtualWin *vw;
 	if((vw = winhash.find(dpy, win)) != NULL)
 		vw->resize(width, height);
 	retval = _XMoveResizeWindow(dpy, win, x, y, width, height);
@@ -881,7 +882,7 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width,
 	PRARGI(height);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	vglfaker::VirtualWin *vw;
+	faker::VirtualWin *vw;
 	if((vw = winhash.find(dpy, win)) != NULL)
 		vw->resize(width, height);
 	retval = _XResizeWindow(dpy, win, width, height);

@@ -10,25 +10,21 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // wxWindows Library License for more details.
 
-#include "VGLPbuffer.h"
+#include "FakePbuffer.h"
 #include "TempContextEGL.h"
 #include "BufferState.h"
-#include "EGLContextHash.h"
+#include "ContextHashEGL.h"
 #include <X11/Xlibint.h>
 
-using namespace vglutil;
-using namespace vglfaker;
+using namespace util;
+using namespace backend;
 
 
-extern GLXDrawable getCurrentDrawable(void);
-extern GLXDrawable getCurrentReadDrawable(void);
+CriticalSection FakePbuffer::idMutex;
+GLXDrawable FakePbuffer::nextID = 1;
 
 
-CriticalSection VGLPbuffer::idMutex;
-GLXDrawable VGLPbuffer::nextID = 1;
-
-
-VGLPbuffer::VGLPbuffer(Display *dpy_, VGLFBConfig config_,
+FakePbuffer::FakePbuffer(Display *dpy_, VGLFBConfig config_,
 	const int *glxAttribs) : dpy(dpy_), config(config_), id(0), fbo(0),
 	rbod(0), width(0), height(0)
 {
@@ -70,13 +66,13 @@ VGLPbuffer::VGLPbuffer(Display *dpy_, VGLFBConfig config_,
 }
 
 
-VGLPbuffer::~VGLPbuffer(void)
+FakePbuffer::~FakePbuffer(void)
 {
 	destroy(true);
 }
 
 
-void VGLPbuffer::createBuffer(bool useRBOContext, bool ignoreReadDrawBufs)
+void FakePbuffer::createBuffer(bool useRBOContext, bool ignoreReadDrawBufs)
 {
 	TempContextEGL *tc = NULL;
 	BufferState *bs = NULL;
@@ -173,7 +169,7 @@ void VGLPbuffer::createBuffer(bool useRBOContext, bool ignoreReadDrawBufs)
 }
 
 
-void VGLPbuffer::destroy(bool errorCheck)
+void FakePbuffer::destroy(bool errorCheck)
 {
 	try
 	{
@@ -196,7 +192,7 @@ void VGLPbuffer::destroy(bool errorCheck)
 }
 
 
-void VGLPbuffer::swap(void)
+void FakePbuffer::swap(void)
 {
 	bool changed = false;
 
@@ -243,7 +239,7 @@ void VGLPbuffer::swap(void)
 }
 
 
-void VGLPbuffer::setDrawBuffer(GLenum drawBuf, bool deferred)
+void FakePbuffer::setDrawBuffer(GLenum drawBuf, bool deferred)
 {
 	if(((drawBuf == GL_FRONT_RIGHT || drawBuf == GL_RIGHT)
 			&& !config->attr.stereo)
@@ -288,11 +284,11 @@ void VGLPbuffer::setDrawBuffer(GLenum drawBuf, bool deferred)
 		_glNamedFramebufferDrawBuffers(fbo, nActualBufs, actualBufs);
 	else
 		_glDrawBuffers(nActualBufs, actualBufs);
-	ectxhash.setDrawBuffers(_eglGetCurrentContext(), 1, &drawBuf);
+	ctxhashegl.setDrawBuffers(_eglGetCurrentContext(), 1, &drawBuf);
 }
 
 
-void VGLPbuffer::setDrawBuffers(GLsizei n, const GLenum *bufs, bool deferred)
+void FakePbuffer::setDrawBuffers(GLsizei n, const GLenum *bufs, bool deferred)
 {
 	if(n < 0)
 	{
@@ -386,11 +382,11 @@ void VGLPbuffer::setDrawBuffers(GLsizei n, const GLenum *bufs, bool deferred)
 		_glNamedFramebufferDrawBuffers(fbo, nActualBufs, actualBufs);
 	else
 		_glDrawBuffers(nActualBufs, actualBufs);
-	ectxhash.setDrawBuffers(_eglGetCurrentContext(), n, bufs);
+	ctxhashegl.setDrawBuffers(_eglGetCurrentContext(), n, bufs);
 }
 
 
-void VGLPbuffer::setReadBuffer(GLenum readBuf, bool deferred)
+void FakePbuffer::setReadBuffer(GLenum readBuf, bool deferred)
 {
 	if(((readBuf == GL_FRONT_RIGHT || readBuf == GL_RIGHT)
 			&& !config->attr.stereo)
@@ -421,5 +417,5 @@ void VGLPbuffer::setReadBuffer(GLenum readBuf, bool deferred)
 		_glNamedFramebufferReadBuffer(fbo, actualReadBuf);
 	else
 		_glReadBuffer(actualReadBuf);
-	ectxhash.setReadBuffer(_eglGetCurrentContext(), readBuf);
+	ctxhashegl.setReadBuffer(_eglGetCurrentContext(), readBuf);
 }

@@ -1,4 +1,4 @@
-// Copyright (C)2009-2011, 2014, 2019 D. R. Commander
+// Copyright (C)2009-2011, 2014, 2019, 2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -16,8 +16,8 @@
 #include <string.h>
 #include "Error.h"
 
-using namespace vglutil;
-using namespace vglserver;
+using namespace util;
+using namespace server;
 
 
 #undef THROW

@@ -22,7 +22,7 @@
 #include "EGLError.h"
 
 
-namespace vglfaker
+namespace backend
 {
 	class TempContextEGL
 	{

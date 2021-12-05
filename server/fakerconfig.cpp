@@ -35,7 +35,7 @@
 	#include <valgrind/helgrind.h>
 #endif
 
-using namespace vglutil;
+using namespace util;
 
 
 #define DEFQUAL  95

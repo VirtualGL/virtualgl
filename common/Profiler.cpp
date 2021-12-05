@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2014 D. R. Commander
+// Copyright (C)2014, 2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -22,7 +22,7 @@
 #include "Timer.h"
 #include "Log.h"
 
-using namespace vglcommon;
+using namespace common;
 
 
 Profiler::Profiler(const char *name_, double interval_) : interval(interval_),

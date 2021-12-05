@@ -22,7 +22,7 @@
 #include "Frame.h"
 
 
-namespace vglfaker
+namespace faker
 {
 	class VirtualDrawable
 	{
@@ -94,13 +94,13 @@ namespace vglfaker
 			void readPixels(GLint x, GLint y, GLint width, GLint pitch, GLint height,
 				GLenum glFormat, PF *pf, GLubyte *bits, GLint readBuf, bool stereo);
 
-			vglutil::CriticalSection mutex;
+			util::CriticalSection mutex;
 			Display *dpy;  Drawable x11Draw;
 			OGLDrawable *oglDraw;  VGLFBConfig config;
 			GLXContext ctx;
 			Bool direct;
-			vglserver::X11Trans *x11Trans;
-			vglcommon::Profiler profReadback;
+			server::X11Trans *x11Trans;
+			common::Profiler profReadback;
 			int autotestFrameCount;
 
 			GLuint pbo;

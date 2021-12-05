@@ -1,5 +1,5 @@
 // Copyright (C)2015 Open Text SA and/or Open Text ULC (in Canada)
-// Copyright (C)2015 D. R. Commander
+// Copyright (C)2015, 2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -13,7 +13,7 @@
 
 #include "GlobalCriticalSection.h"
 
-using namespace vglfaker;
+using namespace faker;
 
 GlobalCriticalSection *GlobalCriticalSection::instance = NULL;
-vglutil::CriticalSection GlobalCriticalSection::instanceMutex;
+util::CriticalSection GlobalCriticalSection::instanceMutex;

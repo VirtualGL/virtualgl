@@ -22,10 +22,10 @@
 
 static void doGLReadback(bool spoilLast, bool sync)
 {
-	GLXDrawable drawable = VGLGetCurrentDrawable();
+	GLXDrawable drawable = backend::getCurrentDrawable();
 	if(!drawable) return;
 
-	vglfaker::VirtualWin *vw;
+	faker::VirtualWin *vw;
 	if((vw = winhash.find(NULL, drawable)) != NULL)
 	{
 		if(DrawingToFront() || vw->dirty)
@@ -53,7 +53,7 @@ extern "C" {
 
 void glFinish(void)
 {
-	if(vglfaker::getExcludeCurrent()) { _glFinish();  return; }
+	if(faker::getExcludeCurrent()) { _glFinish();  return; }
 
 	TRY();
 
@@ -76,7 +76,7 @@ void glFlush(void)
 {
 	static double lastTime = -1.;  double thisTime;
 
-	if(vglfaker::getExcludeCurrent()) { _glFlush();  return; }
+	if(faker::getExcludeCurrent()) { _glFlush();  return; }
 
 	TRY();
 
@@ -106,7 +106,7 @@ void glFlush(void)
 
 void glXWaitGL(void)
 {
-	if(vglfaker::getExcludeCurrent()) { _glXWaitGL();  return; }
+	if(faker::getExcludeCurrent()) { _glXWaitGL();  return; }
 
 	TRY();
 
@@ -128,7 +128,7 @@ void glXWaitGL(void)
 
 void glBindFramebuffer(GLenum target, GLuint framebuffer)
 {
-	if(vglfaker::getExcludeCurrent())
+	if(faker::getExcludeCurrent())
 	{
 		_glBindFramebuffer(target, framebuffer);
 		return;
@@ -136,14 +136,14 @@ void glBindFramebuffer(GLenum target, GLuint framebuffer)
 
 	TRY();
 
-	VGLBindFramebuffer(target, framebuffer);
+	backend::bindFramebuffer(target, framebuffer);
 
 	CATCH();
 }
 
 void glBindFramebufferEXT(GLenum target, GLuint framebuffer)
 {
-	if(vglfaker::getExcludeCurrent())
+	if(faker::getExcludeCurrent())
 	{
 		_glBindFramebufferEXT(target, framebuffer);
 		return;
@@ -151,7 +151,7 @@ void glBindFramebufferEXT(GLenum target, GLuint framebuffer)
 
 	TRY();
 
-	VGLBindFramebuffer(target, framebuffer, true);
+	backend::bindFramebuffer(target, framebuffer, true);
 
 	CATCH();
 }
@@ -159,7 +159,7 @@ void glBindFramebufferEXT(GLenum target, GLuint framebuffer)
 
 void glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers)
 {
-	if(vglfaker::getExcludeCurrent())
+	if(faker::getExcludeCurrent())
 	{
 		_glDeleteFramebuffers(n, framebuffers);
 		return;
@@ -167,7 +167,7 @@ void glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers)
 
 	TRY();
 
-	VGLDeleteFramebuffers(n, framebuffers);
+	backend::deleteFramebuffers(n, framebuffers);
 
 	CATCH();
 }
@@ -185,7 +185,7 @@ void glDeleteFramebuffersEXT(GLsizei n, const GLuint *framebuffers)
 
 void glDrawBuffer(GLenum mode)
 {
-	if(vglfaker::getExcludeCurrent()) { _glDrawBuffer(mode);  return; }
+	if(faker::getExcludeCurrent()) { _glDrawBuffer(mode);  return; }
 
 	TRY();
 
@@ -193,21 +193,21 @@ void glDrawBuffer(GLenum mode)
 	OPENTRACE(glDrawBuffer);  PRARGX(mode);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	vglfaker::VirtualWin *vw;
+	faker::VirtualWin *vw;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
-	GLXDrawable drawable = VGLGetCurrentDrawable();
+	GLXDrawable drawable = backend::getCurrentDrawable();
 
 	if(drawable && (vw = winhash.find(NULL, drawable)) != NULL)
 	{
 		before = DrawingToFront();
 		rbefore = DrawingToRight();
-		VGLDrawBuffer(mode);
+		backend::drawBuffer(mode);
 		after = DrawingToFront();
 		rafter = DrawingToRight();
 		if(before && !after) vw->dirty = true;
 		if(rbefore && !rafter && vw->isStereo()) vw->rdirty = true;
 	}
-	else VGLDrawBuffer(mode);
+	else backend::drawBuffer(mode);
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();
@@ -224,7 +224,7 @@ void glDrawBuffer(GLenum mode)
 
 void glDrawBuffers(GLsizei n, const GLenum *bufs)
 {
-	if(vglfaker::getExcludeCurrent()) { _glDrawBuffers(n, bufs);  return; }
+	if(faker::getExcludeCurrent()) { _glDrawBuffers(n, bufs);  return; }
 
 	TRY();
 
@@ -237,21 +237,21 @@ void glDrawBuffers(GLsizei n, const GLenum *bufs)
 	STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	vglfaker::VirtualWin *vw = NULL;
+	faker::VirtualWin *vw = NULL;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
-	GLXDrawable drawable = VGLGetCurrentDrawable();
+	GLXDrawable drawable = backend::getCurrentDrawable();
 
 	if(drawable && (vw = winhash.find(NULL, drawable)) != NULL)
 	{
 		before = DrawingToFront();
 		rbefore = DrawingToRight();
-		VGLDrawBuffers(n, bufs);
+		backend::drawBuffers(n, bufs);
 		after = DrawingToFront();
 		rafter = DrawingToRight();
 		if(before && !after) vw->dirty = true;
 		if(rbefore && !rafter && vw->isStereo()) vw->rdirty = true;
 	}
-	else VGLDrawBuffers(n, bufs);
+	else backend::drawBuffers(n, bufs);
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();
@@ -278,7 +278,7 @@ void glDrawBuffersATI(GLsizei n, const GLenum *bufs)
 
 void glFramebufferDrawBufferEXT(GLuint framebuffer, GLenum mode)
 {
-	if(vglfaker::getExcludeCurrent())
+	if(faker::getExcludeCurrent())
 	{
 		_glFramebufferDrawBufferEXT(framebuffer, mode);
 		return;
@@ -291,22 +291,22 @@ void glFramebufferDrawBufferEXT(GLuint framebuffer, GLenum mode)
 	STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	vglfaker::VirtualWin *vw = NULL;
+	faker::VirtualWin *vw = NULL;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
 	GLXDrawable drawable = 0;
 
-	if(framebuffer == 0 && (drawable = VGLGetCurrentDrawable()) != 0
+	if(framebuffer == 0 && (drawable = backend::getCurrentDrawable()) != 0
 		&& (vw = winhash.find(NULL, drawable)) != NULL)
 	{
 		before = DrawingToFront();
 		rbefore = DrawingToRight();
-		VGLNamedFramebufferDrawBuffer(framebuffer, mode, true);
+		backend::namedFramebufferDrawBuffer(framebuffer, mode, true);
 		after = DrawingToFront();
 		rafter = DrawingToRight();
 		if(before && !after) vw->dirty = true;
 		if(rbefore && !rafter && vw->isStereo()) vw->rdirty = true;
 	}
-	else VGLNamedFramebufferDrawBuffer(framebuffer, mode, true);
+	else backend::namedFramebufferDrawBuffer(framebuffer, mode, true);
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();
@@ -324,7 +324,7 @@ void glFramebufferDrawBufferEXT(GLuint framebuffer, GLenum mode)
 void glFramebufferDrawBuffersEXT(GLuint framebuffer, GLsizei n,
 	const GLenum *bufs)
 {
-	if(vglfaker::getExcludeCurrent())
+	if(faker::getExcludeCurrent())
 	{
 		_glFramebufferDrawBuffersEXT(framebuffer, n, bufs);
 		return;
@@ -341,22 +341,22 @@ void glFramebufferDrawBuffersEXT(GLuint framebuffer, GLsizei n,
 	STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	vglfaker::VirtualWin *vw = NULL;
+	faker::VirtualWin *vw = NULL;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
 	GLXDrawable drawable = 0;
 
-	if(framebuffer == 0 && (drawable = VGLGetCurrentDrawable()) != 0
+	if(framebuffer == 0 && (drawable = backend::getCurrentDrawable()) != 0
 		&& (vw = winhash.find(NULL, drawable)) != NULL)
 	{
 		before = DrawingToFront();
 		rbefore = DrawingToRight();
-		VGLNamedFramebufferDrawBuffers(framebuffer, n, bufs, true);
+		backend::namedFramebufferDrawBuffers(framebuffer, n, bufs, true);
 		after = DrawingToFront();
 		rafter = DrawingToRight();
 		if(before && !after) vw->dirty = true;
 		if(rbefore && !rafter && vw->isStereo()) vw->rdirty = true;
 	}
-	else VGLNamedFramebufferDrawBuffers(framebuffer, n, bufs, true);
+	else backend::namedFramebufferDrawBuffers(framebuffer, n, bufs, true);
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();
@@ -373,7 +373,7 @@ void glFramebufferDrawBuffersEXT(GLuint framebuffer, GLsizei n,
 
 void glFramebufferReadBufferEXT(GLuint framebuffer, GLenum mode)
 {
-	if(vglfaker::getExcludeCurrent())
+	if(faker::getExcludeCurrent())
 	{
 		_glFramebufferReadBufferEXT(framebuffer, mode);
 		return;
@@ -381,7 +381,7 @@ void glFramebufferReadBufferEXT(GLuint framebuffer, GLenum mode)
 
 	TRY();
 
-	VGLNamedFramebufferReadBuffer(framebuffer, mode, true);
+	backend::namedFramebufferReadBuffer(framebuffer, mode, true);
 
 	CATCH();
 }
@@ -389,7 +389,7 @@ void glFramebufferReadBufferEXT(GLuint framebuffer, GLenum mode)
 
 void glGetBooleanv(GLenum pname, GLboolean *data)
 {
-	if(vglfaker::getExcludeCurrent() || !data || !fconfig.egl)
+	if(faker::getExcludeCurrent() || !data || !fconfig.egl)
 	{
 		_glGetBooleanv(pname, data);  return;
 	}
@@ -408,7 +408,7 @@ void glGetBooleanv(GLenum pname, GLboolean *data)
 		case GL_STEREO:
 		{
 			GLint val = -1;
-			VGLGetIntegerv(pname, &val);
+			backend::getIntegerv(pname, &val);
 			*data = (val == 0 ? GL_FALSE : GL_TRUE);
 			break;
 		}
@@ -422,7 +422,7 @@ void glGetBooleanv(GLenum pname, GLboolean *data)
 
 void glGetDoublev(GLenum pname, GLdouble *data)
 {
-	if(vglfaker::getExcludeCurrent() || !data || !fconfig.egl)
+	if(faker::getExcludeCurrent() || !data || !fconfig.egl)
 	{
 		_glGetDoublev(pname, data);  return;
 	}
@@ -441,7 +441,7 @@ void glGetDoublev(GLenum pname, GLdouble *data)
 		case GL_STEREO:
 		{
 			GLint val = -1;
-			VGLGetIntegerv(pname, &val);
+			backend::getIntegerv(pname, &val);
 			*data = (GLdouble)val;
 			break;
 		}
@@ -455,7 +455,7 @@ void glGetDoublev(GLenum pname, GLdouble *data)
 
 void glGetFloatv(GLenum pname, GLfloat *data)
 {
-	if(vglfaker::getExcludeCurrent() || !data || !fconfig.egl)
+	if(faker::getExcludeCurrent() || !data || !fconfig.egl)
 	{
 		_glGetFloatv(pname, data);  return;
 	}
@@ -474,7 +474,7 @@ void glGetFloatv(GLenum pname, GLfloat *data)
 		case GL_STEREO:
 		{
 			GLint val = -1;
-			VGLGetIntegerv(pname, &val);
+			backend::getIntegerv(pname, &val);
 			*data = (GLfloat)val;
 			break;
 		}
@@ -489,7 +489,7 @@ void glGetFloatv(GLenum pname, GLfloat *data)
 void glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 	GLenum pname, GLint *params)
 {
-	if(vglfaker::getExcludeCurrent())
+	if(faker::getExcludeCurrent())
 	{
 		_glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
 		return;
@@ -497,7 +497,7 @@ void glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 
 	TRY();
 
-	VGLGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
+	backend::getFramebufferAttachmentParameteriv(target, attachment, pname, params);
 
 	CATCH();
 }
@@ -505,14 +505,14 @@ void glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 
 void glGetFramebufferParameteriv(GLenum target, GLenum pname, GLint *params)
 {
-	if(vglfaker::getExcludeCurrent())
+	if(faker::getExcludeCurrent())
 	{
 		_glGetFramebufferParameteriv(target, pname, params);  return;
 	}
 
 	TRY();
 
-	VGLGetFramebufferParameteriv(target, pname, params);
+	backend::getFramebufferParameteriv(target, pname, params);
 
 	CATCH();
 }
@@ -520,11 +520,11 @@ void glGetFramebufferParameteriv(GLenum target, GLenum pname, GLint *params)
 
 void glGetIntegerv(GLenum pname, GLint *params)
 {
-	if(vglfaker::getExcludeCurrent()) { _glGetIntegerv(pname, params);  return; }
+	if(faker::getExcludeCurrent()) { _glGetIntegerv(pname, params);  return; }
 
 	TRY();
 
-	VGLGetIntegerv(pname, params);
+	backend::getIntegerv(pname, params);
 
 	CATCH();
 }
@@ -532,7 +532,7 @@ void glGetIntegerv(GLenum pname, GLint *params)
 
 void glGetInteger64v(GLenum pname, GLint64 *data)
 {
-	if(vglfaker::getExcludeCurrent() || !data || !fconfig.egl)
+	if(faker::getExcludeCurrent() || !data || !fconfig.egl)
 	{
 		_glGetInteger64v(pname, data);  return;
 	}
@@ -551,7 +551,7 @@ void glGetInteger64v(GLenum pname, GLint64 *data)
 		case GL_STEREO:
 		{
 			GLint val = -1;
-			VGLGetIntegerv(pname, &val);
+			backend::getIntegerv(pname, &val);
 			*data = (GLint64)val;
 			break;
 		}
@@ -566,14 +566,14 @@ void glGetInteger64v(GLenum pname, GLint64 *data)
 void glGetNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname,
 	GLint *param)
 {
-	if(vglfaker::getExcludeCurrent())
+	if(faker::getExcludeCurrent())
 	{
 		_glGetNamedFramebufferParameteriv(framebuffer, pname, param);  return;
 	}
 
 	TRY()
 
-	VGLGetNamedFramebufferParameteriv(framebuffer, pname, param);
+	backend::getNamedFramebufferParameteriv(framebuffer, pname, param);
 
 	CATCH();
 }
@@ -583,7 +583,7 @@ const GLubyte *glGetString(GLenum name)
 {
 	char *string = NULL;
 
-	if(vglfaker::getExcludeCurrent()) { return _glGetString(name); }
+	if(faker::getExcludeCurrent()) { return _glGetString(name); }
 
 	TRY();
 
@@ -591,15 +591,15 @@ const GLubyte *glGetString(GLenum name)
 	if(name == GL_EXTENSIONS && string
 		&& strstr(string, "GL_EXT_x11_sync_object") != NULL)
 	{
-		if(!vglfaker::glExtensions)
+		if(!faker::glExtensions)
 		{
-			vglfaker::GlobalCriticalSection::SafeLock l(globalMutex);
-			if(!vglfaker::glExtensions)
+			faker::GlobalCriticalSection::SafeLock l(globalMutex);
+			if(!faker::glExtensions)
 			{
-				vglfaker::glExtensions = strdup(string);
-				if(!vglfaker::glExtensions) THROW("strdup() failed");
+				faker::glExtensions = strdup(string);
+				if(!faker::glExtensions) THROW("strdup() failed");
 				char *ptr =
-					strstr((char *)vglfaker::glExtensions, "GL_EXT_x11_sync_object");
+					strstr((char *)faker::glExtensions, "GL_EXT_x11_sync_object");
 				if(ptr)
 				{
 					if(ptr[22] == ' ') memmove(ptr, &ptr[23], strlen(&ptr[23]) + 1);
@@ -607,7 +607,7 @@ const GLubyte *glGetString(GLenum name)
 				}
 			}
 		}
-		string = vglfaker::glExtensions;
+		string = faker::glExtensions;
 	}
 
 	CATCH();
@@ -620,7 +620,7 @@ const GLubyte *glGetStringi(GLenum name, GLuint index)
 {
 	const GLubyte *string = NULL;
 
-	if(vglfaker::getExcludeCurrent()) { return _glGetStringi(name, index); }
+	if(faker::getExcludeCurrent()) { return _glGetStringi(name, index); }
 
 	TRY();
 
@@ -641,7 +641,7 @@ const GLubyte *glGetStringi(GLenum name, GLuint index)
 
 void glNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf)
 {
-	if(vglfaker::getExcludeCurrent())
+	if(faker::getExcludeCurrent())
 	{
 		_glNamedFramebufferDrawBuffer(framebuffer, buf);
 		return;
@@ -654,22 +654,22 @@ void glNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf)
 	STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	vglfaker::VirtualWin *vw = NULL;
+	faker::VirtualWin *vw = NULL;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
 	GLXDrawable drawable = 0;
 
-	if(framebuffer == 0 && (drawable = VGLGetCurrentDrawable()) != 0
+	if(framebuffer == 0 && (drawable = backend::getCurrentDrawable()) != 0
 		&& (vw = winhash.find(NULL, drawable)) != NULL)
 	{
 		before = DrawingToFront();
 		rbefore = DrawingToRight();
-		VGLNamedFramebufferDrawBuffer(framebuffer, buf);
+		backend::namedFramebufferDrawBuffer(framebuffer, buf);
 		after = DrawingToFront();
 		rafter = DrawingToRight();
 		if(before && !after) vw->dirty = true;
 		if(rbefore && !rafter && vw->isStereo()) vw->rdirty = true;
 	}
-	else VGLNamedFramebufferDrawBuffer(framebuffer, buf);
+	else backend::namedFramebufferDrawBuffer(framebuffer, buf);
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();
@@ -687,7 +687,7 @@ void glNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf)
 void glNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 	const GLenum *bufs)
 {
-	if(vglfaker::getExcludeCurrent())
+	if(faker::getExcludeCurrent())
 	{
 		_glNamedFramebufferDrawBuffers(framebuffer, n, bufs);
 		return;
@@ -704,22 +704,22 @@ void glNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 	STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	vglfaker::VirtualWin *vw = NULL;
+	faker::VirtualWin *vw = NULL;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
 	GLXDrawable drawable = 0;
 
-	if(framebuffer == 0 && (drawable = VGLGetCurrentDrawable()) != 0
+	if(framebuffer == 0 && (drawable = backend::getCurrentDrawable()) != 0
 		&& (vw = winhash.find(NULL, drawable)) != NULL)
 	{
 		before = DrawingToFront();
 		rbefore = DrawingToRight();
-		VGLNamedFramebufferDrawBuffers(framebuffer, n, bufs);
+		backend::namedFramebufferDrawBuffers(framebuffer, n, bufs);
 		after = DrawingToFront();
 		rafter = DrawingToRight();
 		if(before && !after) vw->dirty = true;
 		if(rbefore && !rafter && vw->isStereo()) vw->rdirty = true;
 	}
-	else VGLNamedFramebufferDrawBuffers(framebuffer, n, bufs);
+	else backend::namedFramebufferDrawBuffers(framebuffer, n, bufs);
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();
@@ -736,7 +736,7 @@ void glNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 
 void glNamedFramebufferReadBuffer(GLuint framebuffer, GLenum mode)
 {
-	if(vglfaker::getExcludeCurrent())
+	if(faker::getExcludeCurrent())
 	{
 		_glNamedFramebufferReadBuffer(framebuffer, mode);
 		return;
@@ -744,7 +744,7 @@ void glNamedFramebufferReadBuffer(GLuint framebuffer, GLenum mode)
 
 	TRY();
 
-	VGLNamedFramebufferReadBuffer(framebuffer, mode);
+	backend::namedFramebufferReadBuffer(framebuffer, mode);
 
 	CATCH();
 }
@@ -754,7 +754,7 @@ void glNamedFramebufferReadBuffer(GLuint framebuffer, GLenum mode)
 
 void glPopAttrib(void)
 {
-	if(vglfaker::getExcludeCurrent()) { _glPopAttrib();  return; }
+	if(faker::getExcludeCurrent()) { _glPopAttrib();  return; }
 
 	TRY();
 
@@ -762,9 +762,9 @@ void glPopAttrib(void)
 	OPENTRACE(glPopAttrib);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	vglfaker::VirtualWin *vw;
+	faker::VirtualWin *vw;
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
-	GLXDrawable drawable = VGLGetCurrentDrawable();
+	GLXDrawable drawable = backend::getCurrentDrawable();
 
 	if(drawable && (vw = winhash.find(NULL, drawable)) != NULL)
 	{
@@ -793,11 +793,11 @@ void glPopAttrib(void)
 
 void glReadBuffer(GLenum mode)
 {
-	if(vglfaker::getExcludeCurrent()) { _glReadBuffer(mode);  return; }
+	if(faker::getExcludeCurrent()) { _glReadBuffer(mode);  return; }
 
 	TRY();
 
-	VGLReadBuffer(mode);
+	backend::readBuffer(mode);
 
 	CATCH();
 }
@@ -806,7 +806,7 @@ void glReadBuffer(GLenum mode)
 void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
 	GLenum format, GLenum type, GLvoid *pixels)
 {
-	if(vglfaker::getExcludeCurrent())
+	if(faker::getExcludeCurrent())
 	{
 		_glReadPixels(x, y, width, height, format, type, pixels);
 		return;
@@ -814,7 +814,7 @@ void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
 
 	TRY();
 
-	VGLReadPixels(x, y, width, height, format, type, pixels);
+	backend::readPixels(x, y, width, height, format, type, pixels);
 
 	CATCH();
 }
@@ -826,7 +826,7 @@ void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
 
 void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 {
-	if(vglfaker::getExcludeCurrent())
+	if(faker::getExcludeCurrent())
 	{
 		_glViewport(x, y, width, height);  return;
 	}
@@ -838,24 +838,24 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 	PRARGI(height);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	GLXContext ctx = VGLGetCurrentContext();
-	GLXDrawable draw = VGLGetCurrentDrawable();
-	GLXDrawable read = VGLGetCurrentReadDrawable();
-	Display *dpy = VGLGetCurrentDisplay();
+	GLXContext ctx = backend::getCurrentContext();
+	GLXDrawable draw = backend::getCurrentDrawable();
+	GLXDrawable read = backend::getCurrentReadDrawable();
+	Display *dpy = backend::getCurrentDisplay();
 	GLXDrawable newRead = 0, newDraw = 0;
 
 	if(dpy && (draw || read) && ctx && ctxhash.findConfig(ctx))
 	{
 		newRead = read, newDraw = draw;
-		vglfaker::VirtualWin *drawVW = winhash.find(NULL, draw);
-		vglfaker::VirtualWin *readVW = winhash.find(NULL, read);
+		faker::VirtualWin *drawVW = winhash.find(NULL, draw);
+		faker::VirtualWin *readVW = winhash.find(NULL, read);
 		if(drawVW) drawVW->checkResize();
 		if(readVW && readVW != drawVW) readVW->checkResize();
 		if(drawVW) newDraw = drawVW->updateGLXDrawable();
 		if(readVW) newRead = readVW->updateGLXDrawable();
 		if(newRead != read || newDraw != draw)
 		{
-			VGLMakeCurrent(dpy, newDraw, newRead, ctx);
+			backend::makeCurrent(dpy, newDraw, newRead, ctx);
 			if(drawVW) { drawVW->clear();  drawVW->cleanup(); }
 			if(readVW) readVW->cleanup();
 		}

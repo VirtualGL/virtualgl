@@ -20,10 +20,10 @@
 #include "glxvisual.h"
 #include "vglutil.h"
 
-using namespace vglutil;
-using namespace vglcommon;
-using namespace vglfaker;
-using namespace vglserver;
+using namespace util;
+using namespace common;
+using namespace faker;
+using namespace server;
 
 
 static const int trans2pf[RRTRANS_FORMATOPT] =
@@ -63,8 +63,8 @@ VirtualWin::VirtualWin(Display *dpy_, Window win) :
 	rdirty = false;
 	fconfig_setdefaultsfromdpy(dpy);
 	plugin = NULL;
-	doWMDelete = false;
-	doVGLWMDelete = false;
+	deletedByWM = false;
+	handleWMDelete = false;
 	newConfig = false;
 	swapInterval = 0;
 	alreadyWarnedPluginRenderMode = false;
@@ -114,7 +114,7 @@ VirtualWin::~VirtualWin(void)
 int VirtualWin::init(int w, int h, VGLFBConfig config_)
 {
 	CriticalSection::SafeLock l(mutex);
-	if(doWMDelete) THROW("Window has been deleted by window manager");
+	if(deletedByWM) THROW("Window has been deleted by window manager");
 	return VirtualDrawable::init(w, h, config_);
 }
 
@@ -125,7 +125,7 @@ int VirtualWin::init(int w, int h, VGLFBConfig config_)
 void VirtualWin::resize(int width, int height)
 {
 	CriticalSection::SafeLock l(mutex);
-	if(doWMDelete) THROW("Window has been deleted by window manager");
+	if(deletedByWM) THROW("Window has been deleted by window manager");
 	if(width == 0 && oglDraw) width = oglDraw->getWidth();
 	if(height == 0 && oglDraw) height = oglDraw->getHeight();
 	if(oglDraw && oglDraw->getWidth() == width && oglDraw->getHeight() == height)
@@ -143,7 +143,7 @@ void VirtualWin::resize(int width, int height)
 void VirtualWin::checkConfig(VGLFBConfig config_)
 {
 	CriticalSection::SafeLock l(mutex);
-	if(doWMDelete) THROW("Window has been deleted by window manager");
+	if(deletedByWM) THROW("Window has been deleted by window manager");
 	if(FBCID(config_) != FBCID(config))
 	{
 		config = config_;  newConfig = true;
@@ -154,7 +154,7 @@ void VirtualWin::checkConfig(VGLFBConfig config_)
 void VirtualWin::clear(void)
 {
 	CriticalSection::SafeLock l(mutex);
-	if(doWMDelete) THROW("Window has been deleted by window manager");
+	if(deletedByWM) THROW("Window has been deleted by window manager");
 	VirtualDrawable::clear();
 }
 
@@ -162,7 +162,7 @@ void VirtualWin::clear(void)
 void VirtualWin::cleanup(void)
 {
 	CriticalSection::SafeLock l(mutex);
-	if(doWMDelete) THROW("Window has been deleted by window manager");
+	if(deletedByWM) THROW("Window has been deleted by window manager");
 	delete oldDraw;  oldDraw = NULL;
 }
 
@@ -181,7 +181,7 @@ void VirtualWin::initFromWindow(VGLFBConfig config_)
 GLXDrawable VirtualWin::getGLXDrawable(void)
 {
 	CriticalSection::SafeLock l(mutex);
-	if(doWMDelete) THROW("Window has been deleted by window manager");
+	if(deletedByWM) THROW("Window has been deleted by window manager");
 	return VirtualDrawable::getGLXDrawable();
 }
 
@@ -210,7 +210,7 @@ GLXDrawable VirtualWin::updateGLXDrawable(void)
 {
 	GLXDrawable retval = 0;
 	CriticalSection::SafeLock l(mutex);
-	if(doWMDelete) THROW("Window has been deleted by window manager");
+	if(deletedByWM) THROW("Window has been deleted by window manager");
 	if(newConfig)
 	{
 		if(newWidth <= 0 && oglDraw) newWidth = oglDraw->getWidth();
@@ -231,7 +231,7 @@ GLXDrawable VirtualWin::updateGLXDrawable(void)
 void VirtualWin::swapBuffers(void)
 {
 	CriticalSection::SafeLock l(mutex);
-	if(doWMDelete) THROW("Window has been deleted by window manager");
+	if(deletedByWM) THROW("Window has been deleted by window manager");
 	if(oglDraw)
 	{
 		if(fconfig.amdgpuHack)
@@ -243,17 +243,17 @@ void VirtualWin::swapBuffers(void)
 }
 
 
-void VirtualWin::wmDelete(void)
+void VirtualWin::wmDeleted(void)
 {
 	CriticalSection::SafeLock l(mutex);
-	doWMDelete = doVGLWMDelete;
+	deletedByWM = handleWMDelete;
 }
 
 
-void VirtualWin::vglWMDelete(void)
+void VirtualWin::enableWMDeleteHandler(void)
 {
 	CriticalSection::SafeLock l(mutex);
-	doVGLWMDelete = true;
+	handleWMDelete = true;
 }
 
 
@@ -266,7 +266,7 @@ void VirtualWin::readback(GLint drawBuf, bool spoilLast, bool sync)
 		return;
 
 	CriticalSection::SafeLock l(mutex);
-	if(doWMDelete) THROW("Window has been deleted by window manager");
+	if(deletedByWM) THROW("Window has been deleted by window manager");
 
 	dirty = false;
 
@@ -370,7 +370,7 @@ TempContext *VirtualWin::setupPluginTempContext(GLint drawBuf)
 	{
 		initReadbackContext();
 		tc = new TempContext(dpy, getGLXDrawable(), getGLXDrawable(), ctx);
-		VGLReadBuffer(drawBuf);
+		backend::readBuffer(drawBuf);
 	}
 
 	return tc;

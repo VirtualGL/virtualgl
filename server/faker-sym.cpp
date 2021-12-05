@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011, 2013-2016, 2019-2020 D. R. Commander
+// Copyright (C)2009, 2011, 2013-2016, 2019-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -56,12 +56,12 @@ static void *loadXCBX11Symbol(const char *, bool);
 		vglout.print("[VGL] ERROR: VirtualGL attempted to load the real " #f " function\n"); \
 		vglout.print("[VGL]   and got the fake one instead.  Something is terribly wrong.  Aborting\n"); \
 		vglout.print("[VGL]   before chaos ensues.\n"); \
-		vglfaker::safeExit(1); \
+		faker::safeExit(1); \
 	} \
 }
 
 
-namespace vglfaker {
+namespace faker {
 
 void *loadSymbol(const char *name, bool optional)
 {
@@ -411,7 +411,7 @@ LOAD_XCB_SYMBOL(XCBX11, xcbx11, X11-xcb, 1, 1)
 #endif
 
 
-namespace vglfaker {
+namespace faker {
 
 void unloadSymbols(void)
 {

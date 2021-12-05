@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2007 Sun Microsystems, Inc.
-// Copyright (C)2011, 2014 D. R. Commander
+// Copyright (C)2011, 2014, 2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -20,7 +20,7 @@
 #include "Mutex.h"
 
 
-namespace vglutil
+namespace util
 {
 	class GenericQ
 	{

@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2010-2011, 2014 D. R. Commander
+// Copyright (C)2010-2011, 2014, 2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -21,9 +21,9 @@
 #include "Profiler.h"
 
 
-namespace vglserver
+namespace server
 {
-	class X11Trans : public vglutil::Runnable
+	class X11Trans : public util::Runnable
 	{
 		public:
 
@@ -42,21 +42,21 @@ namespace vglserver
 
 			bool isReady(void);
 			void synchronize(void);
-			void sendFrame(vglcommon::FBXFrame *, bool sync = false);
+			void sendFrame(common::FBXFrame *, bool sync = false);
 			void run(void);
-			vglcommon::FBXFrame *getFrame(Display *dpy, Window win, int width,
+			common::FBXFrame *getFrame(Display *dpy, Window win, int width,
 				int height);
 
 		private:
 
 			static const int NFRAMES = 3;
-			vglutil::CriticalSection mutex;
-			vglcommon::FBXFrame *frames[NFRAMES];
-			vglutil::Event ready;
-			vglutil::GenericQ q;
-			vglutil::Thread *thread;
+			util::CriticalSection mutex;
+			common::FBXFrame *frames[NFRAMES];
+			util::Event ready;
+			util::GenericQ q;
+			util::Thread *thread;
 			bool deadYet;
-			vglcommon::Profiler profBlit, profTotal;
+			common::Profiler profBlit, profTotal;
 	};
 }
 

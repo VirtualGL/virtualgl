@@ -18,9 +18,9 @@
 #include "bmp.h"
 #include "fakerconfig.h"
 
-using namespace vglutil;
-using namespace vglcommon;
-using namespace vglserver;
+using namespace util;
+using namespace common;
+using namespace server;
 
 
 void usage(char **argv)

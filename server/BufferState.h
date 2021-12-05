@@ -26,7 +26,7 @@
 #define BS_READBUF  16
 
 
-namespace vglfaker
+namespace backend
 {
 	class BufferState
 	{

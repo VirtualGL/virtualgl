@@ -1,5 +1,5 @@
 // Copyright (C)2007 Sun Microsystems, Inc.
-// Copyright (C)2009, 2012, 2014, 2017-2019 D. R. Commander
+// Copyright (C)2009, 2012, 2014, 2017-2019, 2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -34,7 +34,7 @@
 #include "Log.h"
 #include "vglutil.h"
 
-using namespace vglutil;
+using namespace util;
 
 
 Fl_Double_Window *win = NULL;

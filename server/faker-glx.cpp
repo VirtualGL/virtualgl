@@ -53,7 +53,7 @@ static INLINE VGLFBConfig matchConfig(Display *dpy, XVisualInfo *vis)
 }
 
 
-void setWMAtom(Display *dpy, Window win, vglfaker::VirtualWin *vw)
+void setWMAtom(Display *dpy, Window win, faker::VirtualWin *vw)
 {
 	Atom *protocols = NULL, *newProtocols = NULL;  int count = 0;
 
@@ -77,7 +77,7 @@ void setWMAtom(Display *dpy, Window win, vglfaker::VirtualWin *vw)
 		free(newProtocols);
 	}
 	else if(!XSetWMProtocols(dpy, win, &deleteAtom, 1)) goto bailout;
-	vw->vglWMDelete();
+	vw->enableWMDeleteHandler();
 	return;
 
 	bailout:
@@ -283,7 +283,7 @@ void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst,
 	if(fconfig.egl)
 	{
 		vglout.println("[VGL] ERROR: glXCopyContext() requires the GLX back end");
-		vglfaker::sendGLXError(dpy, X_GLXCopyContext, BadRequest, true);
+		faker::sendGLXError(dpy, X_GLXCopyContext, BadRequest, true);
 		return;
 	}
 	_glXCopyContext(DPY3D, src, dst, mask);
@@ -313,13 +313,13 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 
 	if(!(config = matchConfig(dpy, vis)))
 	{
-		vglfaker::sendGLXError(dpy, X_GLXCreateContext, BadValue, true);
+		faker::sendGLXError(dpy, X_GLXCreateContext, BadValue, true);
 		goto done;
 	}
-	ctx = VGLCreateContext(dpy, config, share_list, direct, NULL);
+	ctx = backend::createContext(dpy, config, share_list, direct, NULL);
 	if(ctx)
 	{
-		int newctxIsDirect = VGLIsDirect(ctx);
+		int newctxIsDirect = backend::isDirect(ctx);
 		if(!fconfig.egl && !newctxIsDirect && direct)
 		{
 			vglout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
@@ -363,10 +363,10 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config_,
 	PRARGX(share_context);  PRARGI(direct);  PRARGAL13(attribs);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	ctx = VGLCreateContext(dpy, config, share_context, direct, attribs);
+	ctx = backend::createContext(dpy, config, share_context, direct, attribs);
 	if(ctx)
 	{
-		int newctxIsDirect = VGLIsDirect(ctx);
+		int newctxIsDirect = backend::isDirect(ctx);
 		if(!fconfig.egl && !newctxIsDirect && direct)
 		{
 			vglout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
@@ -406,10 +406,10 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config_,
 	PRARGI(render_type);  PRARGX(share_list);  PRARGI(direct);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	ctx = VGLCreateContext(dpy, config, share_list, direct, NULL);
+	ctx = backend::createContext(dpy, config, share_list, direct, NULL);
 	if(ctx)
 	{
-		int newctxIsDirect = VGLIsDirect(ctx);
+		int newctxIsDirect = backend::isDirect(ctx);
 		if(!fconfig.egl && !newctxIsDirect && direct)
 		{
 			vglout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
@@ -462,7 +462,7 @@ GLXPbuffer glXCreatePbuffer(Display *dpy, GLXFBConfig config_,
 	PRARGAL13(attrib_list);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	pb = VGLCreatePbuffer(dpy, config, attrib_list);
+	pb = backend::createPbuffer(dpy, config, attrib_list);
 	if(dpy && pb) glxdhash.add(pb, dpy);
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -499,7 +499,7 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 {
 	GLXPixmap drawable = 0;  VGLFBConfig config = 0;
 	int x = 0, y = 0;  unsigned int width = 0, height = 0, depth = 0;
-	vglfaker::VirtualPixmap *vpm = NULL;
+	faker::VirtualPixmap *vpm = NULL;
 
 	TRY();
 
@@ -514,16 +514,16 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 	Window root;  unsigned int bw;
 	if(!(config = matchConfig(dpy, vis)))
 	{
-		vglfaker::sendGLXError(dpy, X_GLXCreateGLXPixmap, BadValue, true);
+		faker::sendGLXError(dpy, X_GLXCreateGLXPixmap, BadValue, true);
 		goto done;
 	}
 	if(!pm
 		|| !_XGetGeometry(dpy, pm, &root, &x, &y, &width, &height, &bw, &depth))
 	{
-		vglfaker::sendGLXError(dpy, X_GLXCreateGLXPixmap, BadPixmap, true);
+		faker::sendGLXError(dpy, X_GLXCreateGLXPixmap, BadPixmap, true);
 		goto done;
 	}
-	if((vpm = new vglfaker::VirtualPixmap(dpy, vis->visual, pm)) != NULL)
+	if((vpm = new faker::VirtualPixmap(dpy, vis->visual, pm)) != NULL)
 	{
 		// Hash the VirtualPixmap instance to the 2D pixmap and also hash the 2D X
 		// display handle to the 3D pixmap.
@@ -549,7 +549,7 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config_, Pixmap pm,
 {
 	GLXPixmap drawable = 0;
 	VGLFBConfig config = (VGLFBConfig)config_;
-	vglfaker::VirtualPixmap *vpm = NULL;
+	faker::VirtualPixmap *vpm = NULL;
 	XVisualInfo *vis = NULL;
 
 	TRY();
@@ -564,26 +564,26 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config_, Pixmap pm,
 
 	if(!VALID_CONFIG(config))
 	{
-		vglfaker::sendGLXError(dpy, X_GLXCreatePixmap, GLXBadFBConfig, false);
+		faker::sendGLXError(dpy, X_GLXCreatePixmap, GLXBadFBConfig, false);
 		goto done;
 	}
 	Window root;  int x, y;  unsigned int w, h, bw, d;
 	if(!pm
 		|| !_XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d))
 	{
-		vglfaker::sendGLXError(dpy, X_GLXCreatePixmap, BadPixmap, true);
+		faker::sendGLXError(dpy, X_GLXCreatePixmap, BadPixmap, true);
 		goto done;
 	}
 
 	if(!config->visualID)
 	{
-		vglfaker::sendGLXError(dpy, X_GLXCreatePixmap, BadMatch, true);
+		faker::sendGLXError(dpy, X_GLXCreatePixmap, BadMatch, true);
 		goto done;
 	}
 	if((vis = glxvisual::visualFromID(dpy, config->screen,
 		config->visualID)) != NULL)
 	{
-		vpm = new vglfaker::VirtualPixmap(dpy, vis->visual, pm);
+		vpm = new faker::VirtualPixmap(dpy, vis->visual, pm);
 		_XFree(vis);
 	}
 	if(vpm)
@@ -617,7 +617,7 @@ GLXPixmap glXCreateGLXPixmapWithConfigSGIX(Display *dpy,
 GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config_, Window win,
 	const int *attrib_list)
 {
-	vglfaker::VirtualWin *vw = NULL;
+	faker::VirtualWin *vw = NULL;
 	VGLFBConfig config = (VGLFBConfig)config_;
 
 	TRY();
@@ -635,13 +635,13 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config_, Window win,
 	XSync(dpy, False);
 	if(!VALID_CONFIG(config))
 	{
-		vglfaker::sendGLXError(dpy, X_GLXCreateWindow, GLXBadFBConfig, false);
+		faker::sendGLXError(dpy, X_GLXCreateWindow, GLXBadFBConfig, false);
 		win = 0;
 		goto done;
 	}
 	if(!win)
 	{
-		vglfaker::sendGLXError(dpy, X_GLXCreateWindow, BadWindow, true);
+		faker::sendGLXError(dpy, X_GLXCreateWindow, BadWindow, true);
 		goto done;
 	}
 	try
@@ -659,7 +659,7 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config_, Window win,
 		if(!strcmp(GET_METHOD(e), "VirtualWin")
 			&& !strcmp(e.what(), "Invalid window"))
 		{
-			vglfaker::sendGLXError(dpy, X_GLXCreateWindow, BadWindow, true);
+			faker::sendGLXError(dpy, X_GLXCreateWindow, BadWindow, true);
 			win = 0;
 			goto done;
 		}
@@ -697,7 +697,7 @@ void glXDestroyContext(Display *dpy, GLXContext ctx)
 	/////////////////////////////////////////////////////////////////////////////
 
 	ctxhash.remove(ctx);
-	VGLDestroyContext(dpy, ctx);
+	backend::destroyContext(dpy, ctx);
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();  CLOSETRACE();
@@ -720,7 +720,7 @@ void glXDestroyPbuffer(Display *dpy, GLXPbuffer pbuf)
 	OPENTRACE(glXDestroyPbuffer);  PRARGD(dpy);  PRARGX(pbuf);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	VGLDestroyPbuffer(dpy, pbuf);
+	backend::destroyPbuffer(dpy, pbuf);
 	if(pbuf) glxdhash.remove(pbuf);
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -755,7 +755,7 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 
 	DISABLE_FAKER();
 
-	vglfaker::VirtualPixmap *vpm = pmhash.find(dpy, pix);
+	faker::VirtualPixmap *vpm = pmhash.find(dpy, pix);
 	if(vpm && vpm->isInit()) vpm->readback();
 
 	if(pix) glxdhash.remove(pix);
@@ -785,7 +785,7 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 
 	DISABLE_FAKER();
 
-	vglfaker::VirtualPixmap *vpm = pmhash.find(dpy, pix);
+	faker::VirtualPixmap *vpm = pmhash.find(dpy, pix);
 	if(vpm && vpm->isInit()) vpm->readback();
 
 	if(pix) glxdhash.remove(pix);
@@ -862,9 +862,8 @@ static const char *getGLXExtensions(void)
 	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
-		vglfaker::init3D();
-		if((vglfaker::eglMajor > 1
-				|| (vglfaker::eglMajor == 1 && vglfaker::eglMinor >= 5))
+		faker::init3D();
+		if((faker::eglMajor > 1 || (faker::eglMajor == 1 && faker::eglMinor >= 5))
 			&& !strstr(glxextensions, "GLX_ARB_create_context"))
 			strncat(glxextensions,
 				" GLX_ARB_create_context GLX_ARB_create_context_profile",
@@ -986,7 +985,7 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 				*value = 1;
 			else *value = 0;
 		}
-		else retval = VGLGetFBConfigAttrib(dpy, config, attrib, value);
+		else retval = backend::getFBConfigAttrib(dpy, config, attrib, value);
 	}
 	else
 	{
@@ -1008,7 +1007,7 @@ GLXContext glXGetCurrentContext(void)
 {
 	GLXContext ctx = 0;
 
-	if(vglfaker::getExcludeCurrent()) return _glXGetCurrentContext();
+	if(faker::getExcludeCurrent()) return _glXGetCurrentContext();
 
 	TRY();
 
@@ -1016,7 +1015,7 @@ GLXContext glXGetCurrentContext(void)
 	OPENTRACE(glXGetCurrentContext);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	ctx = VGLGetCurrentContext();
+	ctx = backend::getCurrentContext();
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();  PRARGX(ctx);  CLOSETRACE();
@@ -1034,9 +1033,9 @@ GLXContext glXGetCurrentContext(void)
 
 Display *glXGetCurrentDisplay(void)
 {
-	Display *dpy = NULL;  vglfaker::VirtualWin *vw;
+	Display *dpy = NULL;  faker::VirtualWin *vw;
 
-	if(vglfaker::getExcludeCurrent()) return _glXGetCurrentDisplay();
+	if(faker::getExcludeCurrent()) return _glXGetCurrentDisplay();
 
 	TRY();
 
@@ -1044,7 +1043,7 @@ Display *glXGetCurrentDisplay(void)
 	OPENTRACE(glXGetCurrentDisplay);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	GLXDrawable curdraw = VGLGetCurrentDrawable();
+	GLXDrawable curdraw = backend::getCurrentDrawable();
 	if((vw = winhash.find(NULL, curdraw)) != NULL)
 		dpy = vw->getX11Display();
 	else if(curdraw)
@@ -1070,9 +1069,9 @@ Display *glXGetCurrentDisplayEXT(void)
 
 GLXDrawable glXGetCurrentDrawable(void)
 {
-	vglfaker::VirtualWin *vw;  GLXDrawable draw = 0;
+	faker::VirtualWin *vw;  GLXDrawable draw = 0;
 
-	if(vglfaker::getExcludeCurrent()) return _glXGetCurrentDrawable();
+	if(faker::getExcludeCurrent()) return _glXGetCurrentDrawable();
 
 	TRY();
 
@@ -1080,7 +1079,7 @@ GLXDrawable glXGetCurrentDrawable(void)
 	OPENTRACE(glXGetCurrentDrawable);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	draw = VGLGetCurrentDrawable();
+	draw = backend::getCurrentDrawable();
 	if((vw = winhash.find(NULL, draw)) != NULL)
 		draw = vw->getX11Drawable();
 
@@ -1094,9 +1093,9 @@ GLXDrawable glXGetCurrentDrawable(void)
 
 GLXDrawable glXGetCurrentReadDrawable(void)
 {
-	vglfaker::VirtualWin *vw;  GLXDrawable read = 0;
+	faker::VirtualWin *vw;  GLXDrawable read = 0;
 
-	if(vglfaker::getExcludeCurrent()) return _glXGetCurrentReadDrawable();
+	if(faker::getExcludeCurrent()) return _glXGetCurrentReadDrawable();
 
 	TRY();
 
@@ -1104,7 +1103,7 @@ GLXDrawable glXGetCurrentReadDrawable(void)
 	OPENTRACE(glXGetCurrentReadDrawable);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	read = VGLGetCurrentReadDrawable();
+	read = backend::getCurrentReadDrawable();
 	if((vw = winhash.find(NULL, read)) != NULL)
 		read = vw->getX11Drawable();
 
@@ -1160,7 +1159,7 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config_, int attribute,
 	if(attribute == GLX_VISUAL_ID)
 		*value = config->visualID;
 	else
-		retval = VGLGetFBConfigAttrib(dpy, config, attribute, value);
+		retval = backend::getFBConfigAttrib(dpy, config, attribute, value);
 
 	if(attribute == GLX_DRAWABLE_TYPE && retval == Success)
 	{
@@ -1262,12 +1261,12 @@ void glXBindTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer,
 	PRARGI(buffer);  PRARGAL13(attrib_list);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	vglfaker::VirtualPixmap *vpm = NULL;
+	faker::VirtualPixmap *vpm = NULL;
 	if((vpm = pmhash.find(dpy, drawable)) == NULL)
 	{
 		// If we get here, then the drawable wasn't created with
 		// glXCreate[GLX]Pixmap().
-		vglfaker::sendGLXError(dpy, X_GLXVendorPrivate, GLXBadPixmap, false);
+		faker::sendGLXError(dpy, X_GLXVendorPrivate, GLXBadPixmap, false);
 		goto done;
 	}
 	else
@@ -1282,7 +1281,7 @@ void glXBindTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer,
 				vpm->getWidth(), vpm->getHeight());
 		else
 		{
-			vglfaker::sendGLXError(dpy, X_GLXVendorPrivate, GLXBadPixmap, false);
+			faker::sendGLXError(dpy, X_GLXVendorPrivate, GLXBadPixmap, false);
 			goto done;
 		}
 		if(gc) XFreeGC(DPY3D, gc);
@@ -1354,9 +1353,9 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 {
 	void (*retval)(void) = NULL;
 
-	vglfaker::init();
+	faker::init();
 
-	if(vglfaker::getExcludeCurrent()) return _glXGetProcAddressARB(procName);
+	if(faker::getExcludeCurrent()) return _glXGetProcAddressARB(procName);
 
 	/////////////////////////////////////////////////////////////////////////////
 	OPENTRACE(glXGetProcAddressARB);  PRARGS((char *)procName);  STARTTRACE();
@@ -1529,18 +1528,18 @@ void glXGetSelectedEvent(Display *dpy, GLXDrawable draw,
 
 	if(!draw)
 	{
-		vglfaker::sendGLXError(dpy, X_GLXGetDrawableAttributes, GLXBadDrawable,
+		faker::sendGLXError(dpy, X_GLXGetDrawableAttributes, GLXBadDrawable,
 			false);
 		return;
 	}
 
-	vglfaker::VirtualWin *vw;
+	faker::VirtualWin *vw;
 	if((vw = winhash.find(dpy, draw)) != NULL)
 		*event_mask = vw->getEventMask();
 	else if(glxdhash.getCurrentDisplay(draw))
 		*event_mask = glxdhash.getEventMask(draw);
 	else
-		vglfaker::sendGLXError(dpy, X_GLXGetDrawableAttributes, GLXBadDrawable,
+		faker::sendGLXError(dpy, X_GLXGetDrawableAttributes, GLXBadDrawable,
 			false);
 
 	CATCH();
@@ -1625,7 +1624,7 @@ Bool glXIsDirect(Display *dpy, GLXContext ctx)
 	OPENTRACE(glXIsDirect);  PRARGD(dpy);  PRARGX(ctx);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	direct = VGLIsDirect(ctx);
+	direct = backend::isDirect(ctx);
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();  PRARGI(direct);  CLOSETRACE();
@@ -1641,9 +1640,9 @@ Bool glXIsDirect(Display *dpy, GLXContext ctx)
 Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 {
 	Bool retval = False;  const char *renderer = "Unknown";
-	vglfaker::VirtualWin *vw;  VGLFBConfig config = 0;
+	faker::VirtualWin *vw;  VGLFBConfig config = 0;
 
-	if(vglfaker::deadYet || vglfaker::getFakerLevel() > 0)
+	if(faker::deadYet || faker::getFakerLevel() > 0)
 		return _glXMakeCurrent(dpy, drawable, ctx);
 
 	TRY();
@@ -1651,12 +1650,12 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	// Find the FB config that was previously hashed to this context when it was
 	// created.
 	if(ctx) config = ctxhash.findConfig(ctx);
-	if(vglfaker::isDisplayExcluded(dpy))
+	if(faker::isDisplayExcluded(dpy))
 	{
-		vglfaker::setExcludeCurrent(true);
+		faker::setExcludeCurrent(true);
 		return _glXMakeCurrent(dpy, drawable, ctx);
 	}
-	vglfaker::setExcludeCurrent(false);
+	faker::setExcludeCurrent(false);
 
 	/////////////////////////////////////////////////////////////////////////////
 	OPENTRACE(glXMakeCurrent);  PRARGD(dpy);  PRARGX(drawable);  PRARGX(ctx);
@@ -1667,11 +1666,11 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 
 	// glXMakeCurrent() implies a glFinish() on the previous context, which is
 	// why we read back the front buffer here if it is dirty.
-	GLXDrawable curdraw = VGLGetCurrentDrawable();
-	if(VGLGetCurrentContext() && curdraw
+	GLXDrawable curdraw = backend::getCurrentDrawable();
+	if(backend::getCurrentContext() && curdraw
 		&& (vw = winhash.find(NULL, curdraw)) != NULL)
 	{
-		vglfaker::VirtualWin *newvw;
+		faker::VirtualWin *newvw;
 		if(drawable == 0 || !(newvw = winhash.find(dpy, drawable))
 			|| newvw->getGLXDrawable() != curdraw)
 		{
@@ -1717,7 +1716,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 			if(!strcmp(GET_METHOD(e), "VirtualWin")
 				&& !strcmp(e.what(), "Invalid window"))
 			{
-				vglfaker::sendGLXError(dpy, X_GLXMakeCurrent, GLXBadDrawable, false);
+				faker::sendGLXError(dpy, X_GLXMakeCurrent, GLXBadDrawable, false);
 				goto done;
 			}
 			throw;
@@ -1728,11 +1727,11 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		// This situation would cause _glXMakeContextCurrent() to trigger an X11
 		// error anyhow, but the error it triggers is implementation-dependent.
 		// It's better to provide consistent behavior to the calling program.
-		vglfaker::sendGLXError(dpy, X_GLXMakeCurrent, GLXBadContext, false);
+		faker::sendGLXError(dpy, X_GLXMakeCurrent, GLXBadContext, false);
 		goto done;
 	}
 
-	retval = VGLMakeCurrent(dpy, drawable, drawable, ctx);
+	retval = backend::makeCurrent(dpy, drawable, drawable, ctx);
 	if(fconfig.trace && retval)
 		renderer = (const char *)_glGetString(GL_RENDERER);
 	// The pixels in a new off-screen drawable are undefined, so we have to clear
@@ -1741,7 +1740,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	{
 		vw->clear();  vw->cleanup();
 	}
-	vglfaker::VirtualPixmap *vpm;
+	faker::VirtualPixmap *vpm;
 	if((vpm = pmhash.find(dpy, drawable)) != NULL)
 	{
 		vpm->clear();
@@ -1764,20 +1763,20 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	GLXContext ctx)
 {
 	Bool retval = False;  const char *renderer = "Unknown";
-	vglfaker::VirtualWin *vw;  VGLFBConfig config = 0;
+	faker::VirtualWin *vw;  VGLFBConfig config = 0;
 
-	if(vglfaker::deadYet || vglfaker::getFakerLevel() > 0)
+	if(faker::deadYet || faker::getFakerLevel() > 0)
 		return _glXMakeContextCurrent(dpy, draw, read, ctx);
 
 	TRY();
 
 	if(ctx) config = ctxhash.findConfig(ctx);
-	if(vglfaker::isDisplayExcluded(dpy))
+	if(faker::isDisplayExcluded(dpy))
 	{
-		vglfaker::setExcludeCurrent(true);
+		faker::setExcludeCurrent(true);
 		return _glXMakeContextCurrent(dpy, draw, read, ctx);
 	}
-	vglfaker::setExcludeCurrent(false);
+	faker::setExcludeCurrent(false);
 
 	/////////////////////////////////////////////////////////////////////////////
 	OPENTRACE(glXMakeContextCurrent);  PRARGD(dpy);  PRARGX(draw);  PRARGX(read);
@@ -1788,11 +1787,11 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 
 	// glXMakeContextCurrent() implies a glFinish() on the previous context,
 	// which is why we read back the front buffer here if it is dirty.
-	GLXDrawable curdraw = VGLGetCurrentDrawable();
-	if(VGLGetCurrentContext() && curdraw
+	GLXDrawable curdraw = backend::getCurrentDrawable();
+	if(backend::getCurrentContext() && curdraw
 		&& (vw = winhash.find(NULL, curdraw)) != NULL)
 	{
-		vglfaker::VirtualWin *newvw;
+		faker::VirtualWin *newvw;
 		if(draw == 0 || !(newvw = winhash.find(dpy, draw))
 			|| newvw->getGLXDrawable() != curdraw)
 		{
@@ -1803,7 +1802,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 
 	// If the drawable isn't a window, we pass it through unmodified, else we
 	// map it to an off-screen drawable.
-	vglfaker::VirtualWin *drawVW, *readVW;
+	faker::VirtualWin *drawVW, *readVW;
 	int direct = ctxhash.isDirect(ctx);
 	if(dpy && (draw || read) && ctx)
 	{
@@ -1868,7 +1867,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 			if(!strcmp(GET_METHOD(e), "VirtualWin")
 				&& !strcmp(e.what(), "Invalid window"))
 			{
-				vglfaker::sendGLXError(dpy, X_GLXMakeContextCurrent, GLXBadDrawable,
+				faker::sendGLXError(dpy, X_GLXMakeContextCurrent, GLXBadDrawable,
 					false);
 				goto done;
 			}
@@ -1880,11 +1879,11 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		// This situation would cause _glXMakeContextCurrent() to trigger an X11
 		// error anyhow, but the error it triggers is implementation-dependent.
 		// It's better to provide consistent behavior to the calling program.
-		vglfaker::sendGLXError(dpy, X_GLXMakeContextCurrent, GLXBadContext, false);
+		faker::sendGLXError(dpy, X_GLXMakeContextCurrent, GLXBadContext, false);
 		goto done;
 	}
 
-	retval = VGLMakeCurrent(dpy, draw, read, ctx);
+	retval = backend::makeCurrent(dpy, draw, read, ctx);
 	if(fconfig.trace && retval)
 		renderer = (const char *)_glGetString(GL_RENDERER);
 	if((drawVW = winhash.find(NULL, draw)) != NULL)
@@ -1893,7 +1892,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	}
 	if((readVW = winhash.find(NULL, read)) != NULL)
 		readVW->cleanup();
-	vglfaker::VirtualPixmap *vpm;
+	faker::VirtualPixmap *vpm;
 	if((vpm = pmhash.find(dpy, draw)) != NULL)
 	{
 		vpm->clear();
@@ -1943,7 +1942,7 @@ int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 		*value = config->screen;
 		retval = Success;
 	}
-	else retval = VGLQueryContext(dpy, ctx, attribute, value);
+	else retval = backend::queryContext(dpy, ctx, attribute, value);
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();  if(value) PRARGIX(*value);  CLOSETRACE();
@@ -2023,7 +2022,7 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 	// GLX_EXT_swap_control attributes
 	if(attribute == GLX_SWAP_INTERVAL_EXT)
 	{
-		vglfaker::VirtualWin *vw;
+		faker::VirtualWin *vw;
 		if((vw = winhash.find(dpy, draw)) != NULL)
 			*value = vw->getSwapInterval();
 		else
@@ -2037,14 +2036,14 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 	}
 	else
 	{
-		vglfaker::VirtualWin *vw;  vglfaker::VirtualPixmap *vpm;
+		faker::VirtualWin *vw;  faker::VirtualPixmap *vpm;
 
 		if((vw = winhash.find(dpy, draw)) != NULL)
 			glxDraw = vw->getGLXDrawable();
 		else if((vpm = pmhash.find(dpy, draw)) != NULL)
 			glxDraw = vpm->getGLXDrawable();
 
-		VGLQueryDrawable(dpy, glxDraw, attribute, value);
+		backend::queryDrawable(dpy, glxDraw, attribute, value);
 	}
 
 	done:
@@ -2082,7 +2081,8 @@ Bool glXQueryExtension(Display *dpy, int *error_base, int *event_base)
 		return _glXQueryExtension(dpy, error_base, event_base);
 
 	int majorOpcode, eventBase, errorBase;
-	Bool retval = VGLQueryExtension(dpy, &majorOpcode, &eventBase, &errorBase);
+	Bool retval = backend::queryExtension(dpy, &majorOpcode, &eventBase,
+		&errorBase);
 	if(error_base) *error_base = errorBase;
 	if(event_base) *event_base = eventBase;
 	return retval;
@@ -2169,13 +2169,13 @@ void glXSelectEvent(Display *dpy, GLXDrawable draw, unsigned long event_mask)
 
 	event_mask &= GLX_PBUFFER_CLOBBER_MASK;
 
-	vglfaker::VirtualWin *vw;
+	faker::VirtualWin *vw;
 	if((vw = winhash.find(dpy, draw)) != NULL)
 		vw->setEventMask(event_mask);
 	else if(glxdhash.getCurrentDisplay(draw))
 		glxdhash.setEventMask(draw, event_mask);
 	else
-		vglfaker::sendGLXError(dpy, X_GLXChangeDrawableAttributes, GLXBadDrawable,
+		faker::sendGLXError(dpy, X_GLXChangeDrawableAttributes, GLXBadDrawable,
 			false);
 
 	CATCH();
@@ -2193,8 +2193,8 @@ void glXSelectEventSGIX(Display *dpy, GLXDrawable drawable, unsigned long mask)
 
 void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
 {
-	vglfaker::VirtualWin *vw = NULL;
-	static vglutil::Timer timer;  vglutil::Timer sleepTimer;
+	faker::VirtualWin *vw = NULL;
+	static util::Timer timer;  util::Timer sleepTimer;
 	static double err = 0.;  static bool first = true;
 
 	TRY();
@@ -2236,7 +2236,7 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
 			timer.start();
 		}
 	}
-	else VGLSwapBuffers(dpy, drawable);
+	else backend::swapBuffers(dpy, drawable);
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();  if(vw) { PRARGX(vw->getGLXDrawable()); }
@@ -2274,7 +2274,7 @@ void glXSwapIntervalEXT(Display *dpy, GLXDrawable drawable, int interval)
 		// implementation doesn't, so we emulate their behavior.
 		interval = 1;
 
-	vglfaker::VirtualWin *vw;
+	faker::VirtualWin *vw;
 	if((vw = winhash.find(dpy, drawable)) != NULL)
 		vw->setSwapInterval(interval);
 	// NOTE:  Technically, a BadWindow error should be triggered if drawable
@@ -2296,7 +2296,7 @@ int glXSwapIntervalSGI(int interval)
 {
 	int retval = 0;
 
-	if(vglfaker::getExcludeCurrent()) return _glXSwapIntervalSGI(interval);
+	if(faker::getExcludeCurrent()) return _glXSwapIntervalSGI(interval);
 
 	/////////////////////////////////////////////////////////////////////////////
 	OPENTRACE(glXSwapIntervalSGI);  PRARGI(interval);  STARTTRACE();
@@ -2304,7 +2304,7 @@ int glXSwapIntervalSGI(int interval)
 
 	TRY();
 
-	vglfaker::VirtualWin *vw;  GLXDrawable draw = VGLGetCurrentDrawable();
+	faker::VirtualWin *vw;  GLXDrawable draw = backend::getCurrentDrawable();
 	if(interval < 0) retval = GLX_BAD_VALUE;
 	else if(!draw || !(vw = winhash.find(NULL, draw)))
 		retval = GLX_BAD_CONTEXT;
@@ -2326,7 +2326,7 @@ int glXSwapIntervalSGI(int interval)
 
 void glXUseXFont(Font font, int first, int count, int list_base)
 {
-	if(vglfaker::getExcludeCurrent())
+	if(faker::getExcludeCurrent())
 	{
 		_glXUseXFont(font, first, count, list_base);  return;
 	}

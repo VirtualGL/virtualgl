@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2011, 2014, 2019-2020 D. R. Commander
+// Copyright (C)2011, 2014, 2019-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,7 +23,7 @@
 
 // This maps a window ID to an off-screen drawable instance
 
-namespace vglfaker
+namespace faker
 {
 	class WindowHash : public HASH
 	{
@@ -33,7 +33,7 @@ namespace vglfaker
 			{
 				if(instance == NULL)
 				{
-					vglutil::CriticalSection::SafeLock l(instanceMutex);
+					util::CriticalSection::SafeLock l(instanceMutex);
 					if(instance == NULL) instance = new WindowHash;
 				}
 				return instance;
@@ -61,7 +61,7 @@ namespace vglfaker
 			{
 				if(!dpy || !win || !config) THROW("Invalid argument");
 				HashEntry *ptr = NULL;
-				vglutil::CriticalSection::SafeLock l(mutex);
+				util::CriticalSection::SafeLock l(mutex);
 				if((ptr = HASH::findEntry(DisplayString(dpy), win)) != NULL)
 				{
 					if(!ptr->value)
@@ -90,7 +90,7 @@ namespace vglfaker
 			{
 				if(!dpy) return;
 				HashEntry *ptr = NULL, *next = NULL;
-				vglutil::CriticalSection::SafeLock l(mutex);
+				util::CriticalSection::SafeLock l(mutex);
 				ptr = start;
 				while(ptr != NULL)
 				{
@@ -137,13 +137,13 @@ namespace vglfaker
 			}
 
 			static WindowHash *instance;
-			static vglutil::CriticalSection instanceMutex;
+			static util::CriticalSection instanceMutex;
 	};
 }
 
 #undef HASH
 
 
-#define winhash  (*(vglfaker::WindowHash::getInstance()))
+#define winhash  (*(faker::WindowHash::getInstance()))
 
 #endif  // __WINDOWHASH_H__

@@ -33,7 +33,7 @@
 	#define INADDR_NONE  ((in_addr_t)0xffffffff)
 #endif
 
-using namespace vglutil;
+using namespace util;
 
 
 #define TRY_SOCK(f)  { if((f) == SOCKET_ERROR) THROW_SOCK(); }
@@ -44,6 +44,8 @@ typedef int SOCKLEN_T;
 typedef socklen_t SOCKLEN_T;
 #endif
 
+namespace util {
+
 typedef struct
 {
 	union
@@ -53,7 +55,9 @@ typedef struct
 		struct sockaddr_in sin;
 		struct sockaddr_in6 sin6;
 	} u;
-} VGLSockAddr;
+} SockAddr;
+
+}
 
 #ifdef USESSL
 bool Socket::sslInit = false;
@@ -327,7 +331,7 @@ unsigned short Socket::setupListener(unsigned short port, bool reuseAddr)
 	#ifdef __CYGWIN__
 	int zero = 0;
 	#endif
-	VGLSockAddr myaddr;  SOCKLEN_T addrlen;
+	SockAddr myaddr;  SOCKLEN_T addrlen;
 
 	if(sd != INVALID_SOCKET) THROW("Already connected");
 	#ifdef USESSL
@@ -418,7 +422,7 @@ Socket *Socket::accept(void)
 {
 	SOCKET clientsd;
 	int m = 1;
-	VGLSockAddr remoteaddr;
+	SockAddr remoteaddr;
 	SOCKLEN_T addrlen = sizeof(struct sockaddr_storage);
 
 	if(sd == INVALID_SOCKET) THROW("Not connected");
@@ -449,7 +453,7 @@ Socket *Socket::accept(void)
 
 const char *Socket::remoteName(void)
 {
-	VGLSockAddr remoteaddr;
+	SockAddr remoteaddr;
 	SOCKLEN_T addrlen = sizeof(struct sockaddr_storage);
 	const char *remoteName;
 

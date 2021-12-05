@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2010-2011, 2014, 2019-2020 D. R. Commander
+// Copyright (C)2010-2011, 2014, 2019-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -26,9 +26,9 @@
 #endif
 
 
-namespace vglserver
+namespace server
 {
-	class VGLTrans : public vglutil::Runnable
+	class VGLTrans : public util::Runnable
 	{
 		public:
 
@@ -41,10 +41,10 @@ namespace vglserver
 				delete socket;  socket = NULL;
 			}
 
-			vglcommon::Frame *getFrame(int, int, int, int, bool stereo);
+			common::Frame *getFrame(int, int, int, int, bool stereo);
 			bool isReady(void);
 			void synchronize(void);
-			void sendFrame(vglcommon::Frame *);
+			void sendFrame(common::Frame *);
 			void run(void);
 			void sendHeader(rrframeheader h, bool eof = false);
 			void send(char *, int);
@@ -56,18 +56,18 @@ namespace vglserver
 
 		private:
 
-			vglutil::Socket *socket;
+			util::Socket *socket;
 			static const int NFRAMES = 4;
-			vglutil::CriticalSection mutex;
-			vglcommon::Frame frames[NFRAMES];
-			vglutil::Event ready;
-			vglutil::GenericQ q;
-			vglutil::Thread *thread;  bool deadYet;
-			vglcommon::Profiler profTotal;
+			util::CriticalSection mutex;
+			common::Frame frames[NFRAMES];
+			util::Event ready;
+			util::GenericQ q;
+			util::Thread *thread;  bool deadYet;
+			common::Profiler profTotal;
 			int dpynum;
 			rrversion version;
 
-		class Compressor : public vglutil::Runnable
+		class Compressor : public util::Runnable
 		{
 			public:
 
@@ -108,7 +108,7 @@ namespace vglserver
 					}
 				}
 
-				void go(vglcommon::Frame *frame_, vglcommon::Frame *lastFrame_)
+				void go(common::Frame *frame_, common::Frame *lastFrame_)
 				{
 					frame = frame_;  lastFrame = lastFrame_;
 					ready.signal();
@@ -120,29 +120,28 @@ namespace vglserver
 				}
 
 				void shutdown(void) { deadYet = true;  ready.signal(); }
-				void compressSend(vglcommon::Frame *frame,
-					vglcommon::Frame *lastFrame);
+				void compressSend(common::Frame *frame, common::Frame *lastFrame);
 				void send(void);
 
 				long bytes;
 
 			private:
 
-				void store(vglcommon::CompressedFrame *cf)
+				void store(common::CompressedFrame *cf)
 				{
 					storedFrames++;
-					if(!(cframes = (vglcommon::CompressedFrame **)realloc(cframes,
-						sizeof(vglcommon::CompressedFrame *) * storedFrames)))
+					if(!(cframes = (common::CompressedFrame **)realloc(cframes,
+						sizeof(common::CompressedFrame *) * storedFrames)))
 						THROW("Memory allocation error");
 					cframes[storedFrames - 1] = cf;
 				}
 
-				int storedFrames;  vglcommon::CompressedFrame **cframes;
-				vglcommon::Frame *frame, *lastFrame;
+				int storedFrames;  common::CompressedFrame **cframes;
+				common::Frame *frame, *lastFrame;
 				int myRank, nprocs;
-				vglutil::Event ready, complete;  bool deadYet;
-				vglutil::CriticalSection mutex;
-				vglcommon::Profiler profComp;
+				util::Event ready, complete;  bool deadYet;
+				util::CriticalSection mutex;
+				common::Profiler profComp;
 				VGLTrans *parent;
 		};
 	};

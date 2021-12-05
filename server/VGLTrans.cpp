@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009-2011, 2014, 2017-2020 D. R. Commander
+// Copyright (C)2009-2011, 2014, 2017-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -20,9 +20,9 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-using namespace vglutil;
-using namespace vglcommon;
-using namespace vglserver;
+using namespace util;
+using namespace common;
+using namespace server;
 
 
 #define ENDIANIZE(h) \

@@ -53,9 +53,9 @@ extern "C" {
 	ANNOTATE_BENIGN_RACE_SIZED(&__##s, sizeof(_##s##Type), ); \
 	if(!__##s) \
 	{ \
-		vglfaker::init(); \
-		vglfaker::GlobalCriticalSection::SafeLock l(globalMutex); \
-		if(!__##s) __##s = (_##s##Type)vglfaker::loadSymbol(#s, true); \
+		faker::init(); \
+		faker::GlobalCriticalSection::SafeLock l(globalMutex); \
+		if(!__##s) __##s = (_##s##Type)faker::loadSymbol(#s, true); \
 	} \
 }
 
@@ -64,17 +64,17 @@ extern "C" {
 	ANNOTATE_BENIGN_RACE_SIZED(&__##s, sizeof(_##s##Type), ); \
 	if(!__##s) \
 	{ \
-		vglfaker::init(); \
-		vglfaker::GlobalCriticalSection::SafeLock l(globalMutex); \
-		if(!__##s) __##s = (_##s##Type)vglfaker::loadSymbol(#s); \
+		faker::init(); \
+		faker::GlobalCriticalSection::SafeLock l(globalMutex); \
+		if(!__##s) __##s = (_##s##Type)faker::loadSymbol(#s); \
 	} \
-	if(!__##s) vglfaker::safeExit(1); \
+	if(!__##s) faker::safeExit(1); \
 	if(__##s == fake_s) \
 	{ \
 		vglout.print("[VGL] ERROR: VirtualGL attempted to load the real\n"); \
 		vglout.print("[VGL]   " #s " function and got the fake one instead.\n"); \
 		vglout.print("[VGL]   Something is terribly wrong.  Aborting before chaos ensues.\n"); \
-		vglfaker::safeExit(1); \
+		faker::safeExit(1); \
 	} \
 }
 
@@ -85,10 +85,8 @@ extern "C" {
 #endif
 
 
-#define DISABLE_FAKER() \
-	vglfaker::setFakerLevel(vglfaker::getFakerLevel() + 1);
-#define ENABLE_FAKER() \
-	vglfaker::setFakerLevel(vglfaker::getFakerLevel() - 1);
+#define DISABLE_FAKER()  faker::setFakerLevel(faker::getFakerLevel() + 1);
+#define ENABLE_FAKER()  faker::setFakerLevel(faker::getFakerLevel() - 1);
 
 
 #define FUNCDEF0(RetType, f, fake_f) \

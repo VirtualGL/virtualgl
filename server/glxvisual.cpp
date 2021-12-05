@@ -24,7 +24,7 @@
 #include "TempContextEGL.h"
 #endif
 
-using namespace vglutil;
+using namespace util;
 
 
 namespace glxvisual {
@@ -213,12 +213,12 @@ static bool buildVisAttribTable(Display *dpy, int screen)
 	XExtData *extData;
 	obj.screen = XScreenOfDisplay(dpy, screen);
 
-	if(!fconfig.egl && dpy == vglfaker::dpy3D)
+	if(!fconfig.egl && dpy == faker::dpy3D)
 		THROW("glxvisual::buildVisAttribTable() called with 3D X server handle (this should never happen)");
 
 	try
 	{
-		CriticalSection::SafeLock l(vglfaker::getDisplayCS(dpy));
+		CriticalSection::SafeLock l(faker::getDisplayCS(dpy));
 
 		int minExtensionNumber =
 			XFindOnExtensionList(XEHeadOfExtensionList(obj), 0) ? 0 : 1;
@@ -435,12 +435,12 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 	XExtData *extData;
 	obj.screen = XScreenOfDisplay(dpy, screen);
 
-	if(!fconfig.egl && dpy == vglfaker::dpy3D)
+	if(!fconfig.egl && dpy == faker::dpy3D)
 		THROW("glxvisual::buildCfgAttribTable() called with 3D X server handle (this should never happen)");
 
 	try
 	{
-		CriticalSection::SafeLock l(vglfaker::getDisplayCS(dpy));
+		CriticalSection::SafeLock l(faker::getDisplayCS(dpy));
 
 		int minExtensionNumber =
 			XFindOnExtensionList(XEHeadOfExtensionList(obj), 0) ? 0 : 1;
@@ -462,7 +462,7 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 			if(!(ctx = _eglCreateContext(EDPY, (EGLConfig)0, NULL, NULL)))
 				THROW("Could not create temporary EGL context");
 			{
-				vglfaker::TempContextEGL tc(ctx);
+				backend::TempContextEGL tc(ctx);
 
 				_glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
 				if(maxSamples > 0)

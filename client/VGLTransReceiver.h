@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2010-2011, 2014, 2018-2019 D. R. Commander
+// Copyright (C)2010-2011, 2014, 2018-2019, 2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,9 +23,9 @@
 #define MAXWIN  1024
 
 
-namespace vglclient
+namespace client
 {
-	class VGLTransReceiver : public vglutil::Runnable
+	class VGLTransReceiver : public util::Runnable
 	{
 		public:
 
@@ -39,25 +39,25 @@ namespace vglclient
 			void run(void);
 
 			int drawMethod;
-			vglutil::Socket *listenSocket;
-			vglutil::CriticalSection listenMutex;
-			vglutil::Thread *thread;
+			util::Socket *listenSocket;
+			util::CriticalSection listenMutex;
+			util::Thread *thread;
 			bool deadYet;
 			bool doSSL;
 			bool ipv6;
 			unsigned short port;
 
-		class Listener : public vglutil::Runnable
+		class Listener : public util::Runnable
 		{
 			public:
 
-				Listener(vglutil::Socket *socket_, int drawMethod_) :
+				Listener(util::Socket *socket_, int drawMethod_) :
 					drawMethod(drawMethod_), nwin(0), socket(socket_), thread(NULL),
 					remoteName(NULL)
 				{
 					memset(windows, 0, sizeof(ClientWin *) * MAXWIN);
 					if(socket) remoteName = socket->remoteName();
-					thread = new vglutil::Thread(this);
+					thread = new util::Thread(this);
 					thread->start();
 				}
 
@@ -89,9 +89,9 @@ namespace vglclient
 				int nwin;
 				ClientWin *addWindow(int dpynum, Window win, bool stereo = false);
 				void deleteWindow(ClientWin *win);
-				vglutil::CriticalSection winMutex;
-				vglutil::Socket *socket;
-				vglutil::Thread *thread;
+				util::CriticalSection winMutex;
+				util::Socket *socket;
+				util::Thread *thread;
 				const char *remoteName;
 		};
 	};

@@ -1,4 +1,5 @@
 // Copyright (C)2015 Open Text SA and/or Open Text ULC (in Canada)
+// Copyright (C)2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -29,7 +30,7 @@ static pthread_key_t get##name##Key(void) \
 		if(pthread_key_create(&key, NULL)) \
 		{ \
 			vglout.println("[VGL] ERROR: pthread_key_create() for " #name " failed.\n"); \
-			vglfaker::safeExit(1); \
+			faker::safeExit(1); \
 		} \
 		pthread_setspecific(key, (const void *)initValue); \
 		init = true; \
