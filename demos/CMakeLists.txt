@@ -5,7 +5,7 @@ foreach(program glthreads glthreadsint)
 	set_property(TARGET ${program} PROPERTY COMPILE_FLAGS "-DPTHREADS")
 endforeach()
 
-foreach(program glxgears offset testgl5)
+foreach(program offset testgl5)
 	add_executable(${program} ${program}.c)
 	target_link_libraries(${program} ${OPENGL_gl_LIBRARY} ${X11_X11_LIB}
 		${X11_Xext_LIB} m)

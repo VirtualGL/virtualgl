@@ -43,6 +43,9 @@
 	} \
 }
 
+#define GLX_EXTENSION_EXISTS(ext) \
+	strstr(glXQueryExtensionsString(dpy, screen), #ext)
+
 #define NP2(i)  ((i) > 0 ? (1 << (int)(log((double)(i)) / log(2.))) : 0)
 
 #define SPHERE_RED(f)  fabs(MAXI * (2. * f - 1.))
@@ -69,7 +72,8 @@ enum { GRAY = 0, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN };
 Display *dpy = NULL;  Window win = 0;
 GLXContext ctx = 0;
 int useStereo = 0, useDC = 0, useImm = 0, interactive = 0, loColor = 0,
-	maxFrames = 0, totalFrames = 0, directCtx = True, bpc = -1, deadYet = 0;
+	maxFrames = 0, totalFrames = 0, directCtx = True, bpc = -1, deadYet = 0,
+	swapInterval = -1;
 int rshift = 0, gshift = 0, bshift = 0;
 double benchTime = DEFBENCHTIME;
 int nColors = 0, colorScheme = GRAY;
@@ -457,6 +461,7 @@ static void usage(char **argv)
 	printf("-w <wxh> = Specify window width and height\n");
 	printf("-ic = Use indirect rendering context\n");
 	printf("-sc <s> = Create window on X screen # <s>\n");
+	printf("-si <n> = Set swap interval to <n> frames\n");
 	printf("\n");
 	exit(1);
 }
@@ -511,6 +516,11 @@ int main(int argc, char **argv)
 			screen = atoi(argv[++i]);
 			if(screen < 0) usage(argv);
 			printf("Rendering to screen %d\n", screen);
+		}
+		else if(!stricmp(argv[i], "-si") && i < argc - 1)
+		{
+			swapInterval = atoi(argv[++i]);
+			if(swapInterval < 1) usage(argv);
 		}
 		else if(!stricmp(argv[i], "-s"))
 		{
@@ -635,6 +645,54 @@ int main(int argc, char **argv)
 
 	if(!glXMakeCurrent(dpy, win, ctx))
 		THROW("Could not bind rendering context");
+
+	if(swapInterval > 0)
+	{
+		unsigned int tmp = 0, success = 0;
+
+		glXQueryDrawable(dpy, win, GLX_MAX_SWAP_INTERVAL_EXT, &tmp);
+
+		if((unsigned int)swapInterval <= tmp
+			&& GLX_EXTENSION_EXISTS(GLX_EXT_swap_control))
+		{
+			PFNGLXSWAPINTERVALEXTPROC __glXSwapIntervalEXT =
+				(PFNGLXSWAPINTERVALEXTPROC)glXGetProcAddress(
+					(GLubyte *)"glXSwapIntervalEXT");
+			if(__glXSwapIntervalEXT)
+			{
+				__glXSwapIntervalEXT(dpy, win, swapInterval);
+				tmp = 0;
+				glXQueryDrawable(dpy, win, GLX_SWAP_INTERVAL_EXT, &tmp);
+				if(tmp >= 1)
+				{
+					swapInterval = (int)tmp;
+					success = 1;
+					fprintf(stderr, "Swap interval: %d frames (GLX_EXT_swap_control)\n",
+						swapInterval);
+				}
+			}
+		}
+		if(!success && GLX_EXTENSION_EXISTS(GLX_SGI_swap_control))
+		{
+			PFNGLXSWAPINTERVALSGIPROC __glXSwapIntervalSGI =
+				(PFNGLXSWAPINTERVALSGIPROC)glXGetProcAddress(
+					(GLubyte *)"glXSwapIntervalSGI");
+			if(__glXSwapIntervalSGI)
+			{
+				__glXSwapIntervalSGI(swapInterval);
+				tmp = 0;
+				glXQueryDrawable(dpy, win, GLX_SWAP_INTERVAL_EXT, &tmp);
+				if(tmp >= 1)
+				{
+					swapInterval = (int)tmp;
+					success = 1;
+					fprintf(stderr, "Swap interval: %d frames (GLX_SGI_swap_control)\n",
+						swapInterval);
+				}
+			}
+		}
+		if(!success) THROW("Could not set swap interval");
+	}
 
 	fprintf(stderr, "OpenGL Renderer: %s\n", glGetString(GL_RENDERER));
 
