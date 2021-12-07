@@ -513,23 +513,23 @@ static void usage(char **argv)
 	printf("Options:\n");
 	printf("-dc = Use DirectColor rendering (default is TrueColor)\n");
 	printf("-fs = Full-screen mode\n");
-	printf("-i = Interactive mode.  Frames advance in response to mouse movement\n");
-	printf("-l = Use fewer than 24 colors (to force non-JPEG encoding in TurboVNC)\n");
+	printf("-i = Interactive mode (frames advance in response to mouse movement)\n");
+	printf("-l = Use fewer than 24 colors (to force non-JPEG subencoding in TurboVNC)\n");
 	printf("-m = Use immediate mode rendering (default is display list)\n");
 	printf("-o = Test 8-bit transparent overlays\n");
 	printf("-p <p> = Use (approximately) <p> polygons to render scene\n");
-	printf("         (max. is 57600 per sphere due to limitations of GLU.)\n");
+	printf("         (max. is 57600 per sphere due to limitations of GLU)\n");
 	printf("-n <n> = Render (approximately) <n> spheres (default: %d)\n",
 		DEF_SPHERES * 3 + 1);
 	printf("-s = Use stereographic rendering initially\n");
 	printf("     (this can be switched on and off in the application)\n");
 	printf("-alpha = Use a visual with an alpha channel\n");
-	printf("-bpc = Specify bits per component (default: determined from the default depth\n");
+	printf("-bpc = Specify bits per component (default is determined from the default depth\n");
 	printf("       of the X server)\n");
-	printf("-f <n> = max frames to render\n");
-	printf("-bt <t> = print benchmark results every <t> seconds (default: %.1f)\n",
+	printf("-f <n> = Render <n> frames and exit\n");
+	printf("-bt <t> = Print benchmark results every <t> seconds (default: %.1f)\n",
 		DEFBENCHTIME);
-	printf("-w <wxh> = specify window width and height\n");
+	printf("-w <wxh> = Specify window width and height\n");
 	printf("-ic = Use indirect rendering context\n");
 	printf("-sc <s> = Create window on X screen # <s>\n");
 	printf("\n");
