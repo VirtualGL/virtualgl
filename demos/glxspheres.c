@@ -1,5 +1,5 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
- * Copyright (C)2011, 2013-2015, 2017-2019 D. R. Commander
+ * Copyright (C)2011, 2013-2015, 2017-2019, 2021 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -560,7 +560,7 @@ int main(int argc, char **argv)
 
 	if(bpc < 0)
 	{
-		if(DefaultDepth(dpy, DefaultScreen(dpy)) == 30) bpc = 10;
+		if(DefaultDepth(dpy, screen) == 30) bpc = 10;
 		else bpc = 8;
 	}
 	rgbAttribs[3] = rgbAttribs[5] = rgbAttribs[7] = bpc;
