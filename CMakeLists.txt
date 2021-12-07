@@ -406,7 +406,7 @@ if(VGL_BUILDSERVER)
 	add_subdirectory(server)
 endif()
 add_subdirectory(client)
-add_subdirectory(glxdemos)
+add_subdirectory(demos)
 add_subdirectory(diags)
 add_subdirectory(doc)
 
