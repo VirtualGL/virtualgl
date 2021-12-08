@@ -821,7 +821,7 @@ FUNCDEF1(GLboolean, glUnmapBuffer, GLenum, target, NULL)
 FUNCDEF1(EGLBoolean, eglBindAPI, EGLenum, api, NULL)
 
 FUNCDEF4(EGLContext, eglCreateContext, EGLDisplay, display, EGLConfig, config,
-	EGLContext, share_context, EGLint const *, attrib_list, NULL)
+	EGLContext, share_context, const EGLint *, attrib_list, NULL)
 
 FUNCDEF2(EGLBoolean, eglDestroyContext, EGLDisplay, display,
 	EGLContext, context, NULL)
