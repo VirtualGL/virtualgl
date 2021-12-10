@@ -1,4 +1,4 @@
-// Copyright (C)2009-2011, 2014 D. R. Commander
+// Copyright (C)2009-2011, 2014, 2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -28,7 +28,7 @@ typedef int (*_RRTransDestroyType)(void *);
 typedef const char *(*_RRTransGetErrorType)(void);
 
 
-namespace vglserver
+namespace server
 {
 	class TransPlugin
 	{
@@ -53,7 +53,7 @@ namespace vglserver
 			_RRTransSendFrameType _RRTransSendFrame;
 			_RRTransDestroyType _RRTransDestroy;
 			_RRTransGetErrorType _RRTransGetError;
-			vglutil::CriticalSection mutex;
+			util::CriticalSection mutex;
 			void *dllhnd, *handle;
 	};
 }

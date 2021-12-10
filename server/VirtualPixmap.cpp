@@ -1,4 +1,4 @@
-// Copyright (C)2011, 2013-2014, 2017, 2019-2020 D. R. Commander
+// Copyright (C)2011, 2013-2014, 2017, 2019-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -15,9 +15,9 @@
 #include "vglutil.h"
 #include "faker.h"
 
-using namespace vglutil;
-using namespace vglcommon;
-using namespace vglfaker;
+using namespace util;
+using namespace common;
+using namespace faker;
 
 
 VirtualPixmap::VirtualPixmap(Display *dpy_, Visual *visual, Pixmap pm) :
@@ -54,7 +54,7 @@ int VirtualPixmap::init(int width, int height, int depth, VGLFBConfig config_,
 		oglDraw = new OGLDrawable(width, height, depth, config_, attribs);
 	if(config && FBCID(config_) != FBCID(config) && ctx)
 	{
-		VGLDestroyContext(dpy, ctx);  ctx = 0;
+		backend::destroyContext(dpy, ctx);  ctx = 0;
 	}
 	config = config_;
 	return 1;

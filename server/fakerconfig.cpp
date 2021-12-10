@@ -35,7 +35,7 @@
 	#include <valgrind/helgrind.h>
 #endif
 
-using namespace vglutil;
+using namespace util;
 
 
 #define DEFQUAL  95
@@ -401,7 +401,8 @@ void fconfig_reloadenv(void)
 			else if(strstr(fconfig.guikeyseq, "f7")) key = XK_F7;
 			else if(strstr(fconfig.guikeyseq, "f8")) key = XK_F8;
 			else if(strstr(fconfig.guikeyseq, "f9")) key = XK_F9;
-			if(key) fconfig.guikey = key;  fconfig.guimod = mod;
+			if(key) fconfig.guikey = key;
+			fconfig.guimod = mod;
 			fconfig.gui = true;
 		}
 	}

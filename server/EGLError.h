@@ -19,9 +19,9 @@
 #include <GL/glxproto.h>
 
 
-namespace vglfaker
+namespace backend
 {
-	class EGLError : public vglutil::Error
+	class EGLError : public util::Error
 	{
 		public:
 
@@ -101,6 +101,6 @@ namespace vglfaker
 	};
 }
 
-#define THROW_EGL(f)  throw(vglfaker::EGLError(f, __LINE__))
+#define THROW_EGL(f)  throw(backend::EGLError(f, __LINE__))
 
 #endif  // __EGLERROR_H__

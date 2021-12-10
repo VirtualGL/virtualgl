@@ -11,42 +11,42 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // wxWindows Library License for more details.
 
-#ifndef __VGLPBUFFERHASH_H__
-#define __VGLPBUFFERHASH_H__
+#ifndef __PBUFFERHASHEGL_H__
+#define __PBUFFERHASHEGL_H__
 
-#include "VGLPbuffer.h"
+#include "FakePbuffer.h"
 #include "Hash.h"
 
 
-#define HASH  Hash<GLXDrawable, void *, VGLPbuffer *>
+#define HASH  faker::Hash<GLXDrawable, void *, backend::FakePbuffer *>
 
-// This maps a GLX drawable ID to a VGLPbuffer instance
+// This maps a GLX drawable ID to a backend::FakePbuffer instance
 
-namespace vglfaker
+namespace backend
 {
-	class VGLPbufferHash : public HASH
+	class PbufferHashEGL : public HASH
 	{
 		public:
 
-			static VGLPbufferHash *getInstance(void)
+			static PbufferHashEGL *getInstance(void)
 			{
 				if(instance == NULL)
 				{
-					vglutil::CriticalSection::SafeLock l(instanceMutex);
-					if(instance == NULL) instance = new VGLPbufferHash;
+					util::CriticalSection::SafeLock l(instanceMutex);
+					if(instance == NULL) instance = new PbufferHashEGL;
 				}
 				return instance;
 			}
 
 			static bool isAlloc(void) { return instance != NULL; }
 
-			void add(GLXDrawable id, VGLPbuffer *pb)
+			void add(GLXDrawable id, backend::FakePbuffer *pb)
 			{
 				if(!id || !pb) THROW("Invalid argument");
 				HASH::add(id, NULL, pb);
 			}
 
-			VGLPbuffer *find(GLXDrawable id)
+			backend::FakePbuffer *find(GLXDrawable id)
 			{
 				if(!id) return NULL;
 				return HASH::find(id, NULL);
@@ -60,7 +60,7 @@ namespace vglfaker
 
 		private:
 
-			~VGLPbufferHash(void)
+			~PbufferHashEGL(void)
 			{
 				HASH::kill();
 			}
@@ -75,14 +75,14 @@ namespace vglfaker
 				return false;
 			}
 
-			static VGLPbufferHash *instance;
-			static vglutil::CriticalSection instanceMutex;
+			static PbufferHashEGL *instance;
+			static util::CriticalSection instanceMutex;
 	};
 }
 
 #undef HASH
 
 
-#define vpbhash  (*(vglfaker::VGLPbufferHash::getInstance()))
+#define pbhashegl  (*(backend::PbufferHashEGL::getInstance()))
 
-#endif  // __VGLPBUFFERHASH_H__
+#endif  // __PBUFFERHASHEGL_H__

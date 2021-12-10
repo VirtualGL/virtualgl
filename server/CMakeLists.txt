@@ -92,6 +92,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile
 	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/faker-mapfile.c)
 
 set(FAKER_SOURCES
+	backend.cpp
 	ContextHash.cpp
 	faker.cpp
 	faker-gl.cpp
@@ -112,14 +113,13 @@ set(FAKER_SOURCES
 	WindowHash.cpp
 	X11Trans.cpp
 	vglconfigLauncher.cpp
-	VGLTrans.cpp
-	vglwrap.cpp)
+	VGLTrans.cpp)
 if(VGL_USEXV)
 	set(FAKER_SOURCES ${FAKER_SOURCES};XVTrans.cpp)
 endif()
 if(VGL_EGLBACKEND)
 	set(FAKER_SOURCES
-		${FAKER_SOURCES};EGLContextHash.cpp;VGLPbuffer.cpp;VGLPbufferHash.cpp)
+		${FAKER_SOURCES};ContextHashEGL.cpp;FakePbuffer.cpp;PbufferHashEGL.cpp)
 endif()
 
 set(FAKERLIBS ${VGL_FAKER_NAME};${VGL_FAKER_NAME}-nodl)

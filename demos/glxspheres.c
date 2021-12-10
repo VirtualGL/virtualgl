@@ -1,5 +1,5 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
- * Copyright (C)2011, 2013-2015, 2017-2019 D. R. Commander
+ * Copyright (C)2011, 2013-2015, 2017-2019, 2021 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -43,6 +43,9 @@
 	} \
 }
 
+#define GLX_EXTENSION_EXISTS(ext) \
+	strstr(glXQueryExtensionsString(dpy, screen), #ext)
+
 #define NP2(i)  ((i) > 0 ? (1 << (int)(log((double)(i)) / log(2.))) : 0)
 
 #define SPHERE_RED(f)  fabs(MAXI * (2. * f - 1.))
@@ -69,7 +72,8 @@ enum { GRAY = 0, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN };
 Display *dpy = NULL;  Window win = 0;
 GLXContext ctx = 0;
 int useStereo = 0, useDC = 0, useImm = 0, interactive = 0, loColor = 0,
-	maxFrames = 0, totalFrames = 0, directCtx = True, bpc = -1, deadYet = 0;
+	maxFrames = 0, totalFrames = 0, directCtx = True, bpc = -1, deadYet = 0,
+	swapInterval = -1;
 int rshift = 0, gshift = 0, bshift = 0;
 double benchTime = DEFBENCHTIME;
 int nColors = 0, colorScheme = GRAY;
@@ -439,24 +443,25 @@ static void usage(char **argv)
 	printf("Options:\n");
 	printf("-dc = Use DirectColor rendering (default is TrueColor)\n");
 	printf("-fs = Full-screen mode\n");
-	printf("-i = Interactive mode.  Frames advance in response to mouse movement\n");
-	printf("-l = Use fewer than 24 colors (to force non-JPEG encoding in TurboVNC)\n");
+	printf("-i = Interactive mode (frames advance in response to mouse movement)\n");
+	printf("-l = Use fewer than 24 colors (to force non-JPEG subencoding in TurboVNC)\n");
 	printf("-m = Use immediate mode rendering (default is display list)\n");
 	printf("-p <p> = Use (approximately) <p> polygons to render scene\n");
-	printf("         (max. is 57600 per sphere due to limitations of GLU.)\n");
+	printf("         (max. is 57600 per sphere due to limitations of GLU)\n");
 	printf("-n <n> = Render (approximately) <n> spheres (default: %d)\n",
 		DEF_SPHERES * 3 + 1);
 	printf("-s = Use stereographic rendering initially\n");
 	printf("     (this can be switched on and off in the application)\n");
 	printf("-alpha = Use a visual with an alpha channel\n");
-	printf("-bpc = Specify bits per component (default: determined from the default depth\n");
+	printf("-bpc = Specify bits per component (default is determined from the default depth\n");
 	printf("       of the X server)\n");
-	printf("-f <n> = max frames to render\n");
-	printf("-bt <t> = print benchmark results every <t> seconds (default: %.1f)\n",
+	printf("-f <n> = Render <n> frames and exit\n");
+	printf("-bt <t> = Print benchmark results every <t> seconds (default: %.1f)\n",
 		DEFBENCHTIME);
-	printf("-w <wxh> = specify window width and height\n");
+	printf("-w <wxh> = Specify window width and height\n");
 	printf("-ic = Use indirect rendering context\n");
 	printf("-sc <s> = Create window on X screen # <s>\n");
+	printf("-si <n> = Set swap interval to <n> frames\n");
 	printf("\n");
 	exit(1);
 }
@@ -512,6 +517,11 @@ int main(int argc, char **argv)
 			if(screen < 0) usage(argv);
 			printf("Rendering to screen %d\n", screen);
 		}
+		else if(!stricmp(argv[i], "-si") && i < argc - 1)
+		{
+			swapInterval = atoi(argv[++i]);
+			if(swapInterval < 1) usage(argv);
+		}
 		else if(!stricmp(argv[i], "-s"))
 		{
 			rgbAttribs[13] = 1;
@@ -560,7 +570,7 @@ int main(int argc, char **argv)
 
 	if(bpc < 0)
 	{
-		if(DefaultDepth(dpy, DefaultScreen(dpy)) == 30) bpc = 10;
+		if(DefaultDepth(dpy, screen) == 30) bpc = 10;
 		else bpc = 8;
 	}
 	rgbAttribs[3] = rgbAttribs[5] = rgbAttribs[7] = bpc;
@@ -635,6 +645,54 @@ int main(int argc, char **argv)
 
 	if(!glXMakeCurrent(dpy, win, ctx))
 		THROW("Could not bind rendering context");
+
+	if(swapInterval > 0)
+	{
+		unsigned int tmp = 0, success = 0;
+
+		glXQueryDrawable(dpy, win, GLX_MAX_SWAP_INTERVAL_EXT, &tmp);
+
+		if((unsigned int)swapInterval <= tmp
+			&& GLX_EXTENSION_EXISTS(GLX_EXT_swap_control))
+		{
+			PFNGLXSWAPINTERVALEXTPROC __glXSwapIntervalEXT =
+				(PFNGLXSWAPINTERVALEXTPROC)glXGetProcAddress(
+					(GLubyte *)"glXSwapIntervalEXT");
+			if(__glXSwapIntervalEXT)
+			{
+				__glXSwapIntervalEXT(dpy, win, swapInterval);
+				tmp = 0;
+				glXQueryDrawable(dpy, win, GLX_SWAP_INTERVAL_EXT, &tmp);
+				if(tmp >= 1)
+				{
+					swapInterval = (int)tmp;
+					success = 1;
+					fprintf(stderr, "Swap interval: %d frames (GLX_EXT_swap_control)\n",
+						swapInterval);
+				}
+			}
+		}
+		if(!success && GLX_EXTENSION_EXISTS(GLX_SGI_swap_control))
+		{
+			PFNGLXSWAPINTERVALSGIPROC __glXSwapIntervalSGI =
+				(PFNGLXSWAPINTERVALSGIPROC)glXGetProcAddress(
+					(GLubyte *)"glXSwapIntervalSGI");
+			if(__glXSwapIntervalSGI)
+			{
+				__glXSwapIntervalSGI(swapInterval);
+				tmp = 0;
+				glXQueryDrawable(dpy, win, GLX_SWAP_INTERVAL_EXT, &tmp);
+				if(tmp >= 1)
+				{
+					swapInterval = (int)tmp;
+					success = 1;
+					fprintf(stderr, "Swap interval: %d frames (GLX_SGI_swap_control)\n",
+						swapInterval);
+				}
+			}
+		}
+		if(!success) THROW("Could not set swap interval");
+	}
 
 	fprintf(stderr, "OpenGL Renderer: %s\n", glGetString(GL_RENDERER));
 

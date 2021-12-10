@@ -1,5 +1,5 @@
 // Copyright (C)2007 Sun Microsystems, Inc.
-// Copyright (C)2014, 2018-2020 D. R. Commander
+// Copyright (C)2014, 2018-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -22,9 +22,9 @@
 #include "fakerconfig.h"
 
 
-namespace vglfaker
+namespace faker
 {
-	class vglconfigLauncher : public vglutil::Runnable
+	class vglconfigLauncher : public util::Runnable
 	{
 		public:
 
@@ -32,7 +32,7 @@ namespace vglfaker
 			{
 				if(instance == NULL)
 				{
-					vglutil::CriticalSection::SafeLock l(instanceMutex);
+					util::CriticalSection::SafeLock l(instanceMutex);
 					if(instance == NULL) instance = new vglconfigLauncher;
 				}
 				return instance;
@@ -41,10 +41,10 @@ namespace vglfaker
 			void popup(Display *dpy_, int shmid_)
 			{
 				if(!dpy_ || shmid_ == -1) THROW("Invalid argument");
-				vglutil::CriticalSection::SafeLock l(popupMutex);
+				util::CriticalSection::SafeLock l(popupMutex);
 				if(thread) return;
 				dpy = dpy_;  shmid = shmid_;
-				thread = new vglutil::Thread(this);
+				thread = new util::Thread(this);
 				thread->start();
 			}
 
@@ -64,7 +64,7 @@ namespace vglfaker
 				{
 					vglout.println("Error invoking vglconfig--\n%s", e.what());
 				}
-				vglutil::CriticalSection::SafeLock l(popupMutex);
+				util::CriticalSection::SafeLock l(popupMutex);
 				thread->detach();  delete thread;  thread = NULL;
 			}
 
@@ -97,9 +97,9 @@ namespace vglfaker
 			}
 
 			static vglconfigLauncher *instance;
-			static vglutil::CriticalSection instanceMutex;
-			static vglutil::CriticalSection popupMutex;
-			vglutil::Thread *thread;
+			static util::CriticalSection instanceMutex;
+			static util::CriticalSection popupMutex;
+			util::Thread *thread;
 			Display *dpy;
 			int shmid;
 	};
@@ -107,6 +107,6 @@ namespace vglfaker
 
 
 #define VGLPOPUP(dpy, shmid) \
-	((*(vglfaker::vglconfigLauncher::getInstance())).popup(dpy, shmid))
+	((*(faker::vglconfigLauncher::getInstance())).popup(dpy, shmid))
 
 #endif  // __VGLCONFIGLAUNCHER_H__

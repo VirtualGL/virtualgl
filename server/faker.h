@@ -22,10 +22,10 @@
 #include "Mutex.h"
 #include "fakerconfig.h"
 #include "vglutil.h"
-#include "vglwrap.h"
+#include "backend.h"
 
 
-namespace vglfaker
+namespace faker
 {
 	extern Display *dpy3D;
 	extern bool deadYet;
@@ -81,14 +81,14 @@ namespace vglfaker
 	extern "C" int deleteCS(XExtData *extData);
 	extern "C" int deleteRBOContext(XExtData *extData);
 
-	INLINE vglutil::CriticalSection &getDisplayCS(Display *dpy)
+	INLINE util::CriticalSection &getDisplayCS(Display *dpy)
 	{
 		XEDataObject obj = { dpy };
 		XExtData *extData;
 
 		// The 3D X server may have its own extensions that conflict with ours.
 		if(!fconfig.egl && dpy == dpy3D)
-			THROW("vglfaker::getDisplayCS() called with 3D X server handle (this should never happen)");
+			THROW("faker::getDisplayCS() called with 3D X server handle (this should never happen)");
 		int minExtensionNumber =
 			XFindOnExtensionList(XEHeadOfExtensionList(obj), 0) ? 0 : 1;
 		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj),
@@ -96,19 +96,19 @@ namespace vglfaker
 		ERRIFNOT(extData);
 		ERRIFNOT(extData->private_data);
 
-		return *(vglutil::CriticalSection *)extData->private_data;
+		return *(util::CriticalSection *)extData->private_data;
 	}
 
 	extern void sendGLXError(Display *dpy, CARD16 minorCode, CARD8 errorCode,
 		bool x11Error);
 }
 
-#define DPY3D  vglfaker::init3D()
-#define EDPY  ((EGLDisplay)vglfaker::init3D())
+#define DPY3D  faker::init3D()
+#define EDPY  ((EGLDisplay)faker::init3D())
 
 #define IS_EXCLUDED(dpy) \
-	(vglfaker::deadYet || vglfaker::getFakerLevel() > 0 \
-		|| vglfaker::isDisplayExcluded(dpy))
+	(faker::deadYet || faker::getFakerLevel() > 0 \
+		|| faker::isDisplayExcluded(dpy))
 
 #define IS_FRONT(drawbuf) \
 	(drawbuf == GL_FRONT || drawbuf == GL_FRONT_AND_BACK \
@@ -119,11 +119,13 @@ namespace vglfaker
 	(drawbuf == GL_RIGHT || drawbuf == GL_FRONT_RIGHT \
 		|| drawbuf == GL_BACK_RIGHT)
 
+#define MAX_ATTRIBS  256
+
 
 static INLINE int DrawingToFront(void)
 {
 	GLint drawbuf = GL_BACK;
-	VGLGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
+	backend::getIntegerv(GL_DRAW_BUFFER, &drawbuf);
 	return IS_FRONT(drawbuf);
 }
 
@@ -131,16 +133,16 @@ static INLINE int DrawingToFront(void)
 static INLINE int DrawingToRight(void)
 {
 	GLint drawbuf = GL_LEFT;
-	VGLGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
+	backend::getIntegerv(GL_DRAW_BUFFER, &drawbuf);
 	return IS_RIGHT(drawbuf);
 }
 
 
 #define DIE(f, m) \
 { \
-	if(!vglfaker::deadYet) \
+	if(!faker::deadYet) \
 		vglout.print("[VGL] ERROR: in %s--\n[VGL]    %s\n", f, m); \
-	vglfaker::safeExit(1); \
+	faker::safeExit(1); \
 }
 
 
@@ -199,7 +201,7 @@ static INLINE int DrawingToRight(void)
 #define PRARGAL11(a)  if(a) \
 { \
 	vglout.print(#a "=["); \
-	for(int __an = 0; a[__an] != None; __an++) \
+	for(int __an = 0; a[__an] != None && __an < MAX_ATTRIBS; __an++) \
 	{ \
 		vglout.print("0x%.4x", a[__an]); \
 		if(a[__an] != GLX_USE_GL && a[__an] != GLX_DOUBLEBUFFER \
@@ -213,7 +215,7 @@ static INLINE int DrawingToRight(void)
 #define PRARGAL13(a)  if(a != NULL) \
 { \
 	vglout.print(#a "=["); \
-	for(int __an = 0; a[__an] != None; __an += 2) \
+	for(int __an = 0; a[__an] != None && __an < MAX_ATTRIBS; __an += 2) \
 	{ \
 		vglout.print("0x%.4x=0x%.4x ", a[__an], a[__an + 1]); \
 	} \
@@ -232,14 +234,14 @@ static INLINE int DrawingToRight(void)
 	double vglTraceTime = 0.; \
 	if(fconfig.trace) \
 	{ \
-		if(vglfaker::getTraceLevel() > 0) \
+		if(faker::getTraceLevel() > 0) \
 		{ \
 			vglout.print("\n[VGL 0x%.8x] ", pthread_self()); \
-			for(int __i = 0; __i < vglfaker::getTraceLevel(); __i++) \
+			for(int __i = 0; __i < faker::getTraceLevel(); __i++) \
 				vglout.print("  "); \
 		} \
 		else vglout.print("[VGL 0x%.8x] ", pthread_self()); \
-		vglfaker::setTraceLevel(vglfaker::getTraceLevel() + 1); \
+		faker::setTraceLevel(faker::getTraceLevel() + 1); \
 		vglout.print("%s (", #f); \
 
 #define STARTTRACE() \
@@ -253,12 +255,12 @@ static INLINE int DrawingToRight(void)
 
 #define CLOSETRACE() \
 		vglout.PRINT(") %f ms\n", vglTraceTime * 1000.); \
-		vglfaker::setTraceLevel(vglfaker::getTraceLevel() - 1); \
-		if(vglfaker::getTraceLevel() > 0) \
+		faker::setTraceLevel(faker::getTraceLevel() - 1); \
+		if(faker::getTraceLevel() > 0) \
 		{ \
 			vglout.print("[VGL 0x%.8x] ", pthread_self()); \
-			if(vglfaker::getTraceLevel() > 1) \
-				for(int __i = 0; __i < vglfaker::getTraceLevel() - 1; __i++) \
+			if(faker::getTraceLevel() > 1) \
+				for(int __i = 0; __i < faker::getTraceLevel() - 1; __i++) \
 					vglout.print("  "); \
 		} \
 	}

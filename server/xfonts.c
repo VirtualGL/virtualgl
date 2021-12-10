@@ -2,7 +2,7 @@
  * Mesa 3-D graphics library
  *
  * Copyright (C) 1999-2000  Brian Paul   All Rights Reserved.
- * Copyright (C) 2011-2012, 2014-2015, 2017-2020  D. R. Commander
+ * Copyright (C) 2011-2012, 2014-2015, 2017-2021  D. R. Commander
  *                                                All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -121,7 +121,7 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
    unsigned int max_width, max_height, max_bm_width, max_bm_height;
    GLubyte *bm = NULL;
    int i, j, ngroups, groupsize, n;
-   vglfaker::VirtualWin *pbw;
+   faker::VirtualWin *pbw;
    typedef struct {
       int bm_width, bm_height, width, height, valid;
       GLfloat x0, y0, dx, dy;
@@ -130,7 +130,7 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
 
    try {
 
-   GLXDrawable draw = VGLGetCurrentDrawable();
+   GLXDrawable draw = backend::getCurrentDrawable();
    if (!draw) return;
    if ((pbw = winhash.find(NULL, draw)) != NULL) {
       /* Current drawable is a virtualized Window */
@@ -174,7 +174,7 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
 
    fs = XQueryFont(dpy, font);
    if (!fs) {
-      vglfaker::sendGLXError(dpy, X_GLXUseXFont, BadFont, true);
+      faker::sendGLXError(dpy, X_GLXUseXFont, BadFont, true);
       return;
    }
 

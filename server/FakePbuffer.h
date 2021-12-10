@@ -13,20 +13,20 @@
 // This class emulates multi-buffered Pbuffers using RBOs, since EGL doesn't
 // support multi-buffered Pbuffers.
 
-#ifndef __VGLPBUFFER_H__
-#define __VGLPBUFFER_H__
+#ifndef __FAKEPBUFFER_H__
+#define __FAKEPBUFFER_H__
 
 #include "glxvisual.h"
 
 
-namespace vglfaker
+namespace backend
 {
-	class VGLPbuffer
+	class FakePbuffer
 	{
 		public:
 
-			VGLPbuffer(Display *dpy, VGLFBConfig config, const int *glxAttribs);
-			~VGLPbuffer(void);
+			FakePbuffer(Display *dpy, VGLFBConfig config, const int *glxAttribs);
+			~FakePbuffer(void);
 
 			void createBuffer(bool useRBOContext, bool ignoreReadDrawBufs = false);
 			Display *getDisplay(void) { return dpy; }
@@ -50,9 +50,9 @@ namespace vglfaker
 			// 0 = front left, 1 = back left, 2 = front right, 3 = back right
 			GLuint fbo, rboc[4], rbod;
 			int width, height;
-			static vglutil::CriticalSection idMutex;
+			static util::CriticalSection idMutex;
 			static GLXDrawable nextID;
 	};
 }
 
-#endif  // __VGLPBUFFER_H__
+#endif  // __FAKEPBUFFER_H__

@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011, 2014 D. R. Commander
+// Copyright (C)2009, 2011, 2014, 2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,16 +23,16 @@
 enum { RR_DRAWAUTO = -1, RR_DRAWX11 = 0, RR_DRAWOGL };
 
 
-namespace vglclient
+namespace client
 {
-	class ClientWin : public vglutil::Runnable
+	class ClientWin : public util::Runnable
 	{
 		public:
 
 			ClientWin(int dpynum, Window window, int drawMethod, bool stereo);
 			virtual ~ClientWin(void);
-			vglcommon::Frame *getFrame(bool useXV);
-			void drawFrame(vglcommon::Frame *f);
+			common::Frame *getFrame(bool useXV);
+			void drawFrame(common::Frame *f);
 			int match(int dpynum, Window window);
 			bool isStereo(void) { return stereo; }
 
@@ -43,19 +43,19 @@ namespace vglclient
 
 			int drawMethod, reqDrawMethod;
 			static const int NFRAMES = 2;
-			vglcommon::Frame *fb;
-			vglcommon::CompressedFrame cframes[NFRAMES];  int cfindex;
+			common::Frame *fb;
+			common::CompressedFrame cframes[NFRAMES];  int cfindex;
 			#ifdef USEXV
-			vglcommon::XVFrame *xvframes[NFRAMES];
+			common::XVFrame *xvframes[NFRAMES];
 			#endif
-			vglutil::GenericQ q;
+			util::GenericQ q;
 			bool deadYet;
 			int dpynum;  Window window;
 			void run(void);
-			vglutil::Thread *thread;
-			vglutil::CriticalSection cfmutex;
+			util::Thread *thread;
+			util::CriticalSection cfmutex;
 			bool stereo;
-			vglutil::CriticalSection mutex;
+			util::CriticalSection mutex;
 	};
 }
 

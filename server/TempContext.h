@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2011, 2014-2015, 2018-2020 D. R. Commander
+// Copyright (C)2011, 2014-2015, 2018-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,22 +23,22 @@
 #include "ContextHash.h"
 
 
-namespace vglfaker
+namespace faker
 {
 	class TempContext
 	{
 		public:
 
 			TempContext(Display *dpy_, GLXDrawable draw, GLXDrawable read,
-				GLXContext ctx) : dpy(dpy_), oldctx(VGLGetCurrentContext()),
-				oldread(VGLGetCurrentReadDrawable()), olddraw(VGLGetCurrentDrawable()),
-				ctxChanged(false)
+				GLXContext ctx) : dpy(dpy_), oldctx(backend::getCurrentContext()),
+				oldread(backend::getCurrentReadDrawable()),
+				olddraw(backend::getCurrentDrawable()), ctxChanged(false)
 			{
 				if(!ctx) THROW("Invalid argument");
 				if((read || draw)
 					&& (oldread != read  || olddraw != draw || oldctx != ctx))
 				{
-					if(!VGLMakeCurrent(dpy, draw, read, ctx))
+					if(!backend::makeCurrent(dpy, draw, read, ctx))
 						THROW("Could not bind OpenGL context to window (window may have disappeared)");
 					// If oldctx has already been destroyed, then we don't want to
 					// restore it.  This can happen if the application is rendering to
@@ -54,7 +54,7 @@ namespace vglfaker
 			{
 				if(ctxChanged)
 				{
-					VGLMakeCurrent(dpy, olddraw, oldread, oldctx);
+					backend::makeCurrent(dpy, olddraw, oldread, oldctx);
 					ctxChanged = false;
 				}
 			}

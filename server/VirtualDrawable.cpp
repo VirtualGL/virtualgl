@@ -17,14 +17,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include "glxvisual.h"
-#include "glext-vgl.h"
 #include "TempContext.h"
 #include "vglutil.h"
 #include "faker.h"
 #include "glpf.h"
 
-using namespace vglutil;
-using namespace vglfaker;
+using namespace util;
+using namespace faker;
 
 
 static Window create_window(Display *dpy, XVisualInfo *vis, int width,
@@ -58,7 +57,7 @@ VirtualDrawable::OGLDrawable::OGLDrawable(Display *dpy_, int width_,
 
 	int pbattribs[] = { GLX_PBUFFER_WIDTH, width, GLX_PBUFFER_HEIGHT, height,
 		GLX_PRESERVED_CONTENTS, True, None };
-	glxDraw = VGLCreatePbuffer(dpy, config, pbattribs);
+	glxDraw = backend::createPbuffer(dpy, config, pbattribs);
 	if(!glxDraw) THROW("Could not create Pbuffer");
 
 	setVisAttribs();
@@ -133,7 +132,7 @@ VirtualDrawable::OGLDrawable::~OGLDrawable(void)
 	}
 	else
 	{
-		VGLDestroyPbuffer(dpy, glxDraw);
+		backend::destroyPbuffer(dpy, glxDraw);
 		glxDraw = 0;
 	}
 }
@@ -156,7 +155,7 @@ void VirtualDrawable::OGLDrawable::swap(void)
 	if(isPixmap)
 		_glXSwapBuffers(DPY3D, glxDraw);
 	else
-		VGLSwapBuffers(dpy, glxDraw);
+		backend::swapBuffers(dpy, glxDraw);
 }
 
 
@@ -188,7 +187,7 @@ VirtualDrawable::~VirtualDrawable(void)
 {
 	mutex.lock(false);
 	delete oglDraw;  oglDraw = NULL;
-	if(ctx) { VGLDestroyContext(dpy, ctx);  ctx = 0; }
+	if(ctx) { backend::destroyContext(dpy, ctx);  ctx = 0; }
 	mutex.unlock(false);
 }
 
@@ -204,7 +203,7 @@ int VirtualDrawable::init(int width, int height, VGLFBConfig config_)
 	oglDraw = new OGLDrawable(dpy, width, height, config_);
 	if(config && FBCID(config_) != FBCID(config) && ctx)
 	{
-		VGLDestroyContext(dpy, ctx);  ctx = 0;
+		backend::destroyContext(dpy, ctx);  ctx = 0;
 	}
 	config = config_;
 	return 1;
@@ -217,7 +216,7 @@ void VirtualDrawable::setDirect(Bool direct_)
 	CriticalSection::SafeLock l(mutex);
 	if(direct_ != direct && ctx)
 	{
-		VGLDestroyContext(dpy, ctx);  ctx = 0;
+		backend::destroyContext(dpy, ctx);  ctx = 0;
 	}
 	direct = direct_;
 }
@@ -260,7 +259,7 @@ void VirtualDrawable::initReadbackContext(void)
 	{
 		if(!isInit())
 			THROW("VirtualDrawable instance has not been fully initialized");
-		if((ctx = VGLCreateContext(dpy, config, NULL, direct, NULL)) == 0)
+		if((ctx = backend::createContext(dpy, config, NULL, direct, NULL)) == 0)
 			THROW("Could not create OpenGL context for readback");
 	}
 }
@@ -345,7 +344,7 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	initReadbackContext();
 	TempContext tc(dpy, getGLXDrawable(), getGLXDrawable(), ctx);
 
-	VGLReadBuffer(readBuf);
+	backend::readBuffer(readBuf);
 
 	if(pitch % 8 == 0) _glPixelStorei(GL_PACK_ALIGNMENT, 8);
 	else if(pitch % 4 == 0) _glPixelStorei(GL_PACK_ALIGNMENT, 4);
@@ -391,7 +390,8 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	TRY_GL();
 	profReadback.startFrame();
 	if(usePBO) t0 = GetTime();
-	VGLReadPixels(x, y, width, height, glFormat, type, usePBO ? NULL : bits);
+	backend::readPixels(x, y, width, height, glFormat, type,
+		usePBO ? NULL : bits);
 
 	if(usePBO)
 	{
@@ -457,7 +457,7 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 		if(match)
 		{
 			unsigned char rgb[3];
-			VGLReadPixels(0, 0, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, rgb);
+			backend::readPixels(0, 0, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, rgb);
 			color = rgb[0] + (rgb[1] << 8) + (rgb[2] << 16);
 		}
 		if(readBuf == GL_FRONT_RIGHT || readBuf == GL_BACK_RIGHT)
@@ -478,8 +478,8 @@ void VirtualDrawable::copyPixels(GLint srcX, GLint srcY, GLint width,
 	initReadbackContext();
 	TempContext tc(dpy, draw, getGLXDrawable(), ctx);
 
-	VGLReadBuffer(readBuf);
-	VGLDrawBuffer(drawBuf);
+	backend::readBuffer(readBuf);
+	backend::drawBuffer(drawBuf);
 
 	_glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	_glPixelStorei(GL_PACK_ALIGNMENT, 1);

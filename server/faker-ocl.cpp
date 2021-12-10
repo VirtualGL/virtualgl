@@ -1,4 +1,4 @@
-// Copyright (C)2019 D. R. Commander
+// Copyright (C)2019, 2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -22,7 +22,7 @@ cl_context clCreateContext(const cl_context_properties *properties,
 	void pfn_notify(const char *errinfo, const void *private_info, size_t cb,
 		void *user_data), void *user_data, cl_int *errcode_ret)
 {
-	cl_context_properties oclprops[257],
+	cl_context_properties oclprops[MAX_ATTRIBS + 1],
 		*props = (cl_context_properties *)properties;
 	int j = 0;
 
@@ -30,8 +30,8 @@ cl_context clCreateContext(const cl_context_properties *properties,
 
 	if(properties)
 	{
-		memset(oclprops, 0, sizeof(cl_context_properties) * 257);
-		for(int i = 0; properties[i] != 0 && i <= 254; i += 2)
+		memset(oclprops, 0, sizeof(cl_context_properties) * (MAX_ATTRIBS + 1));
+		for(int i = 0; properties[i] != 0 && i < MAX_ATTRIBS; i += 2)
 		{
 			oclprops[j++] = properties[i];
 			if(properties[i] == CL_GLX_DISPLAY_KHR)

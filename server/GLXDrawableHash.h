@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2014, 2019-2020 D. R. Commander
+// Copyright (C)2014, 2019-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -34,7 +34,7 @@ typedef struct
 // glXGetSelectedEvent() work properly and to distinguish Pbuffers from other
 // GLX drawables.
 
-namespace vglfaker
+namespace faker
 {
 	class GLXDrawableHash : public HASH
 	{
@@ -44,7 +44,7 @@ namespace vglfaker
 			{
 				if(instance == NULL)
 				{
-					vglutil::CriticalSection::SafeLock l(instanceMutex);
+					util::CriticalSection::SafeLock l(instanceMutex);
 					if(instance == NULL) instance = new GLXDrawableHash;
 				}
 				return instance;
@@ -111,13 +111,13 @@ namespace vglfaker
 			}
 
 			static GLXDrawableHash *instance;
-			static vglutil::CriticalSection instanceMutex;
+			static util::CriticalSection instanceMutex;
 	};
 }
 
 #undef HASH
 
 
-#define glxdhash  (*(vglfaker::GLXDrawableHash::getInstance()))
+#define glxdhash  (*(faker::GLXDrawableHash::getInstance()))
 
 #endif  // __GLXDRAWABLEHASH_H__

@@ -1,4 +1,4 @@
-// Copyright (C)2014, 2020 D. R. Commander
+// Copyright (C)2014, 2020-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -14,9 +14,9 @@
 
 #include "XCBConnHash.h"
 
-using namespace vglfaker;
+using namespace faker;
 
 XCBConnHash *XCBConnHash::instance = NULL;
-vglutil::CriticalSection XCBConnHash::instanceMutex;
+util::CriticalSection XCBConnHash::instanceMutex;
 
 #endif

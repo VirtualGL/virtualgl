@@ -30,14 +30,13 @@
 #include <unistd.h>
 #include "Error.h"
 #include "Thread.h"
-#include "glext-vgl.h"
 #include <X11/Xmd.h>
 #include <GL/glxproto.h>
 #ifdef USEHELGRIND
 	#include <valgrind/helgrind.h>
 #endif
 
-using namespace vglutil;
+using namespace util;
 
 
 #define CLEAR_BUFFER(buffer, r, g, b, a) \

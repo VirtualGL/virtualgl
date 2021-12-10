@@ -12,8 +12,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // wxWindows Library License for more details.
 
-#ifndef __EGLCONTEXTHASH_H__
-#define __EGLCONTEXTHASH_H__
+#ifndef __CONTEXTHASHEGL_H__
+#define __CONTEXTHASHEGL_H__
 
 #include "glxvisual.h"
 #include "Hash.h"
@@ -28,22 +28,22 @@ typedef struct
 } EGLContextAttribs;
 
 
-#define HASH  Hash<EGLContext, void *, EGLContextAttribs *>
+#define HASH  faker::Hash<EGLContext, void *, EGLContextAttribs *>
 
 // This maps an EGLContext to a VGLFBConfig + context-specific attributes
 
-namespace vglfaker
+namespace backend
 {
-	class EGLContextHash : public HASH
+	class ContextHashEGL : public HASH
 	{
 		public:
 
-			static EGLContextHash *getInstance(void)
+			static ContextHashEGL *getInstance(void)
 			{
 				if(instance == NULL)
 				{
-					vglutil::CriticalSection::SafeLock l(instanceMutex);
-					if(instance == NULL) instance = new EGLContextHash;
+					util::CriticalSection::SafeLock l(instanceMutex);
+					if(instance == NULL) instance = new ContextHashEGL;
 				}
 				return instance;
 			}
@@ -154,7 +154,7 @@ namespace vglfaker
 
 		private:
 
-			~EGLContextHash(void)
+			~ContextHashEGL(void)
 			{
 				HASH::kill();
 			}
@@ -170,14 +170,14 @@ namespace vglfaker
 				return false;
 			}
 
-			static EGLContextHash *instance;
-			static vglutil::CriticalSection instanceMutex;
+			static ContextHashEGL *instance;
+			static util::CriticalSection instanceMutex;
 	};
 }
 
 #undef HASH
 
 
-#define ectxhash  (*(vglfaker::EGLContextHash::getInstance()))
+#define ctxhashegl  (*(backend::ContextHashEGL::getInstance()))
 
-#endif  // __EGLCONTEXTHASH_H__
+#endif  // __CONTEXTHASHEGL_H__

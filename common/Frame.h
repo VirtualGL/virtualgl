@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005-2007 Sun Microsystems, Inc.
-// Copyright (C)2009-2012, 2014, 2017-2018, 2020 D. R. Commander
+// Copyright (C)2009-2012, 2014, 2017-2018, 2020-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -31,7 +31,7 @@
 
 // Uncompressed frame
 
-namespace vglcommon
+namespace common
 {
 	class Frame
 	{
@@ -68,8 +68,8 @@ namespace vglcommon
 			void dumpHeader(rrframeheader &);
 			void checkHeader(rrframeheader &);
 
-			vglutil::Event ready;
-			vglutil::Event complete;
+			util::Event ready;
+			util::Event complete;
 			friend class CompressedFrame;
 			bool primary;
 	};
@@ -78,7 +78,7 @@ namespace vglcommon
 
 // Compressed frame
 
-namespace vglcommon
+namespace common
 {
 	class CompressedFrame : public Frame
 	{
@@ -104,7 +104,7 @@ namespace vglcommon
 
 // Frame created from shared graphics memory
 
-namespace vglcommon
+namespace common
 {
 	class FBXFrame : public Frame
 	{
@@ -126,7 +126,7 @@ namespace vglcommon
 			fbx_struct fb;
 			tjhandle tjhnd;
 			bool reuseConn;
-			static vglutil::CriticalSection mutex;
+			static util::CriticalSection mutex;
 	};
 }
 
@@ -135,7 +135,7 @@ namespace vglcommon
 
 // Frame created using X Video
 
-namespace vglcommon
+namespace common
 {
 	class XVFrame : public Frame
 	{
@@ -154,7 +154,7 @@ namespace vglcommon
 			fbxv_struct fb;
 			Display *dpy;  Window win;
 			tjhandle tjhnd;
-			static vglutil::CriticalSection mutex;
+			static util::CriticalSection mutex;
 	};
 }
 

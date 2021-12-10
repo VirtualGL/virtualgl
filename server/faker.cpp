@@ -16,8 +16,8 @@
 #include "Mutex.h"
 #include "ContextHash.h"
 #ifdef EGLBACKEND
-#include "EGLContextHash.h"
-#include "VGLPbufferHash.h"
+#include "ContextHashEGL.h"
+#include "PbufferHashEGL.h"
 #endif
 #include "GLXDrawableHash.h"
 #include "GlobalCriticalSection.h"
@@ -31,7 +31,7 @@
 #include "faker.h"
 
 
-namespace vglfaker {
+namespace faker {
 
 Display *dpy3D = NULL;
 bool deadYet = false;
@@ -57,8 +57,8 @@ static void cleanup(void)
 	if(GLXDrawableHash::isAlloc()) glxdhash.kill();
 	if(WindowHash::isAlloc()) winhash.kill();
 	#ifdef EGLBACKEND
-	if(EGLContextHash::isAlloc()) ectxhash.kill();
-	if(VGLPbufferHash::isAlloc()) vpbhash.kill();
+	if(backend::ContextHashEGL::isAlloc()) ctxhashegl.kill();
+	if(backend::PbufferHashEGL::isAlloc()) pbhashegl.kill();
 	#endif
 	free(glExtensions);
 	unloadSymbols();
@@ -89,8 +89,8 @@ class GlobalCleanup
 
 		~GlobalCleanup()
 		{
-			vglfaker::GlobalCriticalSection *gcs =
-				vglfaker::GlobalCriticalSection::getInstance(false);
+			faker::GlobalCriticalSection *gcs =
+				faker::GlobalCriticalSection::getInstance(false);
 			if(gcs) gcs->lock(false);
 			fconfig_deleteinstance(gcs);
 			deadYet = true;
@@ -120,7 +120,7 @@ void sendGLXError(Display *dpy, CARD16 minorCode, CARD8 errorCode,
 	xError error;
 	int majorCode, errorBase, dummy;
 
-	ERRIFNOT(VGLQueryExtension(dpy, &majorCode, &dummy, &errorBase));
+	ERRIFNOT(backend::queryExtension(dpy, &majorCode, &dummy, &errorBase));
 
 	if(!fconfig.egl) dpy = DPY3D;
 
@@ -283,7 +283,7 @@ extern "C" {
 
 int deleteCS(XExtData *extData)
 {
-	if(extData) delete (vglutil::CriticalSection *)extData->private_data;
+	if(extData) delete (util::CriticalSection *)extData->private_data;
 	return 0;
 }
 
@@ -291,7 +291,7 @@ int deleteCS(XExtData *extData)
 
 int deleteRBOContext(XExtData *extData)
 {
-	if(extData) delete (EGLRBOContext *)extData->private_data;
+	if(extData) delete (backend::RBOContext *)extData->private_data;
 	return 0;
 }
 
@@ -312,7 +312,7 @@ void *_vgl_dlopen(const char *file, int mode)
 {
 	if(!__dlopen)
 	{
-		vglfaker::GlobalCriticalSection::SafeLock l(globalMutex);
+		faker::GlobalCriticalSection::SafeLock l(globalMutex);
 		if(!__dlopen)
 		{
 			dlerror();  // Clear error state
@@ -322,7 +322,7 @@ void *_vgl_dlopen(const char *file, int mode)
 			{
 				vglout.print("[VGL] ERROR: Could not load function \"dlopen\"\n");
 				if(err) vglout.print("[VGL]    %s\n", err);
-				vglfaker::safeExit(1);
+				faker::safeExit(1);
 			}
 		}
 	}
@@ -332,10 +332,9 @@ void *_vgl_dlopen(const char *file, int mode)
 
 int _vgl_getAutotestColor(Display *dpy, Drawable d, int right)
 {
-	if(vglfaker::getAutotestDisplay() == dpy
-		&& vglfaker::getAutotestDrawable() == (long)d)
-		return right ?
-			vglfaker::getAutotestRColor() : vglfaker::getAutotestColor();
+	if(faker::getAutotestDisplay() == dpy
+		&& faker::getAutotestDrawable() == (long)d)
+		return right ? faker::getAutotestRColor() : faker::getAutotestColor();
 
 	return -1;
 }
@@ -343,9 +342,9 @@ int _vgl_getAutotestColor(Display *dpy, Drawable d, int right)
 
 int _vgl_getAutotestFrame(Display *dpy, Drawable d)
 {
-	if(vglfaker::getAutotestDisplay() == dpy
-		&& vglfaker::getAutotestDrawable() == (long)d)
-		return vglfaker::getAutotestFrame();
+	if(faker::getAutotestDisplay() == dpy
+		&& faker::getAutotestDrawable() == (long)d)
+		return faker::getAutotestFrame();
 
 	return -1;
 }
@@ -354,14 +353,14 @@ int _vgl_getAutotestFrame(Display *dpy, Drawable d)
 // disable/re-enable the faker on a per-thread basis.
 void _vgl_disableFaker(void)
 {
-	vglfaker::setFakerLevel(vglfaker::getFakerLevel() + 1);
-	vglfaker::setExcludeCurrent(true);
+	faker::setFakerLevel(faker::getFakerLevel() + 1);
+	faker::setExcludeCurrent(true);
 }
 
 void _vgl_enableFaker(void)
 {
-	vglfaker::setFakerLevel(vglfaker::getFakerLevel() - 1);
-	vglfaker::setExcludeCurrent(false);
+	faker::setFakerLevel(faker::getFakerLevel() - 1);
+	faker::setExcludeCurrent(false);
 }
 
 }

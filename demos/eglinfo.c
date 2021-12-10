@@ -192,7 +192,7 @@ create_context_flags(EGLDisplay edpy, EGLConfig config, int major, int minor,
    attribs[n++] = EGL_NONE;
 
    /* try creating context */
-   if(eglBindAPI(EGL_OPENGL_API))
+   if (!eglBindAPI(EGL_OPENGL_API))
       return NULL;
    context = eglCreateContext(edpy, config, 0, /* share_context */
                               attribs);
@@ -657,7 +657,7 @@ main(int argc, char *argv[])
          usage();
          exit(0);
       }
-      else if(strcmp(argv[i], "-s") == 0) {
+      else if (strcmp(argv[i], "-s") == 0) {
          opts.singleLine = GL_TRUE;
       }
       else {

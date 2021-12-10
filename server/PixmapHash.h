@@ -1,5 +1,5 @@
 // Copyright (C)2004 Landmark Graphics Corporation
-// Copyright (C)2011, 2014, 2019-2020 D. R. Commander
+// Copyright (C)2011, 2014, 2019-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -26,7 +26,7 @@
 // This maps a 2D pixmap ID on the 2D X Server to a VirtualPixmap instance,
 // which encapsulates the corresponding 3D pixmap on the 3D X Server
 
-namespace vglfaker
+namespace faker
 {
 	class PixmapHash : public HASH
 	{
@@ -39,7 +39,7 @@ namespace vglfaker
 				#endif
 				if(instance == NULL)
 				{
-					vglutil::CriticalSection::SafeLock l(instanceMutex);
+					util::CriticalSection::SafeLock l(instanceMutex);
 					if(instance == NULL) instance = new PixmapHash;
 				}
 				return instance;
@@ -65,7 +65,7 @@ namespace vglfaker
 			{
 				if(!glxd) return 0;
 				HashEntry *ptr = NULL;
-				vglutil::CriticalSection::SafeLock l(mutex);
+				util::CriticalSection::SafeLock l(mutex);
 				if((ptr = HASH::findEntry(NULL, glxd)) != NULL)
 					return ptr->key2;
 				return 0;
@@ -104,13 +104,13 @@ namespace vglfaker
 			}
 
 			static PixmapHash *instance;
-			static vglutil::CriticalSection instanceMutex;
+			static util::CriticalSection instanceMutex;
 	};
 }
 
 #undef HASH
 
 
-#define pmhash  (*(vglfaker::PixmapHash::getInstance()))
+#define pmhash  (*(faker::PixmapHash::getInstance()))
 
 #endif  // __PIXMAPHASH_H__

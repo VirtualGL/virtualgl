@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2011, 2014, 2019-2020 D. R. Commander
+// Copyright (C)2011, 2014, 2019-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -24,7 +24,7 @@
 
 // This maps a XVisualInfo * to a VGLFBConfig
 
-namespace vglfaker
+namespace faker
 {
 	class VisualHash : public HASH
 	{
@@ -34,7 +34,7 @@ namespace vglfaker
 			{
 				if(instance == NULL)
 				{
-					vglutil::CriticalSection::SafeLock l(instanceMutex);
+					util::CriticalSection::SafeLock l(instanceMutex);
 					if(instance == NULL) instance = new VisualHash;
 				}
 				return instance;
@@ -81,13 +81,13 @@ namespace vglfaker
 			}
 
 			static VisualHash *instance;
-			static vglutil::CriticalSection instanceMutex;
+			static util::CriticalSection instanceMutex;
 	};
 }
 
 #undef HASH
 
 
-#define vishash  (*(vglfaker::VisualHash::getInstance()))
+#define vishash  (*(faker::VisualHash::getInstance()))
 
 #endif  // __VISUALHASH_H__

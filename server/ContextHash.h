@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2011-2012, 2014-2015, 2019-2020 D. R. Commander
+// Copyright (C)2011-2012, 2014-2015, 2019-2021 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -30,7 +30,7 @@ typedef struct
 
 // This maps a GLXContext to a VGLFBConfig
 
-namespace vglfaker
+namespace faker
 {
 	class ContextHash : public HASH
 	{
@@ -40,7 +40,7 @@ namespace vglfaker
 			{
 				if(instance == NULL)
 				{
-					vglutil::CriticalSection::SafeLock l(instanceMutex);
+					util::CriticalSection::SafeLock l(instanceMutex);
 					if(instance == NULL) instance = new ContextHash;
 				}
 				return instance;
@@ -100,13 +100,13 @@ namespace vglfaker
 			}
 
 			static ContextHash *instance;
-			static vglutil::CriticalSection instanceMutex;
+			static util::CriticalSection instanceMutex;
 	};
 }
 
 #undef HASH
 
 
-#define ctxhash  (*(vglfaker::ContextHash::getInstance()))
+#define ctxhash  (*(faker::ContextHash::getInstance()))
 
 #endif  // __CONTEXTHASH_H__
