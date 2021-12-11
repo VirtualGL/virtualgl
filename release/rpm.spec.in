@@ -225,9 +225,9 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %endif
 %if %{eglbackend}
 	%if "%{_bits}" == "64"
-		%{bindir}/eglspheres64
+		%{bindir}/eglxspheres64
 	%else
-		%{bindir}/eglspheres
+		%{bindir}/eglxspheres
 	%endif
 %endif
 %if "%{bindir}" != "%{_bindir}" && %{binsymlinks}
