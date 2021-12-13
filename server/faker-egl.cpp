@@ -1081,19 +1081,11 @@ EGLBoolean eglQueryDisplayAttribEXT(EGLDisplay display, EGLint attribute,
 }
 
 
-static char *eglExtensions = NULL;
+static char eglExtensions[2048] = { 0 };
 
-#define REMOVE_EXTENSION(ext) \
-	if((ptr = strstr(extensions, ext)) != NULL) \
-	{ \
-		int trailingLength = strlen(ptr) - strlen(ext); \
-		if(&ptr[strlen(ext)] != 0) \
-		{ \
-			memmove(ptr, &ptr[strlen(ext) + 1], trailingLength); \
-			ptr += trailingLength; \
-		} \
-		*ptr = 0; \
-	} \
+#define ADD_EXTENSION(ext) \
+	if(strstr(retval, #ext) && !strstr(eglExtensions, #ext)) \
+		strncat(eglExtensions, #ext " ", 2047 - strlen(eglExtensions));
 
 const char *eglQueryString(EGLDisplay display, EGLint name)
 {
@@ -1114,59 +1106,71 @@ const char *eglQueryString(EGLDisplay display, EGLint name)
 	retval = _eglQueryString(display, name);
 	if(name == EGL_EXTENSIONS && retval)
 	{
-		char *extensions = strdup(retval), *ptr;
 
 		faker::GlobalCriticalSection::SafeLock l(globalMutex);
 
-		// Since these extensions deal with EGL surfaces or EGL displays, they
-		// likely would not work with VirtualGL's EGL/X11 front end unless
-		// they were specifically emulated.
-		REMOVE_EXTENSION("EGL_ANDROID_blob_cache")
-		REMOVE_EXTENSION("EGL_ANDROID_get_frame_timestamps")
-		REMOVE_EXTENSION("EGL_ANDROID_native_fence_sync")
-		REMOVE_EXTENSION("EGL_ANDROID_presentation_time")
-		REMOVE_EXTENSION("EGL_EXT_client_sync")
-		REMOVE_EXTENSION("EGL_EXT_image_dma_buf_import_modifiers")
-		REMOVE_EXTENSION("EGL_EXT_output_base")
-		REMOVE_EXTENSION("EGL_EXT_output_drm")
-		REMOVE_EXTENSION("EGL_EXT_protected_content")
-		REMOVE_EXTENSION("EGL_EXT_stream_acquire_mode")
-		REMOVE_EXTENSION("EGL_EXT_stream_consumer_egloutput")
-		REMOVE_EXTENSION("EGL_EXT_swap_buffers_with_damage")
-		REMOVE_EXTENSION("EGL_EXT_sync_reuse")
-		REMOVE_EXTENSION("EGL_HI_clientpixmap")
-		REMOVE_EXTENSION("EGL_KHR_debug")
-		REMOVE_EXTENSION("EGL_KHR_display_reference")
-		REMOVE_EXTENSION("EGL_KHR_lock_surface")
-		REMOVE_EXTENSION("EGL_KHR_lock_surface2")
-		REMOVE_EXTENSION("EGL_KHR_lock_surface3")
-		REMOVE_EXTENSION("EGL_KHR_partial_update")
-		REMOVE_EXTENSION("EGL_KHR_stream")
-		REMOVE_EXTENSION("EGL_KHR_stream_attrib")
-		REMOVE_EXTENSION("EGL_KHR_stream_consumer_gltexture")
-		REMOVE_EXTENSION("EGL_KHR_stream_cross_process_fd")
-		REMOVE_EXTENSION("EGL_KHR_stream_fifo")
-		REMOVE_EXTENSION("EGL_KHR_stream_producer_eglsurface")
-		REMOVE_EXTENSION("EGL_KHR_swap_buffers_with_damage")
-		REMOVE_EXTENSION("EGL_MESA_drm_image")
-		REMOVE_EXTENSION("EGL_MESA_image_dma_buf_export")
-		REMOVE_EXTENSION("EGL_MESA_query_driver")
-		REMOVE_EXTENSION("EGL_NOK_swap_region")
-		REMOVE_EXTENSION("EGL_NOK_swap_region2")
-		REMOVE_EXTENSION("EGL_NV_native_query")
-		REMOVE_EXTENSION("EGL_NV_post_sub_buffer")
-		REMOVE_EXTENSION("EGL_NV_stream_consumer_gltexture_yuv")
-		REMOVE_EXTENSION("EGL_NV_stream_attrib")
-		REMOVE_EXTENSION("EGL_NV_stream_consumer_eglimage")
-		REMOVE_EXTENSION("EGL_NV_stream_flush")
-		REMOVE_EXTENSION("EGL_NV_stream_metadata")
-		REMOVE_EXTENSION("EGL_NV_stream_reset")
-		REMOVE_EXTENSION("EGL_NV_stream_sync")
-		REMOVE_EXTENSION("EGL_NV_sync")
+		// These extensions should work if the underlying EGL implementation
+		// supports them.
+		ADD_EXTENSION(EGL_ARM_image_format);
+		ADD_EXTENSION(EGL_ARM_implicit_external_sync);
+		ADD_EXTENSION(EGL_EXT_bind_to_front);
+		ADD_EXTENSION(EGL_EXT_buffer_age);
+		ADD_EXTENSION(EGL_EXT_client_extensions);
+		ADD_EXTENSION(EGL_EXT_create_context_robustness);
+		ADD_EXTENSION(EGL_EXT_gl_colorspace_bt2020_linear);
+		ADD_EXTENSION(EGL_EXT_gl_colorspace_bt2020_pq);
+		ADD_EXTENSION(EGL_EXT_gl_colorspace_display_p3);
+		ADD_EXTENSION(EGL_EXT_gl_colorspace_display_p3_linear);
+		ADD_EXTENSION(EGL_EXT_gl_colorspace_display_p3_passthrough);
+		ADD_EXTENSION(EGL_EXT_gl_colorspace_scrgb);
+		ADD_EXTENSION(EGL_EXT_gl_colorspace_scrgb_linear);
+		ADD_EXTENSION(EGL_EXT_image_dma_buf_import);
+		ADD_EXTENSION(EGL_EXT_image_gl_colorspace);
+		ADD_EXTENSION(EGL_EXT_image_implicit_sync_control);
+		ADD_EXTENSION(EGL_EXT_pixel_format_float);
+		ADD_EXTENSION(EGL_EXT_platform_base);
+		ADD_EXTENSION(EGL_EXT_platform_x11);
+		ADD_EXTENSION(EGL_EXT_protected_surface);
+		ADD_EXTENSION(EGL_EXT_surface_CTA861_3_metadata);
+		ADD_EXTENSION(EGL_EXT_surface_SMPTE2086_metadata);
+		ADD_EXTENSION(EGL_HI_colorformats);
+		ADD_EXTENSION(EGL_IMG_context_priority);
+		ADD_EXTENSION(EGL_KHR_cl_event);
+		ADD_EXTENSION(EGL_KHR_cl_event2);
+		ADD_EXTENSION(EGL_KHR_client_get_all_proc_addresses);
+		ADD_EXTENSION(EGL_KHR_config_attribs);
+		ADD_EXTENSION(EGL_KHR_context_flush_control);
+		ADD_EXTENSION(EGL_KHR_create_context);
+		ADD_EXTENSION(EGL_KHR_create_context_no_error);
+		ADD_EXTENSION(EGL_KHR_fence_sync);
+		ADD_EXTENSION(EGL_KHR_get_all_proc_addresses);
+		ADD_EXTENSION(EGL_KHR_gl_colorspace);
+		ADD_EXTENSION(EGL_KHR_gl_renderbuffer_image);
+		ADD_EXTENSION(EGL_KHR_gl_texture_2D_image);
+		ADD_EXTENSION(EGL_KHR_gl_texture_3D_image);
+		ADD_EXTENSION(EGL_KHR_gl_texture_cubemap_image);
+		ADD_EXTENSION(EGL_KHR_image);
+		ADD_EXTENSION(EGL_KHR_image_base);
+		ADD_EXTENSION(EGL_KHR_no_config_context);
+		ADD_EXTENSION(EGL_KHR_platform_x11);
+		ADD_EXTENSION(EGL_KHR_reusable_sync);
+		ADD_EXTENSION(EGL_KHR_surfaceless_context);
+		ADD_EXTENSION(EGL_KHR_vg_parent_image);
+		ADD_EXTENSION(EGL_KHR_wait_sync);
+		ADD_EXTENSION(EGL_NV_context_priority_realtime);
+		ADD_EXTENSION(EGL_NV_coverage_sample);
+		ADD_EXTENSION(EGL_NV_coverage_sample_resolve);
+		ADD_EXTENSION(EGL_NV_cuda_event);
+		ADD_EXTENSION(EGL_NV_depth_nonlinear);
+		ADD_EXTENSION(EGL_NV_post_convert_rounding);
+		ADD_EXTENSION(EGL_NV_robustness_video_memory_purge);
+		ADD_EXTENSION(EGL_NV_system_time);
+		ADD_EXTENSION(EGL_TIZEN_image_native_buffer);
+		ADD_EXTENSION(EGL_TIZEN_image_native_surface);
 
-		if(eglExtensions) free(eglExtensions);
-		eglExtensions = strdup(extensions);
-		free(extensions);
+		if(eglExtensions[strlen(eglExtensions) - 1] == ' ')
+			eglExtensions[strlen(eglExtensions) - 1] = 0;
+
 		retval = eglExtensions;
 	}
 
