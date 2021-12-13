@@ -186,41 +186,6 @@ EGLBoolean eglChooseConfig(EGLDisplay display, const EGLint *attrib_list,
 			}
 		}
 	}
-
-	if(num_config)
-	{
-		if(surfaceType >= 0 && surfaceType & EGL_PIXMAP_BIT
-			&& !fconfig.eglxIgnorePixmapBit)
-		{
-			retval = EGL_TRUE;
-			*num_config = 0;
-		}
-		else if(nativeRenderable == EGL_FALSE
-			&& ((surfaceType >= 0 && surfaceType & (EGL_WINDOW_BIT | EGL_PIXMAP_BIT))
-				|| visualID >= 0 || visualType >= 0))
-		{
-			retval = EGL_TRUE;
-			*num_config = 0;
-		}
-		else if(visualID >= 0)
-		{
-			XVisualInfo *v =
-				glxvisual::visualFromID(eglxdpy->x11dpy, eglxdpy->screen, visualID);
-			if(!v)
-			{
-				retval = EGL_TRUE;
-				*num_config = 0;
-			}
-			else _XFree(v);
-		}
-		else if(visualType >= 0 && visualType != TrueColor
-			&& visualType != GLX_TRUE_COLOR)
-		{
-			retval = EGL_TRUE;
-			*num_config = 0;
-		}
-	}
-
 	attribs[j++] = EGL_SURFACE_TYPE;
 	if(surfaceType >= 0)
 		attribs[j++] = surfaceType &
@@ -229,10 +194,91 @@ EGLBoolean eglChooseConfig(EGLDisplay display, const EGLint *attrib_list,
 		attribs[j++] = EGL_PBUFFER_BIT;
 	attribs[j] = EGL_NONE;
 
-	if(!retval)
-		retval = _eglChooseConfig(display, attribs, configs, config_size,
-			num_config);
+	if(surfaceType == -1) surfaceType = EGL_WINDOW_BIT;
 
+	if(!num_config)
+	{
+		faker::setEGLError(EGL_BAD_PARAMETER);
+		goto done;
+	}
+
+	if(surfaceType & EGL_PIXMAP_BIT && !fconfig.eglxIgnorePixmapBit)
+	{
+		retval = EGL_TRUE;
+		*num_config = 0;
+	}
+	if(nativeRenderable == EGL_FALSE
+		&& (surfaceType & (EGL_WINDOW_BIT | EGL_PIXMAP_BIT) || visualID >= 0
+			|| visualType >= 0))
+	{
+		retval = EGL_TRUE;
+		*num_config = 0;
+	}
+	if(nativeRenderable == EGL_TRUE
+		&& (surfaceType & (EGL_WINDOW_BIT | EGL_PIXMAP_BIT)) == 0)
+	{
+		retval = EGL_TRUE;
+		*num_config = 0;
+	}
+	if(visualID >= 0)
+	{
+		XVisualInfo *v =
+			glxvisual::visualFromID(eglxdpy->x11dpy, eglxdpy->screen, visualID);
+		if(!v || (surfaceType & (EGL_WINDOW_BIT | EGL_PIXMAP_BIT)) == 0)
+		{
+			retval = EGL_TRUE;
+			*num_config = 0;
+		}
+		if(v) _XFree(v);
+	}
+	if(visualType >= 0
+		&& ((visualType != TrueColor && visualType != GLX_TRUE_COLOR)
+			|| (surfaceType & (EGL_WINDOW_BIT | EGL_PIXMAP_BIT)) == 0))
+	{
+		retval = EGL_TRUE;
+		*num_config = 0;
+	}
+
+	if(!retval)
+	{
+		EGLint nc = 0;
+
+		retval = _eglChooseConfig(display, attribs, NULL, config_size, &nc);
+		if(!retval || !nc)
+		{
+			*num_config = nc;
+			goto done;
+		}
+
+		EGLConfig *newConfigs = new EGLConfig[nc];
+		EGLint ncOrig = nc;
+
+		retval = _eglChooseConfig(display, attribs, newConfigs, ncOrig, &nc);
+		if(!retval || !nc)
+		{
+			delete [] newConfigs;
+			*num_config = nc;
+			goto done;
+		}
+
+		*num_config = 0;
+		j = 0;
+		for(EGLint i = 0; i < nc; i++)
+		{
+			XVisualInfo *v = getVisualFromConfig(eglxdpy, newConfigs[i]);
+			if(!v && (nativeRenderable == EGL_TRUE || visualID >= 0
+					|| visualType >= 0
+					|| (surfaceType & (EGL_WINDOW_BIT | EGL_PIXMAP_BIT))))
+				continue;
+			if(v) XFree(v);
+			(*num_config)++;
+			if(configs && config_size >= 1 && j < config_size)
+				configs[j++] = newConfigs[i];
+		}
+		delete [] newConfigs;
+	}
+
+	done:
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();
 	if(num_config)
