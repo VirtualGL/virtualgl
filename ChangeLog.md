@@ -1,3 +1,11 @@
+3.0.1
+=====
+
+1. GLXspheres now includes an option (`-si`) that can be used to specify the
+swap interval via the `GLX_EXT_swap_control` and `GLX_SGI_swap_control`
+extensions.
+
+
 3.0
 ===
 
