@@ -1,4 +1,4 @@
-/* Copyright (C)2017, 2019 D. R. Commander
+/* Copyright (C)2017, 2019, 2021 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -15,6 +15,9 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <GL/glx.h>
+#ifdef EGLBACKEND
+#include <EGL/egl.h>
+#endif
 #ifdef FAKEOPENCL
 #include <CL/opencl.h>
 #endif
@@ -41,6 +44,19 @@
 #define _glXDestroyContext  glXDestroyContext
 #define _glXMakeCurrent  glXMakeCurrent
 #define _glXSwapBuffers  glXSwapBuffers
+#ifdef EGLBACKEND
+#define _eglChooseConfig  eglChooseConfig
+#define _eglCreateContext  eglCreateContext
+#define _eglCreateWindowSurface  eglCreateWindowSurface
+#define _eglDestroyContext  eglDestroyContext
+#define _eglDestroySurface  eglDestroySurface
+#define _eglGetDisplay  eglGetDisplay
+#define _eglGetError  eglGetError
+#define _eglInitialize  eglInitialize
+#define _eglMakeCurrent  eglMakeCurrent
+#define _eglSwapBuffers  eglSwapBuffers
+#define _eglTerminate  eglTerminate
+#endif
 #ifdef FAKEOPENCL
 #define _clCreateContext  clCreateContext
 #define _clGetContextInfo  clGetContextInfo

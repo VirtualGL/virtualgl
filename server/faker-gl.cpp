@@ -892,7 +892,9 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 			if(readEGLXVW) newRead = (EGLSurface)readEGLXVW->updateGLXDrawable();
 			if(newRead != read || newDraw != draw)
 			{
-				_eglMakeCurrent(eglxdpy->edpy, newDraw, newRead, ctx);
+				_eglMakeCurrent(eglxdpy->edpy, 0, 0, 0);
+				if(!_eglMakeCurrent(eglxdpy->edpy, newDraw, newRead, ctx))
+					THROW_EGL("eglMakeCurrent()");
 				if(drawEGLXVW) { drawEGLXVW->clear();  drawEGLXVW->cleanup(); }
 				if(readEGLXVW) readEGLXVW->cleanup();
 			}

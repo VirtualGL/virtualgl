@@ -13,6 +13,9 @@
  */
 
 #include <GL/glx.h>
+#ifdef EGLBACKEND
+#include <EGL/egl.h>
+#endif
 #ifdef FAKEOPENCL
 #include <CL/opencl.h>
 #endif
@@ -45,7 +48,6 @@
 	} \
 }
 
-/* TODO */
 
 typedef XVisualInfo *(*_glXChooseVisualType)(Display *, int, int *);
 _glXChooseVisualType _glXChooseVisual = NULL;
@@ -65,6 +67,51 @@ _glXMakeCurrentType _glXMakeCurrent = NULL;
 
 typedef void (*_glXSwapBuffersType)(Display *, GLXDrawable);
 _glXSwapBuffersType _glXSwapBuffers = NULL;
+
+#ifdef EGLBACKEND
+
+typedef EGLBoolean (*_eglChooseConfigType)(EGLDisplay, const EGLint *,
+	EGLConfig *, EGLint, EGLint *);
+_eglChooseConfigType _eglChooseConfig = NULL;
+
+typedef EGLContext (*_eglCreateContextType)(EGLDisplay, EGLConfig,
+	EGLContext, const EGLint *);
+_eglCreateContextType _eglCreateContext = NULL;
+
+typedef EGLSurface (*_eglCreateWindowSurfaceType)(EGLDisplay, EGLConfig,
+	EGLNativeWindowType, const EGLint *);
+_eglCreateWindowSurfaceType _eglCreateWindowSurface = NULL;
+
+typedef EGLBoolean (*_eglDestroyContextType)(EGLDisplay, EGLContext);
+_eglDestroyContextType _eglDestroyContext = NULL;
+
+typedef EGLBoolean (*_eglDestroySurfaceType)(EGLDisplay, EGLSurface);
+_eglDestroySurfaceType _eglDestroySurface = NULL;
+
+typedef EGLDisplay (*_eglGetDisplayType)(EGLNativeDisplayType);
+_eglGetDisplayType _eglGetDisplay = NULL;
+
+typedef EGLint (*_eglGetErrorType)(void);
+_eglGetErrorType _eglGetError = NULL;
+
+typedef __eglMustCastToProperFunctionPointerType
+	(*_eglGetProcAddressType)(const char *);
+_eglGetProcAddressType _eglGetProcAddress = NULL;
+
+typedef EGLBoolean (*_eglInitializeType)(EGLDisplay, EGLint *, EGLint *);
+_eglInitializeType _eglInitialize = NULL;
+
+typedef EGLBoolean (*_eglMakeCurrentType)(EGLDisplay, EGLSurface, EGLSurface,
+	EGLContext);
+_eglMakeCurrentType _eglMakeCurrent = NULL;
+
+typedef EGLBoolean (*_eglSwapBuffersType)(EGLDisplay, EGLSurface);
+_eglSwapBuffersType _eglSwapBuffers = NULL;
+
+typedef EGLBoolean (*_eglTerminateType)(EGLDisplay);
+_eglTerminateType _eglTerminate = NULL;
+
+#endif
 
 typedef void (*_glClearType)(GLbitfield);
 _glClearType _glClear = NULL;
@@ -104,12 +151,18 @@ _clReleaseContextType _clReleaseContext = NULL;
 #endif
 
 void *glxdllhnd = NULL;
+#ifdef EGLBACKEND
+void *egldllhnd = NULL;
+#endif
 void *gldllhnd = NULL;
 #ifdef FAKEOPENCL
 void *ocldllhnd = NULL;
 #endif
-int fakeOpenCL = 0;
+int fakeOpenCL = 0, eglx = 0;
 const char *libGLX = "libGL.so", *libOpenGL = "libGL.so";
+#ifdef EGLBACKEND
+const char *libEGL = "libEGL.so";
+#endif
 
 #define LSYM(dllhnd, s) \
 	dlerror(); \
@@ -139,6 +192,36 @@ static int loadSymbols1(char *prefix)
 	LSYM(glxdllhnd, glXDestroyContext);
 	LSYM(glxdllhnd, glXMakeCurrent);
 	LSYM(glxdllhnd, glXSwapBuffers);
+
+	#ifdef EGLBACKEND
+
+	if(eglx)
+	{
+		if(prefix)
+		{
+			char temps[256];
+			snprintf(temps, 255, "%s/%s", prefix, libEGL);
+			egldllhnd = dlopen(temps, RTLD_NOW);
+		}
+		else egldllhnd = dlopen(libEGL, RTLD_NOW);
+		err = dlerror();
+		if(err) THROW(err)
+		else if(!egldllhnd) THROW("Could not open EGL library")
+
+		LSYM(egldllhnd, eglChooseConfig);
+		LSYM(egldllhnd, eglCreateContext);
+		LSYM(egldllhnd, eglCreateWindowSurface);
+		LSYM(egldllhnd, eglDestroyContext);
+		LSYM(egldllhnd, eglDestroySurface);
+		LSYM(egldllhnd, eglGetDisplay);
+		LSYM(egldllhnd, eglGetError);
+		LSYM(egldllhnd, eglInitialize);
+		LSYM(egldllhnd, eglMakeCurrent);
+		LSYM(egldllhnd, eglSwapBuffers);
+		LSYM(egldllhnd, eglTerminate);
+	}
+
+	#endif
 
 	if(prefix)
 	{
@@ -187,6 +270,9 @@ static int loadSymbols1(char *prefix)
 static void unloadSymbols1(void)
 {
 	if(glxdllhnd) dlclose(glxdllhnd);
+	#ifdef EGLBACKEND
+	if(egldllhnd) dlclose(egldllhnd);
+	#endif
 	if(gldllhnd) dlclose(gldllhnd);
 	#ifdef FAKEOPENCL
 	if(ocldllhnd) dlclose(ocldllhnd);
@@ -194,9 +280,15 @@ static void unloadSymbols1(void)
 }
 
 
-#define LSYM2(s) \
+#define LSYMGLX(s) \
 	_##s = (_##s##Type)_glXGetProcAddressARB((const GLubyte *)#s); \
 	if(!_##s) THROW("Could not load symbol " #s)
+
+#ifdef EGLBACKEND
+#define LSYMEGL(s) \
+	_##s = (_##s##Type)_eglGetProcAddress(#s); \
+	if(!_##s) THROW("Could not load symbol " #s)
+#endif
 
 static int loadSymbols2(void)
 {
@@ -204,13 +296,33 @@ static int loadSymbols2(void)
 	int retval = 0;
 
 	LSYM(glxdllhnd, glXGetProcAddressARB);
-	LSYM2(glXChooseVisual);
-	LSYM2(glXCreateContext);
-	LSYM2(glXDestroyContext);
-	LSYM2(glXMakeCurrent);
-	LSYM2(glXSwapBuffers);
-	LSYM2(glClear);
-	LSYM2(glClearColor);
+	LSYMGLX(glXChooseVisual);
+	LSYMGLX(glXCreateContext);
+	LSYMGLX(glXDestroyContext);
+	LSYMGLX(glXMakeCurrent);
+	LSYMGLX(glXSwapBuffers);
+	LSYMGLX(glClear);
+	LSYMGLX(glClearColor);
+
+	#ifdef EGLBACKEND
+
+	if(eglx)
+	{
+		LSYM(egldllhnd, eglGetProcAddress);
+		LSYMEGL(eglChooseConfig);
+		LSYMEGL(eglCreateContext);
+		LSYMEGL(eglCreateWindowSurface);
+		LSYMEGL(eglDestroyContext);
+		LSYMEGL(eglDestroySurface);
+		LSYMEGL(eglGetDisplay);
+		LSYMEGL(eglGetError);
+		LSYMEGL(eglInitialize);
+		LSYMEGL(eglMakeCurrent);
+		LSYMEGL(eglSwapBuffers);
+		LSYMEGL(eglTerminate);
+	}
+
+	#endif
 
 	bailout:
 	return retval;
@@ -250,7 +362,7 @@ static int nameMatchTest(void)
 #if defined(RTLD_DEEPBIND) && !defined(USING_ASAN)
 /* Test whether libdlfaker.so properly circumvents RTLD_DEEPBIND */
 
-typedef void (*_testType)(const char *, int);
+typedef void (*_testType)(const char *, int, int);
 _testType _test = NULL;
 
 static int deepBindTest(void)
@@ -264,7 +376,7 @@ static int deepBindTest(void)
 	else if(!gldllhnd) THROW("Could not open libdlfakerut")
 
 	LSYM(gldllhnd, test);
-	_test("RTLD_DEEPBIND test", fakeOpenCL);
+	_test("RTLD_DEEPBIND test", fakeOpenCL, eglx);
 	dlclose(gldllhnd);
 	gldllhnd = NULL;
 
@@ -290,11 +402,20 @@ int main(int argc, char **argv)
 				libGLX = "libGLX.so";
 				libOpenGL = "libOpenGL.so";
 			}
+			#ifdef EGLBACKEND
+			else if(!strcasecmp(argv[i], "--eglx"))
+				eglx = 1;
+			#endif
 		}
 	}
 
 	fprintf(stderr, "GLX library = %s%s%s\n", prefix ? prefix : "",
 		prefix ? "/" : "", libGLX);
+	#ifdef EGLBACKEND
+	if(eglx)
+		fprintf(stderr, "EGL library = %s%s%s\n", prefix ? prefix : "",
+			prefix ? "/" : "", libEGL);
+	#endif
 	fprintf(stderr, "OpenGL library = %s%s%s\n", prefix ? prefix : "",
 		prefix ? "/" : "", libOpenGL);
 
@@ -320,11 +441,12 @@ int main(int argc, char **argv)
 
 	TRY(loadSymbols1(prefix));
 	fprintf(stderr, "\n");
-	TRY(test("dlopen() test", fakeOpenCL));
+	TRY(test("dlopen() test", fakeOpenCL, eglx));
 
 	TRY(loadSymbols2());
 	fprintf(stderr, "\n");
-	TRY(test("glXGetProcAddressARB() test", fakeOpenCL));
+	TRY(test("glXGetProcAddressARB()/eglGetProcAddress() test", fakeOpenCL,
+		eglx));
 
 	unloadSymbols1();
 

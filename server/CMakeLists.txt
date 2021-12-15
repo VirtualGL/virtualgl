@@ -242,7 +242,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 		target_link_libraries(deepbindtest ${OpenCL_LIBRARIES})
 	endif()
 	target_link_libraries(deepbindtest ${X11_X11_LIB} ${OPENGL_gl_LIBRARY}
-		${LIBDL})
+		${EGL_LIBRARY} ${LIBDL})
 	set_target_properties(deepbindtest PROPERTIES LINK_FLAGS "${MINUSZ}defs")
 endif()
 
@@ -255,6 +255,13 @@ endif()
 target_link_libraries(fakerut "${MINUSZ}now ${OPENGL_gl_LIBRARY}"
 	${OPENGL_glu_LIBRARY} "${MINUSZ}now ${X11_X11_LIB}" ${LIBDL} vglutil
 	${XCB_XCB_LIB} ${XCB_GLX_LIB} ${X11_XCB_LIB})
+
+if(VGL_EGLBACKEND)
+	add_executable(eglxfakerut eglxfakerut.cpp)
+	target_link_libraries(eglxfakerut "${MINUSZ}now ${OPENGL_gl_LIBRARY}"
+		"${MINUSZ}now ${X11_X11_LIB}" "${MINUSZ}now ${EGL_LIBRARY}" ${LIBDL}
+		vglutil)
+endif()
 
 add_library(vgltrans_test SHARED testplugin.cpp VGLTrans.cpp)
 unset(VGLTRANS_TEST_LINK_FLAGS)

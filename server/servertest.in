@@ -38,6 +38,8 @@ WRAP=
 XVFBARGS=
 VGLTRANS=1
 GLVND=0
+EGLX=0
+EGLXARG=
 
 while [ $# -gt 0 ]; do
 	case "$1" in
@@ -72,6 +74,11 @@ while [ $# -gt 0 ]; do
 		echo "Testing with GLVND"
 		GLVND=1
 		;;
+	-eglx)
+		echo "Testing EGL/X11 interposer"
+		EGLX=1
+		EGLXARG=--eglx
+		;;
 	*)
 		break;
 		;;
@@ -100,15 +107,15 @@ if [[ $XVFBARGS =~ "-extension GLX" ]]; then
 	echo GLX extension disabled
 fi
 
-DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut
-DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut --prefix test
+DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut $EGLXARG
+DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut $EGLXARG --prefix test
 if [ "$GLVND" = "1" ]; then
-	DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut --glvnd
-	DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut --prefix test --glvnd
+	DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut $EGLXARG --glvnd
+	DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut $EGLXARG --prefix test --glvnd
 fi
 if [ "$FAKEOPENCL" = "1" -a ! "$EGLBACKEND" = "1" ]; then
-	DISPLAY=:42 $BIN/vglrun +ocl $BIN/dlfakerut
-	DISPLAY=:42 $BIN/vglrun +ocl $BIN/dlfakerut --prefix test
+	DISPLAY=:42 $BIN/vglrun +ocl $BIN/dlfakerut $EGLXARG
+	DISPLAY=:42 $BIN/vglrun +ocl $BIN/dlfakerut $EGLXARG --prefix test
 fi
 echo
 
@@ -133,6 +140,12 @@ for SCREEN in $SCREENS; do
 		echo
 		VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
 			$BIN/vglrun $NODL -c jpeg $WRAP $BIN/fakerut $FAKERUTARGS
+		if [ "$EGLX" = "1" ]; then
+			echo "===== VGL Transport, JPEG compression (EGL/X11) ====="
+			echo
+			VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
+				$BIN/vglrun $NODL -c jpeg $WRAP $BIN/eglxfakerut
+		fi
 		echo "===== VGL Transport, RGB encoding, 2 threads ====="
 		echo
 		VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB VGL_READBACK=sync \
@@ -143,6 +156,12 @@ for SCREEN in $SCREENS; do
 		echo
 		VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
 			$BIN/vglrun $NODL -trans test $WRAP $BIN/fakerut -nostereo $FAKERUTARGS
+		if [ "$EGLX" = "1" ]; then
+			echo "===== VGL Transport plugin, JPEG compression (EGL/X11) ====="
+			echo
+			VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
+				$BIN/vglrun $NODL -trans test $WRAP $BIN/eglxfakerut
+		fi
 		kill $VGLCLIENTPID
 		VGLCLIENTPID=-1
 
@@ -169,11 +188,23 @@ for SCREEN in $SCREENS; do
 	echo
 	LD_LIBRARY_PATH=$LIB \
 		$BIN/vglrun $NODL -c proxy $WRAP $BIN/fakerut $FAKERUTARGS
+	if [ "$EGLX" = "1" ]; then
+		echo "===== X11 Transport (EGL/X11) ====="
+		echo
+		LD_LIBRARY_PATH=$LIB \
+			$BIN/vglrun $NODL -c proxy $WRAP $BIN/eglxfakerut
+	fi
 	if [ $DEPTH = 24 ]; then
 		echo "===== X11 Transport plugin ====="
 		echo
 		LD_LIBRARY_PATH=$LIB \
 			$BIN/vglrun $NODL -trans test2 $WRAP $BIN/fakerut $FAKERUTARGS
+		if [ "$EGLX" = "1" ]; then
+			echo "===== X11 Transport plugin (EGL/X11) ====="
+			echo
+			LD_LIBRARY_PATH=$LIB \
+				$BIN/vglrun $NODL -trans test2 $WRAP $BIN/eglxfakerut
+		fi
 	fi
 
 done

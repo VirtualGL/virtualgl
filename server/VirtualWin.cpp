@@ -80,6 +80,7 @@ VirtualWin::VirtualWin(Display *dpy_, Window win) :
 			vglout.println("[VGL] Selecting structure notify events in window 0x%.8x",
 				win);
 	}
+	stereoVisual = false;
 	#ifdef EGLBACKEND
 	if(edpy != EGL_NO_DISPLAY)
 	#endif

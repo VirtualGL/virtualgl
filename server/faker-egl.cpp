@@ -275,6 +275,8 @@ EGLBoolean eglChooseConfig(EGLDisplay display, const EGLint *attrib_list,
 			if(configs && config_size >= 1 && j < config_size)
 				configs[j++] = newConfigs[i];
 		}
+		if(configs && config_size >= 1)
+			*num_config = min(*num_config, config_size);
 		delete [] newConfigs;
 	}
 
@@ -456,6 +458,19 @@ EGLSurface eglCreateWindowSurface(EGLDisplay display, EGLConfig config,
 	STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
+	if(attrib_list)
+	{
+		for(int i = 0; i < MAX_ATTRIBS && attrib_list[i] != EGL_NONE; i += 2)
+		{
+			if(attrib_list[i] == EGL_LARGEST_PBUFFER || attrib_list[i] == EGL_WIDTH
+				|| attrib_list[i] == EGL_HEIGHT)
+			{
+				faker::setEGLError(EGL_BAD_ATTRIBUTE);
+				goto done;
+			}
+		}
+	}
+
 	if(!config)
 		faker::setEGLError(EGL_BAD_CONFIG);
 	else if(!native_window)
@@ -476,6 +491,7 @@ EGLSurface eglCreateWindowSurface(EGLDisplay display, EGLConfig config,
 		}
 	}
 
+	done:
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();  PRARGX(surface);  if(actualSurface) PRARGX(actualSurface);
 	CLOSETRACE();
@@ -958,6 +974,38 @@ void (*eglGetProcAddress(const char *procName))(void)
 
 		// EGL_KHR_wait_sync
 		CHECK_FAKED(eglWaitSyncKHR);
+
+		// OpenGL
+		CHECK_FAKED(glBindFramebuffer)
+		CHECK_FAKED(glBindFramebufferEXT)
+		CHECK_FAKED(glDeleteFramebuffers)
+		CHECK_FAKED(glDeleteFramebuffersEXT)
+		CHECK_FAKED(glFinish)
+		CHECK_FAKED(glFlush)
+		CHECK_FAKED(glDrawBuffer)
+		CHECK_FAKED(glDrawBuffers)
+		CHECK_FAKED(glDrawBuffersARB)
+		CHECK_FAKED(glDrawBuffersATI)
+		CHECK_FAKED(glFramebufferDrawBufferEXT)
+		CHECK_FAKED(glFramebufferDrawBuffersEXT)
+		CHECK_FAKED(glFramebufferReadBufferEXT)
+		CHECK_FAKED(glGetBooleanv)
+		CHECK_FAKED(glGetDoublev)
+		CHECK_FAKED(glGetFloatv)
+		CHECK_FAKED(glGetFramebufferAttachmentParameteriv)
+		CHECK_FAKED(glGetFramebufferParameteriv)
+		CHECK_FAKED(glGetIntegerv)
+		CHECK_FAKED(glGetInteger64v)
+		CHECK_FAKED(glGetNamedFramebufferParameteriv)
+		CHECK_FAKED(glGetString)
+		CHECK_FAKED(glGetStringi)
+		CHECK_FAKED(glNamedFramebufferDrawBuffer)
+		CHECK_FAKED(glNamedFramebufferDrawBuffers)
+		CHECK_FAKED(glNamedFramebufferReadBuffer)
+		CHECK_FAKED(glPopAttrib)
+		CHECK_FAKED(glReadBuffer)
+		CHECK_FAKED(glReadPixels)
+		CHECK_FAKED(glViewport)
 	}
 	if(!retval)
 	{
@@ -1149,10 +1197,15 @@ const char *eglQueryString(EGLDisplay display, EGLint name)
 	OPENTRACE(eglQueryString);  PRARGX(display);  PRARGX(name);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	retval = _eglQueryString(display, name);
+	if(name == EGL_VENDOR)
+		retval = "VirtualGL";
+	else if(name == EGL_VERSION)
+		retval = "1.5";
+	else
+		retval = _eglQueryString(display, name);
+
 	if(name == EGL_EXTENSIONS && retval)
 	{
-
 		faker::GlobalCriticalSection::SafeLock l(globalMutex);
 
 		// These extensions should work if the underlying EGL implementation

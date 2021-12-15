@@ -15,7 +15,45 @@
 #include <dlfcn.h>
 
 
-int test(const char *testName, int testOpenCL);
+#ifdef EGLBACKEND
+
+#define CASE(c)  case c:  return #c
+
+static const char *getEGLErrorString(void)
+{
+	switch(_eglGetError())
+	{
+		CASE(EGL_SUCCESS);
+		CASE(EGL_NOT_INITIALIZED);
+		CASE(EGL_BAD_ACCESS);
+		CASE(EGL_BAD_ALLOC);
+		CASE(EGL_BAD_ATTRIBUTE);
+		CASE(EGL_BAD_CONFIG);
+		CASE(EGL_BAD_CONTEXT);
+		CASE(EGL_BAD_CURRENT_SURFACE);
+		CASE(EGL_BAD_DISPLAY);
+		CASE(EGL_BAD_MATCH);
+		CASE(EGL_BAD_NATIVE_PIXMAP);
+		CASE(EGL_BAD_NATIVE_WINDOW);
+		CASE(EGL_BAD_PARAMETER);
+		CASE(EGL_BAD_SURFACE);
+		CASE(EGL_CONTEXT_LOST);
+		default:  return "Unknown EGL error";
+	}
+}
+
+#define THROW_EGL() \
+{ \
+	retval = -1; \
+	fprintf(stderr, "%s ERROR at %s:%d\n", getEGLErrorString(), __FILE__, \
+		__LINE__); \
+	goto bailout; \
+}
+
+#endif
+
+
+int test(const char *testName, int testOpenCL, int testEGLX);
 
 
 static int checkWindowColor(Display *dpy, Window win, unsigned int color)
@@ -69,7 +107,7 @@ static int checkFrame(Display *dpy, Window win, int desiredReadbacks,
 }
 
 
-int test(const char *testName, int testOpenCL)
+int test(const char *testName, int testOpenCL, int testEGLX)
 {
 	Display *dpy = NULL;  Window win = 0, root;
 	int dpyw, dpyh, lastFrame = 0, retval = 0;
@@ -77,6 +115,12 @@ int test(const char *testName, int testOpenCL)
 		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None, None };
 	XVisualInfo *v = NULL;  GLXContext ctx = 0;
 	XSetWindowAttributes swa;
+	#ifdef EGLBACKEND
+	EGLDisplay edpy = 0;  EGLContext ectx = 0;  EGLSurface surface = 0;
+	EGLint cfgAttribs[] = { EGL_RED_SIZE, 8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE, 8,
+		EGL_NONE };
+	EGLConfig config = 0;  EGLint nc = 0;
+	#endif
 	#ifdef FAKEOPENCL
 	cl_uint nPlatforms = 0, pi, nDevices = 0, di;
 	cl_context oclctx = 0;
@@ -191,6 +235,36 @@ int test(const char *testName, int testOpenCL)
 
 	#endif
 
+	#ifdef EGLBACKEND
+
+	if(testEGLX)
+	{
+		_glXMakeCurrent(dpy, 0, 0);  _glXDestroyContext(dpy, ctx);  ctx = 0;
+		lastFrame = 0;
+
+		if(!(edpy = _eglGetDisplay(dpy)))
+			THROW_EGL();
+		if(!_eglInitialize(edpy, NULL, NULL))
+			THROW_EGL();
+		if(!_eglChooseConfig(edpy, cfgAttribs, &config, 1, &nc))
+			THROW_EGL();
+		if(!(surface = _eglCreateWindowSurface(edpy, config, win, NULL)))
+			THROW_EGL();
+		if(!(ectx = _eglCreateContext(edpy, config, NULL, NULL)))
+			THROW_EGL();
+		if(!_eglMakeCurrent(edpy, surface, surface, ectx))
+			THROW_EGL();
+
+		_glClearColor(0., 0., 1., 0.);
+		_glClear(GL_COLOR_BUFFER_BIT);
+		if(!_eglSwapBuffers(edpy, surface))
+			THROW_EGL();
+		TRY(checkFrame(dpy, win, 1, &lastFrame));
+		TRY(checkWindowColor(dpy, win, 0xff0000));
+	}
+
+	#endif
+
 	fprintf(stderr, "SUCCESS\n");
 
 	bailout:
@@ -203,6 +277,20 @@ int test(const char *testName, int testOpenCL)
 	{
 		_glXMakeCurrent(dpy, 0, 0);  _glXDestroyContext(dpy, ctx);
 	}
+	#ifdef EGLBACKEND
+	if(edpy)
+	{
+		if(ectx)
+		{
+			_eglMakeCurrent(edpy, 0, 0, 0);  _eglDestroyContext(edpy, ectx);
+		}
+		if(surface)
+		{
+			_eglDestroySurface(edpy, surface);
+		}
+		_eglTerminate(edpy);
+	}
+	#endif
 	if(win && dpy) XDestroyWindow(dpy, win);
 	if(v) XFree(v);
 	if(dpy) XCloseDisplay(dpy);
