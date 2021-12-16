@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2014, 2017, 2019 D. R. Commander
+ * Copyright (C)2014, 2017, 2019, 2021 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -33,7 +33,7 @@ static int checkWindowColor(Display *dpy, Window win, unsigned int color)
 		THROW("Bogus data read back");
 	if((unsigned int)fakerColor != color)
 	{
-		fprintf(stderr, "Color is 0x%.6x, should be 0x%.6x", fakerColor, color);
+		fprintf(stderr, "Color is 0x%.6x, should be 0x%.6x\n", fakerColor, color);
 		retval = -1;
 	}
 
@@ -58,7 +58,7 @@ static int checkFrame(Display *dpy, Window win, int desiredReadbacks,
 		THROW("Can't communicate w/ faker");
 	if(frame - (*lastFrame) != desiredReadbacks && desiredReadbacks >= 0)
 	{
-		fprintf(stderr, "Expected %d readback%s, not %d", desiredReadbacks,
+		fprintf(stderr, "Expected %d readback%s, not %d\n", desiredReadbacks,
 			desiredReadbacks == 1 ? "" : "s", frame - (*lastFrame));
 		retval = -1;
 	}
