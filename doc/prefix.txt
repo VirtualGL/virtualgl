@@ -62,8 +62,8 @@ different directory, then adjust the instructions accordingly.
 	frame trigger :: A function that is called by the 3D application to signal
 	that it has finished rendering a frame.  VirtualGL reads back and transports
 	a rendered frame if the 3D application calls ''glXSwapBuffers()'' while
-	rendering to the back buffer, or if the application calls ''glFinish()'',
-	''glXWaitGL()'', and (optionally) ''glFlush()'' while rendering to the front
+	rendering to the back buffer or if the application calls ''glFinish()'',
+	''glXWaitGL()'', or (optionally) ''glFlush()'' while rendering to the front
 	buffer.
 
 	VGL Transport :: The (optional) protocol that VirtualGL uses to transport

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2021-06-16T14:56:55">
+<meta name="date" content="2021-12-17T10:28:44">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -382,8 +382,8 @@ the instructions accordingly.</p>
         A function that is called by the 3D application to signal that it has 
         finished rendering a frame.  VirtualGL reads back and transports a 
         rendered frame if the 3D application calls <code>glXSwapBuffers()</code> 
-        while rendering to the back buffer, or if the application calls 
-        <code>glFinish()</code>, <code>glXWaitGL()</code>, and (optionally) 
+        while rendering to the back buffer or if the application calls 
+        <code>glFinish()</code>, <code>glXWaitGL()</code>, or (optionally) 
         <code>glFlush()</code> while rendering to the front buffer.
     </dd>
     <dt class="Description-1 Description">VGL Transport</dt>
@@ -452,7 +452,7 @@ employs a technique called &ldquo;split rendering&rdquo; to redirect the
 3D commands and data from the OpenGL application to a GPU in the 
 application server.  VGL accomplishes this by pre-loading a dynamic 
 shared object (DSO), the VirtualGL Faker, into the OpenGL application at 
-run time.  The VirtualGL Faker intercepts and modifies a handful of GLX, 
+run time.  The VirtualGL Faker intercepts and modifies certain GLX, 
 OpenGL, X11, and XCB function calls in order to divert OpenGL rendering 
 from the 3D application&rsquo;s windows into corresponding off-screen 
 buffers, which VGL creates in GPU memory on the application server.  
@@ -743,7 +743,7 @@ If you are installing VirtualGL onto a fresh server, and you also intend to inst
         provided for RPM-based and Debian-based Linux distributions that contain 
         GLIBC 2.12 or later. <br />
         <div class="important"><p class="important">
-        If you want to run both 32-bit and 64-bit OpenGL applications with VirtualGL on 64-bit x86 Linux systems, then you will need to install both <strong class="filename">VirtualGL-2.6.80.x86_64.rpm</strong> and <strong class="filename">VirtualGL-2.6.80.i386.rpm</strong>, or both <strong class="filename">virtualgl_2.6.80_amd64.deb</strong> and <strong class="filename">virtualgl32_2.6.80_amd64.deb</strong>. (<strong class="filename">virtualgl32_2.6.80_amd64.deb</strong> is a supplementary package that contains only the 32-bit server components.)
+        If you want to run both 32-bit and 64-bit OpenGL applications with VirtualGL on 64-bit x86 Linux systems, then you will need to install both <strong class="filename">VirtualGL-3.0.1.x86_64.rpm</strong> and <strong class="filename">VirtualGL-3.0.1.i386.rpm</strong>, or both <strong class="filename">virtualgl_3.0.1_amd64.deb</strong> and <strong class="filename">virtualgl32_3.0.1_amd64.deb</strong>. (<strong class="filename">virtualgl32_3.0.1_amd64.deb</strong> is a supplementary package that contains only the 32-bit server components.)
         </p></div>
     </li>
     <li class="Ordered-1 Ordered" value="2">
@@ -801,7 +801,7 @@ apt&nbsp;install&nbsp;-f
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
         Download the VirtualGL Mac disk image 
-        (<strong class="filename">VirtualGL-2.6.80.dmg</strong>) from the 
+        (<strong class="filename">VirtualGL-3.0.1.dmg</strong>) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files" class="remote">Files 
         area</a></span><a name="idx0020"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
@@ -809,7 +809,7 @@ apt&nbsp;install&nbsp;-f
     </li>
     <li class="Ordered-1 Ordered">
         Open the disk image, then open 
-        <strong class="filename">VirtualGL-2.6.80.pkg</strong> inside the disk 
+        <strong class="filename">VirtualGL-3.0.1.pkg</strong> inside the disk 
         image.  Follow the instructions to install the Mac VirtualGL Client.
     </li>
 </ol>
@@ -826,12 +826,12 @@ apt&nbsp;install&nbsp;-f
 
 <p>If you are using a platform for which there is not a pre-built VirtualGL 
 binary package available, then download the VirtualGL source tarball 
-(<strong class="filename">VirtualGL-2.6.80.tar.gz</strong>) from the 
+(<strong class="filename">VirtualGL-3.0.1.tar.gz</strong>) from the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files" class="remote">Files 
 area</a></span><a name="idx0022"></a> of the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
 SourceForge project page</a></span><a name="idx0023"></a>, uncompress 
-it, <code>cd VirtualGL-2.6.80</code>, and read the contents of 
+it, <code>cd VirtualGL-3.0.1</code>, and read the contents of 
 <strong class="filename">BUILDING.md</strong> for further instructions 
 on how to build and install VirtualGL from source.</p>
 
