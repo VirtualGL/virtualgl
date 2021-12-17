@@ -2401,9 +2401,9 @@ int contextMismatchTest(void)
 				PFNGLXCREATECONTEXTATTRIBSARBPROC __glXCreateContextAttribsARB =
 					(PFNGLXCREATECONTEXTATTRIBSARBPROC)glXGetProcAddress(
 						(const GLubyte *)"glXCreateContextAttribsARB");
-					if(__glXCreateContextAttribsARB)
-						ctx2 = __glXCreateContextAttribsARB(dpy, config2, NULL, True,
-							attribs);
+				if(__glXCreateContextAttribsARB)
+					ctx2 = __glXCreateContextAttribsARB(dpy, config2, NULL, True,
+						attribs);
 			}
 			if(!ctx2)
 				ctx2 = glXCreateNewContext(dpy, config2, GLX_RGBA_TYPE, NULL, True);
@@ -2444,6 +2444,21 @@ int contextMismatchTest(void)
 				if(notificationStrategy != attribs[9])
 					PRERROR2("Reset notification strategy 0x%.8x != 0x%.8x",
 						notificationStrategy, attribs[9]);
+			}
+			// Make sure that glXCreateContextAttribsARB() accepts GLX_RENDER_TYPE
+			// as an attribute.  This will fail when using the EGL back end with
+			// VirtualGL 3.0.
+			if(GLX_EXTENSION_EXISTS(GLX_ARB_create_context))
+			{
+				int attribs2[] = { GLX_RENDER_TYPE, GLX_RGBA_TYPE, None };
+				glXDestroyContext(dpy, ctx2);  ctx2 = 0;
+				PFNGLXCREATECONTEXTATTRIBSARBPROC __glXCreateContextAttribsARB =
+					(PFNGLXCREATECONTEXTATTRIBSARBPROC)glXGetProcAddress(
+						(const GLubyte *)"glXCreateContextAttribsARB");
+				if(__glXCreateContextAttribsARB)
+					ctx2 = __glXCreateContextAttribsARB(dpy, config2, NULL, True,
+						attribs2);
+				if(!ctx2) THROW("Could not create context");
 			}
 
 			printf("SUCCESS\n");

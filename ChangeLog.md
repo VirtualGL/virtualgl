@@ -5,6 +5,11 @@
 swap interval via the `GLX_EXT_swap_control` and `GLX_SGI_swap_control`
 extensions.
 
+2. Fixed an issue in the EGL back end whereby `glXCreateContextAttribsARB()`
+always returned NULL if `GLX_RENDER_TYPE` was specified in the attribute list.
+This issue was known to affect JOGL applications but may have affected other
+applications as well.
+
 
 3.0
 ===
