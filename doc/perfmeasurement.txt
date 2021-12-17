@@ -255,3 +255,8 @@ features:
 GLXSpheres is installed in {file: /opt/VirtualGL/bin} by default.  64-bit
 VirtualGL builds name this program ''glxspheres64'' so as to allow both a
 64-bit and a 32-bit version of GLXSpheres to be installed on the same system.
+
+	!!! This version of VirtualGL also provides an EGL/X11 equivalent of
+	GLXSpheres (EGLXSpheres), which works identically to GLXSpheres except for
+	the absense of modes (including stereographic rendering) that the EGL API
+	does not support.

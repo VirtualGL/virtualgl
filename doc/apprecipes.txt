@@ -111,14 +111,17 @@
 	| If these environment variables are not set, Fluent will use software \
 		OpenGL when launched from ANSYS Workbench. \
 	|
-| Google Chrome/Chromium | v31 to v54 | Linux \
-	| ''vglrun google-chrome --disable-gpu-sandbox''{nl} \
+| Google Chrome/Chromium | v85 and later | Linux \
+	| ''vglrun -d egl google-chrome --disable-seccomp-filter-sandbox''{nl} \
 		or{nl} \
-		''vglrun chromium --disable-gpu-sandbox'' \
-	| By default, Chrome/Chromium uses a separate process to perform 3D \
-		rendering (WebGL), and for reasons that are not yet fully understood, \
-		this breaks VirtualGL.  The ''--disable-gpu-sandbox'' option causes 3D \
-		rendering to be performed within the browser process. \
+		''vglrun -d egl chromium --disable-seccomp-filter-sandbox'' \
+	| Recent versions of Google Chrome/Chromium use the EGL/X11 API instead of \
+		the GLX API, and VirtualGL only supports the EGL/X11 API when using the \
+		EGL back end.  The ''--disable-seccomp-filter-sandbox'' option prevents \
+		Chrome/Chromium from complaining about the X11 function calls that the \
+		VirtualGL faker makes.  Note that you can replace ''egl'' with the path \
+		to any DRI device, such as ''/dev/dri/card0''.  See \
+		{ref prefix="Section ": VGL_DISPLAY} for further information. \
 	|
 | Compiz | All | Linux \
 	| Set the ''VGL_WM'' environment variable to ''1'' prior to launching the \
@@ -145,21 +148,6 @@
 		return value of those calls, a segfault occurs.  The workaround is simply \
 		to add the Intel ICD library path to ''LD_LIBRARY_PATH'', which is most \
 		easily accomplished with ''vglrun -ld''. \
-	|
-| JOGL | 2.3.x and later | All \
-	| Pass ''-Djogl.disable.opengles'' to ''java'' when launching the \
-		application that uses JOGL, or set \
-		''JAVA_TOOL_OPTIONS=-Djogl.disable.opengles'' in the environment. \
-	| Recent versions of JOGL support using OpenGL ES with X11, which \
-		necessitates using EGL with X11.  In this mode of operation, EGL behaves \
-		like a feature-limited implementation of GLX, and supporting that use \
-		case properly will require implementing an EGL/X11 interposer that \
-		duplicates much of the functionality of VirtualGL's existing GLX \
-		interposer. \
-		{nl}{nl} \
-		If OpenGL ES is not disabled in JOGL, then JOGL will throw an error when \
-		used with VirtualGL: "GLException: Failed to created/initialize EGL \
-		display incl. fallback default: native 0x0, error 0x3008/0x3000." \
 	|
 | Mathematica | v7 | Linux \
 	| Set the ''VGL_ALLOWINDIRECT'' environment variable to ''1'' prior to \

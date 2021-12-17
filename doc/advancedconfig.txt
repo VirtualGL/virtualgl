@@ -113,6 +113,7 @@ previous method:
 	''VGL_COMPRESS'' to any numeric value >= 0 (Default value = ''0''.)  The
 	plugin can choose to respond to this value as it sees fit.
 
+{anchor: VGL_DISPLAY}
 | Environment Variable | {pcode: VGL_DISPLAY = __{d}__ } |
 | ''vglrun'' argument | {pcode: -d __{d}__ } |
 | Summary | __''{d}''__ = the X display/screen or DRI device to use for 3D \
@@ -166,14 +167,14 @@ previous method:
 	{nl}{nl}
 	The ''VGL_EXCLUDE'' environment variable specifies a list of X display
 	names (for instance, '':0.1'') for which VirtualGL should not interpose any
-	X11, GLX, OpenGL, XCB, or OpenCL calls.  In other words, VirtualGL treats
-	these displays as 3D X servers instead of 2D X servers and does not attempt
-	to redirect 3D rendering away from them.  When an X display connection is
-	opened using ''XOpenDisplay()'', VirtualGL checks if the display name appears
-	in the exclude list, and if so, all subsequent X11, GLX, OpenGL, and XCB
-	calls intended for that display are allowed to pass through unimpeded.  This
-	variable is re-checked every time ''XOpenDisplay()'' is called, so it can be
-	set dynamically from within a 3D application.
+	X11, GLX, EGL, OpenGL, XCB, or OpenCL calls.  In other words, VirtualGL
+	treats these displays as 3D X servers instead of 2D X servers and does not
+	attempt to redirect 3D rendering away from them.  When an X display
+	connection is opened using ''XOpenDisplay()'', VirtualGL checks if the
+	display name appears in the exclude list, and if so, all subsequent X11, GLX,
+	EGL, OpenGL, and XCB calls intended for that display are allowed to pass
+	through unimpeded.  This variable is re-checked every time ''XOpenDisplay()''
+	is called, so it can be set dynamically from within a 3D application.
 
 | Environment Variable | {pcode: VGL_FAKEOPENCL = __0 \| 1__ } |
 | ''vglrun'' argument | ''-ocl'' / ''+ocl'' |
@@ -568,22 +569,24 @@ previous method:
 
 | Environment Variable | {pcode: VGL_REFRESHRATE = __{r}__ } |
 | Summary |  __''{r}''__ = the "virtual" refresh rate, in Hz, for the \
-	''GLX_EXT_swap_control'' and ''GLX_SGI_swap_control'' extensions |
+	''GLX_EXT_swap_control'' and ''GLX_SGI_swap_control'' extensions and the \
+	''eglSwapInterval()'' function |
 | Image Transports | All |
 | Default Value | ''60.0'' |
 #OPT: hiCol=first
 
 	Description :: The ''GLX_EXT_swap_control'' and ''GLX_SGI_swap_control''
-	extensions allow applications to specify that buffer swaps should be
-	synchronized with the refresh rate of the monitor.  When one of these
-	extensions is used, ''glXSwapBuffers()'' will not return until a specified
-	number of refreshes (the "swap interval") has occurred.  Although refresh
-	rate has no meaning when rendering into an off-screen buffer, VirtualGL still
-	emulates the swap control extensions so that 3D applications can control
-	their own frame rate (this is often used by games, for instance, in which
-	maintaining a constant frame rate is important.)  VirtualGL uses an internal
-	timer to emulate the refresh rate, and setting ''VGL_REFRESHRATE'' changes
-	the interval of that timer.
+	extensions and the ''eglSwapInterval()'' function allow applications to
+	specify that buffer swaps should be synchronized with the refresh rate of the
+	monitor.  When one of the aforementioned extensions or the aforementioned
+	function is used, ''glXSwapBuffers()'' or ''eglSwapBuffers()'' will not
+	return until a specified number of refreshes (the "swap interval") has
+	occurred.  Although refresh rate has no meaning when rendering into an
+	off-screen buffer, VirtualGL uses an internal timer to emulate the refresh
+	rate so that 3D applications can control their own frame rate.  (This is
+	often used by games, for instance, in which maintaining a constant frame rate
+	is important.)  Setting ''VGL_REFRESHRATE'' changes the interval of
+	VirtualGL's internal timer.
 
 | Environment Variable | {pcode: VGL_SAMPLES = __{s}__ } |
 | ''vglrun'' argument | {pcode: -ms __{s}__ } |
@@ -602,7 +605,8 @@ previous method:
 	buffers with the specified number (or a greater number) of samples.  This
 	effectively forces the 3D application to render with the specified
 	multisampling level, as if the application had explicitly passed attributes
-	of {pcode: GLX_SAMPLES,__{s}__} to ''glXChooseVisual()''.  If ''VGL_SAMPLES''
+	of {pcode: GLX_SAMPLES,__{s}__} to ''glXChooseVisual()'' or
+	{pcode: EGL_SAMPLES,__{s}__} to ''eglChooseConfig()''.  If ''VGL_SAMPLES''
 	is ''0'', then VirtualGL forces multisampling to be disabled, even if the 3D
 	application explicitly tries to enable it.
 

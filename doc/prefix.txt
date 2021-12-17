@@ -41,9 +41,9 @@ different directory, then adjust the instructions accordingly.
 
 	VirtualGL Faker :: A shared library ("dynamic shared object" or "DSO"),
 	loaded into a Linux/Unix OpenGL application at run time, that intercepts and
-	modifies ("interposes") certain GLX, OpenGL, X11, and XCB function calls in
-	order to seamlessly redirect 3D rendering into an off-screen buffer on a GPU,
-	read back the rendered frames, and transport the rendered frames (which
+	modifies ("interposes") certain GLX, EGL, OpenGL, X11, and XCB function calls
+	in order to seamlessly redirect 3D rendering into an off-screen buffer on a
+	GPU, read back the rendered frames, and transport the rendered frames (which
 	normally means delivering them to the 2D X server)
 
 	back end :: The method by which the VirtualGL Faker creates off-screen
@@ -60,11 +60,13 @@ different directory, then adjust the instructions accordingly.
 	GLX back end supports.
 
 	frame trigger :: A function that is called by the 3D application to signal
-	that it has finished rendering a frame.  VirtualGL reads back and transports
-	a rendered frame if the 3D application calls ''glXSwapBuffers()'' while
-	rendering to the back buffer or if the application calls ''glFinish()'',
-	''glXWaitGL()'', or (optionally) ''glFlush()'' while rendering to the front
-	buffer.
+	that it has finished rendering a frame.  If the 3D application is using the
+	GLX API, then VirtualGL reads back and transports a rendered frame if the
+	application calls ''glXSwapBuffers()'' while rendering to the back buffer or
+	if the application calls ''glFinish()'', ''glXWaitGL()'', or (optionally)
+	''glFlush()'' while rendering to the front buffer.  If the 3D application is
+	using the EGL/X11 API, then VirtualGL reads back and transports a rendered
+	frame if the application calls ''eglSwapBuffers()''.
 
 	VGL Transport :: The (optional) protocol that VirtualGL uses to transport
 	rendered frames to a 2D X server on a machine other than the VirtualGL server

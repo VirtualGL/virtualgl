@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2021-12-17T17:10:22">
+<meta name="date" content="2021-12-17T17:47:54">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -36,7 +36,7 @@
 <a name="file000"></a>
 <p><em>Intended audience:</em> System Administrators, Graphics Programmers, 
 Researchers, and others with knowledge of Linux or Unix operating 
-systems, OpenGL and GLX, and X windows.</p>
+systems, OpenGL, GLX or EGL, and X windows.</p>
 
 <div id="hd">
 <div id="hdBlock" class="hd">
@@ -357,9 +357,9 @@ the instructions accordingly.</p>
         A shared library (&ldquo;dynamic shared object&rdquo; or 
         &ldquo;DSO&rdquo;), loaded into a Linux/Unix OpenGL application at run 
         time, that intercepts and modifies (&ldquo;interposes&rdquo;) certain 
-        GLX, OpenGL, X11, and XCB function calls in order to seamlessly redirect 
-        3D rendering into an off-screen buffer on a GPU, read back the rendered 
-        frames, and transport the rendered frames (which normally means 
+        GLX, EGL, OpenGL, X11, and XCB function calls in order to seamlessly 
+        redirect 3D rendering into an off-screen buffer on a GPU, read back the 
+        rendered frames, and transport the rendered frames (which normally means 
         delivering them to the 2D X server)
     </dd>
     <dt class="Description-1 Description">back end</dt>
@@ -380,11 +380,14 @@ the instructions accordingly.</p>
     <dt class="Description-1 Description">frame trigger</dt>
     <dd class="Description-1 Description">
         A function that is called by the 3D application to signal that it has 
-        finished rendering a frame.  VirtualGL reads back and transports a 
-        rendered frame if the 3D application calls <code>glXSwapBuffers()</code> 
-        while rendering to the back buffer or if the application calls 
-        <code>glFinish()</code>, <code>glXWaitGL()</code>, or (optionally) 
-        <code>glFlush()</code> while rendering to the front buffer.
+        finished rendering a frame.  If the 3D application is using the GLX API, 
+        then VirtualGL reads back and transports a rendered frame if the 
+        application calls <code>glXSwapBuffers()</code> while rendering to the 
+        back buffer or if the application calls <code>glFinish()</code>, 
+        <code>glXWaitGL()</code>, or (optionally) <code>glFlush()</code> while 
+        rendering to the front buffer.  If the 3D application is using the 
+        EGL/X11 API, then VirtualGL reads back and transports a rendered frame 
+        if the application calls <code>eglSwapBuffers()</code>.
     </dd>
     <dt class="Description-1 Description">VGL Transport</dt>
     <dd class="Description-1 Description">
@@ -452,7 +455,7 @@ employs a technique called &ldquo;split rendering&rdquo; to redirect the
 3D commands and data from the OpenGL application to a GPU in the 
 application server.  VGL accomplishes this by pre-loading a dynamic 
 shared object (DSO), the VirtualGL Faker, into the OpenGL application at 
-run time.  The VirtualGL Faker intercepts and modifies certain GLX, 
+run time.  The VirtualGL Faker intercepts and modifies certain GLX, EGL, 
 OpenGL, X11, and XCB function calls in order to divert OpenGL rendering 
 from the 3D application&rsquo;s windows into corresponding off-screen 
 buffers, which VGL creates in GPU memory on the application server.  
@@ -2183,10 +2186,10 @@ procedures:</p>
   </tr>
   <tr class="standard">
     <td class="standard">Google Chrome/Chromium</td>
-    <td class="standard">v31 to v54</td>
+    <td class="standard">v85 and later</td>
     <td class="standard">Linux</td>
-    <td class="standard"><code>vglrun&nbsp;google-chrome&nbsp;--disable-gpu-sandbox</code><br /> or<br /> <code>vglrun&nbsp;chromium&nbsp;--disable-gpu-sandbox</code></td>
-    <td class="standard">By default, Chrome/Chromium uses a separate process to perform 3D rendering (WebGL), and for reasons that are not yet fully understood, this breaks VirtualGL.  The <code>--disable-gpu-sandbox</code> option causes 3D rendering to be performed within the browser process.</td>
+    <td class="standard"><code>vglrun&nbsp;-d&nbsp;egl&nbsp;google-chrome&nbsp;--disable-seccomp-filter-sandbox</code><br /> or<br /> <code>vglrun&nbsp;-d&nbsp;egl&nbsp;chromium&nbsp;--disable-seccomp-filter-sandbox</code></td>
+    <td class="standard">Recent versions of Google Chrome/Chromium use the EGL/X11 API instead of the GLX API, and VirtualGL only supports the EGL/X11 API when using the EGL back end.  The <code>--disable-seccomp-filter-sandbox</code> option prevents Chrome/Chromium from complaining about the X11 function calls that the VirtualGL faker makes.  Note that you can replace <code>egl</code> with the path to any DRI device, such as <code>/dev/dri/card0</code>.  See Section <a href="#VGL_DISPLAY" class="ref">19.1</a> for further information.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Compiz</td>
@@ -2208,13 +2211,6 @@ procedures:</p>
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun -ld <em>path-to-Intel-OpenCL-libs</em> <em>application</em></code></td>
     <td class="standard">The Intel OpenCL installable client driver (ICD) is linked with a run-time library search path (rpath) of <code>$ORIGIN</code>, which would normally have the same effect as adding the directory in which the ICD is installed (default: <strong class="filename">/opt/intel/opencl/lib64</strong> on 64-bit systems) to <code>LD_LIBRARY_PATH</code>.  However, when VirtualGL is interposing the <code>dlopen()</code> function (which it does by default), this causes the actual <code>dlopen()</code> system calls to come from <strong class="filename">libdlfaker.so</strong>, so <code>$ORIGIN</code> will resolve to the directory in which the VirtualGL faker libraries are installed.  This causes the <code>dlopen()</code> calls within the Intel ICD to fail, and because the ICD apparently does not check the return value of those calls, a segfault occurs.  The workaround is simply to add the Intel ICD library path to <code>LD_LIBRARY_PATH</code>, which is most easily accomplished with <code>vglrun&nbsp;-ld</code>.</td>
-  </tr>
-  <tr class="standard">
-    <td class="standard">JOGL</td>
-    <td class="standard">2.3.x and later</td>
-    <td class="standard">All</td>
-    <td class="standard">Pass <code>-Djogl.disable.opengles</code> to <code>java</code> when launching the application that uses JOGL, or set <code>JAVA_TOOL_OPTIONS=-Djogl.disable.opengles</code> in the environment.</td>
-    <td class="standard">Recent versions of JOGL support using OpenGL ES with X11, which necessitates using EGL with X11.  In this mode of operation, EGL behaves like a feature-limited implementation of GLX, and supporting that use case properly will require implementing an EGL/X11 interposer that duplicates much of the functionality of VirtualGL&rsquo;s existing GLX interposer. <br /><br /> If OpenGL ES is not disabled in JOGL, then JOGL will throw an error when used with VirtualGL: &ldquo;GLException: Failed to created/initialize EGL display incl. fallback default: native 0x0, error 0x3008/0x3000.&rdquo;</td>
   </tr>
   <tr class="standard">
     <td class="standard">Mathematica</td>
@@ -2731,6 +2727,10 @@ VirtualGL builds name this program <code>glxspheres64</code> so as to
 allow both a 64-bit and a 32-bit version of GLXSpheres to be installed 
 on the same system.</p>
 
+<div class="important"><p class="important">
+This version of VirtualGL also provides an EGL/X11 equivalent of GLXSpheres (EGLXSpheres), which works identically to GLXSpheres except for the absense of modes (including stereographic rendering) that the EGL API does not support.
+</p></div>
+
 <p><br /></p>
 
 <hr class="break" />
@@ -3089,6 +3089,8 @@ Image transport plugins are free to handle or ignore any configuration option as
     </dd>
 </dl>
 
+<p><a name="VGL_DISPLAY"></a></p>
+
 <div class="table">
 <table class="standard">
   <tr class="standard">
@@ -3202,14 +3204,14 @@ Image transport plugins are free to handle or ignore any configuration option as
         thread, which displays the final rendered result from all of the 
         workers. <br /><br /> The <code>VGL_EXCLUDE</code> environment variable 
         specifies a list of X display names (for instance, <code>:0.1</code>) 
-        for which VirtualGL should not interpose any X11, GLX, OpenGL, XCB, or 
-        OpenCL calls.  In other words, VirtualGL treats these displays as 3D X 
-        servers instead of 2D X servers and does not attempt to redirect 3D 
+        for which VirtualGL should not interpose any X11, GLX, EGL, OpenGL, XCB, 
+        or OpenCL calls.  In other words, VirtualGL treats these displays as 3D 
+        X servers instead of 2D X servers and does not attempt to redirect 3D 
         rendering away from them.  When an X display connection is opened using 
         <code>XOpenDisplay()</code>, VirtualGL checks if the display name 
-        appears in the exclude list, and if so, all subsequent X11, GLX, OpenGL, 
-        and XCB calls intended for that display are allowed to pass through 
-        unimpeded.  This variable is re-checked every time 
+        appears in the exclude list, and if so, all subsequent X11, GLX, EGL, 
+        OpenGL, and XCB calls intended for that display are allowed to pass 
+        through unimpeded.  This variable is re-checked every time 
         <code>XOpenDisplay()</code> is called, so it can be set dynamically from 
         within a 3D application.
     </dd>
@@ -4003,7 +4005,7 @@ Image transport plugins are free to handle or ignore any configuration option as
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard"><em><code>{r}</code></em> = the &ldquo;virtual&rdquo; refresh rate, in Hz, for the <code>GLX_EXT_swap_control</code> and <code>GLX_SGI_swap_control</code> extensions</td>
+    <td class="standard"><em><code>{r}</code></em> = the &ldquo;virtual&rdquo; refresh rate, in Hz, for the <code>GLX_EXT_swap_control</code> and <code>GLX_SGI_swap_control</code> extensions and the <code>eglSwapInterval()</code> function</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
@@ -4021,18 +4023,19 @@ Image transport plugins are free to handle or ignore any configuration option as
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
         The <code>GLX_EXT_swap_control</code> and 
-        <code>GLX_SGI_swap_control</code> extensions allow applications to 
-        specify that buffer swaps should be synchronized with the refresh rate 
-        of the monitor.  When one of these extensions is used, 
-        <code>glXSwapBuffers()</code> will not return until a specified number 
+        <code>GLX_SGI_swap_control</code> extensions and the 
+        <code>eglSwapInterval()</code> function allow applications to specify 
+        that buffer swaps should be synchronized with the refresh rate of the 
+        monitor.  When one of the aforementioned extensions or the 
+        aforementioned function is used, <code>glXSwapBuffers()</code> or 
+        <code>eglSwapBuffers()</code> will not return until a specified number 
         of refreshes (the &ldquo;swap interval&rdquo;) has occurred.  Although 
         refresh rate has no meaning when rendering into an off-screen buffer, 
-        VirtualGL still emulates the swap control extensions so that 3D 
-        applications can control their own frame rate (this is often used by 
+        VirtualGL uses an internal timer to emulate the refresh rate so that 3D 
+        applications can control their own frame rate.  (This is often used by 
         games, for instance, in which maintaining a constant frame rate is 
-        important.)  VirtualGL uses an internal timer to emulate the refresh 
-        rate, and setting <code>VGL_REFRESHRATE</code> changes the interval of 
-        that timer.
+        important.)  Setting <code>VGL_REFRESHRATE</code> changes the interval 
+        of VirtualGL&rsquo;s internal timer.
     </dd>
 </dl>
 
@@ -4074,10 +4077,11 @@ Image transport plugins are free to handle or ignore any configuration option as
         greater number) of samples.  This effectively forces the 3D application 
         to render with the specified multisampling level, as if the application 
         had explicitly passed attributes of 
-        <code>GLX_SAMPLES,<em>{s}</em></code> to <code>glXChooseVisual()</code>.  
-        If <code>VGL_SAMPLES</code> is <code>0</code>, then VirtualGL forces 
-        multisampling to be disabled, even if the 3D application explicitly 
-        tries to enable it.
+        <code>GLX_SAMPLES,<em>{s}</em></code> to <code>glXChooseVisual()</code> 
+        or <code>EGL_SAMPLES,<em>{s}</em></code> to 
+        <code>eglChooseConfig()</code>.  If <code>VGL_SAMPLES</code> is 
+        <code>0</code>, then VirtualGL forces multisampling to be disabled, even 
+        if the 3D application explicitly tries to enable it.
         <div class="important"><p class="important">
         Multisampling cannot be used with Pixmap rendering.  Any application that uses Pixmap rendering will fail if <code>VGL_SAMPLES</code> is set to a value other than 0.
         </p></div>
