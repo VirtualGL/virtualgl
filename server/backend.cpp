@@ -227,12 +227,12 @@ GLXContext createContext(Display *dpy, VGLFBConfig config, GLXContext share,
 								true);
 							return NULL;
 						}
-						else
+						else if(glxAttribs[glxi] != GLX_RENDER_TYPE)
 						{
 							faker::sendGLXError(dpy, X_GLXCreateContextAttribsARB, BadValue,
 								true);
+							return NULL;
 						}
-						return NULL;
 				}
 			}
 		}

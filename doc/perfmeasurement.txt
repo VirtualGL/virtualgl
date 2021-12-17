@@ -221,7 +221,7 @@ SphereMark (SphereMark was for Windows only) completely from scratch.
 GLXSpheres does not use any code from the original benchmark, but it does
 attempt to mimic the visual output of the original as closely as possible.
 GLXSpheres lacks some of the advanced rendering features of the original, such
-as the ability to use vertex arrays, but since GLXspheres was primarily
+as the ability to use vertex arrays, but since GLXSpheres was primarily
 designed as a benchmark for VirtualGL, display lists are more than fast enough
 for that purpose.
 

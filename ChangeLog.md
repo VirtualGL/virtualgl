@@ -25,9 +25,14 @@ v1.3.)
 3.0.1
 =====
 
-1. GLXspheres now includes an option (`-si`) that can be used to specify the
+1. GLXSpheres now includes an option (`-si`) that can be used to specify the
 swap interval via the `GLX_EXT_swap_control` and `GLX_SGI_swap_control`
 extensions.
+
+2. Fixed an issue in the EGL back end whereby `glXCreateContextAttribsARB()`
+always returned NULL if `GLX_RENDER_TYPE` was specified in the attribute list.
+This issue was known to affect JOGL applications but may have affected other
+applications as well.
 
 
 3.0
@@ -613,7 +618,7 @@ emulation adds a certain amount of overhead to some OpenGL calls.
 
 5. Added support for DirectColor rendering (DirectColor is similar to
 PseudoColor, except that the colormap indices for red, green, and blue can be
-specified separately.)  GLXspheres now includes a DirectColor mode, replacing
+specified separately.)  GLXSpheres now includes a DirectColor mode, replacing
 its previous color index mode.
 
 6. VirtualGL can now be disabled on a display-by-display basis by specifying a
@@ -742,7 +747,7 @@ prevented `vglconnect -x` from working properly if the user did not have access
 to the current directory (`vglconnect` was erroneously creating a temporary
 file in the current directory instead of in **/tmp**.)
 
-4. GLXspheres now warns if the specified polygon count would exceed the limit
+4. GLXSpheres now warns if the specified polygon count would exceed the limit
 of 57600 polygons per sphere imposed by GLU and prints the actual polygon count
 with this limit taken into account.  Also, a new option (`-n`) has been
 introduced to increase the sphere count.
@@ -791,7 +796,7 @@ moved into the Windows TurboVNC Viewer packages, but it proved to be a pain to
 keep the source code synchronized between the two projects.
 
     The **VirtualGL-Utils** package additionally contains a WGL version of
-GLXspheres, which is a useful tool to have when benchmarking Windows virtual
+GLXSpheres, which is a useful tool to have when benchmarking Windows virtual
 machines that are running in a VirtualGL environment.
 
 9. Worked around an issue in recent versions of SPECviewperf and FEMFAT
@@ -1562,7 +1567,7 @@ from a window to a Pbuffer.
 5. Documented the patch revision necessary to make Exceed 2008 work properly
 with VirtualGL.  Removed dire warnings.
 
-6. Added full-screen rendering mode to GLXspheres.
+6. Added full-screen rendering mode to GLXSpheres.
 
 7. Fixed a regression (uninitialized variable) introduced by 2.1 beta1[7].
 

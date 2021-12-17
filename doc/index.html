@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2021-11-22T17:27:53">
+<meta name="date" content="2021-12-17T17:10:22">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -382,8 +382,8 @@ the instructions accordingly.</p>
         A function that is called by the 3D application to signal that it has 
         finished rendering a frame.  VirtualGL reads back and transports a 
         rendered frame if the 3D application calls <code>glXSwapBuffers()</code> 
-        while rendering to the back buffer, or if the application calls 
-        <code>glFinish()</code>, <code>glXWaitGL()</code>, and (optionally) 
+        while rendering to the back buffer or if the application calls 
+        <code>glFinish()</code>, <code>glXWaitGL()</code>, or (optionally) 
         <code>glFlush()</code> while rendering to the front buffer.
     </dd>
     <dt class="Description-1 Description">VGL Transport</dt>
@@ -452,7 +452,7 @@ employs a technique called &ldquo;split rendering&rdquo; to redirect the
 3D commands and data from the OpenGL application to a GPU in the 
 application server.  VGL accomplishes this by pre-loading a dynamic 
 shared object (DSO), the VirtualGL Faker, into the OpenGL application at 
-run time.  The VirtualGL Faker intercepts and modifies a handful of GLX, 
+run time.  The VirtualGL Faker intercepts and modifies certain GLX, 
 OpenGL, X11, and XCB function calls in order to divert OpenGL rendering 
 from the 3D application&rsquo;s windows into corresponding off-screen 
 buffers, which VGL creates in GPU memory on the application server.  
@@ -2686,7 +2686,7 @@ GLXSpheres does not use any code from the original benchmark, but it
 does attempt to mimic the visual output of the original as closely as 
 possible. GLXSpheres lacks some of the advanced rendering features of 
 the original, such as the ability to use vertex arrays, but since 
-GLXspheres was primarily designed as a benchmark for VirtualGL, display 
+GLXSpheres was primarily designed as a benchmark for VirtualGL, display 
 lists are more than fast enough for that purpose.</p>
 
 <p>GLXSpheres has some additional modes that its predecessor lacked, modes 
