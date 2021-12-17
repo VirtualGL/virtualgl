@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2021-06-16T12:58:54">
+<meta name="date" content="2022-03-29T15:27:04">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.6.6</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -364,8 +364,8 @@ the instructions accordingly.</p>
         A function that is called by the 3D application to signal that it has 
         finished rendering a frame.  VirtualGL reads back and transports a 
         rendered frame if the 3D application calls <code>glXSwapBuffers()</code> 
-        while rendering to the back buffer, or if the application calls 
-        <code>glFinish()</code>, <code>glXWaitGL()</code>, and (optionally) 
+        while rendering to the back buffer or if the application calls 
+        <code>glFinish()</code>, <code>glXWaitGL()</code>, or (optionally) 
         <code>glFlush()</code> while rendering to the front buffer.
     </dd>
     <dt class="Description-1 Description">VGL Transport</dt>
@@ -434,7 +434,7 @@ employs a technique called &ldquo;split rendering&rdquo; to redirect the
 3D commands and data from the OpenGL application to a GPU in the 
 application server.  VGL accomplishes this by pre-loading a dynamic 
 shared object (DSO), the VirtualGL Faker, into the OpenGL application at 
-run time.  The VirtualGL Faker intercepts and modifies a handful of GLX, 
+run time.  The VirtualGL Faker intercepts and modifies certain GLX, 
 OpenGL, X11, and XCB function calls in order to divert OpenGL rendering 
 from the 3D application&rsquo;s windows into corresponding pixel buffers 
 (&ldquo;Pbuffers&rdquo;), which VGL creates in GPU memory on the 
