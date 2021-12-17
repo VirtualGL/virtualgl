@@ -498,7 +498,8 @@ int main(int argc, char **argv)
 	XSetWindowAttributes swa;  Window root;
 	int fullScreen = 0;  unsigned long mask = 0;
 	int screen = -1, pps;
-	int cfgid = -1, red = -1, green = -1, blue = -1, alpha = -1, vid = -1;
+	int cfgid = -1, red = -1, green = -1, blue = -1, alpha = -1, samples = -1,
+		vid = -1;
 
 	if(argc > 1) for(i = 1; i < argc; i++)
 	{
@@ -611,8 +612,13 @@ int main(int argc, char **argv)
 	TRY_EGL(eglGetConfigAttrib(edpy, c, EGL_GREEN_SIZE, &green));
 	TRY_EGL(eglGetConfigAttrib(edpy, c, EGL_BLUE_SIZE, &blue));
 	TRY_EGL(eglGetConfigAttrib(edpy, c, EGL_ALPHA_SIZE, &alpha));
-	fprintf(stderr, "EGL config ID of window: 0x%.2x (%d/%d/%d/%d)\n", cfgid,
-		red, green, blue, alpha);
+	TRY_EGL(eglGetConfigAttrib(edpy, c, EGL_SAMPLES, &samples));
+	if(samples > 0)
+		fprintf(stderr, "EGL config ID of window: 0x%.2x (%d/%d/%d/%d, %d samples)\n",
+			cfgid, red, green, blue, alpha, samples);
+	else
+		fprintf(stderr, "EGL config ID of window: 0x%.2x (%d/%d/%d/%d)\n", cfgid,
+			red, green, blue, alpha);
 	fprintf(stderr, "Visual ID of window: 0x%.2x\n", (int)v->visualid);
 
 	root = RootWindow(dpy, screen);

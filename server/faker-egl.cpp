@@ -159,17 +159,20 @@ EGLBoolean eglChooseConfig(EGLDisplay display, const EGLint *attrib_list,
 	/////////////////////////////////////////////////////////////////////////////
 
 	EGLint attribs[MAX_ATTRIBS + 1];  int j = 0;
-	EGLint nativeRenderable = -1, surfaceType = -1, visualID = -1,
+	EGLint nativeRenderable = -1, samples = -1, surfaceType = -1, visualID = -1,
 		visualType = -1;
 
 	if(attrib_list)
 	{
-		for(EGLint i = 0; attrib_list[i] != EGL_NONE && i < MAX_ATTRIBS - 2;
+		for(EGLint i = 0; attrib_list[i] != EGL_NONE && i < MAX_ATTRIBS - 4;
 			i += 2)
 		{
 			if(attrib_list[i] == EGL_NATIVE_RENDERABLE
 				&& attrib_list[i + 1] != EGL_DONT_CARE)
 				nativeRenderable = attrib_list[i + 1];
+			else if(attrib_list[i] == EGL_SAMPLES
+				&& attrib_list[i + 1] != EGL_DONT_CARE)
+				samples = attrib_list[i + 1];
 			else if(attrib_list[i] == EGL_SURFACE_TYPE
 				&& attrib_list[i + 1] != EGL_DONT_CARE)
 				surfaceType = attrib_list[i + 1];
@@ -192,6 +195,12 @@ EGLBoolean eglChooseConfig(EGLDisplay display, const EGLint *attrib_list,
 			~(EGL_WINDOW_BIT | EGL_PIXMAP_BIT | EGL_SWAP_BEHAVIOR_PRESERVED_BIT);
 	else
 		attribs[j++] = EGL_PBUFFER_BIT;
+	if(fconfig.samples >= 0) samples = fconfig.samples;
+	if(samples >= 0)
+	{
+		attribs[j++] = EGL_SAMPLES;
+		attribs[j++] = samples;
+	}
 	attribs[j] = EGL_NONE;
 
 	if(surfaceType == -1) surfaceType = EGL_WINDOW_BIT;
