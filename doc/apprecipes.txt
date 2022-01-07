@@ -113,6 +113,14 @@
 		''vglrun''. \
 	| See {ref prefix="Section ": VGL_WM} for further information. \
 	|
+| Mozilla Firefox | v91 and later | Linux \
+	| ''vglrun -d egl firefox'' \
+	| Recent versions of Mozilla Firefox use the EGL/X11 API instead of the GLX \
+		API, and VirtualGL only supports the EGL/X11 API when using the EGL back \
+		end.  Note that you can replace ''egl'' with the path to any DRI device, \
+		such as ''/dev/dri/card0''.  See {ref prefix="Section ": VGL_DISPLAY} for \
+		further information. \
+	|
 | ANSYS Fluent (when launched from ANSYS Workbench) | v16 and later | Linux \
 	| Set the ''FLUENT_WB_OPTIONAL_ARGS'' environment variable to \
 		''-driver opengl'' and the ''CORTEX_PRE'' environment variable to \
