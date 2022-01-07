@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2021-12-17T17:08:23">
+<meta name="date" content="2022-01-07T16:39:28">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2156,13 +2156,6 @@ procedures:</p>
     <td class="standard">The ANSA startup script directly invokes <code>/lib/libc.so.6</code> to query the glibc version.  Since the VirtualGL faker libraries depend on libc, preloading VirtualGL when directly invoking <code>libc.so.6</code> creates an infinite loop.  Thus, it is necessary to disable the preloading of VirtualGL in the application script and then re-enable it prior to launching the actual application.</td>
   </tr>
   <tr class="standard">
-    <td class="standard">ANSYS HFSS, ANSYS ICEM CFD, Roxar RMS</td>
-    <td class="standard">All</td>
-    <td class="standard">Linux</td>
-    <td class="standard">Set the <code>VGL_SPOILLAST</code> environment variable to <code>0</code> prior to launching the application with <code>vglrun</code></td>
-    <td class="standard">These applications draw node highlighting and/or rubber banding directly to the front buffer.  In order for these front buffer operations to be displayed properly, it is necessary to use the &ldquo;spoil first&rdquo; frame spoiling algorithm whenever the application calls <code>glFlush()</code>.  See Section <a href="#VGL_SPOILLAST" class="ref">19.1</a> for further information.</td>
-  </tr>
-  <tr class="standard">
     <td class="standard">AutoForm</td>
     <td class="standard">v4.0x</td>
     <td class="standard">All</td>
@@ -2175,13 +2168,6 @@ procedures:</p>
     <td class="standard">Linux</td>
     <td class="standard">Add <br /><br /> <code>export&nbsp;LD_PRELOAD=libvglfaker.so</code> <br /><br /> to the top of <strong class="filename">~/.cedega/.winex_ver/winex-<em>version</em>/bin/winex3</strong>, then run Cedega as you would normally (without <code>vglrun</code>.)  Since <code>vglrun</code> is not being used, it is necessary to use environment variables or the VirtualGL Configuration dialog to modify VirtualGL&rsquo;s configuration.</td>
     <td class="standard">The actual binary (WineX) that uses OpenGL is buried beneath several layers of Python and shell scripts.  The <code>LD_PRELOAD</code> variable does not get propagated down from the initial shell that invoked <code>vglrun</code>.</td>
-  </tr>
-  <tr class="standard">
-    <td class="standard">ANSYS Fluent (when launched from ANSYS Workbench)</td>
-    <td class="standard">v16 and later</td>
-    <td class="standard">Linux</td>
-    <td class="standard">Set the <code>FLUENT_WB_OPTIONAL_ARGS</code> environment variable to <code>-driver&nbsp;opengl</code> and the <code>CORTEX_PRE</code> environment variable to <code>/opt/VirtualGL/bin/vglrun</code>.</td>
-    <td class="standard">If these environment variables are not set, Fluent will use software OpenGL when launched from ANSYS Workbench.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Google Chrome/Chromium</td>
@@ -2198,11 +2184,25 @@ procedures:</p>
     <td class="standard">See Section <a href="#VGL_WM" class="ref">19.1</a> for further information.</td>
   </tr>
   <tr class="standard">
+    <td class="standard">ANSYS Fluent (when launched from ANSYS Workbench)</td>
+    <td class="standard">v16 and later</td>
+    <td class="standard">Linux</td>
+    <td class="standard">Set the <code>FLUENT_WB_OPTIONAL_ARGS</code> environment variable to <code>-driver&nbsp;opengl</code> and the <code>CORTEX_PRE</code> environment variable to <code>/opt/VirtualGL/bin/vglrun</code>.</td>
+    <td class="standard">If these environment variables are not set, Fluent will use software OpenGL when launched from ANSYS Workbench.</td>
+  </tr>
+  <tr class="standard">
     <td class="standard">Heretic II</td>
     <td class="standard">All</td>
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun&nbsp;heretic2&nbsp;+set&nbsp;vid_ref&nbsp;glx</code></td>
     <td class="standard"></td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">ANSYS HFSS, ANSYS ICEM CFD, Roxar RMS</td>
+    <td class="standard">All</td>
+    <td class="standard">Linux</td>
+    <td class="standard">Set the <code>VGL_SPOILLAST</code> environment variable to <code>0</code> prior to launching the application with <code>vglrun</code></td>
+    <td class="standard">These applications draw node highlighting and/or rubber banding directly to the front buffer.  In order for these front buffer operations to be displayed properly, it is necessary to use the &ldquo;spoil first&rdquo; frame spoiling algorithm whenever the application calls <code>glFlush()</code>.  See Section <a href="#VGL_SPOILLAST" class="ref">19.1</a> for further information.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Intel OpenCL ICD</td>
