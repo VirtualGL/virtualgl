@@ -72,15 +72,6 @@
 		VirtualGL in the application script and then re-enable it prior to \
 		launching the actual application. \
 	|
-| ANSYS HFSS, ANSYS ICEM CFD, Roxar RMS | All | Linux \
-	| Set the ''VGL_SPOILLAST'' environment variable to ''0'' prior to \
-		launching the application with ''vglrun'' \
-	| These applications draw node highlighting and/or rubber banding directly \
-		to the front buffer.  In order for these front buffer operations to be \
-		displayed properly, it is necessary to use the "spoil first" frame \
-		spoiling algorithm whenever the application calls ''glFlush()''.  See \
-		{ref prefix="Section ": VGL_SPOILLAST} for further information. \
-	|
 | AutoForm | v4.0x | All \
 	| {pcode: vglrun +sync xaf\___version__} \
 	| AutoForm relies on mixed X11/OpenGL rendering, and thus certain features \
@@ -104,13 +95,6 @@
 		layers of Python and shell scripts.  The ''LD_PRELOAD'' variable does not \
 		get propagated down from the initial shell that invoked ''vglrun''. \
 	|
-| ANSYS Fluent (when launched from ANSYS Workbench) | v16 and later | Linux \
-	| Set the ''FLUENT_WB_OPTIONAL_ARGS'' environment variable to \
-		''-driver opengl'' and the ''CORTEX_PRE'' environment variable to \
-		''/opt/VirtualGL/bin/vglrun''. \
-	| If these environment variables are not set, Fluent will use software \
-		OpenGL when launched from ANSYS Workbench. \
-	|
 | Google Chrome/Chromium | v85 and later | Linux \
 	| ''vglrun -d egl google-chrome --disable-seccomp-filter-sandbox''{nl} \
 		or{nl} \
@@ -129,9 +113,25 @@
 		''vglrun''. \
 	| See {ref prefix="Section ": VGL_WM} for further information. \
 	|
+| ANSYS Fluent (when launched from ANSYS Workbench) | v16 and later | Linux \
+	| Set the ''FLUENT_WB_OPTIONAL_ARGS'' environment variable to \
+		''-driver opengl'' and the ''CORTEX_PRE'' environment variable to \
+		''/opt/VirtualGL/bin/vglrun''. \
+	| If these environment variables are not set, Fluent will use software \
+		OpenGL when launched from ANSYS Workbench. \
+	|
 | Heretic II | All | Linux \
 	| ''vglrun heretic2 +set vid_ref glx'' \
 	| {:} \
+	|
+| ANSYS HFSS, ANSYS ICEM CFD, Roxar RMS | All | Linux \
+	| Set the ''VGL_SPOILLAST'' environment variable to ''0'' prior to \
+		launching the application with ''vglrun'' \
+	| These applications draw node highlighting and/or rubber banding directly \
+		to the front buffer.  In order for these front buffer operations to be \
+		displayed properly, it is necessary to use the "spoil first" frame \
+		spoiling algorithm whenever the application calls ''glFlush()''.  See \
+		{ref prefix="Section ": VGL_SPOILLAST} for further information. \
 	|
 | Intel OpenCL ICD | All | Linux \
 	| {pcode: vglrun -ld __path-to-Intel-OpenCL-libs__ __application__} \
