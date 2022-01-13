@@ -20,7 +20,6 @@ maketemp()
 }
 
 VGLTUNNEL=0
-CONNECT=1
 FORCE=0
 IPV6=0
 SSHCMD=ssh
@@ -38,8 +37,8 @@ usage()
 	echo "-s = Tunnel VGL Transport and forward X11 through SSH"
 	echo "     (default: only forward X11 through SSH)"
 	echo "-ipv6 = Use IPv6 sockets"
-	echo "-e <program> = Execute <program> on the VirtualGL server (if using the -s or -x"
-	echo "               options, <program> is executed after running vgllogin.)"
+	echo "-e <program> = Execute <program> on the VirtualGL server (if using the -s"
+	echo "               option, <program> is executed after running vgllogin.)"
 	echo "-g = Use gsissh from Globus Toolkit to make all SSH connections"
 	echo "-force = Force a new vglclient instance (use with caution)"
 	echo "-bindir <d> = Path in which the VGL executables and scripts are installed on"
@@ -60,7 +59,7 @@ do
 	-b*) VGL_BINDIR=$2; shift ;;
 	-f*) FORCE=1 ;;
 	-ipv6) IPV6=1 ;;
-	-s*) VGLTUNNEL=1; CONNECT=1 ;;
+	-s*) VGLTUNNEL=1 ;;
 	-g*) SSHCMD=gsissh; GLOBUS=1 ;;
 	-e*) COMMAND=$2; shift ;;
 	-h*) usage ;;
@@ -70,7 +69,7 @@ do
 	shift
 done
 
-if [ $# -eq 0 -a $CONNECT -eq 1 ]; then
+if [ $# -eq 0 ]; then
 	usage 0
 fi
 
