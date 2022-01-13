@@ -22,10 +22,10 @@ reliance on the RSA key exchange algorithm (which made it incompatible with TLS
 v1.3.)
 
 3. When using the EGL back end, VirtualGL now supports 3D applications
-(including recent versions of Google Chrome/Chromium) that use the EGL/X11 API
-instead of the GLX API.  As of this writing, VirtualGL does not support EGL
-pixmap surfaces or front buffer/single buffer rendering with EGL window
-surfaces.
+(including recent versions of Google Chrome/Chromium and Mozilla Firefox) that
+use the EGL/X11 API instead of the GLX API.  As of this writing, VirtualGL does
+not support EGL pixmap surfaces or front buffer/single buffer rendering with
+EGL window surfaces.
 
 
 3.0.1
