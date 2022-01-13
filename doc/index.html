@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2022-03-29T15:31:18">
+<meta name="date" content="2022-03-29T15:43:43">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.6.6</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1347,8 +1347,7 @@ over a local-area network.</p>
 <p><a name="X11_Forwarding"></a></p>
 
 <p>This mode is recommended for use only on secure local-area networks.  
-The X11 traffic is encrypted, but the VGL Transport is left unencrypted 
-to maximize performance.</p>
+The X11 traffic is encrypted, but the VGL Transport is left unencrypted.</p>
 
 
 <h3 id="hd008001001">8.1.1&nbsp;Procedure</h3>
@@ -1408,11 +1407,7 @@ to maximize performance.</p>
 <p>Both the VGL Transport and the X11 traffic are tunneled through SSH when 
 using this mode, and thus it provides a completely secure solution.  It 
 is also useful when either the client or the VirtualGL server is behind 
-a restrictive firewall and only SSH connections are allowed through.  
-Using SSH tunneling on wide-area networks should not affect performance 
-significantly.  However, using SSH tunneling with certain SSH clients on 
-a local-area network can reduce the end-to-end performance of the VGL 
-Transport.</p>
+a restrictive firewall and only SSH connections are allowed through.</p>
 
 
 <h3 id="hd008002001">Procedure</h3>
