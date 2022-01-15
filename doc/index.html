@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2022-01-13T16:30:48">
+<meta name="date" content="2022-01-15T17:31:08">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -59,8 +59,8 @@ systems, OpenGL and GLX, and X windows.</p>
         <a href="#hd004" class="hd">4 System Requirements</a>
         <ul class="hd">
             <li class="Itemize-3 hd">
-                <a href="#hd004001" class="hd">4.1 Linux/x86 and Other x86 Un*x 
-                Operating Systems</a>
+                <a href="#hd004001" class="hd">4.1 Linux and Other Un*x Operating 
+                Systems</a>
             </li>
             <li class="Itemize-3 hd">
                 <a href="#hd004002" class="hd">4.2 Mac/x86</a>
@@ -545,7 +545,7 @@ transport plugins.</p>
 <h1 id="hd004"><a name="file004"></a>4&nbsp;System Requirements</h1>
 
 
-<h2 id="hd004001">4.1&nbsp;Linux/x86 and Other x86 Un*x Operating Systems</h2>
+<h2 id="hd004001">4.1&nbsp;Linux and Other Un*x Operating Systems</h2>
 
 <p><a name="Linux_Requirements"></a></p>
 
@@ -555,7 +555,7 @@ transport plugins.</p>
   <tr class="head ">
     <th class="head standard"></th>
     <th class="head standard">Server (x86)</th>
-    <th class="head standard">Server (x86-64)</th>
+    <th class="head standard">Server (x86-64, AArch64)</th>
     <th class="head standard">Client (if using the VGL Transport)</th>
   </tr>
   </thead>
@@ -739,9 +739,10 @@ If you are installing VirtualGL onto a fresh server, and you also intend to inst
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files" class="remote">Files 
         area</a></span><a name="idx0018"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0019"></a>. Packages are 
-        provided for RPM-based and Debian-based Linux distributions that contain 
-        GLIBC 2.12 or later. <br />
+        SourceForge project page</a></span><a name="idx0019"></a>. RPM and 
+        Debian packages are provided for x86 Linux distributions that contain 
+        GLIBC 2.12 or later and AArch64 Linux distributions that contain GLIBC 
+        2.17 or later. <br />
         <div class="important"><p class="important">
         If you want to run both 32-bit and 64-bit OpenGL applications with VirtualGL on 64-bit x86 Linux systems, then you will need to install both <strong class="filename">VirtualGL-3.0.1.x86_64.rpm</strong> and <strong class="filename">VirtualGL-3.0.1.i386.rpm</strong>, or both <strong class="filename">virtualgl_3.0.1_amd64.deb</strong> and <strong class="filename">virtualgl32_3.0.1_amd64.deb</strong>. (<strong class="filename">virtualgl32_3.0.1_amd64.deb</strong> is a supplementary package that contains only the 32-bit server components.)
         </p></div>

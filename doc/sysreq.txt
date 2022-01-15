@@ -1,9 +1,10 @@
 * System Requirements
 
-** Linux/x86 and Other x86 Un*x Operating Systems
+** Linux and Other Un*x Operating Systems
 {anchor: Linux_Requirements}
 
-|| || Server (x86) || Server (x86-64) || Client (if using the VGL Transport) ||
+|| || Server (x86) || Server (x86-64, AArch64) \
+	|| Client (if using the VGL Transport) ||
 | Recommended CPU \
 	| {list type=ul: \
 			{item:For optimal performance, the CPU should support SSE2 \
