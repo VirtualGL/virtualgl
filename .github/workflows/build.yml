@@ -30,7 +30,7 @@ jobs:
           git clone --depth=1 https://github.com/VirtualGL/buildscripts.git $HOME/src/buildscripts
           mkdir $HOME/libjpeg-turbo-rpm
           pushd $HOME/libjpeg-turbo-rpm
-          wget --no-check-certificate $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.x86_64.rpm $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.i386.rpm
+          wget --no-check-certificate $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.x86_64.rpm $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.aarch64.rpm $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.i386.rpm
           popd
           mkdir $HOME/rpmkeys
           wget --no-check-certificate "$LJT_GPG_KEY" -O $HOME/rpmkeys/LJT-GPG-KEY
@@ -46,7 +46,7 @@ jobs:
           echo "GPG_KEY_PASS=${{secrets.GPG_KEY_PASS}}" >>$HOME/src/buildscripts/gpgsign
       - name: Build
         run: |
-          docker run -v $HOME/src/vgl.nightly:/root/src/vgl.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $GITHUB_WORKSPACE:/root/src/virtualgl -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-rpm:/rpms -v $HOME/rpmkeys:/rpmkeys -t dcommander/buildvgl:$BRANCH bash -c "rpm --import /rpmkeys/LJT-GPG-KEY && rpm -K /rpms/*.rpm && rpm -i /rpms/*.rpm && rpm --import /rpmkeys/VGLPR-GPG-KEY && ~/src/buildscripts/buildvgl -d /root/src/virtualgl -v"
+          docker run -v $HOME/src/vgl.nightly:/root/src/vgl.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $GITHUB_WORKSPACE:/root/src/virtualgl -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-rpm:/rpms -v $HOME/rpmkeys:/rpmkeys -t dcommander/buildvgl:$BRANCH bash -c "rpm --import /rpmkeys/LJT-GPG-KEY && rpm -K /rpms/*.rpm && rpm -i /rpms/*86*.rpm && pushd /opt/arm64 && rpm2cpio /rpms/*aarch64*.rpm | cpio -id && popd && rpm --import /rpmkeys/VGLPR-GPG-KEY && ~/src/buildscripts/buildvgl -d /root/src/virtualgl -v"
           sudo chown -R runner:runner $HOME/src/vgl.nightly
           mv $HOME/src/vgl.nightly/latest/log-${{github.job}}.txt $HOME/src/vgl.nightly/latest/files/
       - name: Configure AWS
