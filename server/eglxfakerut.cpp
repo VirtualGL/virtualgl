@@ -20,6 +20,7 @@
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include <X11/Xlib.h>
+#include <X11/Xutil.h>
 #include <X11/XKBlib.h>
 #include <dlfcn.h>
 #include <unistd.h>
