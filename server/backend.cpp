@@ -227,7 +227,8 @@ GLXContext createContext(Display *dpy, VGLFBConfig config, GLXContext share,
 								true);
 							return NULL;
 						}
-						else if(glxAttribs[glxi] != GLX_RENDER_TYPE)
+						else if(glxAttribs[glxi] != GLX_RENDER_TYPE
+							|| glxAttribs[glxi + 1] != GLX_RGBA_TYPE)
 						{
 							faker::sendGLXError(dpy, X_GLXCreateContextAttribsARB, BadValue,
 								true);
