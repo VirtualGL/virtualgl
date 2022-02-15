@@ -1,5 +1,5 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
- * Copyright (C)2011, 2013-2015, 2017-2019, 2021 D. R. Commander
+ * Copyright (C)2011, 2013-2015, 2017-2019, 2021-2022 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -73,7 +73,7 @@ Display *dpy = NULL;  Window win = 0;
 GLXContext ctx = 0;
 int useStereo = 0, useDC = 0, useImm = 0, interactive = 0, loColor = 0,
 	maxFrames = 0, totalFrames = 0, directCtx = True, bpc = -1, deadYet = 0,
-	swapInterval = -1;
+	swapInterval = -1, useSRGB = 0;
 int rshift = 0, gshift = 0, bshift = 0;
 double benchTime = DEFBENCHTIME;
 int nColors = 0, colorScheme = GRAY;
@@ -157,6 +157,8 @@ static void renderSpheres(int buf)
 	GLfloat nearDist = 1.5, farDist = 40., zeroParallaxDist = 17.;
 
 	glDrawBuffer(buf);
+
+	if(useSRGB) glEnable(GL_FRAMEBUFFER_SRGB);
 
 	xAspect = (GLfloat)width / (GLfloat)(min(width, height));
 	yAspect = (GLfloat)height / (GLfloat)(min(width, height));
@@ -455,6 +457,7 @@ static void usage(char **argv)
 	printf("-alpha = Use a visual with an alpha channel\n");
 	printf("-bpc = Specify bits per component (default is determined from the default depth\n");
 	printf("       of the X server)\n");
+	printf("-srgb = Use sRGB color space\n");
 	printf("-f <n> = Render <n> frames and exit\n");
 	printf("-bt <t> = Print benchmark results every <t> seconds (default: %.1f)\n",
 		DEFBENCHTIME);
@@ -475,7 +478,7 @@ int main(int argc, char **argv)
 	int rgbAttribs[] = { GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_RED_SIZE, 8,
 		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, GLX_DEPTH_SIZE, 1,
 		GLX_DOUBLEBUFFER, 1, GLX_STEREO, 0, GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR,
-		None, None, None };
+		GLX_FRAMEBUFFER_SRGB_CAPABLE_EXT, GLX_DONT_CARE, None, None, None };
 	XSetWindowAttributes swa;  Window root;
 	int fullScreen = 0;  unsigned long mask = 0;
 	int screen = -1, pps;
@@ -521,6 +524,12 @@ int main(int argc, char **argv)
 		{
 			swapInterval = atoi(argv[++i]);
 			if(swapInterval < 1) usage(argv);
+		}
+		else if(!stricmp(argv[i], "-srgb"))
+		{
+			if(!GLX_EXTENSION_EXISTS(GLX_EXT_framebuffer_sRGB))
+				THROW("GLX_EXT_framebuffer_sRGB extension is not available");
+			useSRGB = 1;  rgbAttribs[17] = 1;
 		}
 		else if(!stricmp(argv[i], "-s"))
 		{
@@ -576,8 +585,8 @@ int main(int argc, char **argv)
 	rgbAttribs[3] = rgbAttribs[5] = rgbAttribs[7] = bpc;
 	if(useAlpha)
 	{
-		rgbAttribs[16] = GLX_ALPHA_SIZE;
-		rgbAttribs[17] = 32 - bpc * 3;
+		rgbAttribs[18] = GLX_ALPHA_SIZE;
+		rgbAttribs[19] = 32 - bpc * 3;
 	}
 
 	c = glXChooseFBConfig(dpy, screen, rgbAttribs, &n);

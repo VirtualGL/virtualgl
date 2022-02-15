@@ -1,7 +1,8 @@
 /*
  * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  * Copyright (C) 2005-2007  Sun Microsystems, Inc.   All Rights Reserved.
- * Copyright (C) 2011, 2013, 2015, 2019  D. R. Commander   All Rights Reserved.
+ * Copyright (C) 2011, 2013, 2015, 2019, 2022  D. R. Commander
+ *                                             All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -1031,7 +1032,8 @@ print_visual_attribs_short(const struct visual_attribs *attribs,
           attribs->transparentType != GLX_NONE,
           attribs->bufferSize,
           attribs->level,
-          (attribs->render_type & GLX_RGBA_BIT) ? 'r' : ' ',
+          (attribs->render_type & GLX_RGBA_BIT) ? (attribs->srgb ? 's' : 'r') :
+                                                  ' ',
           (attribs->render_type & GLX_COLOR_INDEX_BIT) ? 'c' : ' ',
           attribs->doubleBuffer ? 'y' : '.',
           attribs->stereo ? 'y' : '.',

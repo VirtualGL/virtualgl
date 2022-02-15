@@ -1,4 +1,4 @@
-// Copyright (C)2019-2021 D. R. Commander
+// Copyright (C)2019-2022 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -102,9 +102,9 @@ void FakePbuffer::createBuffer(bool useRBOContext, bool ignoreReadDrawBufs)
 		{
 			if(!rboc[i])
 			{
-				GLenum internalFormat = GL_RGB8;
+				GLenum internalFormat = GL_SRGB8;
 				if(config->attr.redSize > 8) internalFormat = GL_RGB10_A2;
-				else if(config->attr.alphaSize) internalFormat = GL_RGBA8;
+				else if(config->attr.alphaSize) internalFormat = GL_SRGB8_ALPHA8;
 
 				_glGenRenderbuffers(1, &rboc[i]);
 				_glBindRenderbuffer(GL_RENDERBUFFER, rboc[i]);

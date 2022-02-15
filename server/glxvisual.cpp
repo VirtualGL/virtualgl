@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2009-2016, 2019-2021 D. R. Commander
+// Copyright (C)2009-2016, 2019-2022 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -861,7 +861,8 @@ VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
 		int fbConfigID = GLX_DONT_CARE, doubleBuffer = GLX_DONT_CARE, redSize = 0,
 			greenSize = 0, blueSize = 0, alphaSize = 0, depthSize = 0,
 			stencilSize = 0, samples = 0, drawableType = GLX_WINDOW_BIT,
-			xRenderable = GLX_DONT_CARE, visualType = GLX_DONT_CARE, stereo = 0;
+			xRenderable = GLX_DONT_CARE, visualType = GLX_DONT_CARE, stereo = 0,
+			sRGB = GLX_DONT_CARE;
 
 		if(!attribs) return getFBConfigs(dpy, screen, nElements);
 
@@ -891,6 +892,7 @@ VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
 				PARSE_ATTRIB_DC(GLX_X_RENDERABLE, xRenderable, 0, 1)
 				PARSE_ATTRIB_DC(GLX_X_VISUAL_TYPE, visualType, GLX_TRUE_COLOR,
 					GLX_DIRECT_COLOR)
+				PARSE_ATTRIB_DC(GLX_FRAMEBUFFER_SRGB_CAPABLE_EXT, sRGB, 0, 1);
 
 				case GLX_LEVEL:
 				case GLX_AUX_BUFFERS:
@@ -951,6 +953,10 @@ VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
 			if(visualType != (int)GLX_DONT_CARE
 				&& ((visualType == GLX_TRUE_COLOR && ca[i].c_class != TrueColor)
 					|| (visualType == GLX_DIRECT_COLOR && ca[i].c_class != DirectColor)))
+				continue;
+			if(sRGB != (int)GLX_DONT_CARE
+				&& sRGB != !!(ca[i].attr.redSize + ca[i].attr.greenSize +
+					ca[i].attr.blueSize == 24))
 				continue;
 
 			configs[nElements] = &ca[i];
