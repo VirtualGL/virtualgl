@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011-2021 D. R. Commander
+// Copyright (C)2009, 2011-2022 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -866,7 +866,7 @@ static const char *getGLXExtensions(void)
 		if((faker::eglMajor > 1 || (faker::eglMajor == 1 && faker::eglMinor >= 5))
 			&& !strstr(glxextensions, "GLX_ARB_create_context"))
 			strncat(glxextensions,
-				" GLX_ARB_create_context GLX_ARB_create_context_profile",
+				" GLX_ARB_create_context GLX_ARB_create_context_profile GLX_EXT_framebuffer_sRGB",
 				1023 - strlen(glxextensions));
 		return glxextensions;
 	}

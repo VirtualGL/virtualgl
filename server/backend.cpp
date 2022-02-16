@@ -1,4 +1,4 @@
-// Copyright (C)2019-2021 D. R. Commander
+// Copyright (C)2019-2022 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -227,7 +227,8 @@ GLXContext createContext(Display *dpy, VGLFBConfig config, GLXContext share,
 								true);
 							return NULL;
 						}
-						else if(glxAttribs[glxi] != GLX_RENDER_TYPE)
+						else if(glxAttribs[glxi] != GLX_RENDER_TYPE
+							|| glxAttribs[glxi + 1] != GLX_RGBA_TYPE)
 						{
 							faker::sendGLXError(dpy, X_GLXCreateContextAttribsARB, BadValue,
 								true);
@@ -537,6 +538,10 @@ int getFBConfigAttrib(Display *dpy, VGLFBConfig config, int attribute,
 				return Success;
 			case GLX_SAMPLES:
 				*value = config->attr.samples;
+				return Success;
+			case GLX_FRAMEBUFFER_SRGB_CAPABLE_EXT:
+				*value = !!(config->attr.redSize + config->attr.greenSize +
+					config->attr.blueSize == 24);
 				return Success;
 			default:
 				return GLX_BAD_ATTRIBUTE;

@@ -44,6 +44,11 @@ always returned NULL if `GLX_RENDER_TYPE` was specified in the attribute list.
 This issue was known to affect JOGL applications but may have affected other
 applications as well.
 
+3. The EGL back end now supports the `GLX_EXT_framebuffer_sRGB` extension,
+which is necessary for OpenGL 3.0 conformance.  This fixes an issue whereby
+frames rendered by 3D applications using the sRGB color space appeared too
+dark.
+
 
 3.0
 ===
