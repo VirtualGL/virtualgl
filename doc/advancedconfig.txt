@@ -948,7 +948,7 @@ previous method:
 
 	Description :: When window manager mode is enabled, VirtualGL will disable
 	some of its internal features that interfere with the correct operation of
-	compositing window managers such as compiz.
+	compositing window managers such as Compiz.
 
 | Environment Variable | {pcode: VGL_X11LIB = __{l}__ } |
 | Summary | __''{l}''__ = the location of an alternate X11 library |
