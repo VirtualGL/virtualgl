@@ -121,7 +121,7 @@ FBXFrame *X11Trans::getFrame(Display *dpy, Window win, int width, int height)
 				index = i;
 		if(index < 0) THROW("No free buffers in pool");
 		if(!frames[index])
-			frames[index] = new FBXFrame(dpy, win);
+                        frames[index] = new FBXFrame(dpy, win, NULL, true);
 		f = frames[index];  f->waitUntilComplete();
 	}
 
