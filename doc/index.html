@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2022-03-29T15:48:33">
+<meta name="date" content="2022-03-29T16:12:37">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.6.6</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -36,7 +36,7 @@
 <a name="file000"></a>
 <p><em>Intended audience:</em> System Administrators, Graphics Programmers, 
 Researchers, and others with knowledge of Linux or Unix operating 
-systems, OpenGL and GLX, and X windows.</p>
+systems, OpenGL and GLX, and the X Window System.</p>
 
 <div id="hd">
 <div id="hdBlock" class="hd">
@@ -326,16 +326,16 @@ the instructions accordingly.</p>
     </dd>
     <dt class="Description-1 Description">3D X server</dt>
     <dd class="Description-1 Description">
-        An X-Windows server (&ldquo;X server&rdquo;) attached to one or more 
-        GPUs in the VirtualGL server.  The 3D X server can be 
+        An X Window System server (&ldquo;X server&rdquo;) attached to one or 
+        more GPUs in the VirtualGL server.  The 3D X server can be 
         &ldquo;headless&rdquo; (not attached to a monitor.)
     </dd>
     <dt class="Description-1 Description">X proxy</dt>
     <dd class="Description-1 Description">
         A virtual X server that runs on a remote machine (usually, but not 
-        always, on the VirtualGL server.)  Because X proxies render X-Windows 
-        (&ldquo;X11&rdquo;) drawing commands to a virtual framebuffer in main 
-        memory rather than to a real framebuffer in GPU memory, multiple 
+        always, on the VirtualGL server.)  Because X proxies render X Window 
+        System (&ldquo;X11&rdquo;) drawing commands to a virtual framebuffer in 
+        main memory rather than to a real framebuffer in GPU memory, multiple 
         simultaneous instances of an X proxy can co-exist on the same server.  
         However, for the same reason, X proxies generally do not support 
         hardware-accelerated 3D rendering (without the help of VirtualGL.)  Most 
@@ -410,8 +410,8 @@ displaying OpenGL applications to an X server on a different machine
 requires that all of the OpenGL commands and 3D data be sent over the 
 network to be rendered.  That is not a tenable proposition unless the 3D 
 data is relatively small and static, unless the network is very fast, 
-and unless the OpenGL application is specifically tuned for a remote 
-X-Windows environment.</p>
+and unless the OpenGL application is specifically tuned for a remote X 
+Window System (&ldquo;X&rdquo;) environment.</p>
 
 <p>With VirtualGL, the OpenGL commands and 3D data are instead redirected 
 to a GPU in the application server, and only the rendered frames are 
@@ -428,10 +428,10 @@ of the data over the network or sit in front of the machine that is
 rendering the data.</p>
 
 <p>Normally, a Un*x OpenGL application sends all of its graphics rendering 
-commands and data, both 2D and 3D, to an X-Windows server, which may be 
-located across the network from the application server.  VirtualGL 
-employs a technique called &ldquo;split rendering&rdquo; to redirect the 
-3D commands and data from the OpenGL application to a GPU in the 
+commands and data, both 2D and 3D, to an X server, which may be located 
+across the network from the application server.  VirtualGL employs a 
+technique called &ldquo;split rendering&rdquo; to redirect the 3D 
+commands and data from the OpenGL application to a GPU in the 
 application server.  VGL accomplishes this by pre-loading a dynamic 
 shared object (DSO), the VirtualGL Faker, into the OpenGL application at 
 run time.  The VirtualGL Faker intercepts and modifies certain GLX, 
@@ -493,15 +493,15 @@ used to deliver rendered frames to the 2D X server:</p>
     <dt class="Description-1 Description">2. X11 Transport</dt>
     <dd class="Description-1 Description">
         The X11 Transport simply draws the rendered frames into the appropriate 
-        X window using <code>XPutImage()</code> or similar X-Windows commands. 
-        This is most useful in conjunction with an X proxy, which can be one of 
-        any number of Un*x remote display applications, such as VNC.  When using 
-        the X11 Transport, VirtualGL does not normally perform any image 
-        compression or encoding itself.  It instead relies on an X proxy to 
-        encode the frames and deliver them to the client(s).  Since the use of 
-        an X proxy eliminates the need to send X-Windows commands over the 
-        network, this is the recommended method for using VirtualGL over 
-        high-latency or low-bandwidth networks.
+        X window using <code>XPutImage()</code> or similar X11 commands.  This 
+        is most useful in conjunction with an X proxy, which can be one of any 
+        number of Un*x remote display applications, such as VNC.  When using the 
+        X11 Transport, VirtualGL does not normally perform any image compression 
+        or encoding itself.  It instead relies on an X proxy to encode the 
+        frames and deliver them to the client(s).  Since the use of an X proxy 
+        eliminates the need to send X11 commands over the network, this is the 
+        recommended method for using VirtualGL over high-latency or 
+        low-bandwidth networks.
         <div class="important"><p class="important">
         The XV Transport, described in Chapter <a href="#X_Video_Support" class="ref">10</a>, is a variant of the X11 Transport.
         </p></div>

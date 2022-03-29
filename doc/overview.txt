@@ -12,7 +12,7 @@ acceleration, but this approach requires that all of the OpenGL commands and 3D
 data be sent over the network to be rendered.  That is not a tenable
 proposition unless the 3D data is relatively small and static, unless the
 network is very fast, and unless the OpenGL application is specifically tuned
-for a remote X-Windows environment.
+for a remote X Window System ("X") environment.
 
 With VirtualGL, the OpenGL commands and 3D data are instead redirected to a GPU
 in the application server, and only the rendered frames are sent over the
@@ -27,9 +27,9 @@ huge amounts of data in real time without needing to copy any of the data over
 the network or sit in front of the machine that is rendering the data.
 
 Normally, a Un*x OpenGL application sends all of its graphics rendering
-commands and data, both 2D and 3D, to an X-Windows server, which may be located
-across the network from the application server.  VirtualGL employs a technique
-called "split rendering" to redirect the 3D commands and data from the OpenGL
+commands and data, both 2D and 3D, to an X server, which may be located across
+the network from the application server.  VirtualGL employs a technique called
+"split rendering" to redirect the 3D commands and data from the OpenGL
 application to a GPU in the application server.  VGL accomplishes this by
 pre-loading a dynamic shared object (DSO), the VirtualGL Faker, into the OpenGL
 application at run time.  The VirtualGL Faker intercepts and modifies certain
@@ -74,14 +74,14 @@ rendered frames to the 2D X server:
 
 {anchor: X11_Transport}
 	\2. X11 Transport :: The X11 Transport simply draws the rendered frames into
-	the appropriate X window using ''XPutImage()'' or similar X-Windows commands.
-	 This is most useful in conjunction with an X proxy, which can be one of any
-	number of Un*x remote display applications, such as VNC.  When using the X11
+	the appropriate X window using ''XPutImage()'' or similar X11 commands.  This
+	is most useful in conjunction with an X proxy, which can be one of any number
+	of Un*x remote display applications, such as VNC.  When using the X11
 	Transport, VirtualGL does not normally perform any image compression or
 	encoding itself.  It instead relies on an X proxy to encode the frames and
 	deliver them to the client(s).  Since the use of an X proxy eliminates the
-	need to send X-Windows commands over the network, this is the recommended
-	method for using VirtualGL over high-latency or low-bandwidth networks.
+	need to send X11 commands over the network, this is the recommended method
+	for using VirtualGL over high-latency or low-bandwidth networks.
 
 	!!! The XV Transport, described in {ref prefix="Chapter ": X_Video_Support},
 	is a variant of the X11 Transport.
