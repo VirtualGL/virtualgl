@@ -24,7 +24,7 @@
 
 __Intended audience:__ System Administrators, Graphics Programmers,
 Researchers, and others with knowledge of Linux or Unix operating systems,
-OpenGL and GLX, and X windows.
+OpenGL and GLX, and the X Window System.
 
 #LIST: contents
 {nl}
