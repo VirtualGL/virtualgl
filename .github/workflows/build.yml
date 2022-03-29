@@ -49,14 +49,3 @@ jobs:
           docker run -v $HOME/src/vgl.nightly:/root/src/vgl.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $GITHUB_WORKSPACE:/root/src/virtualgl -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-rpm:/rpms -v $HOME/rpmkeys:/rpmkeys -t dcommander/buildvgl:$BRANCH bash -c "rpm --import /rpmkeys/LJT-GPG-KEY && rpm -K /rpms/*.rpm && rpm -i /rpms/*.rpm && rpm --import /rpmkeys/VGLPR-GPG-KEY && ~/src/buildscripts/buildvgl -d /root/src/virtualgl -v"
           sudo chown -R runner:runner $HOME/src/vgl.nightly
           mv $HOME/src/vgl.nightly/latest/log-${{github.job}}.txt $HOME/src/vgl.nightly/latest/files/
-      - name: Configure AWS
-        if: ${{github.event_name != 'pull_request'}}
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
-          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-          aws-region: ${{secrets.AWS_REGION}}
-      - name: Deploy
-        if: ${{github.event_name != 'pull_request'}}
-        run: |
-          aws s3 sync --acl public-read --delete $HOME/src/vgl.nightly/latest/files/ s3://virtualgl-pr/${{env.BRANCH}}/${{github.job}}/
