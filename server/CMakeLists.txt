@@ -225,8 +225,13 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 add_executable(fakerut fakerut.cpp fakerut-supplement.c)
+if(VGL_FAKEXCB)
+	string(REGEX REPLACE "libX11" "libxcb" XCB_XCB_LIB ${X11_X11_LIB})
+	string(REGEX REPLACE "libX11" "libX11-xcb" X11_XCB_LIB ${X11_X11_LIB})
+endif()
 target_link_libraries(fakerut "${MINUSZ}now ${OPENGL_gl_LIBRARY}"
-	${OPENGL_glu_LIBRARY} "${MINUSZ}now ${X11_X11_LIB}" ${LIBDL} vglutil)
+	${OPENGL_glu_LIBRARY} "${MINUSZ}now ${X11_X11_LIB}" ${LIBDL} vglutil
+	${XCB_XCB_LIB} ${X11_XCB_LIB})
 
 add_library(vgltrans_test SHARED testplugin.cpp VGLTrans.cpp)
 unset(VGLTRANS_TEST_LINK_FLAGS)

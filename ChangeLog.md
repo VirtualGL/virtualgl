@@ -33,6 +33,14 @@ used to restore the behavior of previous releases of VirtualGL (generating a
 5. VirtualGL's built-in SSL encryption feature now works with OpenSSL v1.1.1
 and later.
 
+6. The VirtualGL Faker now interposes XCB window creation and destruction
+functions.  This fixes an issue whereby, if an X window was created using the
+XCB API and subsequently attached to an OpenGL context using
+`glXMake[Context]Current()`, the off-screen buffer and other faker resources
+associated with that window were not freed until the 3D application exited or
+closed the X display connection associated with the window.  This issue was
+known to affect Qt5 applications.
+
 
 2.6.5
 =====
