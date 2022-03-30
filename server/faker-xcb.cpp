@@ -29,6 +29,281 @@
 extern "C" {
 
 
+xcb_void_cookie_t xcb_create_window(xcb_connection_t *conn, uint8_t depth,
+	xcb_window_t wid, xcb_window_t parent, int16_t x, int16_t y, uint16_t width,
+	uint16_t height, uint16_t border_width, uint16_t _class,
+	xcb_visualid_t visual, uint32_t value_mask, const void *value_list)
+{
+	xcb_void_cookie_t cookie = { 0 };
+
+	TRY();
+
+	if(!fconfig.fakeXCB || IS_EXCLUDED(xcbconnhash.getX11Display(conn)))
+		return _xcb_create_window(conn, depth, wid, parent, x, y, width, height,
+			border_width, _class, visual, value_mask, value_list);
+
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(xcb_create_window);  PRARGX(conn);  PRARGI(depth);  PRARGX(wid);
+	PRARGX(parent);  PRARGI(x);  PRARGI(y);  PRARGI(width);  PRARGI(height);
+	PRARGI(border_width);  PRARGI(_class);  PRARGX(visual);  PRARGX(value_mask);
+	STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+
+	cookie = _xcb_create_window(conn, depth, wid, parent, x, y, width, height,
+		border_width, _class, visual, value_mask, value_list);
+	if(cookie.sequence) winhash.add(xcbconnhash.getX11Display(conn), wid);
+
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+
+	CATCH();
+
+	return cookie;
+}
+
+
+xcb_void_cookie_t xcb_create_window_aux(xcb_connection_t *conn, uint8_t depth,
+	xcb_window_t wid, xcb_window_t parent, int16_t x, int16_t y, uint16_t width,
+	uint16_t height, uint16_t border_width, uint16_t _class,
+	xcb_visualid_t visual, uint32_t value_mask,
+	const xcb_create_window_value_list_t *value_list)
+{
+	xcb_void_cookie_t cookie = { 0 };
+
+	TRY();
+
+	if(!fconfig.fakeXCB || IS_EXCLUDED(xcbconnhash.getX11Display(conn)))
+		return _xcb_create_window_aux(conn, depth, wid, parent, x, y, width,
+			height, border_width, _class, visual, value_mask, value_list);
+
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(xcb_create_window_aux);  PRARGX(conn);  PRARGI(depth);
+	PRARGX(wid);  PRARGX(parent);  PRARGI(x);  PRARGI(y);  PRARGI(width);
+	PRARGI(height);  PRARGI(border_width);  PRARGI(_class);  PRARGX(visual);
+	PRARGX(value_mask);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+
+	cookie = _xcb_create_window_aux(conn, depth, wid, parent, x, y, width,
+		height, border_width, _class, visual, value_mask, value_list);
+	if(cookie.sequence) winhash.add(xcbconnhash.getX11Display(conn), wid);
+
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+
+	CATCH();
+
+	return cookie;
+}
+
+
+xcb_void_cookie_t xcb_create_window_aux_checked(xcb_connection_t *conn,
+	uint8_t depth, xcb_window_t wid, xcb_window_t parent, int16_t x, int16_t y,
+	uint16_t width, uint16_t height, uint16_t border_width, uint16_t _class,
+	xcb_visualid_t visual, uint32_t value_mask,
+	const xcb_create_window_value_list_t *value_list)
+{
+	xcb_void_cookie_t cookie = { 0 };
+
+	TRY();
+
+	if(!fconfig.fakeXCB || IS_EXCLUDED(xcbconnhash.getX11Display(conn)))
+		return _xcb_create_window_aux_checked(conn, depth, wid, parent, x, y,
+			width, height, border_width, _class, visual, value_mask, value_list);
+
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(xcb_create_window_aux_checked);  PRARGX(conn);  PRARGI(depth);
+	PRARGX(wid);  PRARGX(parent);  PRARGI(x);  PRARGI(y);  PRARGI(width);
+	PRARGI(height);  PRARGI(border_width);  PRARGI(_class);  PRARGX(visual);
+	PRARGX(value_mask);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+
+	cookie = _xcb_create_window_aux_checked(conn, depth, wid, parent, x, y,
+		width, height, border_width, _class, visual, value_mask, value_list);
+	if(cookie.sequence) winhash.add(xcbconnhash.getX11Display(conn), wid);
+
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+
+	CATCH();
+
+	return cookie;
+}
+
+
+xcb_void_cookie_t xcb_create_window_checked(xcb_connection_t *conn,
+	uint8_t depth, xcb_window_t wid, xcb_window_t parent, int16_t x, int16_t y,
+	uint16_t width, uint16_t height, uint16_t border_width, uint16_t _class,
+	xcb_visualid_t visual, uint32_t value_mask, const void *value_list)
+{
+	xcb_void_cookie_t cookie = { 0 };
+
+	TRY();
+
+	if(!fconfig.fakeXCB || IS_EXCLUDED(xcbconnhash.getX11Display(conn)))
+		return _xcb_create_window_checked(conn, depth, wid, parent, x, y, width,
+			height, border_width, _class, visual, value_mask, value_list);
+
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(xcb_create_window_checked);  PRARGX(conn);  PRARGI(depth);
+	PRARGX(wid);  PRARGX(parent);  PRARGI(x);  PRARGI(y);  PRARGI(width);
+	PRARGI(height);  PRARGI(border_width);  PRARGI(_class);  PRARGX(visual);
+	PRARGX(value_mask);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+
+	cookie = _xcb_create_window_checked(conn, depth, wid, parent, x, y, width,
+		height, border_width, _class, visual, value_mask, value_list);
+	if(cookie.sequence) winhash.add(xcbconnhash.getX11Display(conn), wid);
+
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+
+	CATCH();
+
+	return cookie;
+}
+
+
+// When a window is destroyed, we shut down the corresponding VirtualWin
+// instance, but we also have to walk the window tree to ensure that VirtualWin
+// instances attached to subwindows are also shut down.
+
+static void DeleteWindow(Display *dpy, Window win, bool subOnly = false)
+{
+	Window root, parent, *children = NULL;  unsigned int n = 0;
+
+	if(!subOnly) winhash.remove(dpy, win);
+	if(XQueryTree(dpy, win, &root, &parent, &children, &n)
+		&& children && n > 0)
+	{
+		for(unsigned int i = 0; i < n; i++) DeleteWindow(dpy, children[i]);
+		_XFree(children);
+	}
+}
+
+
+xcb_void_cookie_t xcb_destroy_subwindows(xcb_connection_t *conn,
+	xcb_window_t window)
+{
+	xcb_void_cookie_t cookie = { 0 };
+
+	TRY();
+
+	Display *dpy = xcbconnhash.getX11Display(conn);
+
+	if(!fconfig.fakeXCB || IS_EXCLUDED(dpy))
+		return _xcb_destroy_subwindows(conn, window);
+
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(xcb_destroy_subwindows);  PRARGX(conn);  PRARGX(window);
+	STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+
+	if(dpy && window) DeleteWindow(dpy, window, true);
+	cookie = _xcb_destroy_subwindows(conn, window);
+
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+
+	CATCH();
+
+	return cookie;
+}
+
+
+xcb_void_cookie_t xcb_destroy_subwindows_checked(xcb_connection_t *conn,
+	xcb_window_t window)
+{
+	xcb_void_cookie_t cookie = { 0 };
+
+	TRY();
+
+	Display *dpy = xcbconnhash.getX11Display(conn);
+
+	if(!fconfig.fakeXCB || IS_EXCLUDED(dpy))
+		return _xcb_destroy_subwindows_checked(conn, window);
+
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(xcb_destroy_subwindows_checked);  PRARGX(conn);  PRARGX(window);
+	STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+
+	if(dpy && window) DeleteWindow(dpy, window, true);
+	cookie = _xcb_destroy_subwindows_checked(conn, window);
+
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+
+	CATCH();
+
+	return cookie;
+}
+
+
+xcb_void_cookie_t xcb_destroy_window(xcb_connection_t *conn,
+	xcb_window_t window)
+{
+	xcb_void_cookie_t cookie = { 0 };
+
+	TRY();
+
+	Display *dpy = xcbconnhash.getX11Display(conn);
+
+	if(!fconfig.fakeXCB || IS_EXCLUDED(dpy))
+		return _xcb_destroy_window(conn, window);
+
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(xcb_destroy_window);  PRARGX(conn);  PRARGX(window);  STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+
+	if(dpy && window) DeleteWindow(dpy, window);
+	cookie = _xcb_destroy_window(conn, window);
+
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+
+	CATCH();
+
+	return cookie;
+}
+
+
+xcb_void_cookie_t xcb_destroy_window_checked(xcb_connection_t *conn,
+	xcb_window_t window)
+{
+	xcb_void_cookie_t cookie = { 0 };
+
+	TRY();
+
+	Display *dpy = xcbconnhash.getX11Display(conn);
+
+	if(!fconfig.fakeXCB || IS_EXCLUDED(dpy))
+		return _xcb_destroy_window_checked(conn, window);
+
+	/////////////////////////////////////////////////////////////////////////////
+	OPENTRACE(xcb_destroy_window_checked);  PRARGX(conn);  PRARGX(window);
+	STARTTRACE();
+	/////////////////////////////////////////////////////////////////////////////
+
+	if(dpy && window) DeleteWindow(dpy, window);
+	cookie = _xcb_destroy_window_checked(conn, window);
+
+	/////////////////////////////////////////////////////////////////////////////
+	STOPTRACE();  CLOSETRACE();
+	/////////////////////////////////////////////////////////////////////////////
+
+	CATCH();
+
+	return cookie;
+}
+
+
 const xcb_query_extension_reply_t *
 	xcb_get_extension_data(xcb_connection_t *conn, xcb_extension_t *ext)
 {

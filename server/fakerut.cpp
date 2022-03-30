@@ -2755,6 +2755,7 @@ int copyContextTest(void)
 int subWinTest(void)
 {
 	Display *dpy = NULL;  Window win = 0, win1 = 0, win2 = 0;
+	xcb_connection_t *conn = NULL;
 	TestColor clr(0);
 	int dpyw, dpyh, retval = 1, lastFrame = 0;
 	int glxattribs[] = { GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8,
@@ -2817,6 +2818,96 @@ int subWinTest(void)
 				else if(i % 3 == 1) { XDestroyWindow(dpy, win);  win = 0; }
 				else XDestroySubwindows(dpy, win);
 			}
+
+			if(win && dpy) { XDestroyWindow(dpy, win);  win = 0; }
+			if(dpy) { XCloseDisplay(dpy);  dpy = NULL; }
+
+			for(int i = 0; i < 20; i++)
+			{
+				xcb_void_cookie_t cookie = { 0 };
+
+				if(!dpy && !(dpy = XOpenDisplay(0)))
+					THROW("Could not open display");
+				if(!(conn = XGetXCBConnection(dpy)))
+					THROW("Could not get XCB connection");
+				XSetEventQueueOwner(dpy, XCBOwnsEventQueue);
+				dpyw = DisplayWidth(dpy, DefaultScreen(dpy));
+				dpyh = DisplayHeight(dpy, DefaultScreen(dpy));
+
+				if((vis = glXChooseVisual(dpy, DefaultScreen(dpy),
+					glxattribs)) == NULL)
+					THROW("Could not find a suitable visual");
+
+				Window root = RootWindow(dpy, DefaultScreen(dpy));
+
+				if(!win)
+				{
+					if((win = xcb_generate_id(conn)) == 0)
+						THROW("Could not create window");
+					cookie = xcb_create_window(conn, vis->depth, win, root, 0, 0,
+						dpyw / 2, dpyh / 2, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT,
+						vis->visualid, 0, NULL);
+					if(!cookie.sequence)
+						THROW("Could not create window");
+				}
+
+				if((win1 = xcb_generate_id(conn)) == 0)
+					THROW("Could not create subwindow");
+				cookie.sequence = 0;
+				cookie = xcb_create_window_checked(conn, vis->depth, win1, win, 0, 0,
+					dpyw / 2, dpyh / 2, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, vis->visualid,
+					0, NULL);
+				if(!cookie.sequence)
+					THROW("Could not create subwindow");
+
+				if((win2 = xcb_generate_id(conn)) == 0)
+					THROW("Could not create subwindow");
+				cookie.sequence = 0;
+				if(i % 2 == 0)
+					cookie = xcb_create_window_aux(conn, vis->depth, win2, win1, 0, 0,
+						dpyw / 2, dpyh / 2, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT,
+						vis->visualid, 0, NULL);
+				else
+					cookie = xcb_create_window_aux_checked(conn, vis->depth, win2, win1,
+						0, 0, dpyw / 2, dpyh / 2, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT,
+						vis->visualid, 0, NULL);
+				if(!cookie.sequence)
+					THROW("Could not create subwindow");
+
+				xcb_map_subwindows(conn, win);
+				xcb_map_window(conn, win);
+
+				lastFrame = 0;
+				if(!(ctx = glXCreateContext(dpy, vis, NULL, True)))
+					THROW("Could not create context");
+				XFree(vis);  vis = NULL;
+				if(!(glXMakeCurrent(dpy, win2, ctx)))
+					THROWNL("Could not make context current");
+				clr.clear(GL_BACK);
+				glXSwapBuffers(dpy, win2);
+				checkFrame(dpy, win2, 1, lastFrame);
+				checkWindowColor(dpy, win2, clr.bits(-1), false);
+				glXMakeCurrent(dpy, 0, 0);
+				glXDestroyContext(dpy, ctx);  ctx = 0;
+
+				if(i % 3 == 0) { XCloseDisplay(dpy);  dpy = NULL;  win = 0; }
+				else if(i % 3 == 1)
+				{
+					if(i % 2 == 0)
+						xcb_destroy_window(conn, win);
+					else
+						xcb_destroy_window_checked(conn, win);
+					win = 0;
+				}
+				else
+				{
+					if(i % 2 == 0)
+						xcb_destroy_subwindows(conn, win);
+					else
+						xcb_destroy_subwindows_checked(conn, win);
+				}
+			}
+
 			printf("SUCCESS\n");
 		}
 		catch(std::exception &e)
