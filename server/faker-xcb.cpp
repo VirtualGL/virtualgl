@@ -1,4 +1,4 @@
-// Copyright (C)2014-2016, 2018-2021 D. R. Commander
+// Copyright (C)2014-2016, 2018-2022 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -36,9 +36,8 @@ const xcb_query_extension_reply_t *
 
 	TRY();
 
-	if(!faker::deadYet && ext && !strcmp(ext->name, "GLX") && fconfig.fakeXCB
-		&& faker::getFakerLevel() == 0
-		&& !faker::isDisplayExcluded(xcbconnhash.getX11Display(conn)))
+	if(fconfig.fakeXCB && ext && !strcmp(ext->name, "GLX")
+		&& !IS_EXCLUDED(xcbconnhash.getX11Display(conn)))
 	{
 		///////////////////////////////////////////////////////////////////////////
 		OPENTRACE(xcb_get_extension_data);  PRARGX(conn);  PRARGS(ext->name);
@@ -81,8 +80,7 @@ xcb_glx_query_version_cookie_t
 	// faker::deadYet==true, because MainWin calls X11 functions (which in turn
 	// call XCB functions) from one of its shared library destructors, which is
 	// executed after the VirtualGL Faker has shut down.
-	if(faker::deadYet || !fconfig.fakeXCB || faker::getFakerLevel() > 0
-		|| faker::isDisplayExcluded(xcbconnhash.getX11Display(conn)))
+	if(!fconfig.fakeXCB || IS_EXCLUDED(xcbconnhash.getX11Display(conn)))
 		return _xcb_glx_query_version(conn, major_version, minor_version);
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -112,8 +110,7 @@ xcb_glx_query_version_reply_t *
 
 	TRY();
 
-	if(faker::deadYet || !fconfig.fakeXCB || faker::getFakerLevel() > 0
-		|| faker::isDisplayExcluded(xcbconnhash.getX11Display(conn)))
+	if(!fconfig.fakeXCB || IS_EXCLUDED(xcbconnhash.getX11Display(conn)))
 		return _xcb_glx_query_version_reply(conn, cookie, error);
 
 	/////////////////////////////////////////////////////////////////////////////
