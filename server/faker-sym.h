@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011, 2013-2016, 2018-2021 D. R. Commander
+// Copyright (C)2009, 2011, 2013-2016, 2018-2022 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -346,6 +346,23 @@ extern "C" {
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
 		retval = __##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12); \
+		ENABLE_FAKER(); \
+		return retval; \
+	}
+
+#define FUNCDEF13(RetType, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
+	at6, a6, at7, a7, at8, a8, at9, a9, at10, a10, at11, a11, at12, a12, \
+	at13, a13, fake_f) \
+	typedef RetType (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7, at8, at9, \
+		at10, at11, at12, at13); \
+	SYMDEF(f); \
+	static INLINE RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
+		at7 a7, at8 a8, at9 a9, at10 a10, at11 a11, at12 a12, at13 a13) \
+	{ \
+		RetType retval; \
+		CHECKSYM(f, fake_f); \
+		DISABLE_FAKER(); \
+		retval = __##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13); \
 		ENABLE_FAKER(); \
 		return retval; \
 	}
@@ -906,6 +923,46 @@ SYMDEF(dlopen);
 #ifdef FAKEXCB
 
 // XCB functions
+
+FUNCDEF13(xcb_void_cookie_t, xcb_create_window, xcb_connection_t *, conn,
+	uint8_t, depth, xcb_window_t, wid, xcb_window_t, parent, int16_t, x,
+	int16_t, y, uint16_t, width, uint16_t, height, uint16_t, border_width,
+	uint16_t, _class, xcb_visualid_t, visual, uint32_t, value_mask,
+	const void *, value_list, xcb_create_window)
+
+FUNCDEF13(xcb_void_cookie_t, xcb_create_window_aux, xcb_connection_t *, conn,
+	uint8_t, depth, xcb_window_t, wid, xcb_window_t, parent, int16_t, x,
+	int16_t, y, uint16_t, width, uint16_t, height, uint16_t, border_width,
+	uint16_t, _class, xcb_visualid_t, visual, uint32_t, value_mask,
+	const xcb_create_window_value_list_t *, value_list, xcb_create_window_aux)
+
+FUNCDEF13(xcb_void_cookie_t, xcb_create_window_aux_checked,
+	xcb_connection_t *, conn, uint8_t, depth, xcb_window_t, wid,
+	xcb_window_t, parent, int16_t, x, int16_t, y, uint16_t, width,
+	uint16_t, height, uint16_t, border_width, uint16_t, _class,
+	xcb_visualid_t, visual, uint32_t, value_mask,
+	const xcb_create_window_value_list_t *, value_list,
+	xcb_create_window_aux_checked)
+
+FUNCDEF13(xcb_void_cookie_t, xcb_create_window_checked,
+	xcb_connection_t *, conn, uint8_t, depth, xcb_window_t, wid,
+	xcb_window_t, parent, int16_t, x, int16_t, y, uint16_t, width,
+	uint16_t, height, uint16_t, border_width, uint16_t, _class,
+	xcb_visualid_t, visual, uint32_t, value_mask, const void *, value_list,
+	xcb_create_window_checked)
+
+FUNCDEF2(xcb_void_cookie_t, xcb_destroy_subwindows, xcb_connection_t *, conn,
+	xcb_window_t, window, xcb_destroy_subwindows)
+
+FUNCDEF2(xcb_void_cookie_t, xcb_destroy_subwindows_checked,
+	xcb_connection_t *, conn, xcb_window_t, window,
+	xcb_destroy_subwindows_checked)
+
+FUNCDEF2(xcb_void_cookie_t, xcb_destroy_window, xcb_connection_t *, conn,
+	xcb_window_t, window, xcb_destroy_window)
+
+FUNCDEF2(xcb_void_cookie_t, xcb_destroy_window_checked,
+	xcb_connection_t *, conn, xcb_window_t, window, xcb_destroy_window_checked)
 
 FUNCDEF2(const xcb_query_extension_reply_t *, xcb_get_extension_data,
 	xcb_connection_t *, conn, xcb_extension_t *, ext, xcb_get_extension_data)

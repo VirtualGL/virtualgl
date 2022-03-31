@@ -129,6 +129,9 @@ login prompt.
 			device(s) and thus see (or alter) the output of a 3D application that is
 			being used with VirtualGL.
 
+		!!! If you are using a recent release of GDM, then the ''gdm'' account must
+		be added to the ''vglusers'' group.
+
 		No :: Any authenticated user can run OpenGL applications on the VirtualGL
 			server.  If it is necessary for users outside of the ''vglusers'' group
 			to log in locally to this server and run OpenGL applications, then this

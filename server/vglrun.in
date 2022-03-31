@@ -93,7 +93,7 @@ usage()
 	echo
 	echo "+xcb/-xcb : Enable/disable XCB interposer [default = enabled]"
 	echo
-	echo "+wm/-wm   : Enable/disable window manager mode (for running compiz, etc.)"
+	echo "+wm/-wm   : Enable/disable window manager mode (for running Compiz, etc.)"
 	echo
 	exit $1
 }

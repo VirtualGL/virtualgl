@@ -239,6 +239,14 @@
 
 		/* XCB */
 		#ifdef FAKEXCB
+		xcb_create_window;
+		xcb_create_window_aux;
+		xcb_create_window_aux_checked;
+		xcb_create_window_checked;
+		xcb_destroy_subwindows;
+		xcb_destroy_subwindows_checked;
+		xcb_destroy_window;
+		xcb_destroy_window_checked;
 		xcb_get_extension_data;
 		xcb_glx_query_version;
 		xcb_glx_query_version_reply;

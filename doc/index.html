@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2022-01-15T18:27:02">
+<meta name="date" content="2022-03-31T10:55:23">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -36,7 +36,7 @@
 <a name="file000"></a>
 <p><em>Intended audience:</em> System Administrators, Graphics Programmers, 
 Researchers, and others with knowledge of Linux or Unix operating 
-systems, OpenGL, GLX or EGL, and X windows.</p>
+systems, OpenGL, GLX or EGL, and the X Window System.</p>
 
 <div id="hd">
 <div id="hdBlock" class="hd">
@@ -329,16 +329,16 @@ the instructions accordingly.</p>
     </dd>
     <dt class="Description-1 Description">3D X server</dt>
     <dd class="Description-1 Description">
-        An X-Windows server (&ldquo;X server&rdquo;) attached to one or more 
-        GPUs in the VirtualGL server.  The 3D X server can be 
+        An X Window System server (&ldquo;X server&rdquo;) attached to one or 
+        more GPUs in the VirtualGL server.  The 3D X server can be 
         &ldquo;headless&rdquo; (not attached to a monitor.)
     </dd>
     <dt class="Description-1 Description">X proxy</dt>
     <dd class="Description-1 Description">
         A virtual X server that runs on a remote machine (usually, but not 
-        always, on the VirtualGL server.)  Because X proxies render X-Windows 
-        (&ldquo;X11&rdquo;) drawing commands to a virtual framebuffer in main 
-        memory rather than to a real framebuffer in GPU memory, multiple 
+        always, on the VirtualGL server.)  Because X proxies render X Window 
+        System (&ldquo;X11&rdquo;) drawing commands to a virtual framebuffer in 
+        main memory rather than to a real framebuffer in GPU memory, multiple 
         simultaneous instances of an X proxy can co-exist on the same server.  
         However, for the same reason, X proxies generally do not support 
         hardware-accelerated 3D rendering (without the help of VirtualGL.)  Most 
@@ -431,8 +431,8 @@ displaying OpenGL applications to an X server on a different machine
 requires that all of the OpenGL commands and 3D data be sent over the 
 network to be rendered.  That is not a tenable proposition unless the 3D 
 data is relatively small and static, unless the network is very fast, 
-and unless the OpenGL application is specifically tuned for a remote 
-X-Windows environment.</p>
+and unless the OpenGL application is specifically tuned for a remote X 
+Window System (&ldquo;X&rdquo;) environment.</p>
 
 <p>With VirtualGL, the OpenGL commands and 3D data are instead redirected 
 to a GPU in the application server, and only the rendered frames are 
@@ -449,10 +449,10 @@ of the data over the network or sit in front of the machine that is
 rendering the data.</p>
 
 <p>Normally, a Un*x OpenGL application sends all of its graphics rendering 
-commands and data, both 2D and 3D, to an X-Windows server, which may be 
-located across the network from the application server.  VirtualGL 
-employs a technique called &ldquo;split rendering&rdquo; to redirect the 
-3D commands and data from the OpenGL application to a GPU in the 
+commands and data, both 2D and 3D, to an X server, which may be located 
+across the network from the application server.  VirtualGL employs a 
+technique called &ldquo;split rendering&rdquo; to redirect the 3D 
+commands and data from the OpenGL application to a GPU in the 
 application server.  VGL accomplishes this by pre-loading a dynamic 
 shared object (DSO), the VirtualGL Faker, into the OpenGL application at 
 run time.  The VirtualGL Faker intercepts and modifies certain GLX, EGL, 
@@ -515,15 +515,15 @@ used to deliver rendered frames to the 2D X server:</p>
     <dt class="Description-1 Description">2. X11 Transport</dt>
     <dd class="Description-1 Description">
         The X11 Transport simply draws the rendered frames into the appropriate 
-        X window using <code>XPutImage()</code> or similar X-Windows commands. 
-        This is most useful in conjunction with an X proxy, which can be one of 
-        any number of Un*x remote display applications, such as VNC.  When using 
-        the X11 Transport, VirtualGL does not normally perform any image 
-        compression or encoding itself.  It instead relies on an X proxy to 
-        encode the frames and deliver them to the client(s).  Since the use of 
-        an X proxy eliminates the need to send X-Windows commands over the 
-        network, this is the recommended method for using VirtualGL over 
-        high-latency or low-bandwidth networks.
+        X window using <code>XPutImage()</code> or similar X11 commands.  This 
+        is most useful in conjunction with an X proxy, which can be one of any 
+        number of Un*x remote display applications, such as VNC.  When using the 
+        X11 Transport, VirtualGL does not normally perform any image compression 
+        or encoding itself.  It instead relies on an X proxy to encode the 
+        frames and deliver them to the client(s).  Since the use of an X proxy 
+        eliminates the need to send X11 commands over the network, this is the 
+        recommended method for using VirtualGL over high-latency or 
+        low-bandwidth networks.
         <div class="important"><p class="important">
         The XV Transport, described in Chapter <a href="#X_Video_Support" class="ref">10</a>, is a variant of the X11 Transport.
         </p></div>
@@ -592,7 +592,7 @@ transport plugins.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">O/S</td>
-    <td class="standard" colspan="3">VirtualGL should work with a variety of Linux distributions, <span class="remote"><a href="http://www.freebsd.org" class="remote">FreeBSD</a></span><a name="idx007"></a>, and <span class="remote"><a href="http://www.oracle.com/us/products/servers-storage/solaris" class="remote">Solaris</a></span><a name="idx008"></a>, but currently-supported versions of <span class="remote"><a href="http://www.redhat.com/products/enterprise-linux/" class="remote">Red Hat Enterprise Linux</a></span><a name="idx009"></a> (and its work-alikes, including <span class="remote"><a href="http://www.centos.org" class="remote">CentOS</a></span><a name="idx0010"></a>, <span class="remote"><a href="http://www.oracle.com/us/technologies/linux" class="remote">Oracle Linux</a></span><a name="idx0011"></a>, and <span class="remote"><a href="https://www.scientificlinux.org" class="remote">Scientific Linux</a></span><a name="idx0012"></a>), <span class="remote"><a href="http://www.ubuntu.com" class="remote">Ubuntu</a></span><a name="idx0013"></a> LTS, and <span class="remote"><a href="http://www.suse.com" class="remote">SuSE</a></span><a name="idx0014"></a> Linux Enterprise tend to receive the most attention from the VirtualGL community.</td>
+    <td class="standard" colspan="3">VirtualGL should work with a variety of Linux distributions, <span class="remote"><a href="http://www.freebsd.org" class="remote">FreeBSD</a></span><a name="idx007"></a>, and <span class="remote"><a href="http://www.oracle.com/us/products/servers-storage/solaris" class="remote">Solaris</a></span><a name="idx008"></a>, but currently-supported versions of <span class="remote"><a href="http://www.redhat.com/products/enterprise-linux/" class="remote">Red Hat Enterprise Linux</a></span><a name="idx009"></a> and its derivatives, <span class="remote"><a href="http://www.ubuntu.com" class="remote">Ubuntu</a></span><a name="idx0010"></a> LTS, and <span class="remote"><a href="http://www.suse.com" class="remote">SuSE</a></span><a name="idx0011"></a> Linux Enterprise tend to receive the most attention from the VirtualGL community.</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Other Software</td>
@@ -624,7 +624,7 @@ transport plugins.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Other Software</td>
-    <td class="standard"><span class="remote"><a href="http://xquartz.macosforge.org" class="remote">XQuartz</a></span><a name="idx0015"></a></td>
+    <td class="standard"><span class="remote"><a href="http://xquartz.macosforge.org" class="remote">XQuartz</a></span><a name="idx0012"></a></td>
   </tr>
 </table>
 </div>
@@ -653,7 +653,7 @@ transport plugins.</p>
   <tr class="standard">
     <td class="high standard">Other Software</td>
     <td class="standard"><ul class="Itemize"><li class="Itemize-0">
-    <span class="remote"><a href="http://x.cygwin.com" class="remote">Cygwin/X</a></span><a name="idx0016"></a>
+    <span class="remote"><a href="http://x.cygwin.com" class="remote">Cygwin/X</a></span><a name="idx0013"></a>
 </li>
 <li class="Itemize-0">
     Client display must have a 24-bit or 32-bit color depth (True Color.)
@@ -725,7 +725,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
 <h1 id="hd005"><a name="file005"></a>5&nbsp;Obtaining and Installing VirtualGL</h1>
 
 <div class="important"><p class="important">
-VirtualGL must be installed on any machine that will act as a VirtualGL server or as a client for the <a href="#VGL_Transport">VGL Transport</a><a name="idx0017"></a>. It is not necessary to install VirtualGL on the client if using VNC or another type of X proxy.
+VirtualGL must be installed on any machine that will act as a VirtualGL server or as a client for the <a href="#VGL_Transport">VGL Transport</a><a name="idx0014"></a>. It is not necessary to install VirtualGL on the client if using VNC or another type of X proxy.
 </p></div>
 
 
@@ -740,9 +740,9 @@ If you are installing VirtualGL onto a fresh server, and you also intend to inst
         Download the appropriate VirtualGL binary package(s) for your system 
         from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files" class="remote">Files 
-        area</a></span><a name="idx0018"></a> of the 
+        area</a></span><a name="idx0015"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0019"></a>. RPM and 
+        SourceForge project page</a></span><a name="idx0016"></a>. RPM and 
         Debian packages are provided for x86 Linux distributions that contain 
         GLIBC 2.12 or later and AArch64 Linux distributions that contain GLIBC 
         2.17 or later. <br />
@@ -807,9 +807,9 @@ apt&nbsp;install&nbsp;-f
         Download the VirtualGL Mac disk image 
         (<strong class="filename">VirtualGL-3.0.80.dmg</strong>) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files" class="remote">Files 
-        area</a></span><a name="idx0020"></a> of the 
+        area</a></span><a name="idx0017"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0021"></a>.
+        SourceForge project page</a></span><a name="idx0018"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Open the disk image, then open 
@@ -832,9 +832,9 @@ apt&nbsp;install&nbsp;-f
 binary package available, then download the VirtualGL source tarball 
 (<strong class="filename">VirtualGL-3.0.80.tar.gz</strong>) from the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files" class="remote">Files 
-area</a></span><a name="idx0022"></a> of the 
+area</a></span><a name="idx0019"></a> of the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-SourceForge project page</a></span><a name="idx0023"></a>, uncompress 
+SourceForge project page</a></span><a name="idx0020"></a>, uncompress 
 it, <code>cd VirtualGL-3.0.80</code>, and read the contents of 
 <strong class="filename">BUILDING.md</strong> for further instructions 
 on how to build and install VirtualGL from source.</p>
@@ -936,7 +936,7 @@ On Wayland-enabled Linux machines running GDM, configuring the machine for use w
     <li class="Itemize-1 Itemize asterisk">
         If the 3D X server is headless, then proceed with the instructions 
         below, and the <a href="#Sanity_Check">Sanity 
-        Check</a><a name="idx0024"></a> section will provide you with an 
+        Check</a><a name="idx0021"></a> section will provide you with an 
         opportunity to verify that the 3D X server is using accelerated OpenGL.
     </li>
 </ul>
@@ -1063,6 +1063,9 @@ Restrict&nbsp;framebuffer&nbsp;device&nbsp;access&nbsp;to&nbsp;vglusers&nbsp;gro
                 exist.)  This limits the possibility that an unauthorized user could 
                 snoop the 3D framebuffer device(s) and thus see (or alter) the output of 
                 a 3D application that is being used with VirtualGL.
+                <div class="important"><p class="important">
+                If you are using a recent release of GDM, then the <code>gdm</code> account must be added to the <code>vglusers</code> group.
+                </p></div>
             </dd>
             <dt class="Description-3 Description">No</dt>
             <dd class="Description-3 Description">
@@ -1505,7 +1508,7 @@ a restrictive firewall and only SSH connections are allowed through.</p>
 
 <p>The procedure for this mode is identical to the procedure for the 
 <a href="#X11_Forwarding">VGL Transport with X11 
-forwarding</a><a name="idx0025"></a>, except that you should pass a 
+forwarding</a><a name="idx0022"></a>, except that you should pass a 
 <code>-s</code> argument to <code>vglconnect</code> when connecting to 
 the server:</p>
 
@@ -1613,7 +1616,7 @@ executables instead of listening ports.</p>
 
 <p>Note that it is not necessary to open any inbound ports in the firewall 
 to use the VGL Transport with <a href="#SSH_Tunneling">SSH 
-Tunneling</a><a name="idx0026"></a>.</p>
+Tunneling</a><a name="idx0023"></a>.</p>
 
 <p><br /></p>
 
@@ -1650,7 +1653,7 @@ order to keep up. Unfortunately, however, most X proxies can&rsquo;t.
 They simply aren&rsquo;t designed to compress, with any degree of 
 performance, the large and complex images generated by 3D applications.  
 Therefore, The VirtualGL Project provides an optimized X proxy called 
-<span class="remote"><a href="http://turbovnc.org" class="remote">TurboVNC</a></span><a name="idx0027"></a>, 
+<span class="remote"><a href="http://turbovnc.org" class="remote">TurboVNC</a></span><a name="idx0024"></a>, 
 a high-speed VNC (Virtual Network Computing) variant that is designed 
 specifically to achieve high levels of performance with VirtualGL.  More 
 information about TurboVNC, including instructions for using it with 
@@ -1713,7 +1716,7 @@ for this procedure to perform well.</p>
 
 <p>The procedure for using the VGL Transport to display 3D applications 
 from a VirtualGL server to an X proxy on a different machine is the same 
-as the <a href="#X11_Forwarding">procedure</a><a name="idx0028"></a> for 
+as the <a href="#X11_Forwarding">procedure</a><a name="idx0025"></a> for 
 using the VGL Transport to display 3D applications from a VirtualGL 
 server to a client-side 2D X server, with the following exceptions:</p>
 
@@ -1903,7 +1906,7 @@ export LD_PRELOAD
 <p>This procedure may be necessary to work around certain other interaction 
 issues between VirtualGL and the launch scripts of specific 3D 
 applications.  See <a href="#Application_Recipes">Application 
-Recipes</a><a name="idx0029"></a> for more details.</p>
+Recipes</a><a name="idx0026"></a> for more details.</p>
 
 <p>If the 3D application that you are intending to run with VirtualGL is 
 itself a setuid/setgid executable, then further steps are required.  
@@ -1972,7 +1975,7 @@ crle&nbsp;-64&nbsp;-u&nbsp;-s&nbsp;/opt/VirtualGL/lib64
 
 <h1 id="hd0013"><a name="file013"></a>13&nbsp;Using VirtualGL with VirtualBox</h1>
 
-<p><span class="remote"><a href="http://VirtualBox.org" class="remote">VirtualBox</a></span><a name="idx0030"></a> 
+<p><span class="remote"><a href="http://VirtualBox.org" class="remote">VirtualBox</a></span><a name="idx0027"></a> 
 is an enterprise-class, open source virtualization solution that 
 supports hardware-accelerated OpenGL in Windows and Linux guests running 
 on Windows, Mac, Linux, and Solaris/x86 hosts.  3D acceleration in 
@@ -2303,7 +2306,7 @@ supported in Cygwin/X.) Otherwise, VirtualGL will fall back to using
 anaglyphic stereo (see below.)  It is usually necessary to explicitly 
 enable stereo in the graphics driver configuration for both the client 
 and, if using the GLX back end, the VirtualGL server.  The 
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0031"></a> 
+<a href="#Troubleshooting">Troubleshooting</a><a name="idx0028"></a> 
 section below lists a way to verify that both the 3D X server and the 2D 
 X server have stereo visuals available.</p>
 
@@ -3342,7 +3345,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         <code>VGL_FORCEALPHA</code> might be necessary in order to use PBO 
         readback mode with the aforementioned GPUs (as of this writing, nVidia 
         GeForce adapters are known to require this.)  See the 
-        <a href="#VGL_READBACK"><code>VGL_READBACK</code></a><a name="idx0032"></a> 
+        <a href="#VGL_READBACK"><code>VGL_READBACK</code></a><a name="idx0029"></a> 
         option for further information.
     </dd>
 </dl>
@@ -3489,7 +3492,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         <code>glFlush()</code> so often that VirtualGL cannot get away with 
         reading back/transporting a frame every time <code>glFlush()</code> is 
         called, either (see 
-        <a href="#VGL_SPOILLAST"><code>VGL_SPOILLAST</code></a><a name="idx0033"></a> 
+        <a href="#VGL_SPOILLAST"><code>VGL_SPOILLAST</code></a><a name="idx0030"></a> 
         for more information on how VirtualGL tries to handle this, under normal 
         circumstances.) <br /><br /> Some 3D applications use 
         <code>glFlush()</code> very liberally and intend for it to be an 
@@ -3504,7 +3507,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         applications, setting <code>VGL_GLFLUSHTRIGGER</code> to <code>0</code> 
         should make them display properly with VirtualGL.  See 
         <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0034"></a> for a list of 3D applications that are 
+        Recipes</a><a name="idx0031"></a> for a list of 3D applications that are 
         known to require this.
     </dd>
 </dl>
@@ -3624,7 +3627,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         for that issue was introduced in VirtualGL 2.1.1, this option 
         isn&rsquo;t really useful anymore.
         <div class="important"><p class="important">
-        When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0035"></a> option
+        When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0032"></a> option
         </p></div>
     </dd>
 </dl>
@@ -3732,7 +3735,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         used for compression, nor will it allow you to set this parameter to a 
         value greater than the number of CPU cores in the system.
         <div class="important"><p class="important">
-        When using the VGL Transport, multithreaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0036"></a> option
+        When using the VGL Transport, multithreaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0033"></a> option
         </p></div>
     </dd>
 </dl>
@@ -3899,7 +3902,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         level at which JPEG compression becomes perceptually lossless is 
         different for each image, but experiments with various visual difference 
         benchmarks (such as 
-        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0037"></a>) 
+        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0034"></a>) 
         suggest that a JPEG quality of 95 is sufficient to guarantee perceptual 
         losslessness for the types of 3D applications (volume visualization 
         applications, in particular) in which image quality is critical.  As 
@@ -3951,7 +3954,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         frames, so setting <code>VGL_READBACK=none</code> disables 
         VirtualGL&rsquo;s readback mechanism and prevents duplication of effort. 
         <br /><br /> This option was developed initially to support running 
-        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0038"></a> 
+        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0035"></a> 
         in parallel using MPI.  ParaView/MPI normally uses MPI Processes 1 
         through N as rendering servers, each rendering a portion of the geometry 
         into a separate window on a separate X display. ParaView reads back 
@@ -3987,7 +3990,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         proxy&rsquo;s virtual framebuffer is BGRA but, unless the 3D application 
         has requested an alpha channel, its off-screen buffer is likely BGR.  In 
         this specific case, setting the 
-        <a href="#VGL_FORCEALPHA"><code>VGL_FORCEALPHA</code></a><a name="idx0039"></a> 
+        <a href="#VGL_FORCEALPHA"><code>VGL_FORCEALPHA</code></a><a name="idx0036"></a> 
         option to <code>1</code> could alleviate the issue. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -4205,7 +4208,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         at the expense of increased load on the GPU (because VirtualGL is now 
         reading back the rendered frame every time <code>glFlush()</code> is 
         called.)  See <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0040"></a> for a list of 3D applications that are 
+        Recipes</a><a name="idx0037"></a> for a list of 3D applications that are 
         known to require this.
     </dd>
 </dl>
@@ -4399,7 +4402,7 @@ Image transport plugins are free to handle or ignore any configuration option as
         (<code>conformx</code>, specifically), but at least one commercial 
         application is known to require it as well (see 
         <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0041"></a>.) <br /><br /> When 
+        Recipes</a><a name="idx0038"></a>.) <br /><br /> When 
         <code>VGL_SYNC</code> is enabled, every call to a frame trigger function 
         will cause VirtualGL to read back the rendered frame and 
         <em>synchronously</em> draw it into the 3D application&rsquo;s window 
@@ -4448,11 +4451,11 @@ Image transport plugins are free to handle or ignore any configuration option as
         square tiles, compares each tile against the same tile in the previous 
         frame, and compresses/sends only the tiles that have changed (assuming 
         <a href="#VGL_INTERFRAME">interframe 
-        comparison</a><a name="idx0042"></a> is enabled.)  The VGL Transport 
+        comparison</a><a name="idx0039"></a> is enabled.)  The VGL Transport 
         also divides the task of compressing or encoding these tiles among the 
         available CPUs in a round robin fashion, if multithreaded compression is 
         enabled (see 
-        <a href="#VGL_NPROCS"><code>VGL_NPROCS</code></a><a name="idx0043"></a>.) 
+        <a href="#VGL_NPROCS"><code>VGL_NPROCS</code></a><a name="idx0040"></a>.) 
         <br /><br /> There are several tradeoffs that must be considered when 
         choosing a tile size: <br /><br /> <em>Parallel scalability:</em> 
         <ul class="Itemize"><li class="Itemize-0">
@@ -4657,7 +4660,7 @@ Image transport plugins are free to handle or ignore any configuration option as
     <dd class="Description-1 Description">
         When window manager mode is enabled, VirtualGL will disable some of its 
         internal features that interfere with the correct operation of 
-        compositing window managers such as compiz.
+        compositing window managers such as Compiz.
     </dd>
 </dl>
 

@@ -35,6 +35,8 @@ tunneling the VGL Transport through SSH.
 3.0.1
 =====
 
+### Significant changes relative to 3.0:
+
 1. GLXSpheres now includes an option (`-si`) that can be used to specify the
 swap interval via the `GLX_EXT_swap_control` and `GLX_SGI_swap_control`
 extensions.
@@ -48,6 +50,14 @@ applications as well.
 which is necessary for OpenGL 3.0 conformance.  This fixes an issue whereby
 frames rendered by 3D applications using the sRGB color space appeared too
 dark.
+
+4. The VirtualGL Faker now interposes XCB window creation and destruction
+functions.  This fixes an issue whereby, if an X window was created using the
+XCB API and subsequently attached to an OpenGL context using
+`glXMake[Context]Current()`, the off-screen buffer and other faker resources
+associated with that window were not freed until the 3D application exited or
+closed the X display connection associated with the window.  This issue was
+known to affect Qt5 applications.
 
 
 3.0
@@ -787,8 +797,8 @@ interposer is also disabled by default at run time.  It must be enabled by
 setting the `VGL_FAKEXCB` environment variable to `1` or passing `+xcb` to
 `vglrun`.
 
-7. Fixed a deadlock that occurred when running compiz 0.9.11 (and possibly
-other versions as well) with VirtualGL.  The issue occurred when compiz called
+7. Fixed a deadlock that occurred when running Compiz 0.9.11 (and possibly
+other versions as well) with VirtualGL.  The issue occurred when Compiz called
 `XGrabServer()`, followed by `glXCreatePixmap()` and `glXDestroyPixmap()`.  In
 VirtualGL, a GLX pixmap resides on the 3D X server, but the corresponding X11
 pixmap resides on the 2D X server.  Thus, VirtualGL has to synchronize pixels
@@ -796,7 +806,7 @@ between the two pixmaps in response to certain operations, such as
 `XCopyArea()` and `XGetImage()`, or when the GLX pixmap is destroyed.
 VirtualGL was previously opening a new connection to the 2D X server in order
 to perform this synchronization, and because the 2D X server was grabbed,
-compiz locked up when VirtualGL called `XCloseDisplay()` on the new display
+Compiz locked up when VirtualGL called `XCloseDisplay()` on the new display
 connection.  In fact, however, the new display connection was unnecessary,
 since the GLX/X11 pixmap synchronization occurs within the 3D rendering thread.
 Thus, VirtualGL now simply reuses the same display connection that was passed
@@ -948,8 +958,8 @@ used to control them.  See the User's Guide for more information.
 6. Added support for depth=32 visuals and FB configs.
 
 7. Added a new "window manager" mode that disables certain features in
-VirtualGL that interfere with 3D window managers such as compiz.  This,
-combined with [6] and [4] above, should allow compiz to run properly with this
+VirtualGL that interfere with 3D window managers such as Compiz.  This,
+combined with [6] and [4] above, should allow Compiz to run properly with this
 version of VirtualGL, provided that the 2D X Server has support for the X
 Composite extension.  See the User's Guide for more information.
 

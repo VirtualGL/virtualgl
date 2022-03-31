@@ -42,7 +42,7 @@ Build Requirements
 
 - Some requisite development libraries are located in the CRB (Code Ready
   Builder) repository on Red Hat Enterprise Linux 8 and in the PowerTools
-  repository on CentOS 8, which is not enabled by default.
+  repository on RHEL derivatives, which is not enabled by default.
 
 
 32-bit VirtualGL Builds on x86-64 Linux Distributions

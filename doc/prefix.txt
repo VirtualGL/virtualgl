@@ -21,17 +21,17 @@ different directory, then adjust the instructions accordingly.
 	could.  In order to effectively use VirtualGL, a GPU must be present in the
 	VirtualGL server.
 
-	3D X server :: An X-Windows server ("X server") attached to one or more GPUs
-	in the VirtualGL server.  The 3D X server can be "headless" (not attached to
-	a monitor.)
+	3D X server :: An X Window System server ("X server") attached to one or more
+	GPUs in the VirtualGL server.  The 3D X server can be "headless" (not
+	attached to a monitor.)
 
 	X proxy :: A virtual X server that runs on a remote machine (usually, but not
-	always, on the VirtualGL server.)  Because X proxies render X-Windows ("X11")
-	drawing commands to a virtual framebuffer in main memory rather than to a
-	real framebuffer in GPU memory, multiple simultaneous instances of an X proxy
-	can co-exist on the same server.  However, for the same reason, X proxies
-	generally do not support hardware-accelerated 3D rendering (without the help
-	of VirtualGL.)  Most X proxies send only images to the client.
+	always, on the VirtualGL server.)  Because X proxies render X Window System
+	("X11") drawing commands to a virtual framebuffer in main memory rather than
+	to a real framebuffer in GPU memory, multiple simultaneous instances of an X
+	proxy can co-exist on the same server.  However, for the same reason, X
+	proxies generally do not support hardware-accelerated 3D rendering (without
+	the help of VirtualGL.)  Most X proxies send only images to the client.
 
 	2D X server :: The X server to which the 3D application's GUI will be
 	displayed, and with which the user will interact.  The 2D X server can be an
