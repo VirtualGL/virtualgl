@@ -41,6 +41,10 @@ associated with that window were not freed until the 3D application exited or
 closed the X display connection associated with the window.  This issue was
 known to affect Qt5 applications.
 
+7. `vglserver_config` should now work properly with SDDM if its scripts are
+installed in **/etc/sddm**, which is the case when SDDM is installed through
+EPEL.
+
 
 2.6.5
 =====
