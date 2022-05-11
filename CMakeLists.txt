@@ -15,7 +15,7 @@ else()
 endif()
 string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_PROJECT_NAME_LC)
 set(VERSION 3.0.1)
-set(DOCVERSION 3.0)
+set(DOCVERSION 3.0.1)
 
 macro(boolean_number var)
 	if(${var})
