@@ -988,17 +988,19 @@ VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
 		configs = (VGLFBConfig *)calloc(nElements, sizeof(VGLFBConfig));
 		if(!configs) goto bailout;
 
+		int nConfig = 0;
 		for(int i = 0; i < nElements; i++)
 		{
 			for(int j = 0; j < caEntries; j++)
 			{
 				if(ca[j].glx == glxConfigs[i])
 				{
-					configs[i] = &ca[j];
+					configs[nConfig++] = &ca[j];
 					break;
 				}
 			}
 		}
+		nElements = nConfig;
 	}
 
 	bailout:
