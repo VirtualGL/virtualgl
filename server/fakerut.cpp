@@ -2038,8 +2038,6 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 				GL_COLOR_ATTACHMENT0_EXT);
 			glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
 			VERIFY_FBO(0, GL_FRONT_AND_BACK, GL_NONE, fbo, GL_COLOR_ATTACHMENT0_EXT);
-			glFramebufferRenderbufferEXT(GL_DRAW_FRAMEBUFFER_EXT,
-				GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, 0);
 			glDrawBuffer(GL_BACK);
 			glXSwapBuffers(dpy, glxwin);
 			checkFrame(dpy, win, 1, lastFrame);
@@ -2073,8 +2071,6 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
-			GL_RENDERBUFFER_EXT, 0);
 		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
 		if(rbo) { glDeleteRenderbuffersEXT(1, &rbo);  rbo = 0; }
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
@@ -2260,11 +2256,6 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			checkCurrent(dpy, glxpm1, glxpm1, ctx2, dpyw / 2, dpyh / 2);
 			clr.clear(GL_FRONT);
 			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "PM1");
-			if(dbPixmap)
-			{
-				clr.clear(GL_BACK);
-				VERIFY_BUF_COLOR(GL_BACK, clr.bits(-1), "PM1");
-			}
 			if(!glXMakeContextCurrent(dpy, pb, pb, ctx))
 				THROW("Could not make context current");
 			checkCurrent(dpy, pb, pb, ctx, dpyw / 2, dpyh / 2);
@@ -2288,8 +2279,6 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 	{
 		printf("Failed! (%s)\n", e.what());  retval = 0;
 	}
-	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
-		GL_RENDERBUFFER_EXT, 0);
 	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
 	if(rbo) { glDeleteRenderbuffersEXT(1, &rbo);  rbo = 0; }
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
