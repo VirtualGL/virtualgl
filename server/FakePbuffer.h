@@ -1,4 +1,4 @@
-// Copyright (C)2019-2021 D. R. Commander
+// Copyright (C)2019-2022 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -28,7 +28,8 @@ namespace backend
 			FakePbuffer(Display *dpy, VGLFBConfig config, const int *glxAttribs);
 			~FakePbuffer(void);
 
-			void createBuffer(bool useRBOContext, bool ignoreReadDrawBufs = false);
+			void createBuffer(bool useRBOContext, bool ignoreReadDrawBufs = false,
+				bool ignoreDrawFBO = false, bool ignoreReadFBO = false);
 			Display *getDisplay(void) { return dpy; }
 			GLXDrawable getID(void) { return id; }
 			VGLFBConfig getFBConfig(void) { return config; }

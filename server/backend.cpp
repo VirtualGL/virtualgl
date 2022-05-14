@@ -807,8 +807,14 @@ Bool makeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 			_glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFBO);
 			_glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFBO);
 
-			if(drawpb) drawpb->createBuffer(false, true);
-			if(readpb && readpb != drawpb) readpb->createBuffer(false, true);
+			if(drawpb)
+				drawpb->createBuffer(false, true,
+					(ctxhashegl.getDrawFBO(ctx) == 0 || drawFBO == 0),
+					(ctxhashegl.getReadFBO(ctx) == 0 || readFBO == 0));
+			if(readpb && readpb != drawpb)
+				readpb->createBuffer(false, true,
+					(ctxhashegl.getDrawFBO(ctx) == 0 || drawFBO == 0),
+					(ctxhashegl.getReadFBO(ctx) == 0 || readFBO == 0));
 
 			bool boundNewDrawFBO = false, boundNewReadFBO = false;
 			if(drawpb && (ctxhashegl.getDrawFBO(ctx) == 0 || drawFBO == 0))
@@ -837,7 +843,10 @@ Bool makeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 					oldDrawBufs = ctxhashegl.getDrawBuffers(ctx, nDrawBufs);
 					if(oldDrawBufs && nDrawBufs > 0)
 					{
-						drawpb->setDrawBuffers(nDrawBufs, oldDrawBufs, false);
+						if(nDrawBufs == 1)
+							drawpb->setDrawBuffer(oldDrawBufs[0], false);
+						else
+							drawpb->setDrawBuffers(nDrawBufs, oldDrawBufs, false);
 						delete [] oldDrawBufs;
 					}
 				}

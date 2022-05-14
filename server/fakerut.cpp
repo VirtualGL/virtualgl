@@ -39,6 +39,14 @@
 using namespace util;
 
 
+#define CHECK_GL_ERROR() \
+{ \
+	int e = glGetError(); \
+	if(e != GL_NO_ERROR) THROW("OpenGL error"); \
+	while(e != GL_NO_ERROR) e = glGetError(); \
+}
+
+
 #define CLEAR_BUFFER(buffer, r, g, b, a) \
 { \
 	if(buffer > 0) \
@@ -1644,6 +1652,7 @@ class TestThread : public Runnable
 				glClear(GL_COLOR_BUFFER_BIT);
 				glReadBuffer(GL_FRONT);
 				glXSwapBuffers(dpy, win);
+				CHECK_GL_ERROR();
 				checkReadbackState(GL_FRONT, dpy, win, win, ctx);
 				checkFrame(dpy, win, 1, lastFrame);
 				checkWindowColor(dpy, win, colors[clr].bits, false);
@@ -1953,6 +1962,7 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			VERIFY_BUF_COLOR(GL_BACK, clr.bits(-2), "PB");
 			if(!(glXMakeContextCurrent(dpy, glxwin, pb, ctx)))
 				THROWNL("Could not make context current");
+			CHECK_GL_ERROR();
 			checkCurrent(dpy, glxwin, pb, ctx, dpyw / 2, dpyh / 2);
 			glReadBuffer(GL_BACK);  glDrawBuffer(GL_BACK);
 			glCopyPixels(0, 0, dpyw / 2, dpyh / 2, GL_COLOR);
@@ -1974,6 +1984,7 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			printf("Window->Pbuffer:                ");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				THROWNL("Could not make context current");
+			CHECK_GL_ERROR();
 			fontListBase = glGenLists(maxChar + 1);
 			glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
 				fontListBase + minChar);
@@ -1983,6 +1994,7 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			VERIFY_BUF_COLOR(GL_BACK, clr.bits(-2), "Win");
 			if(!(glXMakeContextCurrent(dpy, pb, glxwin, ctx)))
 				THROWNL("Could not make context current");
+			CHECK_GL_ERROR();
 			fontListBase = glGenLists(maxChar + 1);
 			glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
 				fontListBase + minChar);
@@ -1992,6 +2004,23 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			glCopyPixels(0, 0, dpyw / 2, dpyh / 2, GL_COLOR);
 			glXSwapBuffers(dpy, pb);
 			VERIFY_BUF_COLOR(GL_BACK, clr.bits(-2), "PB");
+
+			// Verify that the EGL back end manages FBO bindings properly when
+			// attaching a context to an OpenGL window, destroying the window, then
+			// attaching the same context to a different drawable.  This will fail
+			// when using the EGL back end with VirtualGL 3.0.
+			Window win2;
+			if((win2 = XCreateWindow(dpy, root, 0, 0, dpyw / 2, dpyh / 2, 0,
+				vis->depth, InputOutput, vis->visual,
+				CWBorderPixel | CWColormap | CWEventMask, &swa)) == 0)
+				THROW("Could not create window");
+			XMapWindow(dpy, win2);
+			glXMakeCurrent(dpy, win2, ctx);
+			glXMakeCurrent(dpy, 0, 0);
+			XDestroyWindow(dpy, win2);
+			glXMakeContextCurrent(dpy, pb, pb, ctx);
+			CHECK_GL_ERROR();
+
 			printf("SUCCESS\n");
 		}
 		catch(std::exception &e)
@@ -2005,12 +2034,14 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			printf("FBO->Window:                    ");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				THROWNL("Could not make context current");
+			CHECK_GL_ERROR();
 			checkCurrent(dpy, glxwin, glxwin, ctx, dpyw / 2, dpyh / 2);
 			clr.clear(GL_BACK);
 			clr.clear(GL_FRONT);
 			VERIFY_BUF_COLOR(GL_BACK, clr.bits(-2), "Win");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				THROWNL("Could not make context current");
+			CHECK_GL_ERROR();
 			checkCurrent(dpy, glxwin, glxwin, ctx, dpyw / 2, dpyh / 2);
 			glDrawBuffer(GL_FRONT_AND_BACK);
 			glReadBuffer(GL_FRONT);
@@ -2038,8 +2069,6 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 				GL_COLOR_ATTACHMENT0_EXT);
 			glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
 			VERIFY_FBO(0, GL_FRONT_AND_BACK, GL_NONE, fbo, GL_COLOR_ATTACHMENT0_EXT);
-			glFramebufferRenderbufferEXT(GL_DRAW_FRAMEBUFFER_EXT,
-				GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, 0);
 			glDrawBuffer(GL_BACK);
 			glXSwapBuffers(dpy, glxwin);
 			checkFrame(dpy, win, 1, lastFrame);
@@ -2073,8 +2102,6 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
-			GL_RENDERBUFFER_EXT, 0);
 		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
 		if(rbo) { glDeleteRenderbuffersEXT(1, &rbo);  rbo = 0; }
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
@@ -2087,6 +2114,7 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			printf("GLX Pixmap->Window:             ");
 			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
 				THROWNL("Could not make context current");
+			CHECK_GL_ERROR();
 			fontListBase = glGenLists(maxChar + 1);
 			glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
 				fontListBase + minChar);
@@ -2260,11 +2288,6 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			checkCurrent(dpy, glxpm1, glxpm1, ctx2, dpyw / 2, dpyh / 2);
 			clr.clear(GL_FRONT);
 			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "PM1");
-			if(dbPixmap)
-			{
-				clr.clear(GL_BACK);
-				VERIFY_BUF_COLOR(GL_BACK, clr.bits(-1), "PM1");
-			}
 			if(!glXMakeContextCurrent(dpy, pb, pb, ctx))
 				THROW("Could not make context current");
 			checkCurrent(dpy, pb, pb, ctx, dpyw / 2, dpyh / 2);
@@ -2288,8 +2311,6 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 	{
 		printf("Failed! (%s)\n", e.what());  retval = 0;
 	}
-	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
-		GL_RENDERBUFFER_EXT, 0);
 	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
 	if(rbo) { glDeleteRenderbuffersEXT(1, &rbo);  rbo = 0; }
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
@@ -2583,12 +2604,6 @@ static void checkContext(unsigned long mask)
 		THROWNL("GL_TEXTURE_GEN_MODE");
 	CHECK_INT1(GL_MATRIX_MODE, expectedMatrixMode);
 	CHECK_INT4(GL_VIEWPORT, expectedViewport);
-}
-
-#define CHECK_GL_ERROR() \
-{ \
-	int e = glGetError(); \
-	if(e != GL_NO_ERROR) THROW("OpenGL error"); \
 }
 
 #define CHECK_CONTEXT(m) \

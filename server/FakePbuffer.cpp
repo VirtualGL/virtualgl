@@ -72,7 +72,8 @@ FakePbuffer::~FakePbuffer(void)
 }
 
 
-void FakePbuffer::createBuffer(bool useRBOContext, bool ignoreReadDrawBufs)
+void FakePbuffer::createBuffer(bool useRBOContext, bool ignoreReadDrawBufs,
+	bool ignoreDrawFBO, bool ignoreReadFBO)
 {
 	TempContextEGL *tc = NULL;
 	BufferState *bs = NULL;
@@ -85,11 +86,12 @@ void FakePbuffer::createBuffer(bool useRBOContext, bool ignoreReadDrawBufs)
 			tc = new TempContextEGL(getRBOContext(dpy).getContext());
 		else
 		{
-			if(ignoreReadDrawBufs)
-				bs = new BufferState(BS_DRAWFBO | BS_READFBO | BS_RBO);
-			else
-				bs = new BufferState(BS_DRAWFBO | BS_READFBO | BS_RBO | BS_DRAWBUFS |
-					BS_READBUF);
+			int saveMask = BS_RBO;
+			if(!ignoreReadDrawBufs) saveMask |= BS_DRAWBUFS | BS_READBUF;
+			if(!ignoreDrawFBO) saveMask |= BS_DRAWFBO;
+			if(!ignoreReadFBO) saveMask |= BS_READFBO;
+
+			bs = new BufferState(saveMask);
 		}
 
 		TRY_GL();
@@ -223,7 +225,8 @@ void FakePbuffer::swap(void)
 		GLuint oldFBO = fbo;
 
 		if(getCurrentDrawable() == id || getCurrentReadDrawable() == id)
-			createBuffer(false);
+			createBuffer(false, false, drawFBO == (GLint)oldFBO,
+				readFBO == (GLint)oldFBO);
 
 		if(getCurrentDrawable() == id && drawFBO == (GLint)oldFBO)
 		{
