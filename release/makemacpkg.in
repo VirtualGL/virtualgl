@@ -80,7 +80,7 @@ fi
 install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
 osacompile -t APPL -a x86_64 -o "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/uninstall.applescript
 if [ "$MACOS_APP_CERT_NAME" != "" ]; then
-	codesign -s "$MACOS_APP_CERT_NAME" --timestamp "$TMPDIR/Uninstall $PROJECT.app"
+	codesign -f -s "$MACOS_APP_CERT_NAME" --timestamp "$TMPDIR/Uninstall $PROJECT.app"
 	codesign -vv "$TMPDIR/Uninstall $PROJECT.app"
 fi
 cp -RX "$TMPDIR/Uninstall $PROJECT.app" "$PKGROOT/Applications/$PROJECT/"
