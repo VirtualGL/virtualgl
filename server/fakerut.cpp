@@ -2770,7 +2770,9 @@ int copyContextTest(void)
 int subWinTest(void)
 {
 	Display *dpy = NULL;  Window win = 0, win1 = 0, win2 = 0;
+#ifdef FAKEXCB
 	xcb_connection_t *conn = NULL;
+#endif
 	TestColor clr(0);
 	int dpyw, dpyh, retval = 1, lastFrame = 0;
 	int glxattribs[] = { GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8,
@@ -2839,13 +2841,16 @@ int subWinTest(void)
 
 			for(int i = 0; i < 20; i++)
 			{
+#ifdef FAKEXCB
 				xcb_void_cookie_t cookie = { 0 };
-
+#endif
 				if(!dpy && !(dpy = XOpenDisplay(0)))
 					THROW("Could not open display");
+#ifdef FAKEXCB
 				if(!(conn = XGetXCBConnection(dpy)))
 					THROW("Could not get XCB connection");
 				XSetEventQueueOwner(dpy, XCBOwnsEventQueue);
+#endif
 				dpyw = DisplayWidth(dpy, DefaultScreen(dpy));
 				dpyh = DisplayHeight(dpy, DefaultScreen(dpy));
 
@@ -2855,6 +2860,7 @@ int subWinTest(void)
 
 				Window root = RootWindow(dpy, DefaultScreen(dpy));
 
+#ifdef FAKEXCB
 				if(!win)
 				{
 					if((win = xcb_generate_id(conn)) == 0)
@@ -2891,6 +2897,7 @@ int subWinTest(void)
 
 				xcb_map_subwindows(conn, win);
 				xcb_map_window(conn, win);
+#endif
 
 				lastFrame = 0;
 				if(!(ctx = glXCreateContext(dpy, vis, NULL, True)))
@@ -2906,6 +2913,7 @@ int subWinTest(void)
 				glXDestroyContext(dpy, ctx);  ctx = 0;
 
 				if(i % 3 == 0) { XCloseDisplay(dpy);  dpy = NULL;  win = 0; }
+#ifdef FAKEXCB
 				else if(i % 3 == 1)
 				{
 					if(i % 2 == 0)
@@ -2921,6 +2929,7 @@ int subWinTest(void)
 					else
 						xcb_destroy_subwindows_checked(conn, win);
 				}
+#endif
 			}
 
 			printf("SUCCESS\n");
