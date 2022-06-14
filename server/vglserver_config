@@ -324,11 +324,11 @@ setdripermissions()
 		backup $1
 	fi
 	if [ "$FBDEVVGLUSERSONLY" = "1" ]; then
-		echo "... Modifying $1 to enable DRI permissions"
-		echo "    for vglusers group ..."
+		echo "... Modifying $1 to enable DRI"
+		echo "    permissions for vglusers group ..."
 	else
-		echo "... Modifying $1 to enable DRI permissions"
-		echo "    for all users ..."
+		echo "... Modifying $1 to enable DRI"
+		echo "    permissions for all users ..."
 	fi
 	TMPFILE=`maketemp vglserver_config_9`
 	# Delete Section "DRI" stanza
@@ -386,6 +386,11 @@ unconfigdev()
 			echo ... Removing /etc/X11/xorg.conf.d/99-virtualgl-dri to restore default
 			echo "    permissions for /dev/dri/card* ..."
 			rm -f /etc/X11/xorg.conf.d/99-virtualgl-dri
+		fi
+		if [ "$BACKEND" = "glx" -a -f /etc/X11/xorg.conf.d/99-virtualgl-dri.conf ]; then
+			echo ... Removing /etc/X11/xorg.conf.d/99-virtualgl-dri.conf to restore default
+			echo "    permissions for /dev/dri/card* ..."
+			rm -f /etc/X11/xorg.conf.d/99-virtualgl-dri.conf
 		fi
 	fi
 }
@@ -493,8 +498,11 @@ configdev()
 		fi
 		if [ "$BACKEND" = "glx" ]; then
 			if [ -d /etc/X11/xorg.conf.d ]; then
-				touch /etc/X11/xorg.conf.d/99-virtualgl-dri
-				setdripermissions /etc/X11/xorg.conf.d/99-virtualgl-dri
+				if [ -f /etc/X11/xorg.conf.d/99-virtualgl-dri ]; then
+					rm /etc/X11/xorg.conf.d/99-virtualgl-dri
+				fi
+				touch /etc/X11/xorg.conf.d/99-virtualgl-dri.conf
+				setdripermissions /etc/X11/xorg.conf.d/99-virtualgl-dri.conf
 			fi
 			setdripermissions /etc/X11/xorg.conf backup
 			setdripermissions /etc/X11/XF86Config backup
