@@ -17,6 +17,7 @@ VGLUSERSONLY=1
 DISABLEXTEST=1
 FBDEVVGLUSERSONLY=1
 RMMODNEEDED=0
+NVIDIADRMNEEDED=0
 UNATTENDED=0
 SELINUX=0
 WAYLAND=0
@@ -29,8 +30,8 @@ if [ "`uname -s`" = "FreeBSD" ]; then
 fi
 LSMOD=/sbin/lsmod
 if [ ! -x $LSMOD ]; then LSMOD=lsmod; fi
-RMMOD=/sbin/rmmod
-if [ ! -x $RMMOD ]; then RMMOD=rmmod; fi
+MODPROBE=/sbin/modprobe
+if [ ! -x $MODPROBE ]; then MODPROBE=modprobe; fi
 SEMANAGE=
 RESTORECON=
 
@@ -369,9 +370,18 @@ unconfigdev()
 			rm -f /etc/modprobe.d/virtualgl.conf
 			$LSMOD | grep -q nvidia >/dev/null 2>/dev/null
 			if [ $? = 0 ]; then
+				$LSMOD | grep -q nvidia_drm >/dev/null 2>/dev/null
+				if [ $? = 0 ]; then
+					NVIDIADRMNEEDED=1
+				fi
 				echo ... Attempting to remove nvidia module from memory so device permissions
 				echo "    will be reloaded ..."
-				$RMMOD nvidia || RMMODNEEDED=1
+				$MODPROBE -r nvidia_uvm nvidia_drm nvidia_modeset nvidia || RMMODNEEDED=1
+				# Reload the nvidia_drm module if necessary.  This prevents the DRI
+        # devices from disappearing.
+				if [ "$NVIDIADRMNEEDED" = "1" -a ! "$RMMODNEEDED" = "1" ]; then
+					$MODPROBE nvidia_drm
+				fi
 			fi
 		fi
 		if [ -f /etc/udev/rules.d/99-virtualgl-dri.rules ]; then
@@ -448,9 +458,18 @@ configdev()
 			fi
 			$LSMOD | grep -q nvidia >/dev/null 2>/dev/null
 			if [ $? = 0 ]; then
+				$LSMOD | grep -q nvidia_drm >/dev/null 2>/dev/null
+				if [ $? = 0 ]; then
+					NVIDIADRMNEEDED=1
+				fi
 				echo ... Attempting to remove nvidia module from memory so device permissions
 				echo "    will be reloaded ..."
-				$RMMOD nvidia || RMMODNEEDED=1
+				$MODPROBE -r nvidia_uvm nvidia_drm nvidia_modeset nvidia || RMMODNEEDED=1
+				# Reload the nvidia_drm module if necessary.  This prevents the DRI
+				# devices from disappearing.
+				if [ "$NVIDIADRMNEEDED" = "1" -a ! "$RMMODNEEDED" = "1" ]; then
+					$MODPROBE nvidia_drm
+				fi
 			fi
 		fi
 		if [ "$FBDEVVGLUSERSONLY" = "1" ]; then
@@ -739,8 +758,9 @@ EOF
 	if [ "$RMMODNEEDED" = "1" ]; then
 		echo
 		echo "IMPORTANT NOTE: Your system uses modprobe.d to set device permissions.  You"
-		echo "must execute 'rmmod nvidia_drm nvidia_modeset nvidia' with the display manager"
-		echo "stopped in order for the new device permission settings to become effective."
+		echo "must execute 'modprobe -r nvidia_uvm nvidia_drm nvidia_modeset nvidia' with the"
+		echo "display manager stopped in order for the new device permission settings to"
+		echo "become effective."
 	fi
 	echo
 }
@@ -1000,8 +1020,9 @@ EOF
 	if [ "$RMMODNEEDED" = "1" ]; then
 		echo
 		echo "IMPORTANT NOTE: Your system uses modprobe.d to set device permissions.  You"
-		echo "must execute 'rmmod nvidia_drm nvidia_modeset nvidia' with the display manager"
-		echo "stopped in order for the new device permission settings to become effective."
+		echo "must execute 'modprobe -r nvidia_uvm nvidia_drm nvidia_modeset nvidia' with the"
+		echo "display manager stopped in order for the new device permission settings to"
+		echo "become effective."
 	fi
 	echo
 }

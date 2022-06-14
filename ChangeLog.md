@@ -1,3 +1,14 @@
+2.6.7 ESR
+=========
+
+### Significant changes relative to 2.6.6 ESR:
+
+1. Fixed an issue whereby `vglserver_config` failed to unload the `nvidia`
+module when using recent versions of nVidia's proprietary drivers.  In some
+cases, this led to incorrect device permissions for **/dev/nvidia*** after the
+display manager was restarted.
+
+
 2.6.6 ESR
 =========
 
