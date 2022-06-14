@@ -2770,7 +2770,9 @@ int copyContextTest(void)
 int subWinTest(void)
 {
 	Display *dpy = NULL;  Window win = 0, win1 = 0, win2 = 0;
+	#ifdef FAKEXCB
 	xcb_connection_t *conn = NULL;
+	#endif
 	TestColor clr(0);
 	int dpyw, dpyh, retval = 1, lastFrame = 0;
 	int glxattribs[] = { GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8,
@@ -2837,6 +2839,7 @@ int subWinTest(void)
 			if(win && dpy) { XDestroyWindow(dpy, win);  win = 0; }
 			if(dpy) { XCloseDisplay(dpy);  dpy = NULL; }
 
+			#ifdef FAKEXCB
 			for(int i = 0; i < 20; i++)
 			{
 				xcb_void_cookie_t cookie = { 0 };
@@ -2922,6 +2925,7 @@ int subWinTest(void)
 						xcb_destroy_subwindows_checked(conn, win);
 				}
 			}
+			#endif
 
 			printf("SUCCESS\n");
 		}
