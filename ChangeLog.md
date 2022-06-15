@@ -32,6 +32,17 @@ option to avoid the need to authenticate with the server multiple times when
 tunneling the VGL Transport through SSH.
 
 
+3.0.2
+=====
+
+### Significant changes relative to 3.0.1:
+
+1. Fixed an issue whereby `vglserver_config` failed to unload the `nvidia`
+module when using recent versions of nVidia's proprietary drivers.  In some
+cases, this led to incorrect device permissions for **/dev/nvidia*** after the
+display manager was restarted.
+
+
 3.0.1
 =====
 
