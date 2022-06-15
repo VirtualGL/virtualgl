@@ -381,7 +381,7 @@ unconfigdev()
 				echo "    will be reloaded ..."
 				$MODPROBE -r nvidia_uvm nvidia_drm nvidia_modeset nvidia || RMMODNEEDED=1
 				# Reload the nvidia_drm module if necessary.  This prevents the DRI
-        # devices from disappearing.
+				# devices from disappearing.
 				if [ "$NVIDIADRMNEEDED" = "1" -a ! "$RMMODNEEDED" = "1" ]; then
 					$MODPROBE nvidia_drm
 				fi
