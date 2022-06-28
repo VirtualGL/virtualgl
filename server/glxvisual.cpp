@@ -988,17 +988,23 @@ VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
 		configs = (VGLFBConfig *)calloc(nElements, sizeof(VGLFBConfig));
 		if(!configs) goto bailout;
 
+		// Some Mesa implementations of glXChooseFBConfig() can return an FB config
+		// that is not returned by glXGetFBConfigs().  Work around that by
+		// filtering out any FB configs returned by glXChooseFBConfig() that do not
+		// match an entry in the config attribute table.
+		int nValidConfigs = 0;
 		for(int i = 0; i < nElements; i++)
 		{
 			for(int j = 0; j < caEntries; j++)
 			{
 				if(ca[j].glx == glxConfigs[i])
 				{
-					configs[i] = &ca[j];
+					configs[nValidConfigs++] = &ca[j];
 					break;
 				}
 			}
 		}
+		nElements = nValidConfigs;
 	}
 
 	bailout:
