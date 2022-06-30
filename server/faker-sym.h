@@ -1080,6 +1080,9 @@ FUNCDEF3(EGLBoolean, eglQueryDevicesEXT, EGLint, max_devices, EGLDeviceEXT *,
 FUNCDEF2(const char *, eglQueryDeviceStringEXT, EGLDeviceEXT, device, EGLint,
 	name, NULL)
 
+FUNCDEF3(EGLBoolean, eglQueryDeviceAttribEXT, EGLDeviceEXT, device, EGLint,
+	name, EGLAttrib *, value, NULL)
+
 FUNCDEF0(EGLenum, eglQueryAPI, NULL)
 
 #endif

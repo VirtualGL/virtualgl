@@ -731,7 +731,7 @@ usage(void)
 #else
    printf("Usage: eglinfo <device> [-v] [-h] [-l] [-s]\n");
    printf("\t<device>: Print EGL configs for the specified DRI device.\n");
-   printf("\t          (\"egl\" = print EGL configs for the first DRI device)\n");
+   printf("\t          (\"egl[:cuda|:mesa][:<n>]\" = print EGL configs for the first or nth DRI/CUDA/Mesa device)\n");
 #endif
    printf("\t-B: brief output, print only the basics.\n");
    printf("\t-v: Print config info in verbose form.\n");
@@ -739,6 +739,57 @@ usage(void)
    printf("\t-l: Print interesting OpenGL limits.\n");
    printf("\t-s: Print a single extension per line.\n");
 }
+
+
+#ifndef EGLX
+static int isValidEglDevice(EGLDeviceEXT device, int i, const char *displayName,
+                            PFNEGLQUERYDEVICESTRINGEXTPROC _eglQueryDeviceStringEXT,
+                            PFNEGLQUERYDEVICEATTRIBEXTPROC _eglQueryDeviceAttribEXT)
+{
+   static int mesaNum = 0;
+   int deviceNum = i;
+   const char *displayNamePtr = &displayName[3];
+
+   // plain "egl"
+   if(*displayNamePtr == '\0')
+      return 1;
+
+   if(*displayNamePtr == ':') {
+      if(!strncasecmp(displayNamePtr, ":cuda", 5)) {
+         EGLAttrib devAttr;
+         if(_eglQueryDeviceAttribEXT(device, EGL_CUDA_DEVICE_NV, &devAttr) == EGL_FALSE)
+            return 0;
+         deviceNum = devAttr;
+         displayNamePtr += 5;
+      } else if(!strncasecmp(displayNamePtr, ":mesa", 5)) {
+         const char *devStr = _eglQueryDeviceStringEXT(device, EGL_EXTENSIONS);
+         if(!devStr || !strstr(devStr, "EGL_MESA_device_software"))
+            return 0;
+         deviceNum = mesaNum++;
+         displayNamePtr += 5;
+      }
+   }
+
+   // "egl:cuda" or "egl:mesa"
+   if(*displayNamePtr == '\0')
+      return 1;
+
+   // "egl[:cuda|:mesa]:<n>
+   if(*displayNamePtr == ':') {
+      char *endptr;
+      displayNamePtr++;
+      if(*displayNamePtr != '\0') {
+         int displayNum = strtol(displayNamePtr, &endptr, 10);
+         if (*endptr == '\0')
+            return displayNum == deviceNum;
+      }
+   }
+
+   if (i == 0)
+      fprintf(stderr, "Error: Invalid index for device %s\n", displayName);
+   return 0;
+}
+#endif
 
 
 int
@@ -753,6 +804,7 @@ main(int argc, char *argv[])
    EGLDeviceEXT *devices = NULL;
    PFNEGLQUERYDEVICESEXTPROC _eglQueryDevicesEXT;
    PFNEGLQUERYDEVICESTRINGEXTPROC _eglQueryDeviceStringEXT;
+   PFNEGLQUERYDEVICEATTRIBEXTPROC _eglQueryDeviceAttribEXT;
    PFNEGLGETPLATFORMDISPLAYEXTPROC _eglGetPlatformDisplayEXT;
 #endif
    EGLDisplay edpy;
@@ -855,6 +907,12 @@ main(int argc, char *argv[])
       fprintf(stderr, "Error: eglQueryDeviceStringEXT() could not be loaded");
       return -1;
    }
+   _eglQueryDeviceAttribEXT =
+      (PFNEGLQUERYDEVICEATTRIBEXTPROC)eglGetProcAddress("eglQueryDeviceAttribEXT");
+   if (!_eglQueryDeviceAttribEXT) {
+      fprintf(stderr, "Error: eglQueryDeviceAttribEXT() could not be loaded");
+      return -1;
+   }
    _eglGetPlatformDisplayEXT =
       (PFNEGLGETPLATFORMDISPLAYEXTPROC)eglGetProcAddress("eglGetPlatformDisplayEXT");
    if (!_eglGetPlatformDisplayEXT) {
@@ -869,7 +927,9 @@ main(int argc, char *argv[])
       if (!edpy || !eglInitialize(edpy, &major, &minor))
          continue;
       eglTerminate(edpy);
-      if (!strcasecmp(opts.displayName, "egl"))
+      if (!strncasecmp(opts.displayName, "egl", 3) &&
+         isValidEglDevice(devices[i], i, opts.displayName,
+                          _eglQueryDeviceStringEXT, _eglQueryDeviceAttribEXT))
          break;
       devStr = _eglQueryDeviceStringEXT(devices[i], EGL_DRM_DEVICE_FILE_EXT);
       if (devStr && !strcmp(devStr, opts.displayName))

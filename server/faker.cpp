@@ -174,6 +174,55 @@ void init(void)
 }
 
 
+#ifdef EGLBACKEND
+static int isValidEglDevice(EGLDeviceEXT device, int i, const char *displayName)
+{
+	static int mesaNum = 0;
+	int deviceNum = i;
+	const char *displayNamePtr = &displayName[3];
+
+	// plain "egl"
+	if(*displayNamePtr == '\0')
+		return 1;
+
+	if(*displayNamePtr == ':') {
+		if(!strncasecmp(displayNamePtr, ":cuda", 5)) {
+			EGLAttrib devAttr;
+			if(_eglQueryDeviceAttribEXT(device, EGL_CUDA_DEVICE_NV, &devAttr) == EGL_FALSE)
+				return 0;
+			deviceNum = devAttr;
+			displayNamePtr += 5;
+		} else if(!strncasecmp(displayNamePtr, ":mesa", 5)) {
+			const char *devStr = _eglQueryDeviceStringEXT(device, EGL_EXTENSIONS);
+			if(!devStr || !strstr(devStr, "EGL_MESA_device_software"))
+				return 0;
+			deviceNum = mesaNum++;
+			displayNamePtr += 5;
+		}
+	}
+
+	// "egl:cuda" or "egl:mesa"
+	if(*displayNamePtr == '\0')
+		return 1;
+
+	// "egl[:cuda|:mesa]:<n>
+	if(*displayNamePtr == ':') {
+		char *endptr;
+		displayNamePtr++;
+		if(*displayNamePtr != '\0') {
+			int displayNum = strtol(displayNamePtr, &endptr, 10);
+			if (*endptr == '\0')
+				return displayNum == deviceNum;
+		}
+	}
+
+	if (i == 0)
+		fprintf(stderr, "Error: Invalid index for device %s\n", displayName);
+	return 0;
+}
+#endif
+
+
 Display *init3D(void)
 {
 	init();
@@ -218,7 +267,8 @@ Display *init3D(void)
 						if(!edpy || !_eglInitialize(edpy, &eglMajor, &eglMinor))
 							continue;
 						_eglTerminate(edpy);
-						if(!strcasecmp(fconfig.localdpystring, "egl"))
+						if (!strncasecmp(fconfig.localdpystring, "egl", 3) &&
+						    isValidEglDevice(devices[i], i, fconfig.localdpystring))
 							break;
 						const char *devStr =
 							_eglQueryDeviceStringEXT(devices[i], EGL_DRM_DEVICE_FILE_EXT);
