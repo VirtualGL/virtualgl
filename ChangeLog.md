@@ -42,6 +42,8 @@ module when using recent versions of nVidia's proprietary drivers.  In some
 cases, this led to incorrect device permissions for **/dev/nvidia*** after the
 display manager was restarted.
 
+2. Fixed compilation errors when building with libX11 1.8.x.
+
 
 3.0.1
 =====

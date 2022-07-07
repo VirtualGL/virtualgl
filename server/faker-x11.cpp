@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011-2016, 2018-2021 D. R. Commander
+// Copyright (C)2009, 2011-2016, 2018-2022 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -596,8 +596,13 @@ Display *XOpenDisplay(_Xconst char *name)
 // within libX11, VirtualGL cannot intercept it on some platforms.  Thus we
 // need to interpose XkbOpenDisplay().
 
+#ifdef LIBX11_18
+Display *XkbOpenDisplay(_Xconst char *display_name, int *event_rtrn,
+	int *error_rtrn, int *major_in_out, int *minor_in_out, int *reason_rtrn)
+#else
 Display *XkbOpenDisplay(char *display_name, int *event_rtrn, int *error_rtrn,
 	int *major_in_out, int *minor_in_out, int *reason_rtrn)
+#endif
 {
 	Display *dpy = NULL;
 
