@@ -678,9 +678,15 @@ FUNCDEF2(int, XNextEvent, Display *, dpy, XEvent *, xe, XNextEvent)
 
 FUNCDEF1(Display *, XOpenDisplay, _Xconst char *, name, XOpenDisplay)
 
+#ifdef LIBX11_18
+FUNCDEF6(Display *, XkbOpenDisplay, _Xconst char *, display_name,
+	int *, event_rtrn, int *, error_rtrn, int *, major_in_out,
+	int *, minor_in_out, int *, reason_rtrn, XkbOpenDisplay)
+#else
 FUNCDEF6(Display *, XkbOpenDisplay, char *, display_name, int *, event_rtrn,
 	int *, error_rtrn, int *, major_in_out, int *, minor_in_out,
 	int *, reason_rtrn, XkbOpenDisplay)
+#endif
 
 FUNCDEF5(Bool, XQueryExtension, Display *, dpy, _Xconst char *, name,
 	int *, major_opcode, int *, first_event, int *, first_error,
