@@ -10,11 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // wxWindows Library License for more details.
 
+#include <X11/Xlibint.h>
 #include "FakePbuffer.h"
 #include "TempContextEGL.h"
 #include "BufferState.h"
 #include "ContextHashEGL.h"
-#include <X11/Xlibint.h>
 
 using namespace util;
 using namespace backend;
