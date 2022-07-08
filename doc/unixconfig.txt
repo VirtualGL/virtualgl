@@ -239,9 +239,8 @@ OpenGL renderer string.
 
 ** EGL Back End: Granting Access to the GPU(s)
 
-When using the EGL back end, accessing a GPU requires going through an
-associated DRI device, so the only way to share the application server's GPU(s)
-among multiple users is to grant those users access to the DRI device(s)
+When using the EGL back end, the only way to share the application server's
+GPU(s) among multiple users is to grant those users access to the device(s)
 associated with the GPU(s).
 
 This section will explain how to configure a VirtualGL server such that
@@ -292,7 +291,7 @@ end, log out of the server, log back into the server using SSH, and execute the
 following command in the SSH session:
 
 	#Verb <<---
-	/opt/VirtualGL/bin/eglinfo /dev/dri/card0
+	/opt/VirtualGL/bin/eglinfo egl0
 	---
 
 This command should output a list of EGL configs and should complete with no
@@ -310,11 +309,11 @@ by setting ''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with) '':0.0'',
 a specific GPU can be selected by setting ''VGL_DISPLAY'' to (or invoking
 ''vglrun -d'' with) '':0.0'', '':1.0'', '':2.0'', etc.
 
-Setting ''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with) ''egl'' or the path
-to a DRI device enables the EGL back end.  When using the EGL back end, a
-specific GPU can be selected by setting ''VGL_DISPLAY'' to (or invoking
-''vglrun -d'' with) ''/dev/dri/card0'', ''/dev/dri/card1'', ''/dev/dri/card2'',
-etc.
+Setting ''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with) a DRI device path
+(''/dev/dri/card0'', ''/dev/dri/card1'', ''/dev/dri/card2'', etc.) or an EGL
+device ID (''egl0'', ''egl1'', ''egl2'', etc.) enables the EGL back end and
+selects the specified GPU.  See {ref prefix="Section ": VGL_DISPLAY} for more
+details.
 
 ** SSH Server Configuration
 

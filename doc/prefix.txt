@@ -51,7 +51,7 @@ different directory, then adjust the instructions accordingly.
 	the GLX API, so it can only access a GPU through an attached X server (the 3D
 	X server.)  The EGL back end uses the EGL API with the
 	''EGL_EXT_platform_device'' extension, so it accesses a GPU through an
-	associated DRI device without the need for a 3D X server.  The EGL back end
+	associated EGL device without the need for a 3D X server.  The EGL back end
 	emulates a subset of the GLX API using the EGL API.  Since the EGL API does
 	not support multi-buffering (double buffering or quad-buffered stereo) with
 	off-screen surfaces, the EGL back end emulates multi-buffering using OpenGL
