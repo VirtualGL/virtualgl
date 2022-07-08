@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2022-03-31T10:55:23">
+<meta name="date" content="2022-07-08T11:51:01">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -369,7 +369,7 @@ the instructions accordingly.</p>
         API, so it can only access a GPU through an attached X server (the 3D X 
         server.)  The EGL back end uses the EGL API with the 
         <code>EGL_EXT_platform_device</code> extension, so it accesses a GPU 
-        through an associated DRI device without the need for a 3D X server.  
+        through an associated EGL device without the need for a 3D X server.  
         The EGL back end emulates a subset of the GLX API using the EGL API.  
         Since the EGL API does not support multi-buffering (double buffering or 
         quad-buffered stereo) with off-screen surfaces, the EGL back end 
@@ -472,15 +472,14 @@ been resized, etc., but it does not interfere in any way with the
 delivery of X11 2D drawing commands to the X server.  For the most part, 
 VGL does not interfere with the delivery of OpenGL commands to the GPU, 
 either.  VGL merely forces the OpenGL commands to be delivered to a GPU 
-in the application server, either through the 3D X server attached to 
-the GPU or through a DRI device, rather than to the X server to which 
-the 2D drawing commands are delivered (the 2D X server.)  Once the 
-OpenGL rendering has been redirected to an off-screen buffer, everything 
-(including esoteric OpenGL extensions, fragment/vertex shaders, etc.) 
-should &ldquo;just work.&rdquo;  If an OpenGL application runs correctly 
-when accessing a 3D server/workstation locally, then the same 
-application should run correctly with VirtualGL when accessing the same 
-machine remotely.</p>
+in the application server (through the 3D X server or EGL device 
+attached to the GPU) rather than to the X server to which the 2D drawing 
+commands are delivered (the 2D X server.)  Once the OpenGL rendering has 
+been redirected to an off-screen buffer, everything (including esoteric 
+OpenGL extensions, fragment/vertex shaders, etc.) should &ldquo;just 
+work.&rdquo;  If an OpenGL application runs correctly when accessing a 
+3D server/workstation locally, then the same application should run 
+correctly with VirtualGL when accessing the same machine remotely.</p>
 
 <p>VirtualGL has two built-in &ldquo;image transports&rdquo; that can be 
 used to deliver rendered frames to the 2D X server:</p>
@@ -1209,10 +1208,9 @@ the OpenGL renderer string.</p>
 
 <h2 id="hd006003">6.3&nbsp;EGL Back End: Granting Access to the GPU(s)</h2>
 
-<p>When using the EGL back end, accessing a GPU requires going through an 
-associated DRI device, so the only way to share the application 
+<p>When using the EGL back end, the only way to share the application 
 server&rsquo;s GPU(s) among multiple users is to grant those users 
-access to the DRI device(s) associated with the GPU(s).</p>
+access to the device(s) associated with the GPU(s).</p>
 
 <p>This section will explain how to configure a VirtualGL server such that 
 selected users can use the EGL back end.</p>
@@ -1279,7 +1277,7 @@ back end, log out of the server, log back into the server using SSH, and
 execute the following command in the SSH session:</p>
 
 <pre class="verbatim">
-/opt/VirtualGL/bin/eglinfo&nbsp;/dev/dri/card0
+/opt/VirtualGL/bin/eglinfo&nbsp;egl0
 </pre>
 
 <p>This command should output a list of EGL configs and should complete 
@@ -1302,11 +1300,12 @@ different X servers, then a specific GPU can be selected by setting
 with) <code>:0.0</code>, <code>:1.0</code>, <code>:2.0</code>, etc.</p>
 
 <p>Setting <code>VGL_DISPLAY</code> to (or invoking 
-<code>vglrun&nbsp;-d</code> with) <code>egl</code> or the path to a DRI 
-device enables the EGL back end.  When using the EGL back end, a 
-specific GPU can be selected by setting <code>VGL_DISPLAY</code> to (or 
-invoking <code>vglrun&nbsp;-d</code> with) <code>/dev/dri/card0</code>, 
-<code>/dev/dri/card1</code>, <code>/dev/dri/card2</code>, etc.</p>
+<code>vglrun&nbsp;-d</code> with) a DRI device path 
+(<code>/dev/dri/card0</code>, <code>/dev/dri/card1</code>, 
+<code>/dev/dri/card2</code>, etc.) or an EGL device ID 
+(<code>egl0</code>, <code>egl1</code>, <code>egl2</code>, etc.) enables 
+the EGL back end and selects the specified GPU.  See Section 
+<a href="#VGL_DISPLAY" class="ref">19.1</a> for more details.</p>
 
 
 
@@ -3110,7 +3109,7 @@ Image transport plugins are free to handle or ignore any configuration option as
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard"><em><code>{d}</code></em> = the X display/screen or DRI device to use for 3D rendering</td>
+    <td class="standard"><em><code>{d}</code></em> = the X display/screen or EGL device to use for 3D rendering</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
@@ -3134,10 +3133,12 @@ Image transport plugins are free to handle or ignore any configuration option as
         VirtualGL to use the GLX back end and redirect all of the OpenGL 
         rendering from the 3D application to a GPU attached to Screen 1 on X 
         display :0.  Setting <code>VGL_DISPLAY</code> to (or invoking 
-        <code>vglrun&nbsp;-d</code> with) <code>/dev/dri/card0</code> or 
-        <code>egl</code> would cause VirtualGL to use the EGL back end and 
+        <code>vglrun&nbsp;-d</code> with) a DRI device path (such as 
+        <code>/dev/dri/card0</code>) or an EGL device ID (such as 
+        <code>egl0</code>) would cause VirtualGL to use the EGL back end and 
         redirect all of the OpenGL rendering from the 3D application to the 
-        first GPU in the system.
+        specified EGL device. <code>/opt/VirtualGL/bin/eglinfo&nbsp;-e</code> 
+        lists all valid EGL device IDs and their associated DRI device paths.
     </dd>
 </dl>
 

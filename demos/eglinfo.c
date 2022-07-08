@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1999-2014  Brian Paul   All Rights Reserved.
  * Copyright (C) 2005-2007  Sun Microsystems, Inc.   All Rights Reserved.
- * Copyright (C) 2011, 2013, 2015, 2019-2021  D. R. Commander
+ * Copyright (C) 2011, 2013, 2015, 2019-2022  D. R. Commander
  *                                            All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -251,7 +251,7 @@ create_context_with_config(EGLDisplay edpy, EGLConfig config,
 
 static GLboolean
 print_display_info(EGLDisplay edpy,
-                   const struct options *opts,
+                   const struct options *opts, int eglDeviceID,
                    GLboolean coreProfile, GLboolean limits,
                    GLboolean coreWorked)
 {
@@ -327,7 +327,12 @@ print_display_info(EGLDisplay edpy,
 #ifdef EGLX
          printf("display: %s\n", opts->displayName);
 #else
-         printf("device: %s\n", opts->displayName);
+         printf("EGL device ID: egl%d", eglDeviceID);
+         if (eglDeviceID == 0)
+            printf(" or egl");
+         printf("\n");
+         if (opts->displayName)
+            printf("DRI device path: %s\n", opts->displayName);
 #endif
          if (opts->mode != Brief) {
             printf("EGL client APIs string: %s\n", eglAPIs);
@@ -730,8 +735,9 @@ usage(void)
    printf("\t-display <display>: Print EGL configs for the specified X server.\n");
 #else
    printf("Usage: eglinfo <device> [-v] [-h] [-l] [-s]\n");
-   printf("\t<device>: Print EGL configs for the specified DRI device.\n");
-   printf("\t          (\"egl\" = print EGL configs for the first DRI device)\n");
+   printf("\t<device>: Print EGL configs for the specified EGL device.  <device> can\n");
+   printf("\t          be a DRI device path or an EGL device ID (use -e for a list.)\n");
+   printf("\t-e: List all valid EGL devices\n");
 #endif
    printf("\t-B: brief output, print only the basics.\n");
    printf("\t-v: Print config info in verbose form.\n");
@@ -744,12 +750,12 @@ usage(void)
 int
 main(int argc, char *argv[])
 {
-   int major, minor, i;
+   int major, minor, i, validDevices = 0;
 #ifdef EGLX
    Display *dpy;
 #else
-   const char *exts;
-   int numDevices;
+   const char *exts, *devStr = NULL;
+   int numDevices, list = 0;
    EGLDeviceEXT *devices = NULL;
    PFNEGLQUERYDEVICESEXTPROC _eglQueryDevicesEXT;
    PFNEGLQUERYDEVICESTRINGEXTPROC _eglQueryDeviceStringEXT;
@@ -794,6 +800,9 @@ main(int argc, char *argv[])
          i++;
       }
 #else
+      else if (strcmp(argv[i], "-e") == 0) {
+         list = 1;
+      }
       else {
          opts.displayName = argv[i];
       }
@@ -814,7 +823,7 @@ main(int argc, char *argv[])
    }
    opts.displayName = DisplayString(dpy);
 #else
-   if (!opts.displayName) {
+   if (!opts.displayName && !list) {
       usage();
       exit(0);
    }
@@ -862,18 +871,38 @@ main(int argc, char *argv[])
       return -1;
    }
    for (i = 0; i < numDevices; i++) {
-      const char *devStr;
-
       edpy = _eglGetPlatformDisplayEXT(EGL_PLATFORM_DEVICE_EXT, devices[i],
                                        NULL);
       if (!edpy || !eglInitialize(edpy, &major, &minor))
          continue;
       eglTerminate(edpy);
-      if (!strcasecmp(opts.displayName, "egl"))
-         break;
       devStr = _eglQueryDeviceStringEXT(devices[i], EGL_DRM_DEVICE_FILE_EXT);
-      if (devStr && !strcmp(devStr, opts.displayName))
-         break;
+      if (opts.displayName && !list) {
+         if (!strcasecmp(opts.displayName, "egl"))
+            break;
+         if (!strncasecmp(opts.displayName, "egl", 3)) {
+            char temps[80];
+
+            snprintf(temps, 80, "egl%d", validDevices);
+            if (!strcasecmp(opts.displayName, temps))
+               break;
+         }
+         if (devStr && !strcmp(devStr, opts.displayName))
+            break;
+      }
+      if (list) {
+         printf("EGL device ID: egl%d", validDevices);
+         if (validDevices == 0)
+            printf(" or egl");
+         if (devStr)
+            printf(", DRI device path: %s", devStr);
+         printf("\n");
+      }
+      validDevices++;
+   }
+   if (list) {
+      free(devices);
+      return 0;
    }
    if (i == numDevices) {
       fprintf(stderr, "Error: invalid EGL device\n");
@@ -893,9 +922,13 @@ main(int argc, char *argv[])
       return -1;
    }
 
-   coreWorked = print_display_info(edpy, &opts, GL_TRUE, opts.limits,
-                                   GL_FALSE);
-   print_display_info(edpy, &opts, GL_FALSE, opts.limits, coreWorked);
+#ifndef EGLX
+   opts.displayName = (char *)devStr;
+#endif
+   coreWorked = print_display_info(edpy, &opts, validDevices, GL_TRUE,
+                                   opts.limits, GL_FALSE);
+   print_display_info(edpy, &opts, validDevices, GL_FALSE, opts.limits,
+                      coreWorked);
 
    printf("\n");
 

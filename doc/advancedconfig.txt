@@ -116,7 +116,7 @@ previous method:
 {anchor: VGL_DISPLAY}
 | Environment Variable | {pcode: VGL_DISPLAY = __{d}__ } |
 | ''vglrun'' argument | {pcode: -d __{d}__ } |
-| Summary | __''{d}''__ = the X display/screen or DRI device to use for 3D \
+| Summary | __''{d}''__ = the X display/screen or EGL device to use for 3D \
 	rendering |
 | Image Transports | All |
 | Default Value | '':0'' |
@@ -128,9 +128,11 @@ previous method:
 	'':0.1'' would cause VirtualGL to use the GLX back end and redirect all of
 	the OpenGL rendering from the 3D application to a GPU attached to Screen 1 on
 	X display :0.  Setting ''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with)
-	''/dev/dri/card0'' or ''egl'' would cause VirtualGL to use the EGL back end
-	and redirect all of the OpenGL rendering from the 3D application to the first
-	GPU in the system.
+	a DRI device path (such as ''/dev/dri/card0'') or an EGL device ID (such as
+	''egl0'') would cause VirtualGL to use the EGL back end and redirect all of
+	the OpenGL rendering from the 3D application to the specified EGL device.
+	''/opt/VirtualGL/bin/eglinfo -e'' lists all valid EGL device IDs and their
+	associated DRI device paths.
 
 | Environment Variable | {pcode: VGL_EGLLIB = __{l}__ } |
 | Summary | __''{l}''__ = the location of an alternate EGL library |

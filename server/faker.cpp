@@ -186,7 +186,7 @@ Display *init3D(void)
 			#ifdef EGLBACKEND
 			if(fconfig.egl)
 			{
-				int numDevices = 0, i;
+				int numDevices = 0, i, validDevices = 0;
 				const char *exts = NULL;
 				EGLDeviceEXT *devices = NULL;
 
@@ -220,10 +220,19 @@ Display *init3D(void)
 						_eglTerminate(edpy);
 						if(!strcasecmp(fconfig.localdpystring, "egl"))
 							break;
+						if(!strncasecmp(fconfig.localdpystring, "egl", 3))
+						{
+							char temps[80];
+
+							snprintf(temps, 80, "egl%d", validDevices);
+							if(!strcasecmp(fconfig.localdpystring, temps))
+								break;
+						}
 						const char *devStr =
 							_eglQueryDeviceStringEXT(devices[i], EGL_DRM_DEVICE_FILE_EXT);
 						if(devStr && !strcmp(devStr, fconfig.localdpystring))
 							break;
+						validDevices++;
 					}
 					if(i == numDevices) THROW("Invalid EGL device");
 

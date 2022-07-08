@@ -44,6 +44,11 @@ display manager was restarted.
 
 2. Fixed compilation errors when building with libX11 1.8.x.
 
+3. When using the EGL back end, a GPU can now be specified by an EGL device ID
+of the form `egl{n}`, where `{n}` is a zero-based index, or by a DRI device
+path.  A list of valid EGL device IDs and their associated DRI device paths can
+be obtained by running `/opt/VirtualGL/bin/eglinfo -e`.
+
 
 3.0.1
 =====

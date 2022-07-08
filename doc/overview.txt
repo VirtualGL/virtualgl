@@ -47,14 +47,14 @@ X11 commands and events to determine when windows have been resized, etc., but
 it does not interfere in any way with the delivery of X11 2D drawing commands
 to the X server.  For the most part, VGL does not interfere with the delivery
 of OpenGL commands to the GPU, either.  VGL merely forces the OpenGL commands
-to be delivered to a GPU in the application server, either through the 3D X
-server attached to the GPU or through a DRI device, rather than to the X server
-to which the 2D drawing commands are delivered (the 2D X server.)  Once the
-OpenGL rendering has been redirected to an off-screen buffer, everything
-(including esoteric OpenGL extensions, fragment/vertex shaders, etc.) should
-"just work."  If an OpenGL application runs correctly when accessing a 3D
-server/workstation locally, then the same application should run correctly with
-VirtualGL when accessing the same machine remotely.
+to be delivered to a GPU in the application server (through the 3D X server or
+EGL device attached to the GPU) rather than to the X server to which the 2D
+drawing commands are delivered (the 2D X server.)  Once the OpenGL rendering
+has been redirected to an off-screen buffer, everything (including esoteric
+OpenGL extensions, fragment/vertex shaders, etc.) should "just work."  If an
+OpenGL application runs correctly when accessing a 3D server/workstation
+locally, then the same application should run correctly with VirtualGL when
+accessing the same machine remotely.
 
 VirtualGL has two built-in "image transports" that can be used to deliver
 rendered frames to the 2D X server:
