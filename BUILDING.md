@@ -41,8 +41,8 @@ Build Requirements
     [EPEL](https://fedoraproject.org/wiki/EPEL) repository.
 
 - Some requisite development libraries are located in the CRB (Code Ready
-  Builder) repository on Red Hat Enterprise Linux 8 and in the PowerTools
-  repository on RHEL derivatives, which is not enabled by default.
+  Builder) or PowerTools repository on Red Hat Enterprise Linux 8+ and
+  derivatives, which is not enabled by default.
 
 
 32-bit VirtualGL Builds on x86-64 Linux Distributions
