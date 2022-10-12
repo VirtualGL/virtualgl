@@ -94,7 +94,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile
 include(CheckPrototypeDefinition)
 set(CMAKE_REQUIRED_INCLUDES ${X11_X11_INCLUDE_PATH})
 check_prototype_definition(XkbOpenDisplay
-	"Display *XkbOpenDisplay(_Xconst char *, int *, int *, int *, int *, int *)"
+	"Display *XkbOpenDisplay(_Xconst char *a, int *b, int *c, int *d, int *e, int *f)"
 	NULL X11/XKBlib.h LIBX11_18)
 unset(CMAKE_REQUIRED_INCLUDES)
 if(LIBX11_18)
