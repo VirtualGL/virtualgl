@@ -256,8 +256,8 @@ void checkCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 }
 
 
-void checkReadbackState(int oldReadBuf, Display *dpy, GLXDrawable draw,
-	GLXDrawable read, GLXContext ctx)
+void checkBufferState(int oldDrawBuf, int oldReadBuf, Display *dpy,
+	GLXDrawable draw, GLXDrawable read, GLXContext ctx)
 {
 	if(glXGetCurrentDisplay() != dpy)
 		THROWNL("Current display changed");
@@ -265,6 +265,10 @@ void checkReadbackState(int oldReadBuf, Display *dpy, GLXDrawable draw,
 		THROWNL("Current drawable changed");
 	if(glXGetCurrentContext() != ctx)
 		THROWNL("Context changed");
+	int drawBuf = -1;
+	glGetIntegerv(GL_DRAW_BUFFER, &drawBuf);
+	if(drawBuf != oldDrawBuf)
+		THROWNL("Draw buffer changed");
 	int readBuf = -1;
 	glGetIntegerv(GL_READ_BUFFER, &readBuf);
 	if(readBuf != oldReadBuf)
@@ -510,7 +514,8 @@ int readbackTest(bool stereo, bool doNamedFB)
 			char pixel[4];
 			glReadPixels(0, 0, 1, 1, 0, GL_BYTE, pixel);
 			glXSwapBuffers(dpy, win1);
-			checkReadbackState(GL_FRONT, dpy, win1, win0, ctx1);
+			checkBufferState(stereo ? GL_FRONT_RIGHT : GL_FRONT, GL_FRONT, dpy, win1,
+				win0, ctx1);
 			checkFrame(dpy, win1, 1, lastFrame1);
 			checkWindowColor(dpy, win1, clr.bits(-2));
 			if(stereo)
@@ -518,7 +523,7 @@ int readbackTest(bool stereo, bool doNamedFB)
 			// Make sure that glXSwapBuffers() actually swapped
 			glDrawBuffer(GL_FRONT);
 			glFinish();
-			checkReadbackState(GL_FRONT, dpy, win1, win0, ctx1);
+			checkBufferState(GL_FRONT, GL_FRONT, dpy, win1, win0, ctx1);
 			checkFrame(dpy, win1, 1, lastFrame1);
 			checkWindowColor(dpy, win1, clr.bits(-2));
 			if(stereo)
@@ -530,7 +535,7 @@ int readbackTest(bool stereo, bool doNamedFB)
 			glRenderMode(GL_FEEDBACK);
 			glXSwapBuffers(dpy, win1);
 			glRenderMode(GL_RENDER);
-			checkReadbackState(GL_FRONT, dpy, win1, win0, ctx1);
+			checkBufferState(GL_FRONT, GL_FRONT, dpy, win1, win0, ctx1);
 			checkFrame(dpy, win1, 0, lastFrame1);
 			printf("SUCCESS\n");
 		}
@@ -558,7 +563,7 @@ int readbackTest(bool stereo, bool doNamedFB)
 			glFeedbackBuffer(1, GL_2D, fbBuffer);
 			glRenderMode(GL_FEEDBACK);  glFlush();
 			glRenderMode(GL_RENDER);  glFlush();
-			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);
+			checkBufferState(GL_FRONT, GL_BACK, dpy, win1, win0, ctx1);
 			checkFrame(dpy, win1, 1, lastFrame1);
 			checkWindowColor(dpy, win1, clr.bits(-2));
 			if(stereo)
@@ -582,7 +587,7 @@ int readbackTest(bool stereo, bool doNamedFB)
 			glFinish();  glFinish();
 			checkFrame(dpy, win1, 1, lastFrame1);
 			glDrawBuffer(GL_FRONT);  glFinish();
-			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);
+			checkBufferState(GL_FRONT, GL_BACK, dpy, win1, win0, ctx1);
 			checkFrame(dpy, win1, 1, lastFrame1);
 			checkWindowColor(dpy, win1, clr.bits(-2));
 			if(stereo)
@@ -651,7 +656,7 @@ int readbackTest(bool stereo, bool doNamedFB)
 			glXWaitGL();  glXWaitGL();
 			checkFrame(dpy, win1, 1, lastFrame1);
 			glDrawBuffer(GL_FRONT);  glXWaitGL();
-			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);
+			checkBufferState(GL_FRONT, GL_BACK, dpy, win1, win0, ctx1);
 			checkFrame(dpy, win1, 1, lastFrame1);
 			checkWindowColor(dpy, win1, clr.bits(-2));
 			if(stereo)
@@ -707,7 +712,8 @@ int readbackTest(bool stereo, bool doNamedFB)
 			clr.clear(GL_BACK);  if(stereo) sclr.clear(GL_BACK_RIGHT);
 			glReadBuffer(GL_BACK);
 			glFinish();  glFinish();
-			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);
+			checkBufferState(stereo ? GL_BACK_RIGHT : GL_BACK, GL_BACK, dpy, win1,
+				win0, ctx1);
 			checkFrame(dpy, win1, 1, lastFrame1);
 			checkWindowColor(dpy, win1, clr.bits(-2));
 			if(stereo)
@@ -729,7 +735,7 @@ int readbackTest(bool stereo, bool doNamedFB)
 			glXMakeCurrent(dpy, win0, ctx0);  // No readback should occur
 			glDrawBuffer(GL_FRONT);
 			glXMakeCurrent(dpy, win0, ctx0);  // No readback should occur
-			checkReadbackState(GL_BACK, dpy, win0, win0, ctx0);
+			checkBufferState(GL_FRONT, GL_BACK, dpy, win0, win0, ctx0);
 			checkFrame(dpy, win1, 1, lastFrame1);
 			checkWindowColor(dpy, win1, clr.bits(-2));
 			if(stereo)
@@ -779,7 +785,7 @@ int readbackTest(bool stereo, bool doNamedFB)
 			glXMakeContextCurrent(dpy, win1, win0, ctx1);  // readback should occur
 			glDrawBuffer(GL_FRONT);
 			glXMakeContextCurrent(dpy, win1, win0, ctx1);  // No readback should occur
-			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);
+			checkBufferState(GL_FRONT, GL_BACK, dpy, win1, win0, ctx1);
 			checkFrame(dpy, win0, 1, lastFrame0);
 			checkWindowColor(dpy, win0, clr.bits(-2));
 			if(stereo)
@@ -799,7 +805,8 @@ int readbackTest(bool stereo, bool doNamedFB)
 			clr.clear(GL_FRONT_AND_BACK);  if(stereo) sclr.clear(GL_RIGHT);
 			glReadBuffer(GL_FRONT);
 			glXSwapBuffers(dpy, win1);
-			checkReadbackState(GL_FRONT, dpy, win1, win0, ctx1);
+			checkBufferState(stereo ? GL_RIGHT : GL_FRONT_AND_BACK, GL_FRONT, dpy,
+				win1, win0, ctx1);
 			checkFrame(dpy, win1, 1, lastFrame1);
 			checkWindowColor(dpy, win1, clr.bits(-1));
 			if(stereo) checkWindowColor(dpy, win1, sclr.bits(-1), true);
@@ -817,7 +824,8 @@ int readbackTest(bool stereo, bool doNamedFB)
 			clr.clear(GL_FRONT_AND_BACK);  if(stereo) sclr.clear(GL_RIGHT);
 			glReadBuffer(GL_BACK);
 			glFlush();  glFlush();
-			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);
+			checkBufferState(stereo ? GL_RIGHT : GL_FRONT_AND_BACK, GL_BACK, dpy,
+				win1, win0, ctx1);
 			checkFrame(dpy, win1, 2, lastFrame1);
 			checkWindowColor(dpy, win1, clr.bits(-1));
 			if(stereo) checkWindowColor(dpy, win1, sclr.bits(-1), true);
@@ -840,7 +848,8 @@ int readbackTest(bool stereo, bool doNamedFB)
 			if(stereo) sclr.clear(GL_RIGHT);
 			glReadBuffer(GL_BACK);
 			glFinish();  glFinish();
-			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);
+			checkBufferState(stereo ? GL_RIGHT : GL_FRONT_LEFT, GL_BACK, dpy, win1,
+				win0, ctx1);
 			checkFrame(dpy, win1, 2, lastFrame1);
 			checkWindowColor(dpy, win1, clr.bits(-1));
 			if(stereo) checkWindowColor(dpy, win1, sclr.bits(-1), true);
@@ -858,7 +867,8 @@ int readbackTest(bool stereo, bool doNamedFB)
 			clr.clear(GL_FRONT_AND_BACK);  if(stereo) sclr.clear(GL_RIGHT);
 			glReadBuffer(GL_BACK);
 			glXWaitGL();  glXWaitGL();
-			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);
+			checkBufferState(stereo ? GL_RIGHT : GL_FRONT_AND_BACK, GL_BACK, dpy,
+				win1, win0, ctx1);
 			checkFrame(dpy, win1, 2, lastFrame1);
 			checkWindowColor(dpy, win1, clr.bits(-1));
 			if(stereo) checkWindowColor(dpy, win1, sclr.bits(-1), true);
@@ -877,7 +887,7 @@ int readbackTest(bool stereo, bool doNamedFB)
 			glXMakeCurrent(dpy, win0, ctx0);  // readback should occur
 			glDrawBuffer(GL_FRONT);
 			glXMakeCurrent(dpy, win0, ctx0);  // No readback should occur
-			checkReadbackState(GL_BACK, dpy, win0, win0, ctx0);
+			checkBufferState(GL_FRONT, GL_BACK, dpy, win0, win0, ctx0);
 			checkFrame(dpy, win1, 1, lastFrame1);
 			checkWindowColor(dpy, win1, clr.bits(-1));
 			if(stereo) checkWindowColor(dpy, win1, sclr.bits(-1), true);
@@ -897,7 +907,7 @@ int readbackTest(bool stereo, bool doNamedFB)
 			glXMakeContextCurrent(dpy, win1, win0, ctx1);  // readback should occur
 			glDrawBuffer(GL_FRONT);
 			glXMakeContextCurrent(dpy, win1, win0, ctx1);  // No readback should occur
-			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);
+			checkBufferState(GL_FRONT, GL_BACK, dpy, win1, win0, ctx1);
 			checkFrame(dpy, win0, 1, lastFrame0);
 			checkWindowColor(dpy, win0, clr.bits(-1));
 			if(stereo) checkWindowColor(dpy, win0, sclr.bits(-1), true);
@@ -1009,7 +1019,7 @@ int readbackTestMS(void)
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-2), "GL_FRONT");
 		VERIFY_FBO(0, GL_FRONT, GL_NONE, 0, GL_FRONT);
-		checkReadbackState(GL_FRONT, dpy, win, win, ctx);
+		checkBufferState(GL_FRONT, GL_FRONT, dpy, win, win, ctx);
 		checkFrame(dpy, win, 1, lastFrame);
 		checkWindowColor(dpy, win, clr.bits(-2));
 
@@ -1096,7 +1106,7 @@ int flushTest(void)
 		}
 		checkFrame(dpy, win, -1, lastFrame);
 		printf("Read back %d of 10000 frames\n", lastFrame);
-		checkReadbackState(GL_FRONT, dpy, win, win, ctx);
+		checkBufferState(GL_FRONT, GL_FRONT, dpy, win, win, ctx);
 		checkWindowColor(dpy, win, clr.bits(-1), 0);
 		printf("SUCCESS\n");
 	}
@@ -1653,7 +1663,7 @@ class TestThread : public Runnable
 				glReadBuffer(GL_FRONT);
 				glXSwapBuffers(dpy, win);
 				CHECK_GL_ERROR();
-				checkReadbackState(GL_FRONT, dpy, win, win, ctx);
+				checkBufferState(GL_BACK, GL_FRONT, dpy, win, win, ctx);
 				checkFrame(dpy, win, 1, lastFrame);
 				checkWindowColor(dpy, win, colors[clr].bits, false);
 				clr = (clr + 1) % NC;
@@ -1969,7 +1979,7 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			glReadBuffer(GL_FRONT);
 			glXSwapBuffers(dpy, glxwin);
 			checkFrame(dpy, win, 1, lastFrame);
-			checkReadbackState(GL_FRONT, dpy, glxwin, pb, ctx);
+			checkBufferState(GL_BACK, GL_FRONT, dpy, glxwin, pb, ctx);
 			checkWindowColor(dpy, win, clr.bits(-2), false);
 			printf("SUCCESS\n");
 		}
@@ -2072,7 +2082,8 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			glDrawBuffer(GL_BACK);
 			glXSwapBuffers(dpy, glxwin);
 			checkFrame(dpy, win, 1, lastFrame);
-			checkReadbackState(GL_COLOR_ATTACHMENT0_EXT, dpy, glxwin, glxwin, ctx);
+			checkBufferState(GL_BACK, GL_COLOR_ATTACHMENT0_EXT, dpy, glxwin, glxwin,
+				ctx);
 			checkWindowColor(dpy, win, clr.bits(-3), false);
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 			VERIFY_FBO(0, GL_BACK, GL_NONE, 0, GL_FRONT);
@@ -2124,9 +2135,7 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			glDrawBuffer(GL_BACK);  glReadBuffer(GL_BACK);
 			XCopyArea(dpy, pm0, win, DefaultGC(dpy, DefaultScreen(dpy)), 0, 0,
 				dpyw / 2, dpyh / 2, 0, 0);
-			checkReadbackState(expectedBuf, dpy, glxpm0, glxpm0, ctx);
-			int temp = -1;  glGetIntegerv(GL_DRAW_BUFFER, &temp);
-			if(temp != (int)expectedBuf) THROWNL("Draw buffer changed");
+			checkBufferState(expectedBuf, expectedBuf, dpy, glxpm0, glxpm0, ctx);
 			checkFrame(dpy, win, 1, lastFrame);
 			checkWindowColor(dpy, win, clr.bits(-1), false);
 			printf("SUCCESS\n");
@@ -2158,9 +2167,7 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			glDrawBuffer(GL_BACK);  glReadBuffer(GL_BACK);
 			XCopyArea(dpy, win, pm1, DefaultGC(dpy, DefaultScreen(dpy)), 0, 0,
 				dpyw / 2, dpyh / 2, 0, 0);
-			checkReadbackState(expectedBuf, dpy, glxpm1, glxpm1, ctx);
-			int temp = -1;  glGetIntegerv(GL_DRAW_BUFFER, &temp);
-			if(temp != (int)expectedBuf) THROWNL("Draw buffer changed");
+			checkBufferState(expectedBuf, expectedBuf, dpy, glxpm1, glxpm1, ctx);
 			checkFrame(dpy, win, 0, lastFrame);
 			VERIFY_BUF_COLOR(GL_BACK, clr.bits(dbPixmap ? -2 : -1), "PM1");
 			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(dbPixmap ? -2 : -1), "PM1");
@@ -2192,9 +2199,7 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			glDrawBuffer(GL_BACK);  glReadBuffer(GL_BACK);
 			XCopyArea(dpy, pm0, pm1, DefaultGC(dpy, DefaultScreen(dpy)), 0, 0,
 				dpyw / 2, dpyh / 2, 0, 0);
-			checkReadbackState(expectedBuf, dpy, glxpm1, glxpm1, ctx);
-			int temp = -1;  glGetIntegerv(GL_DRAW_BUFFER, &temp);
-			if(temp != (int)expectedBuf) THROWNL("Draw buffer changed");
+			checkBufferState(expectedBuf, expectedBuf, dpy, glxpm1, glxpm1, ctx);
 			VERIFY_BUF_COLOR(GL_BACK, clr.bits(-1), "PM1");
 			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "PM1");
 			printf("SUCCESS\n");
@@ -2220,9 +2225,7 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			glDrawBuffer(GL_BACK);  glReadBuffer(GL_BACK);
 			XCopyArea(dpy, pm0, pm2, DefaultGC(dpy, DefaultScreen(dpy)), 0, 0,
 				dpyw / 2, dpyh / 2, 0, 0);
-			checkReadbackState(expectedBuf, dpy, glxpm0, glxpm0, ctx);
-			int temp = -1;  glGetIntegerv(GL_DRAW_BUFFER, &temp);
-			if(temp != (int)expectedBuf) THROWNL("Draw buffer changed");
+			checkBufferState(expectedBuf, expectedBuf, dpy, glxpm0, glxpm0, ctx);
 			checkFrame(dpy, pm0, 1, lastFrame);
 			checkWindowColor(dpy, pm0, clr.bits(-1), false);
 
@@ -2233,9 +2236,7 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			XImage *xi = XGetImage(dpy, pm0, 0, 0, dpyw / 2, dpyh / 2, AllPlanes,
 				ZPixmap);
 			if(xi) XDestroyImage(xi);
-			checkReadbackState(expectedBuf, dpy, glxpm0, glxpm0, ctx);
-			temp = -1;  glGetIntegerv(GL_DRAW_BUFFER, &temp);
-			if(temp != (int)expectedBuf) THROWNL("Draw buffer changed");
+			checkBufferState(expectedBuf, expectedBuf, dpy, glxpm0, glxpm0, ctx);
 			checkFrame(dpy, pm0, 1, lastFrame);
 			checkWindowColor(dpy, pm0, clr.bits(dbPixmap ? -2 : -1), false);
 
