@@ -73,25 +73,32 @@ static FakePbuffer *getCurrentFakePbuffer(EGLint readdraw)
 void bindFramebuffer(GLenum target, GLuint framebuffer, bool ext)
 {
 	#ifdef EGLBACKEND
+	const GLenum *oldDrawBufs = NULL;  GLsizei nDrawBufs = 0;
+	GLenum oldReadBuf = GL_NONE;
+	FakePbuffer *drawpb = NULL, *readpb = NULL;
+
 	if(fconfig.egl)
 	{
 		if(framebuffer == 0)
 		{
 			if(target == GL_DRAW_FRAMEBUFFER || target == GL_FRAMEBUFFER)
 			{
-				FakePbuffer *pb = pbhashegl.find(getCurrentDrawableEGL());
-				if(pb)
+				drawpb = pbhashegl.find(getCurrentDrawableEGL());
+				if(drawpb)
 				{
-					framebuffer = pb->getFBO();
+					oldDrawBufs =
+						ctxhashegl.getDrawBuffers(_eglGetCurrentContext(), nDrawBufs);
+					framebuffer = drawpb->getFBO();
 					ctxhashegl.setDrawFBO(_eglGetCurrentContext(), 0);
 				}
 			}
 			if(target == GL_READ_FRAMEBUFFER || target == GL_FRAMEBUFFER)
 			{
-				FakePbuffer *pb = pbhashegl.find(getCurrentReadDrawableEGL());
-				if(pb)
+				readpb = pbhashegl.find(getCurrentReadDrawableEGL());
+				if(readpb)
 				{
-					framebuffer = pb->getFBO();
+					oldReadBuf = ctxhashegl.getReadBuffer(_eglGetCurrentContext());
+					framebuffer = readpb->getFBO();
 					ctxhashegl.setReadFBO(_eglGetCurrentContext(), 0);
 				}
 			}
@@ -107,6 +114,20 @@ void bindFramebuffer(GLenum target, GLuint framebuffer, bool ext)
 	#endif
 	if(ext) _glBindFramebufferEXT(target, framebuffer);
 	else _glBindFramebuffer(target, framebuffer);
+	#ifdef EGLBACKEND
+	if(fconfig.egl)
+	{
+		if(oldDrawBufs)
+		{
+			if(nDrawBufs == 1)
+				drawpb->setDrawBuffer(oldDrawBufs[0], false);
+			else if(nDrawBufs > 0)
+				drawpb->setDrawBuffers(nDrawBufs, oldDrawBufs, false);
+			delete [] oldDrawBufs;
+		}
+		if(oldReadBuf) readpb->setReadBuffer(oldReadBuf, false);
+	}
+	#endif
 }
 
 

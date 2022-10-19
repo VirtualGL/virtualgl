@@ -15,6 +15,12 @@ of the form `egl{n}`, where `{n}` is a zero-based index, or by a DRI device
 path.  A list of valid EGL device IDs and their associated DRI device paths can
 be obtained by running `/opt/VirtualGL/bin/eglinfo -e`.
 
+4. Fixed an issue in the EGL back end whereby `glBindFramebuffer()`, when used
+to bind the default framebuffer, did not restore the previous draw/read buffer
+state for the default framebuffer.  This issue was known to cause flickering in
+Webots when rendering a camera view, and it may have affected other
+applications as well.
+
 
 3.0.1
 =====

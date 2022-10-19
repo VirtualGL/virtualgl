@@ -994,10 +994,10 @@ int readbackTestMS(void)
 
 		XMapWindow(dpy, win);
 
-		clr.clear(GL_BACK);
-		VERIFY_BUF_COLOR(GL_BACK, clr.bits(-1), "GL_BACK");
 		clr.clear(GL_FRONT);
 		VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "GL_FRONT");
+		clr.clear(GL_BACK);
+		VERIFY_BUF_COLOR(GL_BACK, clr.bits(-1), "GL_BACK");
 		glGenFramebuffers(1, &fbo);
 		glGenRenderbuffers(1, &rbo0);
 		glGenRenderbuffers(1, &rbo1);
@@ -1017,9 +1017,26 @@ int readbackTestMS(void)
 		VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, fbo,
 			GL_COLOR_ATTACHMENT1);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		VERIFY_FBO(0, GL_BACK, GL_NONE, 0, GL_BACK);
+		checkBufferState(GL_BACK, GL_BACK, dpy, win, win, ctx);
+		clr.clear(0);
+		VERIFY_BUF_COLOR(0, clr.bits(-1), "GL_BACK");
+		// When using the EGL back end in VirtualGL 3.0 beta1 through 3.0.1, the
+		// following command will fail, because glBindFramebuffer(..., 0) didn't
+		// restore the previous draw/read buffer state for the default framebuffer.
+		// Swapping the buffers of a GLX drawable causes the EGL back end to
+		// create a new FBO to serve as the drawable's default framebuffer, with
+		// the new FBO containing the previous RBOs bound in reverse order.  The
+		// default draw/read buffer for a new FBO is GL_COLOR_ATTACHMENT0, which
+		// the EGL back end uses as the front left buffer.  Since the default
+		// framebuffer isn't bound when the buffers are swapped in the code above,
+		// the FBO's initial draw/read buffer remains unchanged.  Thus, at this
+		// point in the code, VirtualGL reported that GL_BACK was active, but the
+		// RBO corresponding to GL_FRONT was actually active.  As a result, the
+		// previous two commands affected the front buffer rather than the back
+		// buffer.
+		VERIFY_BUF_COLOR(GL_BACK, clr.bits(-1), "GL_BACK");
 		VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-2), "GL_FRONT");
-		VERIFY_FBO(0, GL_FRONT, GL_NONE, 0, GL_FRONT);
-		checkBufferState(GL_FRONT, GL_FRONT, dpy, win, win, ctx);
 		checkFrame(dpy, win, 1, lastFrame);
 		checkWindowColor(dpy, win, clr.bits(-2));
 
@@ -2044,6 +2061,13 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			printf("FBO->Window:                    ");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				THROWNL("Could not make context current");
+			// The following command will fail unless the implementation of
+			// glXMake*Current() in the EGL back end restores the context's previous
+			// read buffer state for the default framebuffer.  The multithreaded
+			// rendering test will fail unless the implementation of
+			// glXMake*Current() in the EGL back end restores the context's previous
+			// draw buffer state for the default framebuffer.
+			VERIFY_BUF_COLOR(0, clr.bits(-2), "Win");
 			CHECK_GL_ERROR();
 			checkCurrent(dpy, glxwin, glxwin, ctx, dpyw / 2, dpyh / 2);
 			clr.clear(GL_BACK);
