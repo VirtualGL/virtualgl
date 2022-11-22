@@ -1,7 +1,7 @@
-3.1 pre-beta
-============
+3.0.90 (3.1 beta1)
+==================
 
-### Significant changes relative to 3.0:
+### Significant changes relative to 3.0.2:
 
 1. The `vglconnect -x` and `vglconnect -k` options have been retired in this
 version of VirtualGL and will continue to be maintained in the 3.0.x branch on
