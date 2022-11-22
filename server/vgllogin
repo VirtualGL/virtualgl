@@ -1,6 +1,8 @@
 #!/bin/sh
 
 # Copyright (C)2007 Sun Microsystems, Inc.
+# Copyright (C)2021 Karl Kleinpaste
+# Copyright (C)2022 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
 # the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -14,13 +16,22 @@
 
 if [ "$1" = "-check" ]; then exit 0; fi
 
+VGLRUN=
+
 usage()
 {
-	echo "USAGE: $0 -s <server-side port on SSH tunnel>"
+	echo "USAGE: $0 [-v] -s <server-side port on SSH tunnel>"
 	exit 1
 }
 
 if [ "$1" = "" ]; then usage $0; fi
+
+if [ "$1" = "-v" ]; then
+
+	VGLRUN=vglrun
+	shift
+
+fi
 
 if [ "$1" = "-s" ]; then
 
@@ -32,6 +43,10 @@ if [ "$1" = "-s" ]; then
 	__VGL_SSHTUNNEL=1
 	export __VGL_SSHTUNNEL
 
+else
+
+	usage $0
+
 fi
 
-exec $SHELL -l
+exec $VGLRUN $SHELL -l

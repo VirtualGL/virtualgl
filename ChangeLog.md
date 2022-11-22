@@ -31,6 +31,10 @@ EGL window surfaces.
 option to avoid the need to authenticate with the server multiple times when
 tunneling the VGL Transport through SSH.
 
+5. `vglconnect` now accepts a new command-line argument (`-v`) that, when
+combined with `-s`, causes VirtualGL to be preloaded into all processes
+launched in the remote shell, thus eliminating the need to invoke `vglrun`.
+
 
 3.0.2
 =====

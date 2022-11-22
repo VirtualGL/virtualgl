@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # Copyright (C)2007 Sun Microsystems, Inc.
+# Copyright (C)2021 Karl Kleinpaste
 # Copyright (C)2009-2011, 2014-2018, 2021-2022 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
@@ -23,6 +24,7 @@ VGLTUNNEL=0
 FORCE=0
 IPV6=0
 SSHCMD=ssh
+VARG=
 
 usage()
 {
@@ -36,6 +38,8 @@ usage()
 	echo "               (default: read from DISPLAY environment variable)"
 	echo "-s = Tunnel VGL Transport and forward X11 through SSH"
 	echo "     (default: only forward X11 through SSH)"
+	echo "-v = When using -s, preload VirtualGL into all processes launched in the remote"
+	echo "     shell."
 	echo "-ipv6 = Use IPv6 sockets"
 	echo "-e <program> = Execute <program> on the VirtualGL server (if using the -s"
 	echo "               option, <program> is executed after running vgllogin.)"
@@ -60,6 +64,7 @@ do
 	-f*) FORCE=1 ;;
 	-ipv6) IPV6=1 ;;
 	-s*) VGLTUNNEL=1 ;;
+	-v*) VARG=-v ;;
 	-g*) SSHCMD=gsissh; GLOBUS=1 ;;
 	-e*) COMMAND=$2; shift ;;
 	-h*) usage ;;
@@ -130,11 +135,11 @@ if [ $VGLTUNNEL = 1 ]; then
 	echo Making final SSH connection ...
 	if [ "$COMMAND" != "" ]; then
 		$SSHCMD $CONTROLPATHARG $CONTROLPERSISTARG -t -Y -R$REMOTEPORT:localhost:$PORT ${1+"$@"} <<EOF
-$VGL_BINDIR/vgllogin -s $REMOTEPORT
+$VGL_BINDIR/vgllogin $VARG -s $REMOTEPORT
 $COMMAND
 EOF
 	else
-		$SSHCMD $CONTROLPATHARG $CONTROLPERSISTARG -t -Y -R$REMOTEPORT:localhost:$PORT ${1+"$@"} "$VGL_BINDIR/vgllogin -s "$REMOTEPORT
+		$SSHCMD $CONTROLPATHARG $CONTROLPERSISTARG -t -Y -R$REMOTEPORT:localhost:$PORT ${1+"$@"} "$VGL_BINDIR/vgllogin $VARG -s "$REMOTEPORT
 	fi
 	exit 0
 fi
