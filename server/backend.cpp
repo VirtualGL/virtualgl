@@ -275,7 +275,7 @@ GLXContext createContext(Display *dpy, VGLFBConfig config, GLXContext share,
 			}
 			if(!share)
 			{
-				getRBOContext(dpy).createContext();
+				getRBOContext(dpy).createContext(RBOContext::REFCOUNT_CONTEXT);
 				share = (GLXContext)getRBOContext(dpy).getContext();
 			}
 			if(!_eglBindAPI(EGL_OPENGL_API))
@@ -341,6 +341,7 @@ void destroyContext(Display *dpy, GLXContext ctx)
 			if(!ctx) return;
 			VGLFBConfig config = ctxhashegl.findConfig(ctx);
 			ctxhashegl.remove(ctx);
+			getRBOContext(dpy).destroyContext(RBOContext::REFCOUNT_CONTEXT);
 			if(!_eglBindAPI(EGL_OPENGL_API))
 				THROW("Could not enable OpenGL API");
 			if(!_eglDestroyContext(EDPY, (EGLContext)ctx))

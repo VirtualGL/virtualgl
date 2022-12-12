@@ -1,3 +1,13 @@
+3.0.3
+=====
+
+### Significant changes relative to 3.0.2:
+
+1. Fixed an issue in the EGL back end whereby textures and other OpenGL objects
+were not automatically destroyed along with the context and drawable in which
+the objects were created.
+
+
 3.0.2
 =====
 

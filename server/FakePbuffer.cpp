@@ -53,7 +53,7 @@ FakePbuffer::FakePbuffer(Display *dpy_, VGLFBConfig config_,
 
 	try
 	{
-		getRBOContext(dpy).createContext();
+		getRBOContext(dpy).createContext(RBOContext::REFCOUNT_DRAWABLE);
 		createBuffer(true);
 		CriticalSection::SafeLock l(idMutex);
 		id = nextID++;
@@ -176,16 +176,21 @@ void FakePbuffer::destroy(bool errorCheck)
 	try
 	{
 		CriticalSection::SafeLock l(getRBOContext(dpy).getMutex());
-		TempContextEGL tc(getRBOContext(dpy).getContext());
 
-		_glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		_glBindRenderbuffer(GL_RENDERBUFFER, 0);
-		for(int i = 0; i < 4; i++)
 		{
-			if(rboc[i]) { _glDeleteRenderbuffers(1, &rboc[i]);  rboc[i] = 0; }
+			TempContextEGL tc(getRBOContext(dpy).getContext());
+
+			_glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			_glBindRenderbuffer(GL_RENDERBUFFER, 0);
+			for(int i = 0; i < 4; i++)
+			{
+				if(rboc[i]) { _glDeleteRenderbuffers(1, &rboc[i]);  rboc[i] = 0; }
+			}
+			if(rbod) { _glDeleteRenderbuffers(1, &rbod);  rbod = 0; }
+			if(fbo) { _glDeleteFramebuffers(1, &fbo);  fbo = 0; }
 		}
-		if(rbod) { _glDeleteRenderbuffers(1, &rbod);  rbod = 0; }
-		if(fbo) { _glDeleteFramebuffers(1, &fbo);  fbo = 0; }
+
+		getRBOContext(dpy).destroyContext(RBOContext::REFCOUNT_DRAWABLE);
 	}
 	catch(std::exception &e)
 	{
