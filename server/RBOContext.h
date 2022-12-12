@@ -1,4 +1,4 @@
-// Copyright (C)2020-2021 D. R. Commander
+// Copyright (C)2020-2022 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -25,11 +25,14 @@ class RBOContext
 {
 	public:
 
-		RBOContext() : ctx(0)
+		static const int REFCOUNT_CONTEXT = 1 << 0;
+		static const int REFCOUNT_DRAWABLE = 1 << 1;
+
+		RBOContext() : ctx(0), contextRefCount(0), drawableRefCount(0)
 		{
 		}
 
-		void createContext(void)
+		void createContext(int refCounts)
 		{
 			util::CriticalSection::SafeLock l(mutex);
 
@@ -39,6 +42,33 @@ class RBOContext
 					THROW("Could not enable OpenGL API");
 				ctx = _eglCreateContext(EDPY, (EGLConfig)0, NULL, NULL);
 				if(!ctx) THROW_EGL("eglCreateContext()");
+			}
+
+			if(refCounts & REFCOUNT_CONTEXT) contextRefCount++;
+			if(refCounts & REFCOUNT_DRAWABLE) drawableRefCount++;
+		}
+
+		void destroyContext(int refCounts, bool force = false)
+		{
+			util::CriticalSection::SafeLock l(mutex);
+
+			if(refCounts & REFCOUNT_CONTEXT)
+			{
+				contextRefCount--;
+				if(contextRefCount < 0) contextRefCount = 0;
+			}
+			if(refCounts & REFCOUNT_DRAWABLE)
+			{
+				drawableRefCount--;
+				if(drawableRefCount < 0) drawableRefCount = 0;
+			}
+
+			if(ctx && (force || (contextRefCount == 0 && drawableRefCount == 0)))
+			{
+				if(_eglBindAPI(EGL_OPENGL_API))
+					_eglDestroyContext(EDPY, ctx);
+				ctx = 0;
+				contextRefCount = drawableRefCount = 0;
 			}
 		}
 
@@ -50,12 +80,7 @@ class RBOContext
 		{
 			util::CriticalSection::SafeLock l(mutex);
 
-			if(ctx)
-			{
-				if(_eglBindAPI(EGL_OPENGL_API))
-					_eglDestroyContext(EDPY, ctx);
-				ctx = 0;
-			}
+			destroyContext(REFCOUNT_CONTEXT | REFCOUNT_DRAWABLE, true);
 		}
 
 	private:
@@ -73,10 +98,23 @@ class RBOContext
 		// allows those contexts to be used for rendering into the RBOs, even
 		// though those contexts were not current when the RBOs were created.
 		EGLContext ctx;
+		// The context reference count is incremented in the body of
+		// glXCreate*Context*() and decremented in the body of glXDestroyContext().
+		// The drawable reference count is incremented when the EGL back end
+		// creates a Pbuffer (either an application-requested Pbuffer or a Pbuffer
+		// that the faker uses to emulate an OpenGL window) and decremented when
+		// the EGL back end destroys a Pbuffer.  When both reference counts reach
+		// 0, the RBO context is destroyed.  That prevents per-context objects,
+		// such as textures, from surviving longer than the GLX drawable and
+		// context in which they were created.  (Note, however, that this behavior
+		// is technically incorrect, as OpenGL objects are supposed to survive only
+		// as long as the context in which they were created.  It's the best we can
+		// do given the limitations of emulating Pbuffers using RBOs.)
+		int contextRefCount, drawableRefCount;
 		// Mutex for the RBO context.  This guards any operations that alter the
-		// context handle above, or any operations that occur while the RBO context
-		// is current (an OpenGL context can only be current in one thread at a
-		// time.)
+		// context handle or reference counts above, or any operations that occur
+		// while the RBO context is current (an OpenGL context can only be current
+		// in one thread at a time.)
 		util::CriticalSection mutex;
 };
 
