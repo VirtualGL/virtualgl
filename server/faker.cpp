@@ -78,7 +78,15 @@ void safeExit(int retcode)
 		fconfig_deleteinstance();
 	}
 	globalMutex.unlock(false);
-	if(!shutdown) exit(retcode);
+	if(!shutdown)
+	{
+		if(!strcasecmp(fconfig.exitfunction, "_exit"))
+			_exit(retcode);
+		else if(!strcasecmp(fconfig.exitfunction, "abort"))
+			abort();
+		else
+			exit(retcode);
+	}
 	else pthread_exit(0);
 }
 

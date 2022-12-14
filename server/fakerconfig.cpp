@@ -1,4 +1,4 @@
-// Copyright (C)2009-2021 D. R. Commander
+// Copyright (C)2009-2022 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -340,6 +340,7 @@ void fconfig_reloadenv(void)
 	FETCHENV_STR("VGL_EGLLIB", egllib);
 	#endif
 	FETCHENV_STR("VGL_EXCLUDE", excludeddpys);
+	FETCHENV_STR("VGL_EXITFUNCTION", exitfunction);
 	#ifdef FAKEXCB
 	FETCHENV_BOOL("VGL_FAKEXCB", fakeXCB);
 	#endif
