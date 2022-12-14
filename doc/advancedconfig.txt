@@ -178,6 +178,23 @@ previous method:
 	through unimpeded.  This variable is re-checked every time ''XOpenDisplay()''
 	is called, so it can be set dynamically from within a 3D application.
 
+| Environment Variable | \
+	{pcode: VGL_EXITFUNCTION = __exit \| _exit \| abort__ } |
+| Summary | Specify the function that the VirtualGL Faker should call when a \
+	non-recoverable error occurs |
+| Image Transports | All |
+| Default Value | ''exit'' |
+#OPT: hiCol=first
+
+	Description :: The VirtualGL Faker normally calls ''exit()'' when a
+	non-recoverable error occurs.  However, that may not be appropriate for
+	multithreaded applications that statically instantiate objects at the global
+	scope, because calling ''exit()'' can cause global objects to be cleaned up
+	before the threads that use them are terminated.  Calling ''_exit()'' instead
+	of ''exit()'' causes the application to exit immediately without cleaning up
+	global objects, and calling ''abort()'' instead of ''exit()'' allows a core
+	dump to be obtained.
+
 | Environment Variable | {pcode: VGL_FAKEOPENCL = __0 \| 1__ } |
 | ''vglrun'' argument | ''-ocl'' / ''+ocl'' |
 | Summary | Disable/enable OpenCL interposer |

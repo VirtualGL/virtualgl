@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2022-12-14T13:29:38">
+<meta name="date" content="2022-12-14T13:32:46">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3222,6 +3222,43 @@ Image transport plugins are free to handle or ignore any configuration option as
         through unimpeded.  This variable is re-checked every time 
         <code>XOpenDisplay()</code> is called, so it can be set dynamically from 
         within a 3D application.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VGL_EXITFUNCTION = <em>exit | _exit | abort</em></code></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Specify the function that the VirtualGL Faker should call when a non-recoverable error occurs</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Image Transports</td>
+    <td class="standard">All</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard"><code>exit</code></td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        The VirtualGL Faker normally calls <code>exit()</code> when a 
+        non-recoverable error occurs.  However, that may not be appropriate for 
+        multithreaded applications that statically instantiate objects at the 
+        global scope, because calling <code>exit()</code> can cause global 
+        objects to be cleaned up before the threads that use them are 
+        terminated.  Calling <code>_exit()</code> instead of <code>exit()</code> 
+        causes the application to exit immediately without cleaning up global 
+        objects, and calling <code>abort()</code> instead of <code>exit()</code> 
+        allows a core dump to be obtained.
     </dd>
 </dl>
 

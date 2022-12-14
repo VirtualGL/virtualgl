@@ -7,6 +7,10 @@
 were not automatically destroyed along with the context and drawable in which
 the objects were created.
 
+2. Added an environment variable (`VGL_EXITFUNCTION`) that, when set to
+`_exit` or `abort`, causes the VirtualGL Faker to call the specified function
+rather than `exit()` when a non-recoverable error occurs.
+
 
 3.0.90 (3.1 beta1)
 ==================
