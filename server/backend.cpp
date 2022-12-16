@@ -273,11 +273,9 @@ GLXContext createContext(Display *dpy, VGLFBConfig config, GLXContext share,
 				faker::sendGLXError(dpy, minorCode, GLXBadFBConfig, false);
 				return NULL;
 			}
+			getRBOContext(dpy).createContext(RBOContext::REFCOUNT_CONTEXT);
 			if(!share)
-			{
-				getRBOContext(dpy).createContext(RBOContext::REFCOUNT_CONTEXT);
 				share = (GLXContext)getRBOContext(dpy).getContext();
-			}
 			if(!_eglBindAPI(EGL_OPENGL_API))
 				THROW("Could not enable OpenGL API");
 			GLXContext ctx = (GLXContext)_eglCreateContext(EDPY, (EGLConfig)0,
