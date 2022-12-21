@@ -1524,7 +1524,10 @@ EGLBoolean eglTerminate(EGLDisplay display)
 	TRY();
 
 	if(IS_EXCLUDED_EGLX(display))
+	{
+		if(display == EDPY) return EGL_TRUE;
 		return _eglTerminate(display);
+	}
 
 	GET_DISPLAY();
 	DISABLE_FAKER();
