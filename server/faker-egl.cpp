@@ -1,5 +1,5 @@
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2011, 2014-2015, 2018, 2021 D. R. Commander
+// Copyright (C)2011, 2014-2015, 2018, 2021-2022 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -691,7 +691,7 @@ EGLDisplay eglGetCurrentDisplay(void)
 
 	TRY();
 
-	if(faker::getExcludeCurrent() || !faker::getEGLXContextCurrent())
+	if(faker::getEGLExcludeCurrent() || !faker::getEGLXContextCurrent())
 		return _eglGetCurrentDisplay();
 
 	DISABLE_FAKER();
@@ -718,7 +718,7 @@ EGLSurface eglGetCurrentSurface(EGLint readdraw)
 
 	TRY();
 
-	if(faker::getExcludeCurrent() || !faker::getEGLXContextCurrent())
+	if(faker::getEGLExcludeCurrent() || !faker::getEGLXContextCurrent())
 		return _eglGetCurrentSurface(readdraw);
 
 	DISABLE_FAKER();
@@ -1096,12 +1096,14 @@ EGLBoolean eglMakeCurrent(EGLDisplay display, EGLSurface draw, EGLSurface read,
 
 	if(IS_EXCLUDED_EGLX(display))
 	{
-		faker::setExcludeCurrent(true);
+		faker::setEGLExcludeCurrent(true);
+		faker::setOGLExcludeCurrent(true);
 		faker::setEGLXContextCurrent(false);
 		faker::setCurrentEGLXDisplay(NULL);
 		return _eglMakeCurrent(display, draw, read, context);
 	}
-	faker::setExcludeCurrent(false);
+	faker::setEGLExcludeCurrent(false);
+	faker::setOGLExcludeCurrent(false);
 
 	GET_DISPLAY()
 	if(!eglxdpy->isInit && context)

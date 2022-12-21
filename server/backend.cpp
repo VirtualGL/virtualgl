@@ -48,6 +48,7 @@ namespace backend {
 	} \
 
 
+VGL_THREAD_LOCAL(CurrentContextEGL, GLXContext, None)
 VGL_THREAD_LOCAL(CurrentDrawableEGL, GLXDrawable, None)
 VGL_THREAD_LOCAL(CurrentReadDrawableEGL, GLXDrawable, None)
 
@@ -410,11 +411,7 @@ GLXContext getCurrentContext(void)
 {
 	#ifdef EGLBACKEND
 	if(fconfig.egl)
-	{
-		if(!_eglBindAPI(EGL_OPENGL_API))
-			THROW("Could not enable OpenGL API");
-		return (GLXContext)_eglGetCurrentContext();
-	}
+		return getCurrentContextEGL();
 	else
 	#endif
 		return _glXGetCurrentContext();
@@ -816,6 +813,7 @@ Bool makeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 			EGLBoolean ret = (Bool)_eglMakeCurrent(EDPY, EGL_NO_SURFACE,
 				EGL_NO_SURFACE, (EGLContext)ctx);
 			if(!ret) THROW_EGL("eglMakeCurrent()");
+			setCurrentContextEGL(ctx);
 			setCurrentDrawableEGL(draw);
 			setCurrentReadDrawableEGL(read);
 			if(!ctx) return True;

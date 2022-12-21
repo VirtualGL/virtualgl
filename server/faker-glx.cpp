@@ -1007,7 +1007,7 @@ GLXContext glXGetCurrentContext(void)
 {
 	GLXContext ctx = 0;
 
-	if(faker::getExcludeCurrent()) return _glXGetCurrentContext();
+	if(faker::getGLXExcludeCurrent()) return _glXGetCurrentContext();
 
 	TRY();
 
@@ -1035,7 +1035,7 @@ Display *glXGetCurrentDisplay(void)
 {
 	Display *dpy = NULL;  faker::VirtualWin *vw;
 
-	if(faker::getExcludeCurrent()) return _glXGetCurrentDisplay();
+	if(faker::getGLXExcludeCurrent()) return _glXGetCurrentDisplay();
 
 	TRY();
 
@@ -1071,7 +1071,7 @@ GLXDrawable glXGetCurrentDrawable(void)
 {
 	faker::VirtualWin *vw;  GLXDrawable draw = 0;
 
-	if(faker::getExcludeCurrent()) return _glXGetCurrentDrawable();
+	if(faker::getGLXExcludeCurrent()) return _glXGetCurrentDrawable();
 
 	TRY();
 
@@ -1095,7 +1095,7 @@ GLXDrawable glXGetCurrentReadDrawable(void)
 {
 	faker::VirtualWin *vw;  GLXDrawable read = 0;
 
-	if(faker::getExcludeCurrent()) return _glXGetCurrentReadDrawable();
+	if(faker::getGLXExcludeCurrent()) return _glXGetCurrentReadDrawable();
 
 	TRY();
 
@@ -1355,7 +1355,7 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 
 	faker::init();
 
-	if(faker::getExcludeCurrent()) return _glXGetProcAddressARB(procName);
+	if(faker::getGLXExcludeCurrent()) return _glXGetProcAddressARB(procName);
 
 	/////////////////////////////////////////////////////////////////////////////
 	OPENTRACE(glXGetProcAddressARB);  PRARGS((char *)procName);  STARTTRACE();
@@ -1652,10 +1652,12 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	if(ctx) config = ctxhash.findConfig(ctx);
 	if(faker::isDisplayExcluded(dpy))
 	{
-		faker::setExcludeCurrent(true);
+		faker::setGLXExcludeCurrent(true);
+		faker::setOGLExcludeCurrent(true);
 		return _glXMakeCurrent(dpy, drawable, ctx);
 	}
-	faker::setExcludeCurrent(false);
+	faker::setGLXExcludeCurrent(false);
+	faker::setOGLExcludeCurrent(false);
 
 	/////////////////////////////////////////////////////////////////////////////
 	OPENTRACE(glXMakeCurrent);  PRARGD(dpy);  PRARGX(drawable);  PRARGX(ctx);
@@ -1773,10 +1775,12 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	if(ctx) config = ctxhash.findConfig(ctx);
 	if(faker::isDisplayExcluded(dpy))
 	{
-		faker::setExcludeCurrent(true);
+		faker::setGLXExcludeCurrent(true);
+		faker::setOGLExcludeCurrent(true);
 		return _glXMakeContextCurrent(dpy, draw, read, ctx);
 	}
-	faker::setExcludeCurrent(false);
+	faker::setGLXExcludeCurrent(false);
+	faker::setOGLExcludeCurrent(false);
 
 	/////////////////////////////////////////////////////////////////////////////
 	OPENTRACE(glXMakeContextCurrent);  PRARGD(dpy);  PRARGX(draw);  PRARGX(read);
@@ -2296,7 +2300,7 @@ int glXSwapIntervalSGI(int interval)
 {
 	int retval = 0;
 
-	if(faker::getExcludeCurrent()) return _glXSwapIntervalSGI(interval);
+	if(faker::getGLXExcludeCurrent()) return _glXSwapIntervalSGI(interval);
 
 	/////////////////////////////////////////////////////////////////////////////
 	OPENTRACE(glXSwapIntervalSGI);  PRARGI(interval);  STARTTRACE();
@@ -2326,7 +2330,7 @@ int glXSwapIntervalSGI(int interval)
 
 void glXUseXFont(Font font, int first, int count, int list_base)
 {
-	if(faker::getExcludeCurrent())
+	if(faker::getGLXExcludeCurrent())
 	{
 		_glXUseXFont(font, first, count, list_base);  return;
 	}

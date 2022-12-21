@@ -43,7 +43,11 @@ EGLint eglMajor = 0, eglMinor = 0;
 #endif
 VGL_THREAD_LOCAL(TraceLevel, long, 0)
 VGL_THREAD_LOCAL(FakerLevel, long, 0)
-VGL_THREAD_LOCAL(ExcludeCurrent, bool, false)
+VGL_THREAD_LOCAL(GLXExcludeCurrent, bool, false)
+#ifdef EGLBACKEND
+VGL_THREAD_LOCAL(EGLExcludeCurrent, bool, false)
+#endif
+VGL_THREAD_LOCAL(OGLExcludeCurrent, bool, false)
 VGL_THREAD_LOCAL(AutotestColor, long, -1)
 VGL_THREAD_LOCAL(AutotestRColor, long, -1)
 VGL_THREAD_LOCAL(AutotestFrame, long, -1)
@@ -380,13 +384,21 @@ int _vgl_getAutotestFrame(Display *dpy, Drawable d)
 void _vgl_disableFaker(void)
 {
 	faker::setFakerLevel(faker::getFakerLevel() + 1);
-	faker::setExcludeCurrent(true);
+	faker::setGLXExcludeCurrent(true);
+#ifdef EGLBACKEND
+	faker::setEGLExcludeCurrent(true);
+#endif
+	faker::setOGLExcludeCurrent(true);
 }
 
 void _vgl_enableFaker(void)
 {
 	faker::setFakerLevel(faker::getFakerLevel() - 1);
-	faker::setExcludeCurrent(false);
+	faker::setGLXExcludeCurrent(false);
+#ifdef EGLBACKEND
+	faker::setEGLExcludeCurrent(false);
+#endif
+	faker::setOGLExcludeCurrent(false);
 }
 
 }

@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011-2012, 2015, 2018-2021 D. R. Commander
+// Copyright (C)2009, 2011-2012, 2015, 2018-2022 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -55,7 +55,7 @@ extern "C" {
 
 void glFinish(void)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glFinish();  return;
 	}
@@ -81,7 +81,7 @@ void glFlush(void)
 {
 	static double lastTime = -1.;  double thisTime;
 
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glFlush();  return;
 	}
@@ -114,7 +114,7 @@ void glFlush(void)
 
 void glXWaitGL(void)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glXWaitGL();  return;
 	}
@@ -139,7 +139,7 @@ void glXWaitGL(void)
 
 void glBindFramebuffer(GLenum target, GLuint framebuffer)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glBindFramebuffer(target, framebuffer);
 		return;
@@ -154,7 +154,7 @@ void glBindFramebuffer(GLenum target, GLuint framebuffer)
 
 void glBindFramebufferEXT(GLenum target, GLuint framebuffer)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glBindFramebufferEXT(target, framebuffer);
 		return;
@@ -170,7 +170,7 @@ void glBindFramebufferEXT(GLenum target, GLuint framebuffer)
 
 void glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glDeleteFramebuffers(n, framebuffers);
 		return;
@@ -196,7 +196,7 @@ void glDeleteFramebuffersEXT(GLsizei n, const GLuint *framebuffers)
 
 void glDrawBuffer(GLenum mode)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glDrawBuffer(mode);  return;
 	}
@@ -238,7 +238,7 @@ void glDrawBuffer(GLenum mode)
 
 void glDrawBuffers(GLsizei n, const GLenum *bufs)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glDrawBuffers(n, bufs);  return;
 	}
@@ -295,7 +295,7 @@ void glDrawBuffersATI(GLsizei n, const GLenum *bufs)
 
 void glFramebufferDrawBufferEXT(GLuint framebuffer, GLenum mode)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glFramebufferDrawBufferEXT(framebuffer, mode);
 		return;
@@ -341,7 +341,7 @@ void glFramebufferDrawBufferEXT(GLuint framebuffer, GLenum mode)
 void glFramebufferDrawBuffersEXT(GLuint framebuffer, GLsizei n,
 	const GLenum *bufs)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glFramebufferDrawBuffersEXT(framebuffer, n, bufs);
 		return;
@@ -390,7 +390,7 @@ void glFramebufferDrawBuffersEXT(GLuint framebuffer, GLsizei n,
 
 void glFramebufferReadBufferEXT(GLuint framebuffer, GLenum mode)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glFramebufferReadBufferEXT(framebuffer, mode);
 		return;
@@ -406,7 +406,7 @@ void glFramebufferReadBufferEXT(GLuint framebuffer, GLenum mode)
 
 void glGetBooleanv(GLenum pname, GLboolean *data)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent() || !data
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent() || !data
 		|| !fconfig.egl)
 	{
 		_glGetBooleanv(pname, data);  return;
@@ -440,7 +440,7 @@ void glGetBooleanv(GLenum pname, GLboolean *data)
 
 void glGetDoublev(GLenum pname, GLdouble *data)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent() || !data
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent() || !data
 		|| !fconfig.egl)
 	{
 		_glGetDoublev(pname, data);  return;
@@ -474,7 +474,7 @@ void glGetDoublev(GLenum pname, GLdouble *data)
 
 void glGetFloatv(GLenum pname, GLfloat *data)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent() || !data
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent() || !data
 		|| !fconfig.egl)
 	{
 		_glGetFloatv(pname, data);  return;
@@ -509,7 +509,7 @@ void glGetFloatv(GLenum pname, GLfloat *data)
 void glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 	GLenum pname, GLint *params)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
 		return;
@@ -525,7 +525,7 @@ void glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 
 void glGetFramebufferParameteriv(GLenum target, GLenum pname, GLint *params)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glGetFramebufferParameteriv(target, pname, params);  return;
 	}
@@ -540,7 +540,7 @@ void glGetFramebufferParameteriv(GLenum target, GLenum pname, GLint *params)
 
 void glGetIntegerv(GLenum pname, GLint *params)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glGetIntegerv(pname, params);  return;
 	}
@@ -555,7 +555,7 @@ void glGetIntegerv(GLenum pname, GLint *params)
 
 void glGetInteger64v(GLenum pname, GLint64 *data)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent() || !data
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent() || !data
 		|| !fconfig.egl)
 	{
 		_glGetInteger64v(pname, data);  return;
@@ -590,7 +590,7 @@ void glGetInteger64v(GLenum pname, GLint64 *data)
 void glGetNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname,
 	GLint *param)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glGetNamedFramebufferParameteriv(framebuffer, pname, param);  return;
 	}
@@ -607,7 +607,7 @@ const GLubyte *glGetString(GLenum name)
 {
 	char *string = NULL;
 
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 		return _glGetString(name);
 
 	TRY();
@@ -645,7 +645,7 @@ const GLubyte *glGetStringi(GLenum name, GLuint index)
 {
 	const GLubyte *string = NULL;
 
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 		return _glGetStringi(name, index);
 
 	TRY();
@@ -667,7 +667,7 @@ const GLubyte *glGetStringi(GLenum name, GLuint index)
 
 void glNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glNamedFramebufferDrawBuffer(framebuffer, buf);
 		return;
@@ -713,7 +713,7 @@ void glNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf)
 void glNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 	const GLenum *bufs)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glNamedFramebufferDrawBuffers(framebuffer, n, bufs);
 		return;
@@ -762,7 +762,7 @@ void glNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 
 void glNamedFramebufferReadBuffer(GLuint framebuffer, GLenum mode)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glNamedFramebufferReadBuffer(framebuffer, mode);
 		return;
@@ -780,7 +780,7 @@ void glNamedFramebufferReadBuffer(GLuint framebuffer, GLenum mode)
 
 void glPopAttrib(void)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glPopAttrib();  return;
 	}
@@ -822,7 +822,7 @@ void glPopAttrib(void)
 
 void glReadBuffer(GLenum mode)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glReadBuffer(mode);  return;
 	}
@@ -838,7 +838,7 @@ void glReadBuffer(GLenum mode)
 void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
 	GLenum format, GLenum type, GLvoid *pixels)
 {
-	if(faker::getExcludeCurrent() || faker::getEGLXContextCurrent())
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
 	{
 		_glReadPixels(x, y, width, height, format, type, pixels);
 		return;
@@ -858,7 +858,7 @@ void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
 
 void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 {
-	if(faker::getExcludeCurrent())
+	if(faker::getOGLExcludeCurrent())
 	{
 		_glViewport(x, y, width, height);  return;
 	}
