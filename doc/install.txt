@@ -15,8 +15,7 @@
 	1. Download the appropriate VirtualGL binary package(s) for your system from
 		the [[http://sourceforge.net/projects/virtualgl/files][Files area]] of the
 		[[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
-		RPM and Debian packages are provided for x86 Linux distributions that
-		contain GLIBC 2.12 or later and AArch64 Linux distributions that contain
+		RPM and Debian packages are provided for Linux distributions that contain
 		GLIBC 2.17 or later.
 		{nl}
 		!!! If you want to run both 32-bit and 64-bit OpenGL applications with
