@@ -96,9 +96,9 @@
 		get propagated down from the initial shell that invoked ''vglrun''. \
 	|
 | Google Chrome/Chromium | v85 and later | Linux \
-	| ''vglrun -d egl google-chrome --disable-seccomp-filter-sandbox''{nl} \
+	| ''vglrun -d egl google-chrome --disable-seccomp-filter-sandbox --use-gl=egl''{nl} \
 		or{nl} \
-		''vglrun -d egl chromium --disable-seccomp-filter-sandbox'' \
+		''vglrun -d egl chromium --disable-seccomp-filter-sandbox --use-gl=egl'' \
 	| Recent versions of Google Chrome/Chromium use the EGL/X11 API instead of \
 		the GLX API, and VirtualGL only supports the EGL/X11 API when using the \
 		EGL back end.  The ''--disable-seccomp-filter-sandbox'' option prevents \

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2023-02-24T11:57:33">
+<meta name="date" content="2023-02-24T12:08:34">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2172,7 +2172,7 @@ procedures:</p>
     <td class="standard">Google Chrome/Chromium</td>
     <td class="standard">v85 and later</td>
     <td class="standard">Linux</td>
-    <td class="standard"><code>vglrun&nbsp;-d&nbsp;egl&nbsp;google-chrome&nbsp;--disable-seccomp-filter-sandbox</code><br /> or<br /> <code>vglrun&nbsp;-d&nbsp;egl&nbsp;chromium&nbsp;--disable-seccomp-filter-sandbox</code></td>
+    <td class="standard"><code>vglrun&nbsp;-d&nbsp;egl&nbsp;google-chrome&nbsp;--disable-seccomp-filter-sandbox&nbsp;--use-gl=egl</code><br /> or<br /> <code>vglrun&nbsp;-d&nbsp;egl&nbsp;chromium&nbsp;--disable-seccomp-filter-sandbox&nbsp;--use-gl=egl</code></td>
     <td class="standard">Recent versions of Google Chrome/Chromium use the EGL/X11 API instead of the GLX API, and VirtualGL only supports the EGL/X11 API when using the EGL back end.  The <code>--disable-seccomp-filter-sandbox</code> option prevents Chrome/Chromium from complaining about the X11 function calls that the VirtualGL faker makes.  Note that you can replace <code>egl</code> with any DRI device path or EGL device ID.  See Section <a href="#VGL_DISPLAY" class="ref">19.1</a> for further information.</td>
   </tr>
   <tr class="standard">
