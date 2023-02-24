@@ -11,6 +11,12 @@ the objects were created.
 `_exit` or `abort`, causes the VirtualGL Faker to call the specified function
 rather than `exit()` when a non-recoverable error occurs.
 
+3. Fixed an issue whereby the interposed `eglCreatePlatformWindowSurface()`
+and `eglCreatePlatformWindowSurfaceEXT()` functions incorrectly treated the
+native window argument as an X window handle rather than a pointer to an X
+window handle.  This caused a segfault in VLC when using the OpenGL video
+output module.
+
 
 3.0.90 (3.1 beta1)
 ==================

@@ -1,5 +1,5 @@
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2011, 2014-2015, 2018, 2021-2022 D. R. Commander
+// Copyright (C)2011, 2014-2015, 2018, 2021-2023 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -519,6 +519,12 @@ EGLSurface eglCreatePlatformWindowSurface(EGLDisplay display, EGLConfig config,
 	EGLint attribs[MAX_ATTRIBS + 1];
 	int j = 0;
 
+	if(!native_window)
+	{
+		faker::setEGLError(EGL_BAD_NATIVE_WINDOW);
+		return 0;
+	}
+
 	if(attrib_list)
 	{
 		for(int i = 0; attrib_list[i] != EGL_NONE && i < MAX_ATTRIBS; i += 2)
@@ -528,15 +534,22 @@ EGLSurface eglCreatePlatformWindowSurface(EGLDisplay display, EGLConfig config,
 	}
 	attribs[j] = EGL_NONE;
 
-	return eglCreateWindowSurface(display, config,
-		(NativeWindowType)native_window, attribs);
+	NativeWindowType *native_window_ptr = (NativeWindowType *)native_window;
+	return eglCreateWindowSurface(display, config, *native_window_ptr, attribs);
 }
 
 EGLSurface eglCreatePlatformWindowSurfaceEXT(EGLDisplay display,
 	EGLConfig config, void *native_window, const EGLint *attrib_list)
 {
-	return eglCreateWindowSurface(display, config,
-		(NativeWindowType)native_window, attrib_list);
+	if(!native_window)
+	{
+		faker::setEGLError(EGL_BAD_NATIVE_WINDOW);
+		return 0;
+	}
+
+	NativeWindowType *native_window_ptr = (NativeWindowType *)native_window;
+	return eglCreateWindowSurface(display, config, *native_window_ptr,
+		attrib_list);
 }
 
 

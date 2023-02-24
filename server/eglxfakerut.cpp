@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2010-2015, 2017-2021 D. R. Commander
+// Copyright (C)2010-2015, 2017-2021, 2023 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -357,7 +357,7 @@ int readbackTest(void)
 
 		if((surface0 = eglCreateWindowSurface(edpy, config, win0, NULL)) == 0)
 			THROW_EGL("eglCreateWindowSurface()");
-		if((surface1 = eglCreatePlatformWindowSurface(edpy, config, (void *)win1,
+		if((surface1 = eglCreatePlatformWindowSurface(edpy, config, &win1,
 			NULL)) == 0)
 			THROW_EGL("eglCreatePlatformWindowSurface()");
 
@@ -1126,14 +1126,15 @@ int extensionQueryTest(void)
 					"eglCreatePlatformWindowSurfaceEXT");
 		if(!__eglCreatePlatformWindowSurfaceEXT)
 			THROW("eglCreatePlatformWindowSurfaceEXT() is not available");
+		Window defaultRootWindow = DefaultRootWindow(dpy);
 		EGLERRTEST(__eglCreatePlatformWindowSurfaceEXT(edpy, config,
-			(void *)DefaultRootWindow(dpy), pbAttribs2), EGL_BAD_ATTRIBUTE);
+			&defaultRootWindow, pbAttribs2), EGL_BAD_ATTRIBUTE);
 		pbAttribs2[0] = EGL_WIDTH;  pbAttribs2[1] = 10;
 		EGLERRTEST(eglCreateWindowSurface(edpy, config, DefaultRootWindow(dpy),
 			pbAttribs2), EGL_BAD_ATTRIBUTE);
 		EGLAttrib pbAttribs3[] = { EGL_HEIGHT, 10, EGL_NONE };
-		EGLERRTEST(eglCreatePlatformWindowSurface(edpy, config,
-			(void *)DefaultRootWindow(dpy), pbAttribs3), EGL_BAD_ATTRIBUTE);
+		EGLERRTEST(eglCreatePlatformWindowSurface(edpy, config, &defaultRootWindow,
+			pbAttribs3), EGL_BAD_ATTRIBUTE);
 
 		//-------------------------------------------------------------------------
 		//    eglGetPlatformDisplay()
