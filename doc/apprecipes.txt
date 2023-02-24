@@ -103,9 +103,9 @@
 		the GLX API, and VirtualGL only supports the EGL/X11 API when using the \
 		EGL back end.  The ''--disable-seccomp-filter-sandbox'' option prevents \
 		Chrome/Chromium from complaining about the X11 function calls that the \
-		VirtualGL faker makes.  Note that you can replace ''egl'' with the path \
-		to any DRI device, such as ''/dev/dri/card0''.  See \
-		{ref prefix="Section ": VGL_DISPLAY} for further information. \
+		VirtualGL faker makes.  Note that you can replace ''egl'' with any DRI \
+		device path or EGL device ID.  See {ref prefix="Section ": VGL_DISPLAY} \
+		for further information. \
 	|
 | Compiz | All | Linux \
 	| Set the ''VGL_WM'' environment variable to ''1'' prior to launching the \
@@ -117,9 +117,9 @@
 	| ''vglrun -d egl firefox'' \
 	| Recent versions of Mozilla Firefox use the EGL/X11 API instead of the GLX \
 		API, and VirtualGL only supports the EGL/X11 API when using the EGL back \
-		end.  Note that you can replace ''egl'' with the path to any DRI device, \
-		such as ''/dev/dri/card0''.  See {ref prefix="Section ": VGL_DISPLAY} for \
-		further information. \
+		end.  Note that you can replace ''egl'' with any DRI device path or EGL \
+		device ID.  See {ref prefix="Section ": VGL_DISPLAY} for further \
+		information. \
 	|
 | ANSYS Fluent (when launched from ANSYS Workbench) | v16 and later | Linux \
 	| Set the ''FLUENT_WB_OPTIONAL_ARGS'' environment variable to \
