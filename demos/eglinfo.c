@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1999-2014  Brian Paul   All Rights Reserved.
  * Copyright (C) 2005-2007  Sun Microsystems, Inc.   All Rights Reserved.
- * Copyright (C) 2011, 2013, 2015, 2019-2022  D. R. Commander
+ * Copyright (C) 2011, 2013, 2015, 2019-2023  D. R. Commander
  *                                            All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -620,11 +620,13 @@ print_config_attribs_short_header(void)
 {
 #ifdef EGLX
  printf("Cfg    Visual  tra buf lev buf colorbuffer   dep ste client APIs   ms  cav  surf\n");
- printf("ID    ID    cl ns  sz  el  typ r  g  b  a  F th  ncl GL ES ES2 VG ns b eat  typ\n");
+ printf("ID    ID    cl ns  sz  el  typ r  g  b  a  F th  ncl GL GLES   VG ns b eat  typ\n");
+ printf("                                                        1 2 3\n");
  printf("--------------------------------------------------------------------------------\n");
 #else
  printf("Cfg   tra buf lev buf colorbuffer   dep ste client APIs   ms  cav  surf\n");
- printf("ID    ns  sz  el  typ r  g  b  a  F th  ncl GL ES ES2 VG ns b eat  typ\n");
+ printf("ID    ns  sz  el  typ r  g  b  a  F th  ncl GL GLES   VG ns b eat  typ\n");
+ printf("                                               1 2 3\n");
  printf("-----------------------------------------------------------------------\n");
 #endif
 }
@@ -657,10 +659,11 @@ print_config_attribs_short(const struct config_attribs *attribs)
           attribs->stencilSize
           );
 
-   printf(" %c  %c  %c   %c  %-2d %-1d %s",
+   printf(" %c  %c %c %c  %c  %-2d %-1d %s",
           attribs->renderableType & EGL_OPENGL_BIT ? 'y' : '.',
           attribs->renderableType & EGL_OPENGL_ES_BIT ? 'y' : '.',
           attribs->renderableType & EGL_OPENGL_ES2_BIT ? 'y' : '.',
+          attribs->renderableType & EGL_OPENGL_ES3_BIT ? 'y' : '.',
           attribs->renderableType & EGL_OPENVG_BIT ? 'y' : '.',
           attribs->numSamples, attribs->numMultisample,
           caveat
