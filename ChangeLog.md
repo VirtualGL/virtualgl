@@ -17,6 +17,9 @@ native window argument as an X window handle rather than a pointer to an X
 window handle.  This caused a segfault in VLC when using the OpenGL video
 output module.
 
+4. `vglserver_config` now works properly with SUSE Linux Enterprise/openSUSE
+Leap 15.
+
 
 3.0.90 (3.1 beta1)
 ==================
