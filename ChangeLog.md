@@ -11,6 +11,9 @@ the objects were created.
 `_exit` or `abort`, causes the VirtualGL Faker to call the specified function
 rather than `exit()` when a non-recoverable error occurs.
 
+3. `vglserver_config` now works properly with SUSE Linux Enterprise/openSUSE
+Leap 15.
+
 
 3.0.2
 =====
