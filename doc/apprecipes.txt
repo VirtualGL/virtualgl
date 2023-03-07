@@ -110,6 +110,14 @@
 		''vglrun''. \
 	| See {ref prefix="Section ": VGL_WM} for further information. \
 	|
+| Mozilla Firefox | v93 and earlier | Linux \
+	| When using the GLX back end, set the ''MOZ_DISABLE_CONTENT_SANDBOX'' \
+		environment variable to ''1'' prior to launching the application with \
+		''vglrun'' \
+	| The content sandbox in Firefox v93 and earlier prevents VirtualGL from \
+		opening an X display connection to the 3D X server, which causes WebGL \
+		tabs to crash when using the GLX back end. \
+	|
 | ANSYS Fluent (when launched from ANSYS Workbench) | v16 and later | Linux \
 	| Set the ''FLUENT_WB_OPTIONAL_ARGS'' environment variable to \
 		''-driver opengl'' and the ''CORTEX_PRE'' environment variable to \

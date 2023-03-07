@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2023-02-01T11:13:21">
+<meta name="date" content="2023-03-07T15:13:13">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.0.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2179,6 +2179,13 @@ procedures:</p>
     <td class="standard">Linux</td>
     <td class="standard">Set the <code>VGL_WM</code> environment variable to <code>1</code> prior to launching the window manager with <code>vglrun</code>, or pass an argument of <code>+wm</code> to <code>vglrun</code>.</td>
     <td class="standard">See Section <a href="#VGL_WM" class="ref">19.1</a> for further information.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">Mozilla Firefox</td>
+    <td class="standard">v93 and earlier</td>
+    <td class="standard">Linux</td>
+    <td class="standard">When using the GLX back end, set the <code>MOZ_DISABLE_CONTENT_SANDBOX</code> environment variable to <code>1</code> prior to launching the application with <code>vglrun</code></td>
+    <td class="standard">The content sandbox in Firefox v93 and earlier prevents VirtualGL from opening an X display connection to the 3D X server, which causes WebGL tabs to crash when using the GLX back end.</td>
   </tr>
   <tr class="standard">
     <td class="standard">ANSYS Fluent (when launched from ANSYS Workbench)</td>
