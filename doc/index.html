@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2023-02-24T12:08:34">
+<meta name="date" content="2023-03-07T14:36:14">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2173,7 +2173,7 @@ procedures:</p>
     <td class="standard">v85 and later</td>
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun&nbsp;-d&nbsp;egl&nbsp;google-chrome&nbsp;--disable-seccomp-filter-sandbox&nbsp;--use-gl=egl</code><br /> or<br /> <code>vglrun&nbsp;-d&nbsp;egl&nbsp;chromium&nbsp;--disable-seccomp-filter-sandbox&nbsp;--use-gl=egl</code></td>
-    <td class="standard">Recent versions of Google Chrome/Chromium use the EGL/X11 API instead of the GLX API, and VirtualGL only supports the EGL/X11 API when using the EGL back end.  The <code>--disable-seccomp-filter-sandbox</code> option prevents Chrome/Chromium from complaining about the X11 function calls that the VirtualGL faker makes.  Note that you can replace <code>egl</code> with any DRI device path or EGL device ID.  See Section <a href="#VGL_DISPLAY" class="ref">19.1</a> for further information.</td>
+    <td class="standard">Recent versions of Google Chrome/Chromium use the EGL/X11 API instead of the GLX API, and VirtualGL only supports the EGL/X11 API when using the EGL back end.  The <code>--disable-seccomp-filter-sandbox</code> option prevents Chrome/Chromium from complaining about the X11 function calls that the VirtualGL faker makes.  The <code>--use-gl=egl</code> option forces Chrome/Chromium to use desktop OpenGL rather than OpenGL ES, which works around an issue whereby, when using OpenGL ES, Chrome/Chromium assumes that every X visual has an EGL framebuffer configuration associated with it.  Note that you can replace <code>egl</code> with any DRI device path or EGL device ID.  See Section <a href="#VGL_DISPLAY" class="ref">19.1</a> for further information.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Compiz</td>
@@ -2184,10 +2184,10 @@ procedures:</p>
   </tr>
   <tr class="standard">
     <td class="standard">Mozilla Firefox</td>
-    <td class="standard">v91 and later</td>
+    <td class="standard">v93 and earlier</td>
     <td class="standard">Linux</td>
-    <td class="standard"><code>vglrun&nbsp;-d&nbsp;egl&nbsp;firefox</code></td>
-    <td class="standard">Recent versions of Mozilla Firefox use the EGL/X11 API instead of the GLX API, and VirtualGL only supports the EGL/X11 API when using the EGL back end.  Note that you can replace <code>egl</code> with any DRI device path or EGL device ID.  See Section <a href="#VGL_DISPLAY" class="ref">19.1</a> for further information.</td>
+    <td class="standard">When using the GLX back end, set the <code>MOZ_DISABLE_CONTENT_SANDBOX</code> environment variable to <code>1</code> prior to launching the application with <code>vglrun</code></td>
+    <td class="standard">The content sandbox in Firefox v93 and earlier prevents VirtualGL from opening an X display connection to the 3D X server, which causes WebGL tabs to crash when using the GLX back end.</td>
   </tr>
   <tr class="standard">
     <td class="standard">ANSYS Fluent (when launched from ANSYS Workbench)</td>
