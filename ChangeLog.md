@@ -20,6 +20,11 @@ output module.
 4. `vglserver_config` now works properly with SUSE Linux Enterprise/openSUSE
 Leap 15.
 
+5. If the GLX back end is in use, then the interposed `eglGetDisplay()` and
+`eglGetPlatformDisplay()` functions now return `EGL_NO_DISPLAY` rather than
+throwing a fatal error.  This allows applications such as Firefox to fail
+gracefully or to fall back and use the GLX API if EGL/X11 is unavailable.
+
 
 3.0.90 (3.1 beta1)
 ==================

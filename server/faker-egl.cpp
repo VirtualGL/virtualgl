@@ -805,7 +805,17 @@ EGLDisplay eglGetDisplay(EGLNativeDisplayType native_display)
 		&& faker::isDisplayExcluded((Display *)native_display))
 		return _eglGetDisplay(native_display);
 
-	if(!fconfig.egl) THROW("EGL/X11 emulation requires the EGL back end");
+	if(!fconfig.egl)
+	{
+		static bool alreadyWarned = false;
+		if(!alreadyWarned)
+		{
+			if(fconfig.verbose)
+				vglout.print("[VGL] WARNING: EGL/X11 emulation requires the EGL back end\n");
+			alreadyWarned = true;
+		}
+		return display;
+	}
 
 	DISABLE_FAKER();
 
@@ -840,7 +850,17 @@ EGLDisplay eglGetPlatformDisplay(EGLenum platform, void *native_display,
 				&& faker::isDisplayExcluded((Display *)native_display)))
 		return _eglGetPlatformDisplay(platform, native_display, attrib_list);
 
-	if(!fconfig.egl) THROW("EGL/X11 emulation requires the EGL back end");
+	if(!fconfig.egl)
+	{
+		static bool alreadyWarned = false;
+		if(!alreadyWarned)
+		{
+			if(fconfig.verbose)
+				vglout.print("[VGL] WARNING: EGL/X11 emulation requires the EGL back end\n");
+			alreadyWarned = true;
+		}
+		return display;
+	}
 
 	DISABLE_FAKER();
 
