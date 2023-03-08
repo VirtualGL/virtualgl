@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2010-2015, 2017-2022 D. R. Commander
+// Copyright (C)2010-2015, 2017-2023 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -1857,7 +1857,7 @@ void checkDrawable(Display *dpy, GLXDrawable draw, int width, int height,
 }
 
 // Test off-screen rendering
-int offScreenTest(bool dbPixmap, bool doSelectEvent)
+int offScreenTest(bool dbPixmap, bool doUseXFont, bool doSelectEvent)
 {
 	Display *dpy = NULL;  Window win = 0;  Pixmap pm0 = 0, pm1 = 0, pm2 = 0;
 	GLXPixmap glxpm0 = 0, glxpm1 = 0;  GLXPbuffer pb = 0;  GLXWindow glxwin = 0;
@@ -1870,7 +1870,7 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 	int n = 0;
 	GLXContext ctx = 0, ctx2 = 0;
 	XSetWindowAttributes swa;
-	XFontStruct *fontInfo = NULL;  int minChar, maxChar;
+	XFontStruct *fontInfo = NULL;  int minChar = 0, maxChar = 0;
 	int fontListBase = 0;
 	GLuint fbo = 0, rbo = 0;
 	TestColor clr(0);
@@ -1883,10 +1883,13 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 		dpyw = DisplayWidth(dpy, DefaultScreen(dpy));
 		dpyh = DisplayHeight(dpy, DefaultScreen(dpy));
 
-		if(!(fontInfo = XLoadQueryFont(dpy, "fixed")))
-			THROW("Could not load X font");
-		minChar = fontInfo->min_char_or_byte2;
-		maxChar = fontInfo->max_char_or_byte2;
+		if(doUseXFont)
+		{
+			if(!(fontInfo = XLoadQueryFont(dpy, "fixed")))
+				THROW("Could not load X font");
+			minChar = fontInfo->min_char_or_byte2;
+			maxChar = fontInfo->max_char_or_byte2;
+		}
 
 		if((configs = glXChooseFBConfigSGIX(dpy, DefaultScreen(dpy), glxattribs,
 			&n)) == NULL || n == 0)
@@ -2012,9 +2015,12 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				THROWNL("Could not make context current");
 			CHECK_GL_ERROR();
-			fontListBase = glGenLists(maxChar + 1);
-			glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
-				fontListBase + minChar);
+			if(doUseXFont)
+			{
+				fontListBase = glGenLists(maxChar + 1);
+				glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
+					fontListBase + minChar);
+			}
 			checkCurrent(dpy, glxwin, glxwin, ctx, dpyw / 2, dpyh / 2);
 			clr.clear(GL_BACK);
 			clr.clear(GL_FRONT);
@@ -2022,9 +2028,12 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			if(!(glXMakeContextCurrent(dpy, pb, glxwin, ctx)))
 				THROWNL("Could not make context current");
 			CHECK_GL_ERROR();
-			fontListBase = glGenLists(maxChar + 1);
-			glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
-				fontListBase + minChar);
+			if(doUseXFont)
+			{
+				fontListBase = glGenLists(maxChar + 1);
+				glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
+					fontListBase + minChar);
+			}
 			checkCurrent(dpy, pb, glxwin, ctx, dpyw / 2, dpyh / 2);
 			checkFrame(dpy, win, 1, lastFrame);
 			glReadBuffer(GL_BACK);  glDrawBuffer(GL_BACK);
@@ -2150,9 +2159,12 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
 				THROWNL("Could not make context current");
 			CHECK_GL_ERROR();
-			fontListBase = glGenLists(maxChar + 1);
-			glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
-				fontListBase + minChar);
+			if(doUseXFont)
+			{
+				fontListBase = glGenLists(maxChar + 1);
+				glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
+					fontListBase + minChar);
+			}
 			checkCurrent(dpy, glxpm0, glxpm0, ctx, dpyw / 2, dpyh / 2);
 			clr.clear(GL_FRONT);
 			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "PM0");
@@ -2177,9 +2189,12 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			printf("Window->GLX Pixmap:             ");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				THROWNL("Could not make context current");
-			fontListBase = glGenLists(maxChar + 1);
-			glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
-				fontListBase + minChar);
+			if(doUseXFont)
+			{
+				fontListBase = glGenLists(maxChar + 1);
+				glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
+					fontListBase + minChar);
+			}
 			checkCurrent(dpy, glxwin, glxwin, ctx, dpyw / 2, dpyh / 2);
 			clr.clear(GL_FRONT);
 			if(dbPixmap) clr.clear(GL_BACK);
@@ -2210,10 +2225,13 @@ int offScreenTest(bool dbPixmap, bool doSelectEvent)
 			printf("GLX Pixmap->GLX Pixmap:         ");
 			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
 				THROWNL("Could not make context current");
-			fontListBase = glGenLists(maxChar + 1);
-			glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
-				fontListBase + minChar);
-			XFreeFont(dpy, fontInfo);  fontInfo = NULL;
+			if(doUseXFont)
+			{
+				fontListBase = glGenLists(maxChar + 1);
+				glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
+					fontListBase + minChar);
+				XFreeFont(dpy, fontInfo);  fontInfo = NULL;
+			}
 			checkCurrent(dpy, glxpm0, glxpm0, ctx, dpyw / 2, dpyh / 2);
 			clr.clear(GL_FRONT);
 			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "PM0");
@@ -3684,6 +3702,7 @@ void usage(char **argv)
 	fprintf(stderr, "-nodbpixmap = Assume GLXPixmaps are always single-buffered, even if created\n");
 	fprintf(stderr, "              with a double-buffered visual or FB config.\n");
 	fprintf(stderr, "-nocopycontext = Disable glXCopyContext() tests\n");
+	fprintf(stderr, "-nousexfont = Disable glXUseXFont() tests\n");
 	fprintf(stderr, "-nonamedfb = Disable named framebuffer function tests\n");
 	fprintf(stderr, "-selectevent = Enable glXSelectEvent() tests\n");
 	fprintf(stderr, "\n");
@@ -3695,7 +3714,8 @@ int main(int argc, char **argv)
 {
 	int ret = 0, nThreads = DEFTHREADS;
 	bool doStereo = true, doMultisample = true, doDBPixmap = true,
-		doCopyContext = true, doSelectEvent = false, doNamedFB = true;
+		doCopyContext = true, doUseXFont = true, doSelectEvent = false,
+		doNamedFB = true;
 
 	if(putenv((char *)"VGL_AUTOTEST=1") == -1
 		|| putenv((char *)"VGL_SPOIL=0") == -1
@@ -3717,6 +3737,7 @@ int main(int argc, char **argv)
 		else if(!strcasecmp(argv[i], "-nomultisample")) doMultisample = false;
 		else if(!strcasecmp(argv[i], "-nodbpixmap")) doDBPixmap = false;
 		else if(!strcasecmp(argv[i], "-nocopycontext")) doCopyContext = false;
+		else if(!strcasecmp(argv[i], "-nousexfont")) doUseXFont = false;
 		else if(!strcasecmp(argv[i], "-nonamedfb")) doNamedFB = false;
 		else if(!strcasecmp(argv[i], "-selectevent")) doSelectEvent = true;
 		else usage(argv);
@@ -3757,7 +3778,7 @@ int main(int argc, char **argv)
 	printf("\n");
 	if(!multiThreadTest(nThreads)) ret = -1;
 	printf("\n");
-	if(!offScreenTest(doDBPixmap, doSelectEvent)) ret = -1;
+	if(!offScreenTest(doDBPixmap, doUseXFont, doSelectEvent)) ret = -1;
 	printf("\n");
 	if(!subWinTest()) ret = -1;
 	printf("\n");
