@@ -1,4 +1,4 @@
-// Copyright (C)2009-2022 D. R. Commander
+// Copyright (C)2009-2023 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -179,7 +179,7 @@ static void fconfig_init(void)
 	strncpy(fconfig.localdpystring, ":0", MAXSTR);
 	fconfig.np = 1;
 	fconfig.port = -1;
-	fconfig.probeglx = 1;
+	fconfig.probeglx = -1;
 	fconfig.qual = DEFQUAL;
 	fconfig.readback = RRREAD_PBO;
 	fconfig.refreshrate = 60.0;
@@ -485,11 +485,9 @@ void fconfig_reloadenv(void)
 }
 
 
-void fconfig_setdefaultsfromdpy(Display *dpy)
+static void fconfig_setcompressfromdpy(Display *dpy, FakerConfig &fc)
 {
-	CriticalSection::SafeLock l(fcmutex);
-
-	if(fconfig.compress < 0)
+	if(fc.compress < 0)
 	{
 		bool useSunRay = false;
 		Atom atom = None;
@@ -499,15 +497,23 @@ void fconfig_setdefaultsfromdpy(Display *dpy)
 		if((strlen(dstr) && dstr[0] == ':') || (strlen(dstr) > 5
 			&& !strnicmp(dstr, "unix", 4)))
 		{
-			if(useSunRay) fconfig_setcompress(fconfig, RRCOMP_XV);
-			else fconfig_setcompress(fconfig, RRCOMP_PROXY);
+			if(useSunRay) fconfig_setcompress(fc, RRCOMP_XV);
+			else fconfig_setcompress(fc, RRCOMP_PROXY);
 		}
 		else
 		{
-			if(useSunRay) fconfig_setcompress(fconfig, RRCOMP_YUV);
-			else fconfig_setcompress(fconfig, RRCOMP_JPEG);
+			if(useSunRay) fconfig_setcompress(fc, RRCOMP_YUV);
+			else fconfig_setcompress(fc, RRCOMP_JPEG);
 		}
 	}
+}
+
+
+void fconfig_setdefaultsfromdpy(Display *dpy)
+{
+	CriticalSection::SafeLock l(fcmutex);
+
+	fconfig_setcompressfromdpy(dpy, fconfig);
 
 	if(fconfig.port < 0)
 	{
@@ -588,6 +594,24 @@ void fconfig_setcompress(FakerConfig &fc, int i)
 		if(fc.subsamp < _Minsubsamp[fc.compress]
 			|| fc.subsamp > _Maxsubsamp[fc.compress])
 			fc.subsamp = _Defsubsamp[fc.compress];
+	}
+}
+
+
+void fconfig_setprobeglxfromdpy(Display *dpy)
+{
+	CriticalSection::SafeLock l(fcmutex);
+
+	if(fconfig.probeglx < 0)
+	{
+		FakerConfig fc = fconfig;
+
+		fconfig_setcompressfromdpy(dpy, fc);
+
+		if(strlen(fc.transport) != 0 || fc.transvalid[RRTRANS_VGL] == 1)
+			fconfig.probeglx = 1;
+		else
+			fconfig.probeglx = 0;
 	}
 }
 

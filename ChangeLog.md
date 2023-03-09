@@ -17,6 +17,14 @@ Leap 15.
 4. Fixed an issue whereby the VirtualGL Configuration dialog did not pop up if
 the X keyboard extension was enabled on the 2D X server.
 
+5. The VirtualGL Faker no longer probes the 2D X server for stereo visuals
+unless the VGL Transport or a transport plugin will be used.  Even if the 2D X
+server has stereo visuals, they will never be used with the X11 and XV
+Transports.  Probing the 2D X server for stereo visuals causes problems with
+certain OpenGL implementations and with applications, such as Tecplot 360, that
+include static builds of Mesa.  An undocumented environment variable
+(`VGL_PROBEGLX`) can be used to override the default behavior.
+
 
 3.0.2
 =====
