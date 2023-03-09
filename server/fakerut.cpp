@@ -3011,7 +3011,7 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 	prevHandler = XSetErrorHandler(xhandler); \
 }
 
-#define XERRTEST_STOP(expectedErrCode, expectedMinorCode, expectedErrString) \
+#define GLXERRTEST_STOP(expectedErrCode, expectedMinorCode) \
 { \
 	XSetErrorHandler(prevHandler); \
 	if(x11Error != expectedErrCode) \
@@ -3020,6 +3020,11 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 	if(expectedMinorCode >= 0 && x11MinorCode != expectedMinorCode) \
 		PRERROR3("%d: X11 minor code %d != %d", __LINE__, x11MinorCode, \
 			expectedMinorCode); \
+}
+
+#define XERRTEST_STOP(expectedErrCode, expectedMinorCode, expectedErrString) \
+{ \
+	GLXERRTEST_STOP(expectedErrCode, expectedMinorCode); \
 	if(strcmp(x11ErrorString, expectedErrString)) \
 		PRERROR3("%d: X11 error string %s != %s", __LINE__, x11ErrorString, \
 			expectedErrString); \
@@ -3077,7 +3082,7 @@ int extensionQueryTest(void)
 			XFree(configs);
 		XERRTEST_START();
 		glXQueryDrawable(dpy, 0, GLX_WIDTH, &dummy2);
-		XERRTEST_STOP(errorBase + GLXBadDrawable, -1, "GLXBadDrawable");
+		GLXERRTEST_STOP(errorBase + GLXBadDrawable, -1);
 
 		int errorBase2 = -1, eventBase2 = -1;
 		if(!glXQueryExtension(dpy, &errorBase2, &eventBase2) || errorBase2 <= 0
@@ -3185,13 +3190,11 @@ int extensionQueryTest(void)
 				{
 					XERRTEST_START();
 					__glXBindTexImageEXT(dpy, (GLXDrawable)badValue, GL_BACK, NULL);
-					XERRTEST_STOP(errorBase + GLXBadPixmap, X_GLXVendorPrivate,
-						"GLXBadPixmap");
+					GLXERRTEST_STOP(errorBase + GLXBadPixmap, X_GLXVendorPrivate)
 				}
 				XERRTEST_START();
 				__glXBindTexImageEXT(dpy, DefaultRootWindow(dpy), GL_BACK, NULL);
-				XERRTEST_STOP(errorBase + GLXBadPixmap, X_GLXVendorPrivate,
-					"GLXBadPixmap");
+				GLXERRTEST_STOP(errorBase + GLXBadPixmap, X_GLXVendorPrivate)
 			}
 		}
 
@@ -3239,8 +3242,7 @@ int extensionQueryTest(void)
 		XERRTEST_START();
 		if(glXCreatePixmap(dpy, NULL, pm, NULL))
 			THROW("glXCreatePixmap(bogus FB config) != NULL");
-		XERRTEST_STOP(errorBase + GLXBadFBConfig, X_GLXCreatePixmap,
-			"GLXBadFBConfig");
+		GLXERRTEST_STOP(errorBase + GLXBadFBConfig, X_GLXCreatePixmap)
 
 		// BadMatch error thrown and NULL returned if FB config doesn't support
 		// window rendering
@@ -3284,8 +3286,7 @@ int extensionQueryTest(void)
 		XERRTEST_START();
 		if(glXCreateWindow(dpy, NULL, DefaultRootWindow(dpy), NULL))
 			THROW("glXCreateWindow(bogus FB config) != NULL");
-		XERRTEST_STOP(errorBase + GLXBadFBConfig, X_GLXCreateWindow,
-			"GLXBadFBConfig");
+		GLXERRTEST_STOP(errorBase + GLXBadFBConfig, X_GLXCreateWindow)
 
 		// BadWindow error thrown and NULL returned if Window is not valid or is
 		// not a window
@@ -3365,7 +3366,7 @@ int extensionQueryTest(void)
 		{
 			XERRTEST_START();
 			glXGetSelectedEvent(dpy, (GLXDrawable)badValue, &dummy3);
-			XERRTEST_STOP(errorBase + GLXBadDrawable, -1, "GLXBadDrawable");
+			GLXERRTEST_STOP(errorBase + GLXBadDrawable, -1);
 		}
 
 		//-------------------------------------------------------------------------
@@ -3400,14 +3401,12 @@ int extensionQueryTest(void)
 			XERRTEST_START();
 			if(glXMakeCurrent(dpy, (GLXDrawable)1, ctx))
 				THROW("glXMakeCurrent(bogus drawable) succeeded");
-			XERRTEST_STOP(errorBase + GLXBadDrawable, X_GLXMakeCurrent,
-				"GLXBadDrawable");
+			GLXERRTEST_STOP(errorBase + GLXBadDrawable, X_GLXMakeCurrent)
 
 			XERRTEST_START();
 			if(glXMakeContextCurrent(dpy, (GLXDrawable)2, None, ctx))
 				THROW("glXMakeContextCurrent(bogus drawable) succeeded");
-			XERRTEST_STOP(errorBase + GLXBadDrawable, X_GLXMakeContextCurrent,
-				"GLXBadDrawable");
+			GLXERRTEST_STOP(errorBase + GLXBadDrawable, X_GLXMakeContextCurrent)
 		}
 
 		// Technically these functions should throw a GLXBadContext error if passed
@@ -3427,15 +3426,13 @@ int extensionQueryTest(void)
 		XERRTEST_START();
 		if(glXMakeCurrent(dpy, DefaultRootWindow(dpy), NULL))
 			THROW("glXMakeCurrent(NULL context) succeeded");
-		XERRTEST_STOP(errorBase + GLXBadContext, X_GLXMakeCurrent,
-			"GLXBadContext");
+		GLXERRTEST_STOP(errorBase + GLXBadContext, X_GLXMakeCurrent)
 
 		XERRTEST_START();
 		if(glXMakeContextCurrent(dpy, DefaultRootWindow(dpy),
 			DefaultRootWindow(dpy), NULL))
 			THROW("glXMakeContextCurrent(NULL context) succeeded");
-		XERRTEST_STOP(errorBase + GLXBadContext, X_GLXMakeContextCurrent,
-			"GLXBadContext");
+		GLXERRTEST_STOP(errorBase + GLXBadContext, X_GLXMakeContextCurrent)
 
 		// VirtualGL can't distinguish between a dead context and a bogus non-zero
 		// one, but at least we can verify that this doesn't cause a segfault.
