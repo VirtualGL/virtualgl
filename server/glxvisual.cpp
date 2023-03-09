@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2009-2016, 2019-2022 D. R. Commander
+// Copyright (C)2009-2016, 2019-2023 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -226,10 +226,15 @@ static bool buildVisAttribTable(Display *dpy, int screen)
 			minExtensionNumber + 2);
 		if(extData && extData->private_data) return true;
 
+		fconfig_setprobeglxfromdpy(dpy);
 		if(fconfig.probeglx
 			&& _XQueryExtension(dpy, "GLX", &majorOpcode, &firstEvent, &firstError)
 			&& majorOpcode >= 0 && firstEvent >= 0 && firstError >= 0)
+		{
+			if(fconfig.verbose)
+				vglout.println("[VGL] NOTICE: Probing 2D X server for stereo visuals");
 			clientGLX = 1;
+		}
 		vtemp.screen = screen;
 		if(!(visuals = XGetVisualInfo(dpy, VisualScreenMask, &vtemp, &nVisuals))
 			|| nVisuals == 0)
