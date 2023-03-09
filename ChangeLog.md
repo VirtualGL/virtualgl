@@ -10,6 +10,9 @@ display manager was restarted.
 
 2. Fixed compilation errors when building with libX11 1.8.x.
 
+3. Fixed an issue whereby the VirtualGL Configuration dialog did not pop up if
+the X keyboard extension was enabled on the 2D X server.
+
 
 2.6.6 ESR
 =========

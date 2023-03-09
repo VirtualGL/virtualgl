@@ -1,4 +1,4 @@
-// Copyright (C)2014-2016, 2018-2019, 2022 D. R. Commander
+// Copyright (C)2014-2016, 2018-2019, 2022-2023 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -470,7 +470,8 @@ static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *ev)
 
 			xcb_keysym_t keysym =
 				_xcb_key_symbols_get_keysym(keysyms, kpe->detail, 0);
-			unsigned int state2, state = (kpe->state & (~(XCB_MOD_MASK_LOCK)));
+			unsigned int state2;
+			unsigned int state = (kpe->state & (~(XCB_MOD_MASK_LOCK))) & 0xFF;
 			state2 = fconfig.guimod;
 			if(state2 & Mod1Mask)
 			{
