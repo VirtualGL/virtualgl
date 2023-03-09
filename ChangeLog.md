@@ -14,6 +14,9 @@ rather than `exit()` when a non-recoverable error occurs.
 3. `vglserver_config` now works properly with SUSE Linux Enterprise/openSUSE
 Leap 15.
 
+4. Fixed an issue whereby the VirtualGL Configuration dialog did not pop up if
+the X keyboard extension was enabled on the 2D X server.
+
 
 3.0.2
 =====
