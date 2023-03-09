@@ -25,6 +25,9 @@ Leap 15.
 throwing a fatal error.  This allows applications such as Firefox to fail
 gracefully or to fall back and use the GLX API if EGL/X11 is unavailable.
 
+6. Fixed an issue whereby the VirtualGL Configuration dialog did not pop up if
+the X keyboard extension was enabled on the 2D X server.
+
 
 3.0.90 (3.1 beta1)
 ==================
