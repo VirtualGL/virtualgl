@@ -12,7 +12,7 @@ install:
 
       set MSYSTEM=MINGW32
 
-      git clone --depth=1 https://github.com/VirtualGL/buildscripts.git c:/buildscripts
+      git clone --depth=1 https://github.com/VirtualGL/buildscripts.git -b %APPVEYOR_REPO_BRANCH% c:/buildscripts
 
 build_script:
   - cmd: >-
