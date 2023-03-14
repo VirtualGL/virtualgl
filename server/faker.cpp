@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011, 2013-2016, 2019-2022 D. R. Commander
+// Copyright (C)2009, 2011, 2013-2016, 2019-2023 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -141,7 +141,13 @@ void sendGLXError(Display *dpy, CARD16 minorCode, CARD8 errorCode,
 	xError error;
 	int majorCode, errorBase, dummy;
 
-	ERRIFNOT(backend::queryExtension(dpy, &majorCode, &dummy, &errorBase));
+	if(!backend::queryExtension(dpy, &majorCode, &dummy, &errorBase))
+	{
+		if(fconfig.egl)
+			THROW("The EGL back end requires a 2D X server with a GLX extension.");
+		else
+			THROW("The 3D X server does not have a GLX extension.");
+	}
 
 	if(!fconfig.egl) dpy = DPY3D;
 

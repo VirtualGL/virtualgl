@@ -36,6 +36,14 @@ certain OpenGL implementations and with applications, such as Tecplot 360, that
 include static builds of Mesa.  An undocumented environment variable
 (`VGL_PROBEGLX`) can be used to override the default behavior.
 
+8. When using the EGL back end, interposed `XQueryExtension(..., "GLX", ...)`
+and `glXQueryExtension()` function calls now return `False`, rather than
+throwing a fatal error, if the 2D X server does not have a GLX extension.  (The
+EGL back end uses the 2D X server's GLX extension for GLX error handling.)
+This allows applications, such as Chrome/Chromium, to fail gracefully or use a
+different API (such as EGL/X11) if the VirtualGL Faker is unable to emulate
+GLX.
+
 
 3.0.90 (3.1 beta1)
 ==================
