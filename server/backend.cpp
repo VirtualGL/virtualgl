@@ -1,4 +1,4 @@
-// Copyright (C)2019-2022 D. R. Commander
+// Copyright (C)2019-2023 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -1050,9 +1050,19 @@ Bool queryExtension(Display *dpy, int *majorOpcode, int *eventBase,
 		Bool retval = _XQueryExtension(dpy, "GLX", majorOpcode, eventBase,
 			errorBase);
 		// Otherwise, there is no sane way for the EGL back end to operate, mostly
-		// because of XCB.
+		// because of XCB.  However, we don't throw a fatal error here, because the
+		// 3D application is well within its rights to ask whether the GLX
+		// extension is present and then not use it.
 		if(!retval)
-			THROW("The EGL back end requires a 2D X server with a GLX extension.");
+		{
+			static bool alreadyWarned = false;
+			if(!alreadyWarned)
+			{
+				if(fconfig.verbose)
+					vglout.print("[VGL] WARNING: The EGL back end requires a 2D X server with a GLX extension.\n");
+				alreadyWarned = true;
+			}
+		}
 		return retval;
 	}
 	// When using the GLX back end, all GLX errors will come from the 3D X
