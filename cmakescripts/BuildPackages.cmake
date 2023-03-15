@@ -140,6 +140,13 @@ string(REGEX REPLACE "/" ":" CMAKE_INSTALL_MACPREFIX ${CMAKE_INSTALL_PREFIX})
 string(REGEX REPLACE "^:" "" CMAKE_INSTALL_MACPREFIX
 	${CMAKE_INSTALL_MACPREFIX})
 
+if(CMAKE_OSX_ARCHITECTURES)
+	string(REGEX REPLACE ";" "," MACOS_HOST_ARCHITECTURES
+		"${CMAKE_OSX_ARCHITECTURES}")
+else()
+	set(MACOS_HOST_ARCHITECTURES ${CPU_TYPE})
+endif()
+
 configure_file(release/makemacpkg.in pkgscripts/makemacpkg)
 configure_file(release/Distribution.xml.in pkgscripts/Distribution.xml)
 configure_file(release/uninstall.in pkgscripts/uninstall)

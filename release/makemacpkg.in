@@ -78,7 +78,7 @@ if [ "$PREFIX" = "@CMAKE_INSTALL_DEFAULT_PREFIX@" ]; then
 	ln -fs /Library/Documentation/$PKGNAME $PKGROOT/$PREFIX/doc
 fi
 install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
-osacompile -t APPL -a x86_64 -o "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/uninstall.applescript
+osacompile -t APPL -o "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/uninstall.applescript
 if [ "$MACOS_APP_CERT_NAME" != "" ]; then
 	codesign -f -s "$MACOS_APP_CERT_NAME" --timestamp "$TMPDIR/Uninstall $PROJECT.app"
 	codesign -vv "$TMPDIR/Uninstall $PROJECT.app"

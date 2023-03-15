@@ -44,6 +44,9 @@ This allows applications, such as Chrome/Chromium, to fail gracefully or use a
 different API (such as EGL/X11) if the VirtualGL Faker is unable to emulate
 GLX.
 
+9. The VirtualGL Client now runs on Macs with Apple silicon CPUs (without
+requiring Rosetta 2.)
+
 
 3.0.90 (3.1 beta1)
 ==================

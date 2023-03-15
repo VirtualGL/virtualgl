@@ -9,7 +9,7 @@
 		enable_currentUserHome="false"
 		enable_localSystem="true"
 	/>
-	<options customize="never" />
+	<options customize="never" hostArchitectures="@MACOS_HOST_ARCHITECTURES@" />
 	<choices-outline>
 		<line choice="default">
 			<line choice="@PKGID@"/>

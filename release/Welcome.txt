@@ -1,1 +1,1 @@
-This package will install the VirtualGL Client for Intel-based Mac computers.  To remove VirtualGL, use the VirtualGL uninstaller application, which can be found in the same archive as this package or in the "VirtualGL" Applications folder.
+This package will install the VirtualGL Client for Macs with Intel or Apple silicon CPUs.  To remove VirtualGL, use the VirtualGL uninstaller application, which can be found in the same archive as this package or in the "VirtualGL" Applications folder.
