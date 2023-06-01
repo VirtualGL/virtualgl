@@ -1286,7 +1286,7 @@ int Fl_Text_Buffer::substitute_null_characters( char *string, int len ) {
 ** routine if no substitution has been done.
 */
 void Fl_Text_Buffer::unsubstitute_null_characters( char *string ) {
-  register char * c, subsChar = mNullSubsChar;
+  char * c, subsChar = mNullSubsChar;
 
   if ( subsChar == '\0' )
     return;
