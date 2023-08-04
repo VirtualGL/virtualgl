@@ -46,14 +46,14 @@ usage()
 	echo "-g = Use gsissh from Globus Toolkit to make all SSH connections"
 	echo "-force = Force a new vglclient instance (use with caution)"
 	echo "-bindir <d> = Path in which the VGL executables and scripts are installed on"
-	echo "              the server (default: @CMAKE_INSTALL_DEFAULT_PREFIX@/bin).  Can also be set"
+	echo "              the server (default: @CMAKE_INSTALL_PREFIX@/bin).  Can also be set"
 	echo "              with the VGL_BINDIR environment variable on the client."
 	echo
 	exit $1
 }
 
 if [ -z $VGL_BINDIR ]; then
-	VGL_BINDIR=@CMAKE_INSTALL_DEFAULT_PREFIX@/bin
+	VGL_BINDIR=@CMAKE_INSTALL_PREFIX@/bin
 fi
 
 while [ $# -gt 0 ]
@@ -97,8 +97,8 @@ if [ ! "$VGL_PORT" = "" -a "$__VGL_SSHTUNNEL" = "1" ]; then
 else
 	VGLCLIENT=`dirname $0`/vglclient
 	if [ ! -x $VGLCLIENT ]; then
-		if [ -x @CMAKE_INSTALL_DEFAULT_PREFIX@/bin/vglclient ]; then
-			VGLCLIENT=@CMAKE_INSTALL_DEFAULT_PREFIX@/bin/vglclient
+		if [ -x @CMAKE_INSTALL_PREFIX@/bin/vglclient ]; then
+			VGLCLIENT=@CMAKE_INSTALL_PREFIX@/bin/vglclient
 		else
 			VGLCLIENT=vglclient
 		fi
