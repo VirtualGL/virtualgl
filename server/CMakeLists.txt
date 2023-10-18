@@ -130,7 +130,7 @@ endif()
 if(VGL_EGLBACKEND)
 	# EGL back end
 	set(FAKER_SOURCES
-		${FAKER_SOURCES};ContextHashEGL.cpp;FakePbuffer.cpp;PbufferHashEGL.cpp)
+		${FAKER_SOURCES};ContextHashEGL.cpp;FakePbuffer.cpp;PbufferHashEGL.cpp;RBOContext.cpp)
 	# EGL front end
 	set(FAKER_SOURCES
 		${FAKER_SOURCES};faker-egl.cpp;EGLXDisplayHash.cpp;EGLXVirtualWin.cpp;

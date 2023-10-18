@@ -1,3 +1,12 @@
+3.1.1
+=====
+
+### Significant changes relative to 3.1:
+
+1. The EGL back end now supports OpenGL applications, including ANSYS Fluent,
+that use multiple X11 Display handles to render to the same GLX drawable.
+
+
 3.1
 ===
 

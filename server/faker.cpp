@@ -72,6 +72,7 @@ static void cleanup(void)
 	if(EGLXWindowHash::isAlloc()) EGLXWINHASH.kill();
 	if(backend::ContextHashEGL::isAlloc()) CTXHASHEGL.kill();
 	if(backend::PbufferHashEGL::isAlloc()) PBHASHEGL.kill();
+	if(backend::RBOContext::isAlloc()) RBOCONTEXT.kill();
 	#endif
 	free(glExtensions);
 	unloadSymbols();
@@ -322,16 +323,6 @@ int deleteCS(XExtData *extData)
 	if(extData) delete (util::CriticalSection *)extData->private_data;
 	return 0;
 }
-
-#ifdef EGLBACKEND
-
-int deleteRBOContext(XExtData *extData)
-{
-	if(extData) delete (backend::RBOContext *)extData->private_data;
-	return 0;
-}
-
-#endif
 
 }
 

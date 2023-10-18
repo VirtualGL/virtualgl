@@ -110,7 +110,6 @@ namespace faker
 	}
 
 	extern "C" int deleteCS(XExtData *extData);
-	extern "C" int deleteRBOContext(XExtData *extData);
 
 	INLINE util::CriticalSection &getDisplayCS(Display *dpy)
 	{

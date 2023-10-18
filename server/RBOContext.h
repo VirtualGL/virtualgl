@@ -1,4 +1,5 @@
-// Copyright (C)2020-2022 D. R. Commander
+// Copyright (C)2007 Sun Microsystems, Inc.
+// Copyright (C)2014, 2020-2023 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -28,9 +29,17 @@ class RBOContext
 		static const int REFCOUNT_CONTEXT = 1 << 0;
 		static const int REFCOUNT_DRAWABLE = 1 << 1;
 
-		RBOContext() : ctx(0), contextRefCount(0), drawableRefCount(0)
+		static RBOContext *getInstance(void)
 		{
+			if(instance == NULL)
+			{
+				util::CriticalSection::SafeLock l(instanceMutex);
+				if(instance == NULL) instance = new RBOContext;
+			}
+			return instance;
 		}
+
+		static bool isAlloc(void) { return instance != NULL; }
 
 		void createContext(int refCounts)
 		{
@@ -76,7 +85,7 @@ class RBOContext
 
 		util::CriticalSection &getMutex(void) { return mutex; }
 
-		~RBOContext()
+		void kill()
 		{
 			util::CriticalSection::SafeLock l(mutex);
 
@@ -84,6 +93,15 @@ class RBOContext
 		}
 
 	private:
+
+		RBOContext() : ctx(0), contextRefCount(0), drawableRefCount(0)
+		{
+		}
+
+		~RBOContext()
+		{
+			kill();
+		}
 
 		// The EGL back end emulates Pbuffers using RBOs, but RBOs are specific to
 		// a particular OpenGL context, whereas Pbuffers are not.  Thus, the EGL
@@ -116,26 +134,14 @@ class RBOContext
 		// while the RBO context is current (an OpenGL context can only be current
 		// in one thread at a time.)
 		util::CriticalSection mutex;
+
+		static RBOContext *instance;
+		static util::CriticalSection instanceMutex;
 };
 
-
-INLINE RBOContext &getRBOContext(Display *dpy)
-{
-	XEDataObject obj = { dpy };
-	XExtData *extData;
-
-	if(!fconfig.egl)
-		THROW("backend::getRBOContext() called while using the GLX back end (this should never happen)");
-	int minExtensionNumber =
-		XFindOnExtensionList(XEHeadOfExtensionList(obj), 0) ? 0 : 1;
-	extData = XFindOnExtensionList(XEHeadOfExtensionList(obj),
-		minExtensionNumber + 4);
-	ERRIFNOT(extData);
-	ERRIFNOT(extData->private_data);
-
-	return *(backend::RBOContext *)extData->private_data;
-}
-
 }  // namespace
+
+
+#define RBOCONTEXT  (*(backend::RBOContext::getInstance()))
 
 #endif
