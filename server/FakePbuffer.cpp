@@ -53,7 +53,7 @@ FakePbuffer::FakePbuffer(Display *dpy_, VGLFBConfig config_,
 
 	try
 	{
-		getRBOContext(dpy).createContext(RBOContext::REFCOUNT_DRAWABLE);
+		RBOCONTEXT.createContext(RBOContext::REFCOUNT_DRAWABLE);
 		createBuffer(true);
 		CriticalSection::SafeLock l(idMutex);
 		id = nextID++;
@@ -78,12 +78,12 @@ void FakePbuffer::createBuffer(bool useRBOContext, bool ignoreReadDrawBufs,
 	TempContextEGL *tc = NULL;
 	BufferState *bs = NULL;
 
-	CriticalSection::SafeLock l(getRBOContext(dpy).getMutex());
+	CriticalSection::SafeLock l(RBOCONTEXT.getMutex());
 
 	try
 	{
 		if(useRBOContext)
-			tc = new TempContextEGL(getRBOContext(dpy).getContext());
+			tc = new TempContextEGL(RBOCONTEXT.getContext());
 		else
 		{
 			int saveMask = BS_RBO;
@@ -175,10 +175,10 @@ void FakePbuffer::destroy(bool errorCheck)
 {
 	try
 	{
-		CriticalSection::SafeLock l(getRBOContext(dpy).getMutex());
+		CriticalSection::SafeLock l(RBOCONTEXT.getMutex());
 
 		{
-			TempContextEGL tc(getRBOContext(dpy).getContext());
+			TempContextEGL tc(RBOCONTEXT.getContext());
 
 			_glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			_glBindRenderbuffer(GL_RENDERBUFFER, 0);
@@ -190,7 +190,7 @@ void FakePbuffer::destroy(bool errorCheck)
 			if(fbo) { _glDeleteFramebuffers(1, &fbo);  fbo = 0; }
 		}
 
-		getRBOContext(dpy).destroyContext(RBOContext::REFCOUNT_DRAWABLE);
+		RBOCONTEXT.destroyContext(RBOContext::REFCOUNT_DRAWABLE);
 	}
 	catch(std::exception &e)
 	{
@@ -205,7 +205,7 @@ void FakePbuffer::swap(void)
 
 	if(_eglGetCurrentContext()) _glFlush();
 
-	CriticalSection::SafeLock l(getRBOContext(dpy).getMutex());
+	CriticalSection::SafeLock l(RBOCONTEXT.getMutex());
 
 	// 0 = front left, 1 = back left, 2 = front right, 3 = back right
 	if(rboc[0] && rboc[1])

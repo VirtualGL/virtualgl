@@ -529,17 +529,6 @@ static void setupXDisplay(Display *dpy)
 	if(!(codes = XAddExtension(dpy)))
 		THROW("Memory allocation error");
 
-	#ifdef EGLBACKEND
-	// Extension code 5 stores the RBO context instance for a Display
-	if(!(codes = XAddExtension(dpy))
-		|| !(extData = (XExtData *)calloc(1, sizeof(XExtData))))
-		THROW("Memory allocation error");
-	extData->private_data = (XPointer)(new backend::RBOContext());
-	extData->number = 5;
-	extData->free_private = faker::deleteRBOContext;
-	XAddToExtensionList(XEHeadOfExtensionList(obj), extData);
-	#endif
-
 	if(!excludeDisplay && strlen(fconfig.vendor) > 0)
 	{
 		// Danger, Will Robinson!  We do this to prevent a small memory leak, but

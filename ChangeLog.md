@@ -32,6 +32,9 @@ EGL back end uses the 2D X server's GLX extension for GLX error handling.)
 This allows applications to fail gracefully or use a different API if the
 VirtualGL Faker is unable to emulate GLX.
 
+7. The EGL back end now supports OpenGL applications, including ANSYS Fluent,
+that use multiple X11 Display handles to render to the same GLX drawable.
+
 
 3.0.2
 =====

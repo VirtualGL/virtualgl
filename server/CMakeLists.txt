@@ -129,7 +129,7 @@ if(VGL_USEXV)
 endif()
 if(VGL_EGLBACKEND)
 	set(FAKER_SOURCES
-		${FAKER_SOURCES};ContextHashEGL.cpp;FakePbuffer.cpp;PbufferHashEGL.cpp)
+		${FAKER_SOURCES};ContextHashEGL.cpp;FakePbuffer.cpp;PbufferHashEGL.cpp;RBOContext.cpp)
 endif()
 
 set(FAKERLIBS ${VGL_FAKER_NAME};${VGL_FAKER_NAME}-nodl)
