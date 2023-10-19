@@ -2,8 +2,8 @@
  * Mesa 3-D graphics library
  *
  * Copyright (C) 1999-2000  Brian Paul   All Rights Reserved.
- * Copyright (C) 2011-2012, 2014-2015, 2017-2021  D. R. Commander
- *                                                All Rights Reserved.
+ * Copyright (C) 2011-2012, 2014-2015, 2017-2021, 2023  D. R. Commander
+ *                                                      All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -132,14 +132,14 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
 
    GLXDrawable draw = backend::getCurrentDrawable();
    if (!draw) return;
-   if ((pbw = winhash.find(NULL, draw)) != NULL) {
+   if ((pbw = WINHASH.find(NULL, draw)) != NULL) {
       /* Current drawable is a virtualized Window */
       ERRIFNOT(dpy = pbw->getX11Display());
       ERRIFNOT(win = pbw->getX11Drawable());
    }
-   else if ((win = pmhash.reverseFind(draw)) != 0) {
+   else if ((win = PMHASH.reverseFind(draw)) != 0) {
       /* Current drawable is a virtualized Pixmap */
-      ERRIFNOT(dpy = glxdhash.getCurrentDisplay(draw));
+      ERRIFNOT(dpy = GLXDHASH.getCurrentDisplay(draw));
    }
    else {
       /* Current drawable must be a Pbuffer that the application created.
@@ -149,7 +149,7 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
       XSetWindowAttributes swa;
       int nv = 0;
 
-      ERRIFNOT(dpy = glxdhash.getCurrentDisplay(draw));
+      ERRIFNOT(dpy = GLXDHASH.getCurrentDisplay(draw));
       vtemp.c_class = TrueColor;
       vtemp.depth = DefaultDepth(dpy, DefaultScreen(dpy));
       vtemp.screen = DefaultScreen(dpy);

@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2011, 2014-2015, 2018, 2021 D. R. Commander
+// Copyright (C)2011, 2014-2015, 2018, 2021, 2023 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -106,6 +106,6 @@ namespace faker
 #undef HASH
 
 
-#define eglxdpyhash  (*(faker::EGLXDisplayHash::getInstance()))
+#define EGLXDPYHASH  (*(faker::EGLXDisplayHash::getInstance()))
 
 #endif  // __EGLXDISPLAYHASH_H__

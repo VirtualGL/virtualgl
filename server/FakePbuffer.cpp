@@ -1,4 +1,4 @@
-// Copyright (C)2019-2022 D. R. Commander
+// Copyright (C)2019-2023 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -292,7 +292,7 @@ void FakePbuffer::setDrawBuffer(GLenum drawBuf, bool deferred)
 		_glNamedFramebufferDrawBuffers(fbo, nActualBufs, actualBufs);
 	else
 		_glDrawBuffers(nActualBufs, actualBufs);
-	ctxhashegl.setDrawBuffers(_eglGetCurrentContext(), 1, &drawBuf);
+	CTXHASHEGL.setDrawBuffers(_eglGetCurrentContext(), 1, &drawBuf);
 }
 
 
@@ -390,7 +390,7 @@ void FakePbuffer::setDrawBuffers(GLsizei n, const GLenum *bufs, bool deferred)
 		_glNamedFramebufferDrawBuffers(fbo, nActualBufs, actualBufs);
 	else
 		_glDrawBuffers(nActualBufs, actualBufs);
-	ctxhashegl.setDrawBuffers(_eglGetCurrentContext(), n, bufs);
+	CTXHASHEGL.setDrawBuffers(_eglGetCurrentContext(), n, bufs);
 }
 
 
@@ -425,5 +425,5 @@ void FakePbuffer::setReadBuffer(GLenum readBuf, bool deferred)
 		_glNamedFramebufferReadBuffer(fbo, actualReadBuf);
 	else
 		_glReadBuffer(actualReadBuf);
-	ctxhashegl.setReadBuffer(_eglGetCurrentContext(), readBuf);
+	CTXHASHEGL.setReadBuffer(_eglGetCurrentContext(), readBuf);
 }

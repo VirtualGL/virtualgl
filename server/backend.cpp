@@ -55,7 +55,7 @@ VGL_THREAD_LOCAL(CurrentReadDrawableEGL, GLXDrawable, None)
 
 static FakePbuffer *getCurrentFakePbuffer(EGLint readdraw)
 {
-	FakePbuffer *pb = pbhashegl.find(readdraw == EGL_READ ?
+	FakePbuffer *pb = PBHASHEGL.find(readdraw == EGL_READ ?
 		getCurrentReadDrawableEGL() : getCurrentDrawableEGL());
 	if(pb)
 	{
@@ -84,32 +84,32 @@ void bindFramebuffer(GLenum target, GLuint framebuffer, bool ext)
 		{
 			if(target == GL_DRAW_FRAMEBUFFER || target == GL_FRAMEBUFFER)
 			{
-				drawpb = pbhashegl.find(getCurrentDrawableEGL());
+				drawpb = PBHASHEGL.find(getCurrentDrawableEGL());
 				if(drawpb)
 				{
 					oldDrawBufs =
-						ctxhashegl.getDrawBuffers(_eglGetCurrentContext(), nDrawBufs);
+						CTXHASHEGL.getDrawBuffers(_eglGetCurrentContext(), nDrawBufs);
 					framebuffer = drawpb->getFBO();
-					ctxhashegl.setDrawFBO(_eglGetCurrentContext(), 0);
+					CTXHASHEGL.setDrawFBO(_eglGetCurrentContext(), 0);
 				}
 			}
 			if(target == GL_READ_FRAMEBUFFER || target == GL_FRAMEBUFFER)
 			{
-				readpb = pbhashegl.find(getCurrentReadDrawableEGL());
+				readpb = PBHASHEGL.find(getCurrentReadDrawableEGL());
 				if(readpb)
 				{
-					oldReadBuf = ctxhashegl.getReadBuffer(_eglGetCurrentContext());
+					oldReadBuf = CTXHASHEGL.getReadBuffer(_eglGetCurrentContext());
 					framebuffer = readpb->getFBO();
-					ctxhashegl.setReadFBO(_eglGetCurrentContext(), 0);
+					CTXHASHEGL.setReadFBO(_eglGetCurrentContext(), 0);
 				}
 			}
 		}
 		else
 		{
 			if(target == GL_DRAW_FRAMEBUFFER || target == GL_FRAMEBUFFER)
-				ctxhashegl.setDrawFBO(_eglGetCurrentContext(), framebuffer);
+				CTXHASHEGL.setDrawFBO(_eglGetCurrentContext(), framebuffer);
 			if(target == GL_READ_FRAMEBUFFER || target == GL_FRAMEBUFFER)
-				ctxhashegl.setReadFBO(_eglGetCurrentContext(), framebuffer);
+				CTXHASHEGL.setReadFBO(_eglGetCurrentContext(), framebuffer);
 		}
 	}
 	#endif
@@ -289,7 +289,7 @@ GLXContext createContext(Display *dpy, VGLFBConfig config, GLXContext share,
 				eglError = EGL_BAD_MATCH;
 			if(!ctx && eglError != EGL_SUCCESS)
 				throw(EGLError("eglCreateContext()", __LINE__, eglError));
-			if(ctx) ctxhashegl.add(ctx, config);
+			if(ctx) CTXHASHEGL.add(ctx, config);
 			return ctx;
 		}
 		CATCH_EGL(minorCode)
@@ -318,7 +318,7 @@ GLXPbuffer createPbuffer(Display *dpy, VGLFBConfig config,
 		{
 			FakePbuffer *pb = new FakePbuffer(dpy, config, glxAttribs);
 			GLXDrawable id = pb->getID();
-			if(id) pbhashegl.add(id, pb);
+			if(id) PBHASHEGL.add(id, pb);
 			return id;
 		}
 		CATCH_EGL(X_GLXCreatePbuffer)
@@ -338,8 +338,8 @@ void destroyContext(Display *dpy, GLXContext ctx)
 		try
 		{
 			if(!ctx) return;
-			VGLFBConfig config = ctxhashegl.findConfig(ctx);
-			ctxhashegl.remove(ctx);
+			VGLFBConfig config = CTXHASHEGL.findConfig(ctx);
+			CTXHASHEGL.remove(ctx);
 			getRBOContext(dpy).destroyContext(RBOContext::REFCOUNT_CONTEXT);
 			if(!_eglBindAPI(EGL_OPENGL_API))
 				THROW("Could not enable OpenGL API");
@@ -363,7 +363,7 @@ void destroyPbuffer(Display *dpy, GLXPbuffer pbuf)
 	{
 		try
 		{
-			pbhashegl.remove(pbuf);
+			PBHASHEGL.remove(pbuf);
 		}
 		CATCH_EGL(X_GLXDestroyPbuffer)
 	}
@@ -423,7 +423,7 @@ Display *getCurrentDisplay(void)
 	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
-		FakePbuffer *pb = pbhashegl.find(getCurrentDrawableEGL());
+		FakePbuffer *pb = PBHASHEGL.find(getCurrentDrawableEGL());
 		return pb ? pb->getDisplay() : NULL;
 	}
 	else
@@ -678,7 +678,7 @@ void getIntegerv(GLenum pname, GLint *params)
 		if(!_eglBindAPI(EGL_OPENGL_API))
 			THROW("Could not enable OpenGL API");
 		EGLContext ctx = _eglGetCurrentContext();
-		VGLFBConfig config = ctxhashegl.findConfig(ctx);
+		VGLFBConfig config = CTXHASHEGL.findConfig(ctx);
 
 		if(!params || !config)
 		{
@@ -697,7 +697,7 @@ void getIntegerv(GLenum pname, GLint *params)
 		else if(pname == GL_DRAW_BUFFER)
 		{
 			FakePbuffer *pb = getCurrentFakePbuffer(EGL_DRAW);
-			GLenum drawBuf = ctxhashegl.getDrawBuffer(ctx, 0);
+			GLenum drawBuf = CTXHASHEGL.getDrawBuffer(ctx, 0);
 			if(pb)
 			{
 				*params = drawBuf;
@@ -708,7 +708,7 @@ void getIntegerv(GLenum pname, GLint *params)
 		{
 			FakePbuffer *pb = getCurrentFakePbuffer(EGL_DRAW);
 			int index = pname - GL_DRAW_BUFFER0;
-			GLenum drawBuf = ctxhashegl.getDrawBuffer(ctx, index);
+			GLenum drawBuf = CTXHASHEGL.getDrawBuffer(ctx, index);
 			if(pb)
 			{
 				*params = drawBuf;
@@ -717,7 +717,7 @@ void getIntegerv(GLenum pname, GLint *params)
 		}
 		else if(pname == GL_DRAW_FRAMEBUFFER_BINDING)
 		{
-			*params = ctxhashegl.getDrawFBO(ctx);
+			*params = CTXHASHEGL.getDrawFBO(ctx);
 			return;
 		}
 		else if(pname == GL_MAX_DRAW_BUFFERS)
@@ -729,7 +729,7 @@ void getIntegerv(GLenum pname, GLint *params)
 		else if(pname == GL_READ_BUFFER)
 		{
 			FakePbuffer *pb = getCurrentFakePbuffer(EGL_READ);
-			GLenum readBuf = ctxhashegl.getReadBuffer(ctx);
+			GLenum readBuf = CTXHASHEGL.getReadBuffer(ctx);
 			if(pb)
 			{
 				*params = readBuf;
@@ -738,7 +738,7 @@ void getIntegerv(GLenum pname, GLint *params)
 		}
 		else if(pname == GL_READ_FRAMEBUFFER_BINDING)
 		{
-			*params = ctxhashegl.getReadFBO(ctx);
+			*params = CTXHASHEGL.getReadFBO(ctx);
 			return;
 		}
 		else if(pname == GL_STEREO)
@@ -769,7 +769,7 @@ void getNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname,
 		}
 		FakePbuffer *pb;
 		if(framebuffer == 0
-			&& (pb = pbhashegl.find(getCurrentDrawableEGL())) != NULL)
+			&& (pb = PBHASHEGL.find(getCurrentDrawableEGL())) != NULL)
 		{
 			if(pname == GL_DOUBLEBUFFER)
 			{
@@ -819,34 +819,34 @@ Bool makeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 			if(!ctx) return True;
 
 			FakePbuffer *drawpb = NULL, *readpb = NULL;
-			drawpb = pbhashegl.find(draw);
-			readpb = (read == draw ? drawpb : pbhashegl.find(read));
+			drawpb = PBHASHEGL.find(draw);
+			readpb = (read == draw ? drawpb : PBHASHEGL.find(read));
 			GLint drawFBO = -1, readFBO = -1;
 			_glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFBO);
 			_glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFBO);
 
 			if(drawpb)
 				drawpb->createBuffer(false, true,
-					(ctxhashegl.getDrawFBO(ctx) == 0 || drawFBO == 0),
-					(ctxhashegl.getReadFBO(ctx) == 0 || readFBO == 0));
+					(CTXHASHEGL.getDrawFBO(ctx) == 0 || drawFBO == 0),
+					(CTXHASHEGL.getReadFBO(ctx) == 0 || readFBO == 0));
 			if(readpb && readpb != drawpb)
 				readpb->createBuffer(false, true,
-					(ctxhashegl.getDrawFBO(ctx) == 0 || drawFBO == 0),
-					(ctxhashegl.getReadFBO(ctx) == 0 || readFBO == 0));
+					(CTXHASHEGL.getDrawFBO(ctx) == 0 || drawFBO == 0),
+					(CTXHASHEGL.getReadFBO(ctx) == 0 || readFBO == 0));
 
 			bool boundNewDrawFBO = false, boundNewReadFBO = false;
-			if(drawpb && (ctxhashegl.getDrawFBO(ctx) == 0 || drawFBO == 0))
+			if(drawpb && (CTXHASHEGL.getDrawFBO(ctx) == 0 || drawFBO == 0))
 			{
 				_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, drawpb->getFBO());
 				boundNewDrawFBO = true;
 			}
-			if(readpb && (ctxhashegl.getReadFBO(ctx) == 0 || readFBO == 0))
+			if(readpb && (CTXHASHEGL.getReadFBO(ctx) == 0 || readFBO == 0))
 			{
 				_glBindFramebuffer(GL_READ_FRAMEBUFFER, readpb->getFBO());
 				boundNewReadFBO = true;
 			}
 
-			VGLFBConfig config = ctxhashegl.findConfig(ctx);
+			VGLFBConfig config = CTXHASHEGL.findConfig(ctx);
 			if(drawpb)
 			{
 				if(drawFBO == 0 && config)
@@ -858,7 +858,7 @@ Bool makeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 				else if(boundNewDrawFBO)
 				{
 					const GLenum *oldDrawBufs;  GLsizei nDrawBufs = 0;
-					oldDrawBufs = ctxhashegl.getDrawBuffers(ctx, nDrawBufs);
+					oldDrawBufs = CTXHASHEGL.getDrawBuffers(ctx, nDrawBufs);
 					if(oldDrawBufs && nDrawBufs > 0)
 					{
 						if(nDrawBufs == 1)
@@ -876,7 +876,7 @@ Bool makeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 						GL_BACK : GL_FRONT, false);
 				else if(boundNewReadFBO)
 				{
-					GLenum oldReadBuf = ctxhashegl.getReadBuffer(ctx);
+					GLenum oldReadBuf = CTXHASHEGL.getReadBuffer(ctx);
 					if(oldReadBuf) readpb->setReadBuffer(oldReadBuf, false);
 				}
 			}
@@ -899,7 +899,7 @@ void namedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf, bool ext)
 	{
 		FakePbuffer *pb;
 		if(framebuffer == 0
-			&& (pb = pbhashegl.find(getCurrentDrawableEGL())) != NULL)
+			&& (pb = PBHASHEGL.find(getCurrentDrawableEGL())) != NULL)
 		{
 			pb->setDrawBuffer(buf, true);
 			return;
@@ -919,7 +919,7 @@ void namedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 	{
 		FakePbuffer *pb;
 		if(framebuffer == 0
-			&& (pb = pbhashegl.find(getCurrentDrawableEGL())) != NULL)
+			&& (pb = PBHASHEGL.find(getCurrentDrawableEGL())) != NULL)
 		{
 			pb->setDrawBuffers(n, bufs, true);
 			return;
@@ -938,7 +938,7 @@ void namedFramebufferReadBuffer(GLuint framebuffer, GLenum mode, bool ext)
 	{
 		FakePbuffer *pb;
 		if(framebuffer == 0
-			&& (pb = pbhashegl.find(getCurrentReadDrawableEGL())) != NULL)
+			&& (pb = PBHASHEGL.find(getCurrentReadDrawableEGL())) != NULL)
 		{
 			pb->setReadBuffer(mode, true);
 			return;
@@ -958,7 +958,7 @@ int queryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 		int retval = Success;
 		VGLFBConfig config;
 
-		if(!ctx || !(config = ctxhashegl.findConfig(ctx)))
+		if(!ctx || !(config = CTXHASHEGL.findConfig(ctx)))
 		{
 			faker::sendGLXError(dpy, X_GLXQueryContext, GLXBadContext, false);
 			return GLX_BAD_CONTEXT;
@@ -1005,7 +1005,7 @@ void queryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 
 		if(!value) return;
 
-		if(!draw || (pb = pbhashegl.find(draw)) == NULL)
+		if(!draw || (pb = PBHASHEGL.find(draw)) == NULL)
 		{
 			faker::sendGLXError(dpy, X_GLXGetDrawableAttributes, GLXBadDrawable,
 				false);
@@ -1098,7 +1098,7 @@ void readPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format,
 	if(fconfig.egl)
 	{
 		bool fallthrough = true;
-		VGLFBConfig config = ctxhashegl.findConfig(_eglGetCurrentContext());
+		VGLFBConfig config = CTXHASHEGL.findConfig(_eglGetCurrentContext());
 		FakePbuffer *readpb = getCurrentFakePbuffer(EGL_READ);
 
 		if(config && config->attr.samples > 1 && readpb)
@@ -1154,11 +1154,11 @@ void swapBuffers(Display *dpy, GLXDrawable drawable)
 	{
 		try
 		{
-			if(pmhash.find(dpy, drawable)) return;
+			if(PMHASH.find(dpy, drawable)) return;
 
 			FakePbuffer *pb = NULL;
 
-			if(drawable && (pb = pbhashegl.find(drawable)) != NULL)
+			if(drawable && (pb = PBHASHEGL.find(drawable)) != NULL)
 				pb->swap();
 			else
 				faker::sendGLXError(dpy, X_GLXSwapBuffers, GLXBadDrawable, false);

@@ -67,12 +67,12 @@ int XCloseDisplay(Display *dpy)
 		else
 		{
 			xcb_connection_t *conn = _XGetXCBConnection(dpy);
-			xcbconnhash.remove(conn);
+			XCBCONNHASH.remove(conn);
 		}
 	}
 	#endif
 
-	winhash.remove(dpy);
+	WINHASH.remove(dpy);
 	retval = _XCloseDisplay(dpy);
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -111,9 +111,9 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 	PRARGI(dest_x);  PRARGI(dest_y);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	if(!(srcVW = (faker::VirtualDrawable *)pmhash.find(dpy, src)))
+	if(!(srcVW = (faker::VirtualDrawable *)PMHASH.find(dpy, src)))
 	{
-		srcVW = (faker::VirtualDrawable *)winhash.find(dpy, src);
+		srcVW = (faker::VirtualDrawable *)WINHASH.find(dpy, src);
 		if(srcVW) srcWin = true;
 	}
 	if(srcVW && !srcVW->isInit())
@@ -123,9 +123,9 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 		srcVW = NULL;
 		srcWin = false;
 	}
-	if(!(dstVW = (faker::VirtualDrawable *)pmhash.find(dpy, dst)))
+	if(!(dstVW = (faker::VirtualDrawable *)PMHASH.find(dpy, dst)))
 	{
-		dstVW = (faker::VirtualDrawable *)winhash.find(dpy, dst);
+		dstVW = (faker::VirtualDrawable *)WINHASH.find(dpy, dst);
 		if(dstVW) dstWin = true;
 	}
 	if(dstVW && !dstVW->isInit())
@@ -217,7 +217,7 @@ Window XCreateSimpleWindow(Display *dpy, Window parent, int x, int y,
 
 	win = _XCreateSimpleWindow(dpy, parent, x, y, width, height, border_width,
 		border, background);
-	if(win) winhash.add(dpy, win);
+	if(win) WINHASH.add(dpy, win);
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();  PRARGX(win);  CLOSETRACE();
@@ -248,7 +248,7 @@ Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 
 	win = _XCreateWindow(dpy, parent, x, y, width, height, border_width, depth,
 		c_class, visual, valuemask, attributes);
-	if(win) winhash.add(dpy, win);
+	if(win) WINHASH.add(dpy, win);
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();  PRARGX(win);  CLOSETRACE();
@@ -267,7 +267,7 @@ static void DeleteWindow(Display *dpy, Window win, bool subOnly = false)
 {
 	Window root, parent, *children = NULL;  unsigned int n = 0;
 
-	if(!subOnly) winhash.remove(dpy, win);
+	if(!subOnly) WINHASH.remove(dpy, win);
 	if(XQueryTree(dpy, win, &root, &parent, &children, &n)
 		&& children && n > 0)
 	{
@@ -339,7 +339,7 @@ int XFree(void *data)
 	int ret = 0;
 	TRY();
 	ret = _XFree(data);
-	if(data && !faker::deadYet) vishash.remove(NULL, (XVisualInfo *)data);
+	if(data && !faker::deadYet) VISHASH.remove(NULL, (XVisualInfo *)data);
 	CATCH();
 	return ret;
 }
@@ -368,7 +368,7 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 	/////////////////////////////////////////////////////////////////////////////
 
 	faker::VirtualWin *vw;
-	if((vw = winhash.find(NULL, drawable)) != NULL)
+	if((vw = WINHASH.find(NULL, drawable)) != NULL)
 	{
 		// Apparently drawable is a GLX drawable ID that backs a window, so we need
 		// to request the geometry of the window, not the GLX drawable.  This
@@ -379,11 +379,11 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 	ret = _XGetGeometry(dpy, drawable, root, x, y, &width, &height, border_width,
 		depth);
 
-	if((vw = winhash.find(dpy, drawable)) != NULL && width > 0 && height > 0)
+	if((vw = WINHASH.find(dpy, drawable)) != NULL && width > 0 && height > 0)
 		vw->resize(width, height);
 	#ifdef EGLBACKEND
 	faker::EGLXVirtualWin *eglxvw;
-	if((eglxvw = eglxwinhash.find(dpy, drawable)) != NULL && width > 0
+	if((eglxvw = EGLXWINHASH.find(dpy, drawable)) != NULL && width > 0
 		&& height > 0)
 		eglxvw->resize(width, height);
 	#endif
@@ -425,7 +425,7 @@ XImage *XGetImage(Display *dpy, Drawable drawable, int x, int y,
 
 	DISABLE_FAKER();
 
-	faker::VirtualPixmap *vpm = pmhash.find(dpy, drawable);
+	faker::VirtualPixmap *vpm = PMHASH.find(dpy, drawable);
 	if(vpm) vpm->readback();
 
 	xi = _XGetImage(dpy, drawable, x, y, width, height, plane_mask, format);
@@ -706,7 +706,7 @@ static void handleEvent(Display *dpy, XEvent *xe)
 
 	if(xe && xe->type == ConfigureNotify)
 	{
-		if((vw = winhash.find(dpy, xe->xconfigure.window)) != NULL)
+		if((vw = WINHASH.find(dpy, xe->xconfigure.window)) != NULL)
 		{
 			/////////////////////////////////////////////////////////////////////////
 			OPENTRACE(handleEvent);  PRARGI(xe->xconfigure.width);
@@ -721,7 +721,7 @@ static void handleEvent(Display *dpy, XEvent *xe)
 			/////////////////////////////////////////////////////////////////////////
 		}
 		#ifdef EGLBACKEND
-		if((eglxvw = eglxwinhash.find(dpy, xe->xconfigure.window)) != NULL)
+		if((eglxvw = EGLXWINHASH.find(dpy, xe->xconfigure.window)) != NULL)
 		{
 			/////////////////////////////////////////////////////////////////////////
 			OPENTRACE(handleEvent);  PRARGI(xe->xconfigure.width);
@@ -759,10 +759,10 @@ static void handleEvent(Display *dpy, XEvent *xe)
 		if(protoAtom && deleteAtom && cme->message_type == protoAtom
 			&& cme->data.l[0] == (long)deleteAtom)
 		{
-			if((vw = winhash.find(dpy, cme->window)) != NULL)
+			if((vw = WINHASH.find(dpy, cme->window)) != NULL)
 				vw->wmDeleted();
 			#ifdef EGLBACKEND
-			if((eglxvw = eglxwinhash.find(dpy, cme->window)) != NULL)
+			if((eglxvw = EGLXWINHASH.find(dpy, cme->window)) != NULL)
 				eglxvw->wmDeleted();
 			#endif
 		}
@@ -840,12 +840,12 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 	/////////////////////////////////////////////////////////////////////////////
 
 	faker::VirtualWin *vw;
-	if((vw = winhash.find(dpy, win)) != NULL && values)
+	if((vw = WINHASH.find(dpy, win)) != NULL && values)
 		vw->resize(value_mask & CWWidth ? values->width : 0,
 			value_mask & CWHeight ? values->height : 0);
 	#ifdef EGLBACKEND
 	faker::EGLXVirtualWin *eglxvw;
-	if((eglxvw = eglxwinhash.find(dpy, win)) != NULL && values)
+	if((eglxvw = EGLXWINHASH.find(dpy, win)) != NULL && values)
 		eglxvw->resize(value_mask & CWWidth ? values->width : 0,
 			value_mask & CWHeight ? values->height : 0);
 	#endif
@@ -888,11 +888,11 @@ int XMoveResizeWindow(Display *dpy, Window win, int x, int y,
 	/////////////////////////////////////////////////////////////////////////////
 
 	faker::VirtualWin *vw;
-	if((vw = winhash.find(dpy, win)) != NULL)
+	if((vw = WINHASH.find(dpy, win)) != NULL)
 		vw->resize(width, height);
 	#ifdef EGLBACKEND
 	faker::EGLXVirtualWin *eglxvw;
-	if((eglxvw = eglxwinhash.find(dpy, win)) != NULL)
+	if((eglxvw = EGLXWINHASH.find(dpy, win)) != NULL)
 		eglxvw->resize(width, height);
 	#endif
 	retval = _XMoveResizeWindow(dpy, win, x, y, width, height);
@@ -934,11 +934,11 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width,
 	/////////////////////////////////////////////////////////////////////////////
 
 	faker::VirtualWin *vw;
-	if((vw = winhash.find(dpy, win)) != NULL)
+	if((vw = WINHASH.find(dpy, win)) != NULL)
 		vw->resize(width, height);
 	#ifdef EGLBACKEND
 	faker::EGLXVirtualWin *eglxvw;
-	if((eglxvw = eglxwinhash.find(dpy, win)) != NULL)
+	if((eglxvw = EGLXWINHASH.find(dpy, win)) != NULL)
 		eglxvw->resize(width, height);
 	#endif
 	retval = _XResizeWindow(dpy, win, width, height);

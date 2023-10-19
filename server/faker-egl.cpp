@@ -52,7 +52,7 @@ static INLINE EGLint EGLConfigID(faker::EGLXDisplay *eglxdpy, EGLConfig c)
 	}
 
 #define IS_EXCLUDED_EGLX(display) \
-	(faker::deadYet || faker::getFakerLevel() > 0 || !eglxdpyhash.find(display))
+	(faker::deadYet || faker::getFakerLevel() > 0 || !EGLXDPYHASH.find(display))
 
 #define WRAP_DISPLAY() \
 	if(!IS_EXCLUDED_EGLX(display)) \
@@ -118,7 +118,7 @@ EGLBoolean eglBindTexImage(EGLDisplay display, EGLSurface surface,
 	GET_DISPLAY();
 	DISABLE_FAKER();
 
-	faker::EGLXVirtualWin *eglxvw = eglxwinhash.find(eglxdpy, surface);
+	faker::EGLXVirtualWin *eglxvw = EGLXWINHASH.find(eglxdpy, surface);
 	if(eglxvw) actualSurface = (EGLSurface)eglxvw->getGLXDrawable();
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -487,7 +487,7 @@ EGLSurface eglCreateWindowSurface(EGLDisplay display, EGLConfig config,
 	else
 	{
 		faker::EGLXVirtualWin *eglxvw =
-			eglxwinhash.find(eglxdpy->x11dpy, native_window);
+			EGLXWINHASH.find(eglxdpy->x11dpy, native_window);
 		if(eglxvw)
 			faker::setEGLError(EGL_BAD_ALLOC);
 		else
@@ -496,7 +496,7 @@ EGLSurface eglCreateWindowSurface(EGLDisplay display, EGLConfig config,
 				display, config, attrib_list);
 			surface = eglxvw->getDummySurface();
 			actualSurface = (EGLSurface)eglxvw->getGLXDrawable();
-			eglxwinhash.add(eglxdpy, surface, eglxvw);
+			EGLXWINHASH.add(eglxdpy, surface, eglxvw);
 		}
 	}
 
@@ -593,11 +593,11 @@ EGLBoolean eglDestroySurface(EGLDisplay display, EGLSurface surface)
 	STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	faker::EGLXVirtualWin *eglxvw = eglxwinhash.find(eglxdpy, surface);
+	faker::EGLXVirtualWin *eglxvw = EGLXWINHASH.find(eglxdpy, surface);
 	if(eglxvw)
 	{
 		actualSurface = (EGLSurface)eglxvw->getGLXDrawable();
-		eglxwinhash.remove(eglxdpy, surface);
+		EGLXWINHASH.remove(eglxdpy, surface);
 		retval = EGL_TRUE;
 	}
 	else retval = _eglDestroySurface(display, surface);
@@ -742,7 +742,7 @@ EGLSurface eglGetCurrentSurface(EGLint readdraw)
 
 	actualSurface = surface = _eglGetCurrentSurface(readdraw);
 	faker::EGLXVirtualWin *eglxvw =
-		eglxwinhash.findInternal(faker::getCurrentEGLXDisplay(), actualSurface);
+		EGLXWINHASH.findInternal(faker::getCurrentEGLXDisplay(), actualSurface);
 	if(eglxvw) surface = eglxvw->getDummySurface();
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -763,7 +763,7 @@ EGLSurface eglGetCurrentSurface(EGLint readdraw)
 	if(native_display != EGL_DEFAULT_DISPLAY) \
 	{ \
 		if(screen < 0) screen = DefaultScreen(native_display); \
-		eglxdpy = eglxdpyhash.find((Display *)native_display, screen); \
+		eglxdpy = EGLXDPYHASH.find((Display *)native_display, screen); \
 	} \
 	if(eglxdpy == NULL) \
 	{ \
@@ -786,7 +786,7 @@ EGLSurface eglGetCurrentSurface(EGLint readdraw)
 			eglxdpy->screen = screen; \
 			eglxdpy->isDefault = isDefault; \
 			eglxdpy->isInit = false; \
-			eglxdpyhash.add((Display *)native_display, screen, eglxdpy); \
+			EGLXDPYHASH.add((Display *)native_display, screen, eglxdpy); \
 		} \
 	} \
 	display = (EGLDisplay)eglxdpy; \
@@ -1150,14 +1150,14 @@ EGLBoolean eglMakeCurrent(EGLDisplay display, EGLSurface draw, EGLSurface read,
 	PRARGX(context);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	faker::EGLXVirtualWin *drawEGLXVW = eglxwinhash.find(eglxdpy, draw);
+	faker::EGLXVirtualWin *drawEGLXVW = EGLXWINHASH.find(eglxdpy, draw);
 	if(drawEGLXVW)
 	{
 		actualDraw = (EGLSurface)drawEGLXVW->updateGLXDrawable();
 		setWMAtom(drawEGLXVW->getX11Display(), drawEGLXVW->getX11Drawable(),
 			drawEGLXVW);
 	}
-	faker::EGLXVirtualWin *readEGLXVW = eglxwinhash.find(eglxdpy, read);
+	faker::EGLXVirtualWin *readEGLXVW = EGLXWINHASH.find(eglxdpy, read);
 	if(readEGLXVW)
 	{
 		actualRead = (EGLSurface)readEGLXVW->updateGLXDrawable();
@@ -1167,11 +1167,11 @@ EGLBoolean eglMakeCurrent(EGLDisplay display, EGLSurface draw, EGLSurface read,
 	}
 	retval = _eglMakeCurrent(display, actualDraw, actualRead, context);
 
-	if((drawEGLXVW = eglxwinhash.findInternal(eglxdpy, actualDraw)) != NULL)
+	if((drawEGLXVW = EGLXWINHASH.findInternal(eglxdpy, actualDraw)) != NULL)
 	{
 		drawEGLXVW->clear();  drawEGLXVW->cleanup();
 	}
-	if((readEGLXVW = eglxwinhash.findInternal(eglxdpy, actualRead)) != NULL)
+	if((readEGLXVW = EGLXWINHASH.findInternal(eglxdpy, actualRead)) != NULL)
 		readEGLXVW->cleanup();
 
 	if(context && retval)
@@ -1342,7 +1342,7 @@ EGLBoolean eglQuerySurface(EGLDisplay display, EGLSurface surface,
 	GET_DISPLAY_INIT(EGL_NOT_INITIALIZED);
 	DISABLE_FAKER();
 
-	faker::EGLXVirtualWin *eglxvw = eglxwinhash.find(eglxdpy, surface);
+	faker::EGLXVirtualWin *eglxvw = EGLXWINHASH.find(eglxdpy, surface);
 	if(eglxvw) actualSurface = (EGLSurface)eglxvw->getGLXDrawable();
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -1388,7 +1388,7 @@ EGLBoolean eglReleaseTexImage(EGLDisplay display, EGLSurface surface,
 	GET_DISPLAY();
 	DISABLE_FAKER();
 
-	faker::EGLXVirtualWin *eglxvw = eglxwinhash.find(eglxdpy, surface);
+	faker::EGLXVirtualWin *eglxvw = EGLXWINHASH.find(eglxdpy, surface);
 	if(eglxvw) actualSurface = (EGLSurface)eglxvw->getGLXDrawable();
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -1430,7 +1430,7 @@ EGLBoolean eglSurfaceAttrib(EGLDisplay display, EGLSurface surface,
 	GET_DISPLAY_INIT(EGL_NOT_INITIALIZED);
 	DISABLE_FAKER();
 
-	faker::EGLXVirtualWin *eglxvw = eglxwinhash.find(eglxdpy, surface);
+	faker::EGLXVirtualWin *eglxvw = EGLXWINHASH.find(eglxdpy, surface);
 	if(eglxvw) actualSurface = (EGLSurface)eglxvw->getGLXDrawable();
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -1473,7 +1473,7 @@ EGLBoolean eglSwapBuffers(EGLDisplay display, EGLSurface surface)
 	/////////////////////////////////////////////////////////////////////////////
 
 	fconfig.flushdelay = 0.;
-	if((eglxvw = eglxwinhash.find(eglxdpy, surface)) != NULL)
+	if((eglxvw = EGLXWINHASH.find(eglxdpy, surface)) != NULL)
 	{
 		actualSurface = (EGLSurface)eglxvw->getGLXDrawable();
 		eglxvw->readback(GL_BACK, false, fconfig.sync);
@@ -1532,7 +1532,7 @@ EGLBoolean eglSwapInterval(EGLDisplay display, EGLint interval)
 	faker::EGLXVirtualWin *eglxvw;
 	EGLSurface draw = _eglGetCurrentSurface(EGL_DRAW);
 	if(interval >= 0
-		&& (eglxvw = eglxwinhash.findInternal(eglxdpy, draw)) != NULL)
+		&& (eglxvw = EGLXWINHASH.findInternal(eglxdpy, draw)) != NULL)
 	{
 		eglxvw->setSwapInterval(interval);
 		retval = EGL_TRUE;
