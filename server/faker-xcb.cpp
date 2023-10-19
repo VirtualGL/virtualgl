@@ -38,7 +38,7 @@ xcb_void_cookie_t xcb_create_window(xcb_connection_t *conn, uint8_t depth,
 
 	TRY();
 
-	if(!fconfig.fakeXCB || IS_EXCLUDED(xcbconnhash.getX11Display(conn)))
+	if(!fconfig.fakeXCB || IS_EXCLUDED(XCBCONNHASH.getX11Display(conn)))
 		return _xcb_create_window(conn, depth, wid, parent, x, y, width, height,
 			border_width, _class, visual, value_mask, value_list);
 
@@ -51,7 +51,7 @@ xcb_void_cookie_t xcb_create_window(xcb_connection_t *conn, uint8_t depth,
 
 	cookie = _xcb_create_window(conn, depth, wid, parent, x, y, width, height,
 		border_width, _class, visual, value_mask, value_list);
-	if(cookie.sequence) winhash.add(xcbconnhash.getX11Display(conn), wid);
+	if(cookie.sequence) WINHASH.add(XCBCONNHASH.getX11Display(conn), wid);
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();  CLOSETRACE();
@@ -73,7 +73,7 @@ xcb_void_cookie_t xcb_create_window_aux(xcb_connection_t *conn, uint8_t depth,
 
 	TRY();
 
-	if(!fconfig.fakeXCB || IS_EXCLUDED(xcbconnhash.getX11Display(conn)))
+	if(!fconfig.fakeXCB || IS_EXCLUDED(XCBCONNHASH.getX11Display(conn)))
 		return _xcb_create_window_aux(conn, depth, wid, parent, x, y, width,
 			height, border_width, _class, visual, value_mask, value_list);
 
@@ -86,7 +86,7 @@ xcb_void_cookie_t xcb_create_window_aux(xcb_connection_t *conn, uint8_t depth,
 
 	cookie = _xcb_create_window_aux(conn, depth, wid, parent, x, y, width,
 		height, border_width, _class, visual, value_mask, value_list);
-	if(cookie.sequence) winhash.add(xcbconnhash.getX11Display(conn), wid);
+	if(cookie.sequence) WINHASH.add(XCBCONNHASH.getX11Display(conn), wid);
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();  CLOSETRACE();
@@ -108,7 +108,7 @@ xcb_void_cookie_t xcb_create_window_aux_checked(xcb_connection_t *conn,
 
 	TRY();
 
-	if(!fconfig.fakeXCB || IS_EXCLUDED(xcbconnhash.getX11Display(conn)))
+	if(!fconfig.fakeXCB || IS_EXCLUDED(XCBCONNHASH.getX11Display(conn)))
 		return _xcb_create_window_aux_checked(conn, depth, wid, parent, x, y,
 			width, height, border_width, _class, visual, value_mask, value_list);
 
@@ -121,7 +121,7 @@ xcb_void_cookie_t xcb_create_window_aux_checked(xcb_connection_t *conn,
 
 	cookie = _xcb_create_window_aux_checked(conn, depth, wid, parent, x, y,
 		width, height, border_width, _class, visual, value_mask, value_list);
-	if(cookie.sequence) winhash.add(xcbconnhash.getX11Display(conn), wid);
+	if(cookie.sequence) WINHASH.add(XCBCONNHASH.getX11Display(conn), wid);
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();  CLOSETRACE();
@@ -142,7 +142,7 @@ xcb_void_cookie_t xcb_create_window_checked(xcb_connection_t *conn,
 
 	TRY();
 
-	if(!fconfig.fakeXCB || IS_EXCLUDED(xcbconnhash.getX11Display(conn)))
+	if(!fconfig.fakeXCB || IS_EXCLUDED(XCBCONNHASH.getX11Display(conn)))
 		return _xcb_create_window_checked(conn, depth, wid, parent, x, y, width,
 			height, border_width, _class, visual, value_mask, value_list);
 
@@ -155,7 +155,7 @@ xcb_void_cookie_t xcb_create_window_checked(xcb_connection_t *conn,
 
 	cookie = _xcb_create_window_checked(conn, depth, wid, parent, x, y, width,
 		height, border_width, _class, visual, value_mask, value_list);
-	if(cookie.sequence) winhash.add(xcbconnhash.getX11Display(conn), wid);
+	if(cookie.sequence) WINHASH.add(XCBCONNHASH.getX11Display(conn), wid);
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();  CLOSETRACE();
@@ -175,7 +175,7 @@ static void DeleteWindow(Display *dpy, Window win, bool subOnly = false)
 {
 	Window root, parent, *children = NULL;  unsigned int n = 0;
 
-	if(!subOnly) winhash.remove(dpy, win);
+	if(!subOnly) WINHASH.remove(dpy, win);
 	if(XQueryTree(dpy, win, &root, &parent, &children, &n)
 		&& children && n > 0)
 	{
@@ -192,7 +192,7 @@ xcb_void_cookie_t xcb_destroy_subwindows(xcb_connection_t *conn,
 
 	TRY();
 
-	Display *dpy = xcbconnhash.getX11Display(conn);
+	Display *dpy = XCBCONNHASH.getX11Display(conn);
 
 	if(!fconfig.fakeXCB || IS_EXCLUDED(dpy))
 		return _xcb_destroy_subwindows(conn, window);
@@ -222,7 +222,7 @@ xcb_void_cookie_t xcb_destroy_subwindows_checked(xcb_connection_t *conn,
 
 	TRY();
 
-	Display *dpy = xcbconnhash.getX11Display(conn);
+	Display *dpy = XCBCONNHASH.getX11Display(conn);
 
 	if(!fconfig.fakeXCB || IS_EXCLUDED(dpy))
 		return _xcb_destroy_subwindows_checked(conn, window);
@@ -252,7 +252,7 @@ xcb_void_cookie_t xcb_destroy_window(xcb_connection_t *conn,
 
 	TRY();
 
-	Display *dpy = xcbconnhash.getX11Display(conn);
+	Display *dpy = XCBCONNHASH.getX11Display(conn);
 
 	if(!fconfig.fakeXCB || IS_EXCLUDED(dpy))
 		return _xcb_destroy_window(conn, window);
@@ -281,7 +281,7 @@ xcb_void_cookie_t xcb_destroy_window_checked(xcb_connection_t *conn,
 
 	TRY();
 
-	Display *dpy = xcbconnhash.getX11Display(conn);
+	Display *dpy = XCBCONNHASH.getX11Display(conn);
 
 	if(!fconfig.fakeXCB || IS_EXCLUDED(dpy))
 		return _xcb_destroy_window_checked(conn, window);
@@ -312,7 +312,7 @@ const xcb_query_extension_reply_t *
 	TRY();
 
 	if(fconfig.fakeXCB && ext && !strcmp(ext->name, "GLX")
-		&& !IS_EXCLUDED(xcbconnhash.getX11Display(conn)))
+		&& !IS_EXCLUDED(XCBCONNHASH.getX11Display(conn)))
 	{
 		///////////////////////////////////////////////////////////////////////////
 		OPENTRACE(xcb_get_extension_data);  PRARGX(conn);  PRARGS(ext->name);
@@ -355,7 +355,7 @@ xcb_glx_query_version_cookie_t
 	// faker::deadYet==true, because MainWin calls X11 functions (which in turn
 	// call XCB functions) from one of its shared library destructors, which is
 	// executed after the VirtualGL Faker has shut down.
-	if(!fconfig.fakeXCB || IS_EXCLUDED(xcbconnhash.getX11Display(conn)))
+	if(!fconfig.fakeXCB || IS_EXCLUDED(XCBCONNHASH.getX11Display(conn)))
 		return _xcb_glx_query_version(conn, major_version, minor_version);
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -385,7 +385,7 @@ xcb_glx_query_version_reply_t *
 
 	TRY();
 
-	if(!fconfig.fakeXCB || IS_EXCLUDED(xcbconnhash.getX11Display(conn)))
+	if(!fconfig.fakeXCB || IS_EXCLUDED(XCBCONNHASH.getX11Display(conn)))
 		return _xcb_glx_query_version_reply(conn, cookie, error);
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -433,11 +433,11 @@ static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *ev)
 		case XCB_CONFIGURE_NOTIFY:
 		{
 			xcb_configure_notify_event_t *cne = (xcb_configure_notify_event_t *)ev;
-			Display *dpy = xcbconnhash.getX11Display(conn);
+			Display *dpy = XCBCONNHASH.getX11Display(conn);
 
 			if(!dpy || faker::isDisplayExcluded(dpy)) break;
 
-			vw = winhash.find(dpy, cne->window);
+			vw = WINHASH.find(dpy, cne->window);
 			if(!vw) break;
 
 			/////////////////////////////////////////////////////////////////////////
@@ -456,7 +456,7 @@ static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *ev)
 		case XCB_KEY_PRESS:
 		{
 			xcb_key_press_event_t *kpe = (xcb_key_press_event_t *)ev;
-			Display *dpy = xcbconnhash.getX11Display(conn);
+			Display *dpy = XCBCONNHASH.getX11Display(conn);
 
 			if(!dpy || !fconfig.gui || faker::isDisplayExcluded(dpy)) break;
 
@@ -486,16 +486,16 @@ static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *ev)
 			xcb_client_message_event_t *cme = (xcb_client_message_event_t *)ev;
 			xcb_atom_t protoAtom = 0, deleteAtom = 0;
 
-			Display *dpy = xcbconnhash.getX11Display(conn);
-			protoAtom = xcbconnhash.getProtoAtom(conn);
-			deleteAtom = xcbconnhash.getDeleteAtom(conn);
+			Display *dpy = XCBCONNHASH.getX11Display(conn);
+			protoAtom = XCBCONNHASH.getProtoAtom(conn);
+			deleteAtom = XCBCONNHASH.getDeleteAtom(conn);
 
 			if(!dpy || !protoAtom || !deleteAtom
 				|| cme->type != protoAtom || cme->data.data32[0] != deleteAtom
 				|| faker::isDisplayExcluded(dpy))
 				break;
 
-			vw = winhash.find(dpy, cme->window);
+			vw = WINHASH.find(dpy, cme->window);
 			if(!vw) break;
 			vw->wmDeleted();
 
@@ -568,8 +568,8 @@ void XSetEventQueueOwner(Display *dpy, enum XEventQueueOwner owner)
 		conn = _XGetXCBConnection(dpy);
 		if(conn)
 		{
-			if(owner == XCBOwnsEventQueue) xcbconnhash.add(conn, dpy);
-			else xcbconnhash.remove(conn);
+			if(owner == XCBOwnsEventQueue) XCBCONNHASH.add(conn, dpy);
+			else XCBCONNHASH.remove(conn);
 		}
 	}
 	_XSetEventQueueOwner(dpy, owner);

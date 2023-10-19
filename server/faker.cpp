@@ -51,14 +51,14 @@ VGL_THREAD_LOCAL(AutotestDrawable, long, 0)
 
 static void cleanup(void)
 {
-	if(PixmapHash::isAlloc()) pmhash.kill();
-	if(VisualHash::isAlloc()) vishash.kill();
-	if(ContextHash::isAlloc()) ctxhash.kill();
-	if(GLXDrawableHash::isAlloc()) glxdhash.kill();
-	if(WindowHash::isAlloc()) winhash.kill();
+	if(PixmapHash::isAlloc()) PMHASH.kill();
+	if(VisualHash::isAlloc()) VISHASH.kill();
+	if(ContextHash::isAlloc()) CTXHASH.kill();
+	if(GLXDrawableHash::isAlloc()) GLXDHASH.kill();
+	if(WindowHash::isAlloc()) WINHASH.kill();
 	#ifdef EGLBACKEND
-	if(backend::ContextHashEGL::isAlloc()) ctxhashegl.kill();
-	if(backend::PbufferHashEGL::isAlloc()) pbhashegl.kill();
+	if(backend::ContextHashEGL::isAlloc()) CTXHASHEGL.kill();
+	if(backend::PbufferHashEGL::isAlloc()) PBHASHEGL.kill();
 	#endif
 	free(glExtensions);
 	unloadSymbols();

@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2011, 2014-2015, 2018-2021 D. R. Commander
+// Copyright (C)2011, 2014-2015, 2018-2021, 2023 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -44,7 +44,7 @@ namespace faker
 					// restore it.  This can happen if the application is rendering to
 					// the front buffer and glXDestroyContext() is called to destroy the
 					// active context before glXMake*Current*() is called to switch it.
-					if((oldctx && ctxhash.findConfig(oldctx))
+					if((oldctx && CTXHASH.findConfig(oldctx))
 						|| (!oldread && !olddraw && !oldctx))
 						ctxChanged = true;
 				}

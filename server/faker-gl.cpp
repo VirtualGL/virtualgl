@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011-2012, 2015, 2018-2021 D. R. Commander
+// Copyright (C)2009, 2011-2012, 2015, 2018-2021, 2023 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -26,7 +26,7 @@ static void doGLReadback(bool spoilLast, bool sync)
 	if(!drawable) return;
 
 	faker::VirtualWin *vw;
-	if((vw = winhash.find(NULL, drawable)) != NULL)
+	if((vw = WINHASH.find(NULL, drawable)) != NULL)
 	{
 		if(DrawingToFront() || vw->dirty)
 		{
@@ -197,7 +197,7 @@ void glDrawBuffer(GLenum mode)
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
 	GLXDrawable drawable = backend::getCurrentDrawable();
 
-	if(drawable && (vw = winhash.find(NULL, drawable)) != NULL)
+	if(drawable && (vw = WINHASH.find(NULL, drawable)) != NULL)
 	{
 		before = DrawingToFront();
 		rbefore = DrawingToRight();
@@ -241,7 +241,7 @@ void glDrawBuffers(GLsizei n, const GLenum *bufs)
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
 	GLXDrawable drawable = backend::getCurrentDrawable();
 
-	if(drawable && (vw = winhash.find(NULL, drawable)) != NULL)
+	if(drawable && (vw = WINHASH.find(NULL, drawable)) != NULL)
 	{
 		before = DrawingToFront();
 		rbefore = DrawingToRight();
@@ -296,7 +296,7 @@ void glFramebufferDrawBufferEXT(GLuint framebuffer, GLenum mode)
 	GLXDrawable drawable = 0;
 
 	if(framebuffer == 0 && (drawable = backend::getCurrentDrawable()) != 0
-		&& (vw = winhash.find(NULL, drawable)) != NULL)
+		&& (vw = WINHASH.find(NULL, drawable)) != NULL)
 	{
 		before = DrawingToFront();
 		rbefore = DrawingToRight();
@@ -346,7 +346,7 @@ void glFramebufferDrawBuffersEXT(GLuint framebuffer, GLsizei n,
 	GLXDrawable drawable = 0;
 
 	if(framebuffer == 0 && (drawable = backend::getCurrentDrawable()) != 0
-		&& (vw = winhash.find(NULL, drawable)) != NULL)
+		&& (vw = WINHASH.find(NULL, drawable)) != NULL)
 	{
 		before = DrawingToFront();
 		rbefore = DrawingToRight();
@@ -659,7 +659,7 @@ void glNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf)
 	GLXDrawable drawable = 0;
 
 	if(framebuffer == 0 && (drawable = backend::getCurrentDrawable()) != 0
-		&& (vw = winhash.find(NULL, drawable)) != NULL)
+		&& (vw = WINHASH.find(NULL, drawable)) != NULL)
 	{
 		before = DrawingToFront();
 		rbefore = DrawingToRight();
@@ -709,7 +709,7 @@ void glNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 	GLXDrawable drawable = 0;
 
 	if(framebuffer == 0 && (drawable = backend::getCurrentDrawable()) != 0
-		&& (vw = winhash.find(NULL, drawable)) != NULL)
+		&& (vw = WINHASH.find(NULL, drawable)) != NULL)
 	{
 		before = DrawingToFront();
 		rbefore = DrawingToRight();
@@ -766,7 +766,7 @@ void glPopAttrib(void)
 	int before = -1, after = -1, rbefore = -1, rafter = -1;
 	GLXDrawable drawable = backend::getCurrentDrawable();
 
-	if(drawable && (vw = winhash.find(NULL, drawable)) != NULL)
+	if(drawable && (vw = WINHASH.find(NULL, drawable)) != NULL)
 	{
 		before = DrawingToFront();
 		rbefore = DrawingToRight();
@@ -844,11 +844,11 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 	Display *dpy = backend::getCurrentDisplay();
 	GLXDrawable newRead = 0, newDraw = 0;
 
-	if(dpy && (draw || read) && ctx && ctxhash.findConfig(ctx))
+	if(dpy && (draw || read) && ctx && CTXHASH.findConfig(ctx))
 	{
 		newRead = read, newDraw = draw;
-		faker::VirtualWin *drawVW = winhash.find(NULL, draw);
-		faker::VirtualWin *readVW = winhash.find(NULL, read);
+		faker::VirtualWin *drawVW = WINHASH.find(NULL, draw);
+		faker::VirtualWin *readVW = WINHASH.find(NULL, read);
 		if(drawVW) drawVW->checkResize();
 		if(readVW && readVW != drawVW) readVW->checkResize();
 		if(drawVW) newDraw = drawVW->updateGLXDrawable();

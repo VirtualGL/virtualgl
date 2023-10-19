@@ -1,5 +1,5 @@
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2014-2015, 2019-2021 D. R. Commander
+// Copyright (C)2014-2015, 2019-2021, 2023 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -127,7 +127,7 @@ namespace faker
 #undef HASH
 
 
-#define xcbconnhash  (*(faker::XCBConnHash::getInstance()))
+#define XCBCONNHASH  (*(faker::XCBConnHash::getInstance()))
 
 #endif  // FAKEXCB
 
