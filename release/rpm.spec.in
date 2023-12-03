@@ -52,7 +52,7 @@ Version: @VERSION@
 Vendor: @PKGVENDOR@
 URL: @PKGURL@
 Group: Applications/Graphics
-#-->Source0: http://prdownloads.sourceforge.net/@CMAKE_PROJECT_NAME_LC@/@CMAKE_PROJECT_NAME@-%{version}.tar.gz
+#-->Source0: https://github.com/VirtualGL/virtualgl/releases/download/%{version}/VirtualGL-%{version}.tar.gz
 Release: @BUILD@
 License: wxWindows Library License v3.1
 BuildRoot: %{_blddir}/%{name}-buildroot-%{version}-%{release}
