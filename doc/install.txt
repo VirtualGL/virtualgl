@@ -13,8 +13,8 @@
 	of Mesa, which can modify the libGL symlinks that the nVidia drivers created.
 
 	1. Download the appropriate VirtualGL binary package(s) for your system from
-		the [[http://sourceforge.net/projects/virtualgl/files][Files area]] of the
-		[[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
+		the [[https://github.com/VirtualGL/virtualgl/releases][Releases area]] of the
+		[[https://github.com/VirtualGL/virtualgl][VirtualGL GitHub project page]].
 		RPM and Debian packages are provided for Linux distributions that contain
 		GLIBC 2.17 or later.
 		{nl}
@@ -64,8 +64,8 @@
 
 	#. Download the VirtualGL Mac disk image
 		({file: VirtualGL-{val: _VERSION}.dmg}) from the
-		[[http://sourceforge.net/projects/virtualgl/files][Files area]] of the
-		[[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
+		[[https://github.com/VirtualGL/virtualgl/releases][Releases area]] of the
+		[[https://github.com/VirtualGL/virtualgl][VirtualGL GitHub project page]].
 
 	#. Open the disk image, then open {file: VirtualGL-{val: _VERSION}.pkg}
 		inside the disk image.  Follow the instructions to install the Mac
@@ -80,8 +80,8 @@ Use Cygwin Setup to install the VirtualGL package.
 If you are using a platform for which there is not a pre-built VirtualGL binary
 package available, then download the VirtualGL source tarball
 ({file: VirtualGL-{val: _VERSION}.tar.gz}) from the
-[[http://sourceforge.net/projects/virtualgl/files][Files area]] of the
-[[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]],
+[[https://github.com/VirtualGL/virtualgl/releases][Releases area]] of the
+[[https://github.com/VirtualGL/virtualgl][VirtualGL GitHub project page]],
 uncompress it, {pcode: cd VirtualGL-{val: _VERSION}}, and read the contents of
 {file: BUILDING.md} for further instructions on how to build and install
 VirtualGL from source.
