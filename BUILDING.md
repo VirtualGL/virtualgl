@@ -14,8 +14,8 @@ Build Requirements
   * [OpenSSL](http://www.OpenSSL.org) -- see "Building SSL Support" below
 
 - libjpeg-turbo SDK v1.2 or later
-  * The libjpeg-turbo SDK binary packages can be downloaded from the "Files"
-    area of <http://sourceforge.net/projects/libjpeg-turbo>.
+  * The libjpeg-turbo SDK binary packages can be downloaded from
+    <https://github.com/libjpeg-turbo/libjpeg-turbo/releases>.
   * The VirtualGL build system will search for the TurboJPEG header and
     library under **/opt/libjpeg-turbo** on Un*x, but you can override this by
     setting the `TJPEG_INCLUDE_DIR` CMake variable to the directory containing
