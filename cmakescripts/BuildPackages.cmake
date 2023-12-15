@@ -80,7 +80,7 @@ add_custom_target(srpm pkgscripts/makesrpm
 
 set(EGLDEPENDS "")
 if(VGL_EGLBACKEND)
-	set(EGLDEPENDS ", libegl1-mesa:${DEBARCH}")
+	set(EGLDEPENDS ", libegl1:${DEBARCH}")
 endif()
 configure_file(release/makedpkg.in pkgscripts/makedpkg)
 configure_file(release/deb-control.in pkgscripts/deb-control)
