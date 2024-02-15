@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011-2016, 2018-2023 D. R. Commander
+// Copyright (C)2009, 2011-2016, 2018-2024 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -538,6 +538,21 @@ static void setupXDisplay(Display *dpy)
 		_XFree(ServerVendor(dpy));
 		ServerVendor(dpy) = strdup(fconfig.vendor);
 	}
+
+	// GTK v3.15.2 through v4.3.1 used glXGetConfig() to probe the OpenGL
+	// rendering attributes of all X visuals, picked "system" (opaque) and "RGBA"
+	// (transparent) visuals based on those attributes, cached the visual IDs of
+	// those visuals in an X root window property, and expected to find a GLX FB
+	// config with a GLX_VISUAL_ID attribute matching one of those visual IDs.
+	// If the visuals are picked without VirtualGL (i.e. using the 2D X server's
+	// GLX implementation), then it is likely that none of the GLX FB configs
+	// returned by VirtualGL will have a GLX_VISUAL_ID attribute corresponding
+	// to one of the visuals.  We delete the GDK_VISUALS X root window property
+	// here in order to force GTK to re-pick the visuals using VirtualGL's
+	// interposed version of glXGetConfig().
+	Atom atom = None;
+	if((atom = XInternAtom(dpy, "GDK_VISUALS", True)) != None)
+		XDeleteProperty(dpy, DefaultRootWindow(dpy), atom);
 }
 
 

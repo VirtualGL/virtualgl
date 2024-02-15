@@ -35,6 +35,11 @@ VirtualGL Faker is unable to emulate GLX.
 7. The EGL back end now supports OpenGL applications, including ANSYS Fluent,
 that use multiple X11 Display handles to render to the same GLX drawable.
 
+8. The VirtualGL Faker now works around an issue whereby applications using the
+GtkGLArea widget with GTK v3.15.2 through v4.3.1 failed with "No available
+configurations for the given [RGBA] pixel format" if GTK v3.15.2 through v4.3.1
+had previously been initialized on the 2D X server without VirtualGL.
+
 
 3.0.2
 =====
