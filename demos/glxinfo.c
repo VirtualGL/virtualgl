@@ -1,8 +1,8 @@
 /*
  * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  * Copyright (C) 2005-2007  Sun Microsystems, Inc.   All Rights Reserved.
- * Copyright (C) 2011, 2013, 2015, 2019, 2022  D. R. Commander
- *                                             All Rights Reserved.
+ * Copyright (C) 2011, 2013, 2015, 2019, 2022, 2024  D. R. Commander
+ *                                                   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -183,8 +183,8 @@ create_context_error_handler(Display *dpy, XErrorEvent *error)
  * (at least w/ NVIDIA).
  */
 static GLXContext
-create_context_flags(Display *dpy, GLXFBConfig fbconfig, int major, int minor,
-                     int contextFlags, int profileMask, Bool direct)
+create_context_flags(Display *dpy, int scrnum, GLXFBConfig fbconfig, int major,
+                     int minor, int contextFlags, int profileMask, Bool direct)
 {
 #ifdef GLX_ARB_create_context
    static PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribsARB_func = 0;
@@ -198,7 +198,7 @@ create_context_flags(Display *dpy, GLXFBConfig fbconfig, int major, int minor,
       /* See if we have GLX_ARB_create_context_profile and get pointer to
        * glXCreateContextAttribsARB() function.
        */
-      const char *glxExt = glXQueryExtensionsString(dpy, 0);
+      const char *glxExt = glXQueryExtensionsString(dpy, scrnum);
       if (extension_supported("GLX_ARB_create_context_profile", glxExt)) {
          glXCreateContextAttribsARB_func = (PFNGLXCREATECONTEXTATTRIBSARBPROC)
             glXGetProcAddress((const GLubyte *) "glXCreateContextAttribsARB");
@@ -263,7 +263,7 @@ create_context_flags(Display *dpy, GLXFBConfig fbconfig, int major, int minor,
  * Try to create a GLX context of the newest version.
  */
 static GLXContext
-create_context_with_config(Display *dpy, GLXFBConfig config,
+create_context_with_config(Display *dpy, int scrnum, GLXFBConfig config,
                            Bool coreProfile, Bool es2Profile, Bool direct)
 {
    GLXContext ctx = 0;
@@ -278,7 +278,7 @@ create_context_with_config(Display *dpy, GLXFBConfig config,
           if (gl_versions[i].major == 3 &&
               gl_versions[i].minor == 0)
              return 0;
-         ctx = create_context_flags(dpy, config,
+         ctx = create_context_flags(dpy, scrnum, config,
                                     gl_versions[i].major,
                                     gl_versions[i].minor,
                                     0x0,
@@ -294,8 +294,8 @@ create_context_with_config(Display *dpy, GLXFBConfig config,
    if (es2Profile) {
 #ifdef GLX_CONTEXT_ES2_PROFILE_BIT_EXT
       if (extension_supported("GLX_EXT_create_context_es2_profile",
-                              glXQueryExtensionsString(dpy, 0))) {
-         ctx = create_context_flags(dpy, config, 2, 0, 0x0,
+                              glXQueryExtensionsString(dpy, scrnum))) {
+         ctx = create_context_flags(dpy, scrnum, config, 2, 0, 0x0,
                                     GLX_CONTEXT_ES2_PROFILE_BIT_EXT,
                                     direct);
          return ctx;
@@ -418,12 +418,12 @@ print_screen_info(Display *dpy, int scrnum,
     */
    fbconfigs = choose_fb_config(dpy, scrnum);
    if (fbconfigs) {
-      ctx = create_context_with_config(dpy, fbconfigs[0],
+      ctx = create_context_with_config(dpy, scrnum, fbconfigs[0],
                                        coreProfile, es2Profile,
                                        opts->allowDirect);
       if (!ctx && opts->allowDirect && !coreProfile) {
          /* try indirect */
-         ctx = create_context_with_config(dpy, fbconfigs[0],
+         ctx = create_context_with_config(dpy, scrnum, fbconfigs[0],
                                           coreProfile, es2Profile, False);
       }
 
