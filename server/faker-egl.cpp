@@ -109,7 +109,7 @@ static XVisualInfo *getVisualFromConfig(faker::EGLXDisplay *eglxdpy,
 {
 	if(!eglxdpy || !config) return NULL;
 
-	EGLint redSize, greenSize, blueSize;
+	EGLint redSize, greenSize, blueSize, alphaSize;
 	int depth = 24;
 
 	if(_eglGetConfigAttrib(eglxdpy->edpy, config, EGL_RED_SIZE, &redSize)
@@ -117,6 +117,15 @@ static XVisualInfo *getVisualFromConfig(faker::EGLXDisplay *eglxdpy,
 		&& _eglGetConfigAttrib(eglxdpy->edpy, config, EGL_BLUE_SIZE, &blueSize)
 		&& redSize == 10 && greenSize == 10 && blueSize == 10)
 		depth = 30;
+
+	if(fconfig.chromeHack
+		&& _eglGetConfigAttrib(eglxdpy->edpy, config, EGL_ALPHA_SIZE, &alphaSize)
+		&& alphaSize == 8)
+	{
+		XVisualInfo *v = glxvisual::getHighestScoringVisual(eglxdpy->x11dpy,
+			eglxdpy->screen);
+		if(v) return v;
+	}
 
 	return getVisual(eglxdpy->x11dpy, eglxdpy->screen, depth, TrueColor);
 }

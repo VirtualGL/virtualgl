@@ -1,4 +1,4 @@
-// Copyright (C)2009-2023 D. R. Commander
+// Copyright (C)2009-2024 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -280,6 +280,7 @@ void fconfig_reloadenv(void)
 	FETCHENV_BOOL("VGL_ALLOWINDIRECT", allowindirect);
 	FETCHENV_BOOL("VGL_AMDGPUHACK", amdgpuHack);
 	FETCHENV_BOOL("VGL_AUTOTEST", autotest);
+	FETCHENV_BOOL("VGL_CHROMEHACK", chromeHack);
 	FETCHENV_STR("VGL_CLIENT", client);
 	if((env = getenv("VGL_SUBSAMP")) != NULL && strlen(env) > 0)
 	{
@@ -481,6 +482,8 @@ void fconfig_reloadenv(void)
 		if(fconfig.subsamp < 0) fconfig.subsamp = 1;
 	}
 
+	if(fconfig.chromeHack) fconfig.probeglx = 1;
+
 	fconfig_envset = true;
 }
 
@@ -620,6 +623,7 @@ void fconfig_print(FakerConfig &fc)
 {
 	PRCONF_INT(allowindirect);
 	PRCONF_INT(amdgpuHack);
+	PRCONF_INT(chromeHack);
 	PRCONF_STR(client);
 	PRCONF_INT(compress);
 	PRCONF_STR(config);

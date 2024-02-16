@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2009-2016, 2019-2023 D. R. Commander
+// Copyright (C)2009-2016, 2019-2024 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -33,6 +33,7 @@ typedef struct
 	VGLFBConfig config;
 	int depth, c_class, bpc, nVisuals;
 	int isStereo, isDB, isGL;
+	int score;
 	GLXAttrib glx;
 } VisAttrib;
 
@@ -248,12 +249,31 @@ static bool buildVisAttribTable(Display *dpy, int screen)
 			va[i].c_class = visuals[i].c_class;
 			va[i].bpc = visuals[i].bits_per_rgb;
 			va[i].nVisuals = nVisuals;
+			va[i].score = -1;
 
 			if(clientGLX)
 			{
 				_glXGetConfig(dpy, &visuals[i], GLX_DOUBLEBUFFER, &va[i].isDB);
 				_glXGetConfig(dpy, &visuals[i], GLX_USE_GL, &va[i].isGL);
 				_glXGetConfig(dpy, &visuals[i], GLX_STEREO, &va[i].isStereo);
+				// Simulate Chrome's ARGB visual selection mechanism, which
+				// unfortunately uses raw GLX requests/replies that VirtualGL cannot
+				// interpose.
+				if(fconfig.chromeHack && va[i].depth == 32 && va[i].bpc == 8
+					&& va[i].isDB && !va[i].isStereo)
+				{
+					va[i].score = 0;
+					int alphaSize = -1, depthSize = -1, stencilSize = -1,
+						sampleBuffers = -1;
+					_glXGetConfig(dpy, &visuals[i], GLX_ALPHA_SIZE, &alphaSize);
+					if(alphaSize > 0) va[i].score++;
+					_glXGetConfig(dpy, &visuals[i], GLX_DEPTH_SIZE, &depthSize);
+					_glXGetConfig(dpy, &visuals[i], GLX_STENCIL_SIZE, &stencilSize);
+					if(depthSize == 0 && stencilSize == 0) va[i].score++;
+					_glXGetConfig(dpy, &visuals[i], GLX_SAMPLE_BUFFERS_ARB,
+						&sampleBuffers);
+					if(sampleBuffers == 0) va[i].score++;
+				}
 			}
 			va[i].glx.alphaSize = va[i].glx.depthSize = va[i].glx.stencilSize =
 				va[i].glx.samples = -1;
@@ -1065,6 +1085,30 @@ VGLFBConfig getDefaultFBConfig(Display *dpy, int screen, VisualID vid)
 	}
 
 	return 0;
+}
+
+
+XVisualInfo *getHighestScoringVisual(Display *dpy, int screen)
+{
+	if(!dpy) return NULL;
+
+	int highestScore = -1;
+	VisualID bestVisualID =
+		matchVisual2D(dpy, screen, 32, TrueColor, 8, 0, true);
+
+	GET_VA_TABLE();
+
+	for(int i = 0; i < vaEntries; i++)
+	{
+		if(va[i].score > highestScore)
+		{
+			highestScore = va[i].score;
+			bestVisualID = va[i].visualID;
+		}
+	}
+
+	if(bestVisualID) return visualFromID(dpy, screen, bestVisualID);
+	else return NULL;
 }
 
 }  // namespace
