@@ -1,5 +1,5 @@
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2011, 2014-2015, 2018, 2021-2023 D. R. Commander
+// Copyright (C)2011, 2014-2015, 2018, 2021-2024 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -1476,6 +1476,12 @@ EGLBoolean eglSwapBuffers(EGLDisplay display, EGLSurface surface)
 	if((eglxvw = EGLXWINHASH.find(eglxdpy, surface)) != NULL)
 	{
 		actualSurface = (EGLSurface)eglxvw->getGLXDrawable();
+		// If the current draw surface is being swapped, ensure that all rendering
+		// has completed.  eglSwapBuffers() would normally do this for us, but
+		// since Pbuffer surfaces are single-buffered, we have to emulate
+		// eglSwapBuffers() rather than actually calling it.
+		if(_eglGetCurrentSurface(EGL_DRAW) == actualSurface)
+			_glFinish();
 		eglxvw->readback(GL_BACK, false, fconfig.sync);
 		int interval = eglxvw->getSwapInterval();
 		if(interval > 0)

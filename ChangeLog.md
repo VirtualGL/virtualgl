@@ -11,6 +11,11 @@ GtkGLArea widget with GTK v3.15.2 through v4.3.1 failed with "No available
 configurations for the given [RGBA] pixel format" if GTK v3.15.2 through v4.3.1
 had previously been initialized on the 2D X server without VirtualGL.
 
+3. As required by the EGL spec, the interposed `eglSwapBuffers()` function now
+flushes the current OpenGL context if the surface being swapped is bound to
+that context.  This fixes a flickering issue that occurred with recent versions
+of Firefox.
+
 
 3.1
 ===
