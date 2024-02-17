@@ -45,24 +45,7 @@ boolean_number(VGL_FAKEOPENCL)
 boolean_number(VGL_FAKEOPENCL PARENT_SCOPE)
 report_option(VGL_FAKEOPENCL "OpenCL interposer")
 if(VGL_FAKEOPENCL)
-	cmake_minimum_required(VERSION 3.1)
 	include(FindOpenCL)
-	include_directories(${OpenCL_INCLUDE_DIRS})
-endif()
-
-set(DEFAULT_VGL_EGLBACKEND 0)
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
-	set(DEFAULT_VGL_EGLBACKEND 1)
-endif()
-option(VGL_EGLBACKEND "Include the EGL back end, which allows the VirtualGL Faker to be used without a 3D X server"
-	${DEFAULT_VGL_EGLBACKEND})
-boolean_number(VGL_EGLBACKEND)
-boolean_number(VGL_EGLBACKEND PARENT_SCOPE)
-report_option(VGL_EGLBACKEND "EGL back end")
-if(VGL_EGLBACKEND)
-	cmake_minimum_required(VERSION 3.10)
-	set(EGL_LIBRARY ${OPENGL_egl_LIBRARY})
-	add_definitions(-DEGLBACKEND)
 endif()
 
 get_directory_property(DEFS_PROP COMPILE_DEFINITIONS)
@@ -104,7 +87,13 @@ endif()
 set(FAKER_SOURCES
 	backend.cpp
 	ContextHash.cpp
+	ContextHashEGL.cpp
+	EGLXDisplayHash.cpp
+	EGLXVirtualWin.cpp
+	EGLXWindowHash.cpp
+	FakePbuffer.cpp
 	faker.cpp
+	faker-egl.cpp
 	faker-gl.cpp
 	faker-glx.cpp
 	faker-sym.cpp
@@ -114,7 +103,9 @@ set(FAKER_SOURCES
 	GlobalCriticalSection.cpp
 	GLXDrawableHash.cpp
 	glxvisual.cpp
+	PbufferHashEGL.cpp
 	PixmapHash.cpp
+	RBOContext.cpp
 	TransPlugin.cpp
 	VirtualDrawable.cpp
 	VirtualPixmap.cpp
@@ -126,15 +117,6 @@ set(FAKER_SOURCES
 	VGLTrans.cpp)
 if(VGL_USEXV)
 	set(FAKER_SOURCES ${FAKER_SOURCES};XVTrans.cpp)
-endif()
-if(VGL_EGLBACKEND)
-	# EGL back end
-	set(FAKER_SOURCES
-		${FAKER_SOURCES};ContextHashEGL.cpp;FakePbuffer.cpp;PbufferHashEGL.cpp;RBOContext.cpp)
-	# EGL front end
-	set(FAKER_SOURCES
-		${FAKER_SOURCES};faker-egl.cpp;EGLXDisplayHash.cpp;EGLXVirtualWin.cpp;
-		EGLXWindowHash.cpp)
 endif()
 
 set(FAKERLIBS ${VGL_FAKER_NAME};${VGL_FAKER_NAME}-nodl)
@@ -170,10 +152,12 @@ foreach(fakerlib ${FAKERLIBS})
 	target_link_libraries(${fakerlib} vglcommon ${FBXFAKERLIB} vglsocket m
 		${LIBDL})
 	if(${fakerlib} STREQUAL ${VGL_FAKER_NAME})
-		target_link_libraries(${fakerlib} ${OPENGL_gl_LIBRARY} ${EGL_LIBRARY})
+		target_link_libraries(${fakerlib} ${OPENGL_gl_LIBRARY}
+			${OPENGL_egl_LIBRARY})
 	endif()
 	if(${fakerlib} STREQUAL ${VGL_FAKER_NAME}-opencl)
-		target_link_libraries(${fakerlib} ${OPENGL_gl_LIBRARY} ${EGL_LIBRARY} ${OpenCL_LIBRARIES})
+		target_link_libraries(${fakerlib} ${OPENGL_gl_LIBRARY}
+			${OPENGL_egl_LIBRARY} OpenCL::OpenCL)
 	endif()
 	if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND GNUCXX)
 		# For some reason, on SunOS/GCC CMake tries to use the C compiler to link
@@ -249,10 +233,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	add_library(deepbindtest SHARED libdeepbindtest.c)
 	if(VGL_FAKEOPENCL)
 		target_compile_definitions(deepbindtest PUBLIC -DFAKEOPENCL)
-		target_link_libraries(deepbindtest ${OpenCL_LIBRARIES})
+		target_link_libraries(deepbindtest OpenCL::OpenCL)
 	endif()
 	target_link_libraries(deepbindtest ${X11_X11_LIB} ${OPENGL_gl_LIBRARY}
-		${EGL_LIBRARY} ${LIBDL})
+		${OPENGL_egl_LIBRARY} ${LIBDL})
 	set_target_properties(deepbindtest PROPERTIES LINK_FLAGS "${MINUSZ}defs")
 endif()
 
@@ -266,12 +250,10 @@ target_link_libraries(fakerut "${MINUSZ}now ${OPENGL_gl_LIBRARY}"
 	${OPENGL_glu_LIBRARY} "${MINUSZ}now ${X11_X11_LIB}" ${LIBDL} vglutil
 	${XCB_XCB_LIB} ${XCB_GLX_LIB} ${X11_XCB_LIB})
 
-if(VGL_EGLBACKEND)
-	add_executable(eglxfakerut eglxfakerut.cpp)
-	target_link_libraries(eglxfakerut "${MINUSZ}now ${OPENGL_gl_LIBRARY}"
-		"${MINUSZ}now ${X11_X11_LIB}" "${MINUSZ}now ${EGL_LIBRARY}" ${LIBDL}
-		vglutil)
-endif()
+add_executable(eglxfakerut eglxfakerut.cpp)
+target_link_libraries(eglxfakerut "${MINUSZ}now ${OPENGL_gl_LIBRARY}"
+	"${MINUSZ}now ${X11_X11_LIB}" "${MINUSZ}now ${OPENGL_egl_LIBRARY}" ${LIBDL}
+	vglutil)
 
 add_library(vgltrans_test SHARED testplugin.cpp VGLTrans.cpp)
 unset(VGLTRANS_TEST_LINK_FLAGS)

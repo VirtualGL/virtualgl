@@ -10,7 +10,7 @@ called "VirtualGL-Utils".
 Build Requirements
 ------------------
 
-- [CMake](http://www.cmake.org) v2.8.12 or later
+- [CMake](http://www.cmake.org) v3.10 or later
 
 - Microsoft Visual C++ 2005 or later
 

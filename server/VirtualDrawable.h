@@ -55,10 +55,8 @@ namespace faker
 					OGLDrawable(Display *dpy, int width, int height, VGLFBConfig config);
 					OGLDrawable(int width, int height, int depth, VGLFBConfig config,
 						const int *attribs);
-					#ifdef EGLBACKEND
 					OGLDrawable(EGLDisplay edpy, int width, int height, EGLConfig config,
 						const EGLint *pbAttribs);
-					#endif
 					~OGLDrawable(void);
 					GLXDrawable getGLXDrawable(void) { return glxDraw; }
 
@@ -85,9 +83,7 @@ namespace faker
 					bool cleared, stereo;
 					GLXDrawable glxDraw;
 					Display *dpy;
-					#ifdef EGLBACKEND
 					EGLDisplay edpy;
-					#endif
 					int width, height, depth, rgbSize;
 					VGLFBConfig config;
 					GLenum glFormat;
@@ -103,9 +99,7 @@ namespace faker
 
 			util::CriticalSection mutex;
 			Display *dpy;  Drawable x11Draw;
-			#ifdef EGLBACKEND
 			EGLDisplay edpy;
-			#endif
 			OGLDrawable *oglDraw;  VGLFBConfig config;
 			GLXContext ctx;
 			Bool direct;

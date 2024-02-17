@@ -859,7 +859,6 @@ static const char *getGLXExtensions(void)
 	const char *realGLXExtensions = fconfig.egl ? "" :
 		_glXQueryExtensionsString(DPY3D, DefaultScreen(DPY3D));
 
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		faker::init3D();
@@ -871,7 +870,6 @@ static const char *getGLXExtensions(void)
 		return glxextensions;
 	}
 	else
-	#endif
 	{
 		CHECKSYM_NONFATAL(glXCreateContextAttribsARB)
 		if(__glXCreateContextAttribsARB

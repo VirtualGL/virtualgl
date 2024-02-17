@@ -159,10 +159,8 @@ typedef struct _FakerConfig
   char defaultfbconfig[MAXSTR];
   char dlsymloader;
   char egl;
-  #ifdef EGLBACKEND
   char egllib[MAXSTR];
   char eglxIgnorePixmapBit;
-  #endif
   double flushdelay;
   int forcealpha;
   double fps;

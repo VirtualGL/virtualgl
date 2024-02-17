@@ -46,11 +46,9 @@ int VirtualPixmap::init(int width, int height, int depth, VGLFBConfig config_,
 		&& oglDraw->getDepth() == depth
 		&& FBCID(oglDraw->getFBConfig()) == FBCID(config_))
 		return 0;
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 		oglDraw = new OGLDrawable(dpy, width, height, config_);
 	else
-	#endif
 		oglDraw = new OGLDrawable(width, height, depth, config_, attribs);
 	if(config && FBCID(config_) != FBCID(config) && ctx)
 	{

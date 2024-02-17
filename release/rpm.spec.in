@@ -44,7 +44,6 @@
 # Path under which docs should be installed
 %define docdir %{_defaultdocdir}/%{name}-%{version}
 
-%define eglbackend @VGL_EGLBACKEND@
 %define fakeopencl @VGL_FAKEOPENCL@
 
 Summary: A toolkit for displaying OpenGL applications to thin clients
@@ -206,10 +205,8 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %{bindir}/tcbench
 %{bindir}/nettest
 %{bindir}/cpustat
-%if %{eglbackend}
-	%{bindir}/eglinfo
-	%{bindir}/eglxinfo
-%endif
+%{bindir}/eglinfo
+%{bindir}/eglxinfo
 %{bindir}/glxinfo
 %{bindir}/vglclient
 %{bindir}/vglconfig
@@ -220,15 +217,10 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %{bindir}/vglrun
 %if "%{_bits}" == "64"
 	%{bindir}/glxspheres64
+	%{bindir}/eglxspheres64
 %else
 	%{bindir}/glxspheres
-%endif
-%if %{eglbackend}
-	%if "%{_bits}" == "64"
-		%{bindir}/eglxspheres64
-	%else
-		%{bindir}/eglxspheres
-	%endif
+	%{bindir}/eglxspheres
 %endif
 %if "%{bindir}" != "%{_bindir}" && %{binsymlinks}
 	%{_bindir}/vglclient

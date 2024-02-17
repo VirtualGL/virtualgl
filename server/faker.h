@@ -27,7 +27,6 @@
 
 namespace faker
 {
-	#ifdef EGLBACKEND
 	// Unfortunately, we have to create our own EGLDisplay structure because
 	// there is no way to get multiple unique EGLDisplay handles for the same DRI
 	// device.  VirtualGL assumes that EGLDisplay handles returned by the
@@ -42,14 +41,11 @@ namespace faker
 		int screen;
 		bool isDefault, isInit;
 	} EGLXDisplay;
-	#endif
 
 	extern Display *dpy3D;
 	extern bool deadYet;
 	extern char *glExtensions;
-	#ifdef EGLBACKEND
 	extern EGLint eglMajor, eglMinor;
-	#endif
 
 	extern void init(void);
 	extern Display *init3D(void);
@@ -61,10 +57,8 @@ namespace faker
 	extern void setFakerLevel(long level);
 	extern bool getGLXExcludeCurrent(void);
 	extern void setGLXExcludeCurrent(bool excludeCurrent);
-	#ifdef EGLBACKEND
 	extern bool getEGLExcludeCurrent(void);
 	extern void setEGLExcludeCurrent(bool eglExcludeCurrent);
-	#endif
 	extern bool getOGLExcludeCurrent(void);
 	extern void setOGLExcludeCurrent(bool excludeCurrent);
 	extern long getAutotestColor();
@@ -79,12 +73,10 @@ namespace faker
 	extern void setAutotestDrawable(long d);
 	extern bool getEGLXContextCurrent(void);
 	extern void setEGLXContextCurrent(bool isEGLXContextCurrent);
-	#ifdef EGLBACKEND
 	extern long getEGLError(void);
 	extern void setEGLError(long error);
 	extern EGLXDisplay *getCurrentEGLXDisplay(void);
 	extern void setCurrentEGLXDisplay(EGLXDisplay *display);
-	#endif
 
 	void *loadSymbol(const char *name, bool optional = false);
 	void unloadSymbols(void);

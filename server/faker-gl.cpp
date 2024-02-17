@@ -17,9 +17,7 @@
 #include <math.h>
 #include "ContextHash.h"
 #include "WindowHash.h"
-#ifdef EGLBACKEND
 #include "EGLXWindowHash.h"
-#endif
 #include "faker.h"
 
 static void doGLReadback(bool spoilLast, bool sync)
@@ -865,7 +863,6 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 
 	TRY();
 
-	#ifdef EGLBACKEND
 	if(faker::getEGLXContextCurrent())
 	{
 		///////////////////////////////////////////////////////////////////////////
@@ -909,7 +906,6 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 		///////////////////////////////////////////////////////////////////////////
 	}
 	else
-	#endif
 	{
 		///////////////////////////////////////////////////////////////////////////
 		OPENTRACE(glViewport);  PRARGI(x);  PRARGI(y);  PRARGI(width);

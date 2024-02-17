@@ -27,7 +27,6 @@ onexit()
 BIN=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
 LIB=@CMAKE_LIBRARY_OUTPUT_DIRECTORY@
 FAKEOPENCL=@VGL_FAKEOPENCL@
-EGLBACKEND=@VGL_EGLBACKEND@
 
 NODL=
 FAKERUTARGS=
@@ -113,7 +112,7 @@ if [ "$GLVND" = "1" ]; then
 	DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut $EGLXARG --glvnd
 	DISPLAY=:42 $BIN/vglrun $BIN/dlfakerut $EGLXARG --prefix test --glvnd
 fi
-if [ "$FAKEOPENCL" = "1" -a ! "$EGLBACKEND" = "1" ]; then
+if [ "$FAKEOPENCL" = "1" ]; then
 	DISPLAY=:42 $BIN/vglrun +ocl $BIN/dlfakerut $EGLXARG
 	DISPLAY=:42 $BIN/vglrun +ocl $BIN/dlfakerut $EGLXARG --prefix test
 fi

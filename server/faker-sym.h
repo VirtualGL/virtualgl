@@ -19,11 +19,9 @@
 #define GL_GLEXT_PROTOTYPES
 #define GLX_GLXEXT_PROTOTYPES
 #include <GL/glx.h>
-#ifdef EGLBACKEND
 #include <EGL/egl.h>
 #define EGL_EGLEXT_PROTOTYPES
 #include <EGL/eglext.h>
-#endif
 #ifdef FAKEOPENCL
 #include <CL/opencl.h>
 #endif
@@ -556,9 +554,6 @@ FUNCDEF2(GLXFBConfigSGIX, glXGetFBConfigFromVisualSGIX, Display *, dpy,
 	XVisualInfo *, vis, glXGetFBConfigFromVisualSGIX)
 
 
-#ifdef EGLBACKEND
-
-
 // EGL 1.0 functions
 
 FUNCDEF5(EGLBoolean, eglChooseConfig, EGLDisplay, display,
@@ -743,9 +738,6 @@ FUNCDEF3(EGLBoolean, eglSignalSyncKHR, EGLDisplay, display, EGLSyncKHR, sync,
 
 FUNCDEF3(EGLint, eglWaitSyncKHR, EGLDisplay, display, EGLSyncKHR, sync,
 	EGLint, flags, eglWaitSyncKHR)
-
-
-#endif
 
 
 // GL functions
@@ -1071,8 +1063,6 @@ FUNCDEF1(GLboolean, glUnmapBuffer, GLenum, target, NULL)
 
 // EGL functions used by the faker (but not interposed.)
 
-#ifdef EGLBACKEND
-
 FUNCDEF1(EGLBoolean, eglBindAPI, EGLenum, api, NULL)
 
 FUNCDEF2(EGLBoolean, eglDestroyContext, EGLDisplay, display,
@@ -1087,8 +1077,6 @@ FUNCDEF2(const char *, eglQueryDeviceStringEXT, EGLDeviceEXT, device, EGLint,
 	name, NULL)
 
 FUNCDEF0(EGLenum, eglQueryAPI, NULL)
-
-#endif
 
 // We load all XCB functions dynamically, so that the same VirtualGL binary
 // can be used to support systems with and without XCB libraries.

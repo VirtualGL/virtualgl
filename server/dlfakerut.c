@@ -13,9 +13,7 @@
  */
 
 #include <GL/glx.h>
-#ifdef EGLBACKEND
 #include <EGL/egl.h>
-#endif
 #ifdef FAKEOPENCL
 #include <CL/opencl.h>
 #endif
@@ -68,8 +66,6 @@ _glXMakeCurrentType _glXMakeCurrent = NULL;
 typedef void (*_glXSwapBuffersType)(Display *, GLXDrawable);
 _glXSwapBuffersType _glXSwapBuffers = NULL;
 
-#ifdef EGLBACKEND
-
 typedef EGLBoolean (*_eglChooseConfigType)(EGLDisplay, const EGLint *,
 	EGLConfig *, EGLint, EGLint *);
 _eglChooseConfigType _eglChooseConfig = NULL;
@@ -111,8 +107,6 @@ _eglSwapBuffersType _eglSwapBuffers = NULL;
 typedef EGLBoolean (*_eglTerminateType)(EGLDisplay);
 _eglTerminateType _eglTerminate = NULL;
 
-#endif
-
 typedef void (*_glClearType)(GLbitfield);
 _glClearType _glClear = NULL;
 
@@ -151,18 +145,14 @@ _clReleaseContextType _clReleaseContext = NULL;
 #endif
 
 void *glxdllhnd = NULL;
-#ifdef EGLBACKEND
 void *egldllhnd = NULL;
-#endif
 void *gldllhnd = NULL;
 #ifdef FAKEOPENCL
 void *ocldllhnd = NULL;
 #endif
 int fakeOpenCL = 0, eglx = 0;
 const char *libGLX = "libGL.so", *libOpenGL = "libGL.so";
-#ifdef EGLBACKEND
 const char *libEGL = "libEGL.so";
-#endif
 
 #define LSYM(dllhnd, s) \
 	dlerror(); \
@@ -193,8 +183,6 @@ static int loadSymbols1(char *prefix)
 	LSYM(glxdllhnd, glXMakeCurrent);
 	LSYM(glxdllhnd, glXSwapBuffers);
 
-	#ifdef EGLBACKEND
-
 	if(eglx)
 	{
 		if(prefix)
@@ -220,8 +208,6 @@ static int loadSymbols1(char *prefix)
 		LSYM(egldllhnd, eglSwapBuffers);
 		LSYM(egldllhnd, eglTerminate);
 	}
-
-	#endif
 
 	if(prefix)
 	{
@@ -270,9 +256,7 @@ static int loadSymbols1(char *prefix)
 static void unloadSymbols1(void)
 {
 	if(glxdllhnd) dlclose(glxdllhnd);
-	#ifdef EGLBACKEND
 	if(egldllhnd) dlclose(egldllhnd);
-	#endif
 	if(gldllhnd) dlclose(gldllhnd);
 	#ifdef FAKEOPENCL
 	if(ocldllhnd) dlclose(ocldllhnd);
@@ -284,11 +268,9 @@ static void unloadSymbols1(void)
 	_##s = (_##s##Type)_glXGetProcAddressARB((const GLubyte *)#s); \
 	if(!_##s) THROW("Could not load symbol " #s)
 
-#ifdef EGLBACKEND
 #define LSYMEGL(s) \
 	_##s = (_##s##Type)_eglGetProcAddress(#s); \
 	if(!_##s) THROW("Could not load symbol " #s)
-#endif
 
 static int loadSymbols2(void)
 {
@@ -303,8 +285,6 @@ static int loadSymbols2(void)
 	LSYMGLX(glXSwapBuffers);
 	LSYMGLX(glClear);
 	LSYMGLX(glClearColor);
-
-	#ifdef EGLBACKEND
 
 	if(eglx)
 	{
@@ -321,8 +301,6 @@ static int loadSymbols2(void)
 		LSYMEGL(eglSwapBuffers);
 		LSYMEGL(eglTerminate);
 	}
-
-	#endif
 
 	bailout:
 	return retval;
@@ -402,20 +380,16 @@ int main(int argc, char **argv)
 				libGLX = "libGLX.so";
 				libOpenGL = "libOpenGL.so";
 			}
-			#ifdef EGLBACKEND
 			else if(!strcasecmp(argv[i], "--eglx"))
 				eglx = 1;
-			#endif
 		}
 	}
 
 	fprintf(stderr, "GLX library = %s%s%s\n", prefix ? prefix : "",
 		prefix ? "/" : "", libGLX);
-	#ifdef EGLBACKEND
 	if(eglx)
 		fprintf(stderr, "EGL library = %s%s%s\n", prefix ? prefix : "",
 			prefix ? "/" : "", libEGL);
-	#endif
 	fprintf(stderr, "OpenGL library = %s%s%s\n", prefix ? prefix : "",
 		prefix ? "/" : "", libOpenGL);
 

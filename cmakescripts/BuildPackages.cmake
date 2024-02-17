@@ -78,10 +78,6 @@ add_custom_target(srpm pkgscripts/makesrpm
 	SOURCES pkgscripts/makesrpm
 	DEPENDS dist)
 
-set(EGLDEPENDS "")
-if(VGL_EGLBACKEND)
-	set(EGLDEPENDS ", libegl1:${DEBARCH}")
-endif()
 configure_file(release/makedpkg.in pkgscripts/makedpkg)
 configure_file(release/deb-control.in pkgscripts/deb-control)
 

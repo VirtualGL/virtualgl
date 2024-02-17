@@ -16,12 +16,10 @@
 #include "Mutex.h"
 #include <X11/Xlibint.h>
 #include "ContextHash.h"
-#ifdef EGLBACKEND
 #include "EGLXDisplayHash.h"
 #include "EGLXWindowHash.h"
 #include "ContextHashEGL.h"
 #include "PbufferHashEGL.h"
-#endif
 #include "GLXDrawableHash.h"
 #include "GlobalCriticalSection.h"
 #include "PixmapHash.h"
@@ -38,15 +36,11 @@ namespace faker {
 Display *dpy3D = NULL;
 bool deadYet = false;
 char *glExtensions = NULL;
-#ifdef EGLBACKEND
 EGLint eglMajor = 0, eglMinor = 0;
-#endif
 VGL_THREAD_LOCAL(TraceLevel, long, 0)
 VGL_THREAD_LOCAL(FakerLevel, long, 0)
 VGL_THREAD_LOCAL(GLXExcludeCurrent, bool, false)
-#ifdef EGLBACKEND
 VGL_THREAD_LOCAL(EGLExcludeCurrent, bool, false)
-#endif
 VGL_THREAD_LOCAL(OGLExcludeCurrent, bool, false)
 VGL_THREAD_LOCAL(AutotestColor, long, -1)
 VGL_THREAD_LOCAL(AutotestRColor, long, -1)
@@ -54,10 +48,8 @@ VGL_THREAD_LOCAL(AutotestFrame, long, -1)
 VGL_THREAD_LOCAL(AutotestDisplay, Display *, NULL)
 VGL_THREAD_LOCAL(AutotestDrawable, long, 0)
 VGL_THREAD_LOCAL(EGLXContextCurrent, bool, false)
-#ifdef EGLBACKEND
 VGL_THREAD_LOCAL(EGLError, long, EGL_SUCCESS)
 VGL_THREAD_LOCAL(CurrentEGLXDisplay, EGLXDisplay *, NULL)
-#endif
 
 
 static void cleanup(void)
@@ -67,13 +59,11 @@ static void cleanup(void)
 	if(ContextHash::isAlloc()) CTXHASH.kill();
 	if(GLXDrawableHash::isAlloc()) GLXDHASH.kill();
 	if(WindowHash::isAlloc()) WINHASH.kill();
-	#ifdef EGLBACKEND
 	if(EGLXDisplayHash::isAlloc()) EGLXDPYHASH.kill();
 	if(EGLXWindowHash::isAlloc()) EGLXWINHASH.kill();
 	if(backend::ContextHashEGL::isAlloc()) CTXHASHEGL.kill();
 	if(backend::PbufferHashEGL::isAlloc()) PBHASHEGL.kill();
 	if(backend::RBOContext::isAlloc()) RBOCONTEXT.kill();
-	#endif
 	free(glExtensions);
 	unloadSymbols();
 }
@@ -202,7 +192,6 @@ Display *init3D(void)
 		GlobalCriticalSection::SafeLock l(globalMutex);
 		if(!dpy3D)
 		{
-			#ifdef EGLBACKEND
 			if(fconfig.egl)
 			{
 				int numDevices = 0, i, validDevices = 0;
@@ -276,7 +265,6 @@ Display *init3D(void)
 				}
 			}
 			else  // fconfig.egl
-			#endif
 			{
 				if(fconfig.verbose)
 					vglout.println("[VGL] Opening connection to 3D X server %s",
@@ -382,9 +370,7 @@ void _vgl_disableFaker(void)
 {
 	faker::setFakerLevel(faker::getFakerLevel() + 1);
 	faker::setGLXExcludeCurrent(true);
-#ifdef EGLBACKEND
 	faker::setEGLExcludeCurrent(true);
-#endif
 	faker::setOGLExcludeCurrent(true);
 }
 
@@ -392,9 +378,7 @@ void _vgl_enableFaker(void)
 {
 	faker::setFakerLevel(faker::getFakerLevel() - 1);
 	faker::setGLXExcludeCurrent(false);
-#ifdef EGLBACKEND
 	faker::setEGLExcludeCurrent(false);
-#endif
 	faker::setOGLExcludeCurrent(false);
 }
 

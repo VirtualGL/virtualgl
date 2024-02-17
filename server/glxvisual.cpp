@@ -20,9 +20,7 @@
 #include "Mutex.h"
 #include "faker.h"
 #include "vglutil.h"
-#ifdef EGLBACKEND
 #include "TempContextEGL.h"
-#endif
 
 using namespace util;
 
@@ -382,7 +380,6 @@ static VisualID matchVisual2D(Display *dpy, int screen, VGLFBConfig config)
 	}
 
 	int depth, c_class, bpc;
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		depth = config->depth;
@@ -390,7 +387,6 @@ static VisualID matchVisual2D(Display *dpy, int screen, VGLFBConfig config)
 		bpc = config->attr.redSize;
 	}
 	else
-	#endif
 	{
 		XVisualInfo *vis = _glXGetVisualFromFBConfig(DPY3D, config->glx);
 		if(!vis) return 0;
@@ -432,9 +428,7 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 {
 	int nConfigs = 0;
 	GLXFBConfig *glxConfigs = NULL;
-	#ifdef EGLBACKEND
 	EGLContext ctx = 0;
-	#endif
 	struct _VGLFBConfig *ca = NULL;
 	XEDataObject obj;
 	XExtData *extData;
@@ -453,7 +447,6 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 			minExtensionNumber + 3);
 		if(extData && extData->private_data) return;
 
-		#ifdef EGLBACKEND
 		if(fconfig.egl)
 		{
 			int i = 0;
@@ -550,7 +543,6 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 			}
 		}
 		else  // fconfig.egl
-		#endif
 		{
 			if(!(glxConfigs = _glXGetFBConfigs(DPY3D, DefaultScreen(DPY3D),
 				&nConfigs)))
@@ -606,9 +598,7 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 	catch(...)
 	{
 		if(glxConfigs) _XFree(glxConfigs);
-		#ifdef EGLBACKEND
 		if(ctx) _eglDestroyContext(EDPY, ctx);
-		#endif
 		free(ca);
 		throw;
 	}
@@ -800,8 +790,6 @@ VGLFBConfig *getFBConfigs(Display *dpy, int screen, int &nElements)
 }
 
 
-#ifdef EGLBACKEND
-
 static int compareFBConfig(const void *arg1, const void *arg2)
 {
 	VGLFBConfig *_c1 = (VGLFBConfig *)arg1, *_c2 = (VGLFBConfig *)arg2,
@@ -850,8 +838,6 @@ static int compareFBConfigNoDepth(const void *arg1, const void *arg2)
 		if(var != (int)GLX_DONT_CARE && (var < min || var > max)) goto bailout; \
 		break;
 
-#endif
-
 VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
 	int &nElements)
 {
@@ -860,7 +846,6 @@ VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
 
 	if(!dpy || screen < 0) return NULL;
 
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		int fbConfigID = GLX_DONT_CARE, doubleBuffer = GLX_DONT_CARE, redSize = 0,
@@ -981,7 +966,6 @@ VGLFBConfig *chooseFBConfig(Display *dpy, int screen, const int attribs[],
 			depthSize == 0 ? compareFBConfigNoDepth : compareFBConfig);
 	}
 	else  // fconfig.egl
-	#endif
 	{
 		glxConfigs = _glXChooseFBConfig(DPY3D, DefaultScreen(DPY3D), attribs,
 			&nElements);

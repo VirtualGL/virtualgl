@@ -21,10 +21,8 @@
 
 static void *gldllhnd = NULL;
 static void *loadGLSymbol(const char *, bool);
-#ifdef EGLBACKEND
 static void *egldllhnd = NULL;
 static void *loadEGLSymbol(const char *, bool);
-#endif
 #ifdef FAKEOPENCL
 static void *ocldllhnd = NULL;
 static void *loadOCLSymbol(const char *, bool);
@@ -72,10 +70,8 @@ void *loadSymbol(const char *name, bool optional)
 	}
 	if(!strncmp(name, "gl", 2))
 		return loadGLSymbol(name, optional);
-	#ifdef EGLBACKEND
 	else if(!strncmp(name, "egl", 3))
 		return loadEGLSymbol(name, optional);
-	#endif
 	#ifdef FAKEOPENCL
 	else if(!strncmp(name, "cl", 2))
 		return loadOCLSymbol(name, optional);
@@ -183,8 +179,6 @@ static void *loadGLSymbol(const char *name, bool optional)
 }
 
 
-#ifdef EGLBACKEND
-
 static void *loadEGLSymbol(const char *name, bool optional)
 {
 	char *err = NULL;
@@ -249,8 +243,6 @@ static void *loadEGLSymbol(const char *name, bool optional)
 	}
 	return sym;
 }
-
-#endif
 
 
 #ifdef FAKEOPENCL
@@ -416,9 +408,7 @@ namespace faker {
 void unloadSymbols(void)
 {
 	if(gldllhnd && gldllhnd != RTLD_NEXT) dlclose(gldllhnd);
-	#ifdef EGLBACKEND
 	if(egldllhnd && egldllhnd != RTLD_NEXT) dlclose(egldllhnd);
-	#endif
 	#ifdef FAKEOPENCL
 	if(ocldllhnd && ocldllhnd != RTLD_NEXT) dlclose(ocldllhnd);
 	#endif

@@ -128,9 +128,7 @@ void *dlopen(const char *filename, int flag)
 			|| (!strncmp(filename, "libOpenCL.", 10) && fakeOpenCL)
 				|| (strstr(filename, "/libOpenCL.") && fakeOpenCL)
 			#endif
-			#ifdef EGLBACKEND
 			|| !strncmp(filename, "libEGL.", 7) || strstr(filename, "/libEGL.")
-			#endif
 			|| !strncmp(filename, "libX11.", 7) || strstr(filename, "/libX11.")
 			|| (flag & RTLD_LAZY
 					&& (!strncmp(filename, "libopengl.", 10)

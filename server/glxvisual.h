@@ -16,9 +16,7 @@
 #define __GLXVISUAL_H__
 
 #include "faker-sym.h"
-#ifdef EGLBACKEND
 #include "RBOContext.h"
-#endif
 
 
 typedef struct

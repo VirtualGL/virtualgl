@@ -11,12 +11,10 @@
 // wxWindows Library License for more details.
 
 #include "backend.h"
-#ifdef EGLBACKEND
 #include "ContextHashEGL.h"
 #include "PbufferHashEGL.h"
 #include "EGLError.h"
 #include "BufferState.h"
-#endif
 #include "PixmapHash.h"
 #include "glxvisual.h"
 #include "threadlocal.h"
@@ -29,8 +27,6 @@
 
 
 namespace backend {
-
-#ifdef EGLBACKEND
 
 #define CATCH_EGL(minorCode) \
 	catch(EGLError &e) \
@@ -68,12 +64,9 @@ static FakePbuffer *getCurrentFakePbuffer(EGLint readdraw)
 	return NULL;
 }
 
-#endif
-
 
 void bindFramebuffer(GLenum target, GLuint framebuffer, bool ext)
 {
-	#ifdef EGLBACKEND
 	const GLenum *oldDrawBufs = NULL;  GLsizei nDrawBufs = 0;
 	GLenum oldReadBuf = GL_NONE;
 	FakePbuffer *drawpb = NULL, *readpb = NULL;
@@ -112,10 +105,8 @@ void bindFramebuffer(GLenum target, GLuint framebuffer, bool ext)
 				CTXHASHEGL.setReadFBO(_eglGetCurrentContext(), framebuffer);
 		}
 	}
-	#endif
 	if(ext) _glBindFramebufferEXT(target, framebuffer);
 	else _glBindFramebuffer(target, framebuffer);
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		if(oldDrawBufs)
@@ -128,13 +119,11 @@ void bindFramebuffer(GLenum target, GLuint framebuffer, bool ext)
 		}
 		if(oldReadBuf) readpb->setReadBuffer(oldReadBuf, false);
 	}
-	#endif
 }
 
 
 void deleteFramebuffers(GLsizei n, const GLuint *framebuffers)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		if(n > 0 && framebuffers)
@@ -151,7 +140,6 @@ void deleteFramebuffers(GLsizei n, const GLuint *framebuffers)
 			}
 		}
 	}
-	#endif
 	_glDeleteFramebuffers(n, framebuffers);
 }
 
@@ -159,7 +147,6 @@ void deleteFramebuffers(GLsizei n, const GLuint *framebuffers)
 GLXContext createContext(Display *dpy, VGLFBConfig config, GLXContext share,
 	Bool direct, const int *glxAttribs)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		if(!direct) return NULL;
@@ -296,7 +283,6 @@ GLXContext createContext(Display *dpy, VGLFBConfig config, GLXContext share,
 		return 0;
 	}
 	else
-	#endif
 	{
 		if(glxAttribs && glxAttribs[0] != None)
 			return _glXCreateContextAttribsARB(DPY3D, GLXFBC(config), share, direct,
@@ -311,7 +297,6 @@ GLXContext createContext(Display *dpy, VGLFBConfig config, GLXContext share,
 GLXPbuffer createPbuffer(Display *dpy, VGLFBConfig config,
 	const int *glxAttribs)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		try
@@ -324,15 +309,12 @@ GLXPbuffer createPbuffer(Display *dpy, VGLFBConfig config,
 		CATCH_EGL(X_GLXCreatePbuffer)
 		return 0;
 	}
-	else
-	#endif
-		return _glXCreatePbuffer(DPY3D, GLXFBC(config), glxAttribs);
+	else return _glXCreatePbuffer(DPY3D, GLXFBC(config), glxAttribs);
 }
 
 
 void destroyContext(Display *dpy, GLXContext ctx)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		try
@@ -350,15 +332,12 @@ void destroyContext(Display *dpy, GLXContext ctx)
 		}
 		CATCH_EGL(X_GLXDestroyContext)
 	}
-	else
-	#endif
-		_glXDestroyContext(DPY3D, ctx);
+	else _glXDestroyContext(DPY3D, ctx);
 }
 
 
 void destroyPbuffer(Display *dpy, GLXPbuffer pbuf)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		try
@@ -367,15 +346,12 @@ void destroyPbuffer(Display *dpy, GLXPbuffer pbuf)
 		}
 		CATCH_EGL(X_GLXDestroyPbuffer)
 	}
-	else
-	#endif
-		_glXDestroyPbuffer(DPY3D, pbuf);
+	else _glXDestroyPbuffer(DPY3D, pbuf);
 }
 
 
 void drawBuffer(GLenum mode)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		FakePbuffer *pb = getCurrentFakePbuffer(EGL_DRAW);
@@ -385,14 +361,12 @@ void drawBuffer(GLenum mode)
 			return;
 		}
 	}
-	#endif
 	_glDrawBuffer(mode);
 }
 
 
 void drawBuffers(GLsizei n, const GLenum *bufs)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		FakePbuffer *pb = getCurrentFakePbuffer(EGL_DRAW);
@@ -402,54 +376,44 @@ void drawBuffers(GLsizei n, const GLenum *bufs)
 			return;
 		}
 	}
-	#endif
 	_glDrawBuffers(n, bufs);
 }
 
 
 GLXContext getCurrentContext(void)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 		return getCurrentContextEGL();
 	else
-	#endif
 		return _glXGetCurrentContext();
 }
 
 
 Display *getCurrentDisplay(void)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		FakePbuffer *pb = PBHASHEGL.find(getCurrentDrawableEGL());
 		return pb ? pb->getDisplay() : NULL;
 	}
-	else
-	#endif
-		return _glXGetCurrentDisplay();
+	else return _glXGetCurrentDisplay();
 }
 
 
 GLXDrawable getCurrentDrawable(void)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 		return getCurrentDrawableEGL();
 	else
-	#endif
 		return _glXGetCurrentDrawable();
 }
 
 
 GLXDrawable getCurrentReadDrawable(void)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 		return getCurrentReadDrawableEGL();
 	else
-	#endif
 		return _glXGetCurrentReadDrawable();
 }
 
@@ -457,7 +421,6 @@ GLXDrawable getCurrentReadDrawable(void)
 int getFBConfigAttrib(Display *dpy, VGLFBConfig config, int attribute,
 	int *value)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		if(!value) return GLX_BAD_VALUE;
@@ -564,16 +527,13 @@ int getFBConfigAttrib(Display *dpy, VGLFBConfig config, int attribute,
 				return GLX_BAD_ATTRIBUTE;
 		}
 	}  // fconfig.egl
-	else
-	#endif
-		return _glXGetFBConfigAttrib(DPY3D, GLXFBC(config), attribute, value);
+	else return _glXGetFBConfigAttrib(DPY3D, GLXFBC(config), attribute, value);
 }
 
 
 void getFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 	GLenum pname, GLint *params)
 {
-	#ifdef EGLBACKEND
 	bool isDefault = false;
 
 	if(fconfig.egl)
@@ -625,21 +585,17 @@ void getFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 			}
 		}
 	}
-	#endif
 	_glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		if(isDefault && *params == GL_RENDERBUFFER)
 			*params = GL_FRAMEBUFFER_DEFAULT;
 	}
-	#endif
 }
 
 
 void getFramebufferParameteriv(GLenum target, GLenum pname, GLint *params)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		if(!params)
@@ -665,14 +621,12 @@ void getFramebufferParameteriv(GLenum target, GLenum pname, GLint *params)
 			}
 		}
 	}
-	#endif
 	_glGetFramebufferParameteriv(target, pname, params);
 }
 
 
 void getIntegerv(GLenum pname, GLint *params)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		if(!_eglBindAPI(EGL_OPENGL_API))
@@ -751,7 +705,6 @@ void getIntegerv(GLenum pname, GLint *params)
 			}
 		}
 	}
-	#endif
 	_glGetIntegerv(pname, params);
 }
 
@@ -759,7 +712,6 @@ void getIntegerv(GLenum pname, GLint *params)
 void getNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname,
 	GLint *param)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		if(!param)
@@ -784,18 +736,15 @@ void getNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname,
 			else framebuffer = pb->getFBO();
 		}
 	}
-	#endif
 	_glGetNamedFramebufferParameteriv(framebuffer, pname, param);
 }
 
 
 Bool isDirect(GLXContext ctx)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 		return True;
 	else
-	#endif
 		return _glXIsDirect(DPY3D, ctx);
 }
 
@@ -803,7 +752,6 @@ Bool isDirect(GLXContext ctx)
 Bool makeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	GLXContext ctx)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		try
@@ -886,15 +834,12 @@ Bool makeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		CATCH_EGL(X_GLXMakeContextCurrent)
 		return 0;
 	}
-	else
-	#endif
-		return _glXMakeContextCurrent(DPY3D, draw, read, ctx);
+	else return _glXMakeContextCurrent(DPY3D, draw, read, ctx);
 }
 
 
 void namedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf, bool ext)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		FakePbuffer *pb;
@@ -905,7 +850,6 @@ void namedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf, bool ext)
 			return;
 		}
 	}
-	#endif
 	if(ext) _glFramebufferDrawBufferEXT(framebuffer, buf);
 	else _glNamedFramebufferDrawBuffer(framebuffer, buf);
 }
@@ -914,7 +858,6 @@ void namedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf, bool ext)
 void namedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 	const GLenum *bufs, bool ext)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		FakePbuffer *pb;
@@ -925,7 +868,6 @@ void namedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 			return;
 		}
 	}
-	#endif
 	if(ext) _glFramebufferDrawBuffersEXT(framebuffer, n, bufs);
 	else _glNamedFramebufferDrawBuffers(framebuffer, n, bufs);
 }
@@ -933,7 +875,6 @@ void namedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 
 void namedFramebufferReadBuffer(GLuint framebuffer, GLenum mode, bool ext)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		FakePbuffer *pb;
@@ -944,7 +885,6 @@ void namedFramebufferReadBuffer(GLuint framebuffer, GLenum mode, bool ext)
 			return;
 		}
 	}
-	#endif
 	if(ext) _glFramebufferReadBufferEXT(framebuffer, mode);
 	else _glNamedFramebufferReadBuffer(framebuffer, mode);
 }
@@ -952,7 +892,6 @@ void namedFramebufferReadBuffer(GLuint framebuffer, GLenum mode, bool ext)
 
 int queryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		int retval = Success;
@@ -984,7 +923,6 @@ int queryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 		return retval;
 	}
 	else
-	#endif
 	{
 		int retval = _glXQueryContext(DPY3D, ctx, attribute, value);
 		if(fconfig.amdgpuHack && ctx && attribute == GLX_RENDER_TYPE && value
@@ -998,7 +936,6 @@ int queryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 void queryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 	unsigned int *value)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		FakePbuffer *pb = NULL;
@@ -1033,16 +970,13 @@ void queryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 				return;
 		}
 	}
-	else
-	#endif
-		_glXQueryDrawable(DPY3D, draw, attribute, value);
+	else _glXQueryDrawable(DPY3D, draw, attribute, value);
 }
 
 
 Bool queryExtension(Display *dpy, int *majorOpcode, int *eventBase,
 	int *errorBase)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		// If the 2D X server has a GLX extension, then we hijack its major opcode
@@ -1069,14 +1003,12 @@ Bool queryExtension(Display *dpy, int *majorOpcode, int *eventBase,
 	// When using the GLX back end, all GLX errors will come from the 3D X
 	// server.
 	else
-	#endif
 		return _XQueryExtension(DPY3D, "GLX", majorOpcode, eventBase, errorBase);
 }
 
 
 void readBuffer(GLenum mode)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		FakePbuffer *pb = getCurrentFakePbuffer(EGL_READ);
@@ -1086,7 +1018,6 @@ void readBuffer(GLenum mode)
 			return;
 		}
 	}
-	#endif
 	_glReadBuffer(mode);
 }
 
@@ -1094,7 +1025,6 @@ void readBuffer(GLenum mode)
 void readPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format,
 	GLenum type, void *data)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		bool fallthrough = true;
@@ -1142,14 +1072,12 @@ void readPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format,
 		}
 		if(!fallthrough) return;
 	}
-	#endif
 	_glReadPixels(x, y, width, height, format, type, data);
 }
 
 
 void swapBuffers(Display *dpy, GLXDrawable drawable)
 {
-	#ifdef EGLBACKEND
 	if(fconfig.egl)
 	{
 		try
@@ -1165,9 +1093,7 @@ void swapBuffers(Display *dpy, GLXDrawable drawable)
 		}
 		CATCH_EGL(X_GLXSwapBuffers)
 	}
-	else
-	#endif
-		_glXSwapBuffers(DPY3D, drawable);
+	else _glXSwapBuffers(DPY3D, drawable);
 }
 
 }  // namespace

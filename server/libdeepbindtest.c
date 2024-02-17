@@ -15,9 +15,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <GL/glx.h>
-#ifdef EGLBACKEND
 #include <EGL/egl.h>
-#endif
 #ifdef FAKEOPENCL
 #include <CL/opencl.h>
 #endif
@@ -44,7 +42,6 @@
 #define _glXDestroyContext  glXDestroyContext
 #define _glXMakeCurrent  glXMakeCurrent
 #define _glXSwapBuffers  glXSwapBuffers
-#ifdef EGLBACKEND
 #define _eglChooseConfig  eglChooseConfig
 #define _eglCreateContext  eglCreateContext
 #define _eglCreateWindowSurface  eglCreateWindowSurface
@@ -56,7 +53,6 @@
 #define _eglMakeCurrent  eglMakeCurrent
 #define _eglSwapBuffers  eglSwapBuffers
 #define _eglTerminate  eglTerminate
-#endif
 #ifdef FAKEOPENCL
 #define _clCreateContext  clCreateContext
 #define _clGetContextInfo  clGetContextInfo

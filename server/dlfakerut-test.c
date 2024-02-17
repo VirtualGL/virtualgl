@@ -15,8 +15,6 @@
 #include <dlfcn.h>
 
 
-#ifdef EGLBACKEND
-
 #define CASE(c)  case c:  return #c
 
 static const char *getEGLErrorString(void)
@@ -49,8 +47,6 @@ static const char *getEGLErrorString(void)
 		__LINE__); \
 	goto bailout; \
 }
-
-#endif
 
 
 int test(const char *testName, int testOpenCL, int testEGLX);
@@ -115,12 +111,10 @@ int test(const char *testName, int testOpenCL, int testEGLX)
 		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None, None };
 	XVisualInfo *v = NULL;  GLXContext ctx = 0;
 	XSetWindowAttributes swa;
-	#ifdef EGLBACKEND
 	EGLDisplay edpy = 0;  EGLContext ectx = 0;  EGLSurface surface = 0;
 	EGLint cfgAttribs[] = { EGL_RED_SIZE, 8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE, 8,
 		EGL_NONE };
 	EGLConfig config = 0;  EGLint nc = 0;
-	#endif
 	#ifdef FAKEOPENCL
 	cl_uint nPlatforms = 0, pi, nDevices = 0, di;
 	cl_context oclctx = 0;
@@ -235,8 +229,6 @@ int test(const char *testName, int testOpenCL, int testEGLX)
 
 	#endif
 
-	#ifdef EGLBACKEND
-
 	if(testEGLX)
 	{
 		_glXMakeCurrent(dpy, 0, 0);  _glXDestroyContext(dpy, ctx);  ctx = 0;
@@ -263,8 +255,6 @@ int test(const char *testName, int testOpenCL, int testEGLX)
 		TRY(checkWindowColor(dpy, win, 0xff0000));
 	}
 
-	#endif
-
 	fprintf(stderr, "SUCCESS\n");
 
 	bailout:
@@ -277,7 +267,6 @@ int test(const char *testName, int testOpenCL, int testEGLX)
 	{
 		_glXMakeCurrent(dpy, 0, 0);  _glXDestroyContext(dpy, ctx);
 	}
-	#ifdef EGLBACKEND
 	if(edpy)
 	{
 		if(ectx)
@@ -290,7 +279,6 @@ int test(const char *testName, int testOpenCL, int testEGLX)
 		}
 		_eglTerminate(edpy);
 	}
-	#endif
 	if(win && dpy) XDestroyWindow(dpy, win);
 	if(v) XFree(v);
 	if(dpy) XCloseDisplay(dpy);

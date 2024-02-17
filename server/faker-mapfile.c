@@ -89,8 +89,6 @@
 		glXQueryGLXPbufferSGIX;
 		glXSelectEventSGIX;
 
-		#ifdef EGLBACKEND
-
 		/* EGL 1.0 */
 		eglChooseConfig;
 		eglCopyBuffers;
@@ -162,8 +160,6 @@
 
 		/* EGL_KHR_wait_sync */
 		eglWaitSyncKHR;
-
-		#endif
 
 		/* OpenGL */
 		glBindFramebuffer;

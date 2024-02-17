@@ -20,9 +20,7 @@
 #ifdef FAKEXCB
 #include "XCBConnHash.h"
 #endif
-#ifdef EGLBACKEND
 #include "EGLXWindowHash.h"
-#endif
 #include "keycodetokeysym.h"
 
 
@@ -381,12 +379,10 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 
 	if((vw = WINHASH.find(dpy, drawable)) != NULL && width > 0 && height > 0)
 		vw->resize(width, height);
-	#ifdef EGLBACKEND
 	faker::EGLXVirtualWin *eglxvw;
 	if((eglxvw = EGLXWINHASH.find(dpy, drawable)) != NULL && width > 0
 		&& height > 0)
 		eglxvw->resize(width, height);
-	#endif
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();  if(root) PRARGX(*root);  if(x) PRARGI(*x);  if(y) PRARGI(*y);
@@ -701,9 +697,7 @@ char *XServerVendor(Display *dpy)
 static void handleEvent(Display *dpy, XEvent *xe)
 {
 	faker::VirtualWin *vw;
-	#ifdef EGLBACKEND
 	faker::EGLXVirtualWin *eglxvw;
-	#endif
 
 	if(IS_EXCLUDED(dpy))
 		return;
@@ -724,7 +718,6 @@ static void handleEvent(Display *dpy, XEvent *xe)
 			STOPTRACE();  CLOSETRACE();
 			/////////////////////////////////////////////////////////////////////////
 		}
-		#ifdef EGLBACKEND
 		if((eglxvw = EGLXWINHASH.find(dpy, xe->xconfigure.window)) != NULL)
 		{
 			/////////////////////////////////////////////////////////////////////////
@@ -739,7 +732,6 @@ static void handleEvent(Display *dpy, XEvent *xe)
 			STOPTRACE();  CLOSETRACE();
 			/////////////////////////////////////////////////////////////////////////
 		}
-		#endif
 	}
 	else if(xe && xe->type == KeyPress)
 	{
@@ -765,10 +757,8 @@ static void handleEvent(Display *dpy, XEvent *xe)
 		{
 			if((vw = WINHASH.find(dpy, cme->window)) != NULL)
 				vw->wmDeleted();
-			#ifdef EGLBACKEND
 			if((eglxvw = EGLXWINHASH.find(dpy, cme->window)) != NULL)
 				eglxvw->wmDeleted();
-			#endif
 		}
 	}
 }
@@ -847,12 +837,10 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 	if((vw = WINHASH.find(dpy, win)) != NULL && values)
 		vw->resize(value_mask & CWWidth ? values->width : 0,
 			value_mask & CWHeight ? values->height : 0);
-	#ifdef EGLBACKEND
 	faker::EGLXVirtualWin *eglxvw;
 	if((eglxvw = EGLXWINHASH.find(dpy, win)) != NULL && values)
 		eglxvw->resize(value_mask & CWWidth ? values->width : 0,
 			value_mask & CWHeight ? values->height : 0);
-	#endif
 	retval = _XConfigureWindow(dpy, win, value_mask, values);
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -894,11 +882,9 @@ int XMoveResizeWindow(Display *dpy, Window win, int x, int y,
 	faker::VirtualWin *vw;
 	if((vw = WINHASH.find(dpy, win)) != NULL)
 		vw->resize(width, height);
-	#ifdef EGLBACKEND
 	faker::EGLXVirtualWin *eglxvw;
 	if((eglxvw = EGLXWINHASH.find(dpy, win)) != NULL)
 		eglxvw->resize(width, height);
-	#endif
 	retval = _XMoveResizeWindow(dpy, win, x, y, width, height);
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -940,11 +926,9 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width,
 	faker::VirtualWin *vw;
 	if((vw = WINHASH.find(dpy, win)) != NULL)
 		vw->resize(width, height);
-	#ifdef EGLBACKEND
 	faker::EGLXVirtualWin *eglxvw;
 	if((eglxvw = EGLXWINHASH.find(dpy, win)) != NULL)
 		eglxvw->resize(width, height);
-	#endif
 	retval = _XResizeWindow(dpy, win, width, height);
 
 	/////////////////////////////////////////////////////////////////////////////

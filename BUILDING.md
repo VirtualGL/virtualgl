@@ -5,10 +5,7 @@ Building VirtualGL
 Build Requirements
 ------------------
 
-- [CMake](http://www.cmake.org) v2.8.12 or later
-  * CMake v3.1 or later is required if building the VirtualGL Faker with the
-    OpenCL interposer enabled (this is the default on Linux and FreeBSD but can
-    be changed using the `VGL_FAKEOPENCL` CMake variable.)
+- [CMake](http://www.cmake.org) v3.10 or later
 
 - libjpeg-turbo SDK v1.2 or later
   * The libjpeg-turbo SDK binary packages can be downloaded from

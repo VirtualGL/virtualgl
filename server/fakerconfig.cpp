@@ -336,12 +336,10 @@ void fconfig_reloadenv(void)
 			fconfig.egl = true;
 	}
 	FETCHENV_BOOL("VGL_DLSYM", dlsymloader);
-	#ifdef EGLBACKEND
 	FETCHENV_STR("VGL_EGLLIB", egllib);
 	// This is a hack to allow piglit tests to pass with the EGL/X11 front end,
 	// which doesn't (yet) support Pixmap surfaces.
 	FETCHENV_BOOL("VGL_EGLXIGNOREPIXMAPBIT", eglxIgnorePixmapBit);
-	#endif
 	FETCHENV_STR("VGL_EXCLUDE", excludeddpys);
 	FETCHENV_STR("VGL_EXITFUNCTION", exitfunction);
 	#ifdef FAKEXCB
@@ -627,10 +625,8 @@ void fconfig_print(FakerConfig &fc)
 	PRCONF_STR(config);
 	PRCONF_STR(defaultfbconfig);
 	PRCONF_INT(dlsymloader);
-	#ifdef EGLBACKEND
 	PRCONF_INT(egl);
 	PRCONF_STR(egllib);
-	#endif
 	PRCONF_STR(excludeddpys);
 	PRCONF_DBL(fps);
 	PRCONF_DBL(flushdelay);
