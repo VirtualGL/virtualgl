@@ -16,6 +16,10 @@ flushes the current OpenGL context if the surface being swapped is bound to
 that context.  This fixes a flickering issue that occurred with recent versions
 of Firefox.
 
+4. It is no longer necessary to enable the EGL back end in order to use
+VirtualGL with 3D applications that use the EGL/X11 API.  If the GLX back end
+is enabled, then the EGL/X11 interposer will now use the 3D X server.
+
 
 3.1
 ===

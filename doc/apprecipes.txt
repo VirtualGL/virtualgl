@@ -96,20 +96,15 @@
 		get propagated down from the initial shell that invoked ''vglrun''. \
 	|
 | Google Chrome/Chromium | v85 and later | Linux \
-	| ''vglrun -d egl google-chrome --disable-seccomp-filter-sandbox --use-gl=egl''{nl} \
+	| ''vglrun google-chrome --disable-seccomp-filter-sandbox --use-gl=egl''{nl} \
 		or{nl} \
-		''vglrun -d egl chromium --disable-seccomp-filter-sandbox --use-gl=egl'' \
-	| Recent versions of Google Chrome/Chromium use the EGL/X11 API instead of \
-		the GLX API, and VirtualGL only supports the EGL/X11 API when using the \
-		EGL back end.  The ''--disable-seccomp-filter-sandbox'' option prevents \
-		Chrome/Chromium from complaining about the X11 function calls that the \
-		VirtualGL faker makes.  The ''--use-gl=egl'' option forces \
-		Chrome/Chromium to use desktop OpenGL rather than OpenGL ES, which works \
-		around an issue whereby, when using OpenGL ES, Chrome/Chromium assumes \
-		that every X visual has an EGL framebuffer configuration associated with \
-		it.  Note that you can replace ''egl'' with any DRI device path or EGL \
-		device ID.  See {ref prefix="Section ": VGL_DISPLAY} for further \
-		information. \
+		''vglrun chromium --disable-seccomp-filter-sandbox --use-gl=egl'' \
+	| The ''--disable-seccomp-filter-sandbox'' option prevents Chrome/Chromium \
+		from complaining about the X11 function calls that the VirtualGL faker \
+		makes.  The ''--use-gl=egl'' option forces Chrome/Chromium to use desktop \
+		OpenGL rather than OpenGL ES, which works around an issue whereby, when \
+		using OpenGL ES, Chrome/Chromium assumes that every X visual has an EGL \
+		framebuffer configuration associated with it. \
 	|
 | Compiz | All | Linux \
 	| Set the ''VGL_WM'' environment variable to ''1'' prior to launching the \

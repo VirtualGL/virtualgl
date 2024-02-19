@@ -46,7 +46,7 @@ different directory, then adjust the instructions accordingly.
 	GPU, read back the rendered frames, and transport the rendered frames (which
 	normally means delivering them to the 2D X server)
 
-	back end :: The method by which the VirtualGL Faker creates off-screen
+	back end :: The method by which the GLX interposer creates off-screen
 	buffers on a GPU and redirects 3D rendering into them.  The GLX back end uses
 	the GLX API, so it can only access a GPU through an attached X server (the 3D
 	X server.)  The EGL back end uses the EGL API with the
@@ -58,6 +58,12 @@ different directory, then adjust the instructions accordingly.
 	renderbuffer objects (RBOs.)  As of this writing, the EGL back end does not
 	yet support all of the GLX extensions and esoteric OpenGL features that the
 	GLX back end supports.
+	{nl}{nl}
+	The EGL/X11 interposer accesses the GPU using either the 3D X server or the
+	EGL device, depending on whether the GLX back end or the EGL back end is
+	enabled.  The EGL/X11 function calls are modified and redirected on a 1:1
+	basis (without the need for API emulation), so there is no disadvantage to
+	using an EGL device for 3D rendering with EGL/X11 applications.
 
 	frame trigger :: A function that is called by the 3D application to signal
 	that it has finished rendering a frame.  If the 3D application is using the

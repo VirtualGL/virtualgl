@@ -19,6 +19,28 @@
 extern void setWMAtom(Display *dpy, Window win, faker::VirtualWin *vw);
 
 
+static EGLDisplay edpy = EGL_NO_DISPLAY;
+static int eglMajor = -1, eglMinor = -1;
+
+static EGLDisplay initEGLX(void)
+{
+	if(edpy == EGL_NO_DISPLAY)
+	{
+		faker::GlobalCriticalSection::SafeLock l(globalMutex);
+		if(edpy == EGL_NO_DISPLAY)
+		{
+			edpy = _eglGetDisplay(DPY3D);
+			if(edpy == EGL_NO_DISPLAY)
+				THROW("Could not open EGL display");
+			if(!_eglInitialize(edpy, &eglMajor, &eglMinor))
+				THROW("Could not initialize EGL");
+		}
+	}
+
+	return edpy;
+}
+
+
 static INLINE EGLint EGLConfigID(faker::EGLXDisplay *eglxdpy, EGLConfig c)
 {
 	EGLint id;
@@ -781,7 +803,7 @@ EGLSurface eglGetCurrentSurface(EGLint readdraw)
 				goto done; \
 			} \
 			eglxdpy = new faker::EGLXDisplay; \
-			eglxdpy->edpy = EDPY; \
+			eglxdpy->edpy = fconfig.egl ? EDPY : initEGLX(); \
 			eglxdpy->x11dpy = (Display *)native_display; \
 			eglxdpy->screen = screen; \
 			eglxdpy->isDefault = isDefault; \
@@ -804,18 +826,6 @@ EGLDisplay eglGetDisplay(EGLNativeDisplayType native_display)
 	if(native_display != EGL_DEFAULT_DISPLAY
 		&& faker::isDisplayExcluded((Display *)native_display))
 		return _eglGetDisplay(native_display);
-
-	if(!fconfig.egl)
-	{
-		static bool alreadyWarned = false;
-		if(!alreadyWarned)
-		{
-			if(fconfig.verbose)
-				vglout.print("[VGL] WARNING: EGL/X11 emulation requires the EGL back end\n");
-			alreadyWarned = true;
-		}
-		return display;
-	}
 
 	DISABLE_FAKER();
 
@@ -849,18 +859,6 @@ EGLDisplay eglGetPlatformDisplay(EGLenum platform, void *native_display,
 		|| (native_display != EGL_DEFAULT_DISPLAY
 				&& faker::isDisplayExcluded((Display *)native_display)))
 		return _eglGetPlatformDisplay(platform, native_display, attrib_list);
-
-	if(!fconfig.egl)
-	{
-		static bool alreadyWarned = false;
-		if(!alreadyWarned)
-		{
-			if(fconfig.verbose)
-				vglout.print("[VGL] WARNING: EGL/X11 emulation requires the EGL back end\n");
-			alreadyWarned = true;
-		}
-		return display;
-	}
 
 	DISABLE_FAKER();
 
@@ -1105,8 +1103,8 @@ EGLBoolean eglInitialize(EGLDisplay display, EGLint *major, EGLint *minor)
 
 	eglxdpy->isInit = true;
 	retval = EGL_TRUE;
-	if(major) *major = 1;
-	if(minor) *minor = 5;
+	if(major) *major = fconfig.egl ? 1 : eglMajor;
+	if(minor) *minor = fconfig.egl ? 5 : eglMinor;
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();  if(major) PRARGI(*major);  if(minor) PRARGI(*minor);
@@ -1564,7 +1562,8 @@ EGLBoolean eglTerminate(EGLDisplay display)
 
 	if(IS_EXCLUDED_EGLX(display))
 	{
-		if(display == EDPY) return EGL_TRUE;
+		if((fconfig.egl && display == EDPY) || (!fconfig.egl && display == edpy))
+			return EGL_TRUE;
 		return _eglTerminate(display);
 	}
 

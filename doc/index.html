@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2023-12-03T18:26:52">
+<meta name="date" content="2024-02-19T07:43:42">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.1.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -364,7 +364,7 @@ the instructions accordingly.</p>
     </dd>
     <dt class="Description-1 Description">back end</dt>
     <dd class="Description-1 Description">
-        The method by which the VirtualGL Faker creates off-screen buffers on a 
+        The method by which the GLX interposer creates off-screen buffers on a 
         GPU and redirects 3D rendering into them.  The GLX back end uses the GLX 
         API, so it can only access a GPU through an attached X server (the 3D X 
         server.)  The EGL back end uses the EGL API with the 
@@ -375,7 +375,13 @@ the instructions accordingly.</p>
         quad-buffered stereo) with off-screen surfaces, the EGL back end 
         emulates multi-buffering using OpenGL renderbuffer objects (RBOs.)  As 
         of this writing, the EGL back end does not yet support all of the GLX 
-        extensions and esoteric OpenGL features that the GLX back end supports.
+        extensions and esoteric OpenGL features that the GLX back end supports. 
+        <br /><br /> The EGL/X11 interposer accesses the GPU using either the 3D 
+        X server or the EGL device, depending on whether the GLX back end or the 
+        EGL back end is enabled.  The EGL/X11 function calls are modified and 
+        redirected on a 1:1 basis (without the need for API emulation), so there 
+        is no disadvantage to using an EGL device for 3D rendering with EGL/X11 
+        applications.
     </dd>
     <dt class="Description-1 Description">frame trigger</dt>
     <dd class="Description-1 Description">
@@ -2172,8 +2178,8 @@ procedures:</p>
     <td class="standard">Google Chrome/Chromium</td>
     <td class="standard">v85 and later</td>
     <td class="standard">Linux</td>
-    <td class="standard"><code>vglrun&nbsp;-d&nbsp;egl&nbsp;google-chrome&nbsp;--disable-seccomp-filter-sandbox&nbsp;--use-gl=egl</code><br /> or<br /> <code>vglrun&nbsp;-d&nbsp;egl&nbsp;chromium&nbsp;--disable-seccomp-filter-sandbox&nbsp;--use-gl=egl</code></td>
-    <td class="standard">Recent versions of Google Chrome/Chromium use the EGL/X11 API instead of the GLX API, and VirtualGL only supports the EGL/X11 API when using the EGL back end.  The <code>--disable-seccomp-filter-sandbox</code> option prevents Chrome/Chromium from complaining about the X11 function calls that the VirtualGL faker makes.  The <code>--use-gl=egl</code> option forces Chrome/Chromium to use desktop OpenGL rather than OpenGL ES, which works around an issue whereby, when using OpenGL ES, Chrome/Chromium assumes that every X visual has an EGL framebuffer configuration associated with it.  Note that you can replace <code>egl</code> with any DRI device path or EGL device ID.  See Section <a href="#VGL_DISPLAY" class="ref">19.1</a> for further information.</td>
+    <td class="standard"><code>vglrun&nbsp;google-chrome&nbsp;--disable-seccomp-filter-sandbox&nbsp;--use-gl=egl</code><br /> or<br /> <code>vglrun&nbsp;chromium&nbsp;--disable-seccomp-filter-sandbox&nbsp;--use-gl=egl</code></td>
+    <td class="standard">The <code>--disable-seccomp-filter-sandbox</code> option prevents Chrome/Chromium from complaining about the X11 function calls that the VirtualGL faker makes.  The <code>--use-gl=egl</code> option forces Chrome/Chromium to use desktop OpenGL rather than OpenGL ES, which works around an issue whereby, when using OpenGL ES, Chrome/Chromium assumes that every X visual has an EGL framebuffer configuration associated with it.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Compiz</td>
