@@ -27,6 +27,9 @@ onexit()
 BIN=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
 LIB=@CMAKE_LIBRARY_OUTPUT_DIRECTORY@
 FAKEOPENCL=@VGL_FAKEOPENCL@
+if [[ ${VGL_DISPLAY:-"x"} != "x" && ! $VGL_DISPLAY =~ ":" ]]; then
+	FAKEOPENCL=0
+fi
 
 NODL=
 FAKERUTARGS=
@@ -45,6 +48,10 @@ while [ $# -gt 0 ]; do
 	-nodl)
 		echo "Testing without dlopen() interposer"
 		NODL=-nodl
+		;;
+	-noopencl)
+		echo "Testing without OpenCL interposer"
+		FAKEOPENCL=0
 		;;
 	-novgltrans)
 		echo "Testing without VGL Transport"
