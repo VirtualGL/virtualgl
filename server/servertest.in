@@ -33,6 +33,7 @@ fi
 
 NODL=
 FAKERUTARGS=
+THREADSARG=
 DEPTH=24
 IPV6=1
 SCREENS="0 1"
@@ -65,6 +66,11 @@ while [ $# -gt 0 ]; do
 		;;
 	-nomitshm)
 		XVFBARGS=$XVFBARGS" -extension MIT-SHM"
+		;;
+	-n)
+		THREADSARG="-n $2"
+		echo "Testing with $2 threads"
+		shift
 		;;
 	-10bpc)
 		DEPTH=30
@@ -145,28 +151,28 @@ for SCREEN in $SCREENS; do
 		echo "===== VGL Transport, JPEG compression ====="
 		echo
 		VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
-			$BIN/vglrun $NODL -c jpeg $WRAP $BIN/fakerut $FAKERUTARGS
+			$BIN/vglrun $NODL -c jpeg $WRAP $BIN/fakerut $FAKERUTARGS $THREADSARG
 		if [ "$EGLX" = "1" ]; then
 			echo "===== VGL Transport, JPEG compression (EGL/X11) ====="
 			echo
 			VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
-				$BIN/vglrun $NODL -c jpeg $WRAP $BIN/eglxfakerut
+				$BIN/vglrun $NODL -c jpeg $WRAP $BIN/eglxfakerut $THREADSARG
 		fi
 		echo "===== VGL Transport, RGB encoding, 2 threads ====="
 		echo
 		VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB VGL_READBACK=sync \
-			$BIN/vglrun $NODL -np 2 -c rgb $WRAP $BIN/fakerut $FAKERUTARGS
+			$BIN/vglrun $NODL -np 2 -c rgb $WRAP $BIN/fakerut $FAKERUTARGS $THREADSARG
 		# (we can't test stereo here, because the transport plugin assumes
 		# quad-buffered, which isn't available with an X proxy.)
 		echo "===== VGL Transport plugin, JPEG compression ====="
 		echo
 		VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
-			$BIN/vglrun $NODL -trans test $WRAP $BIN/fakerut -nostereo $FAKERUTARGS
+			$BIN/vglrun $NODL -trans test $WRAP $BIN/fakerut -nostereo $FAKERUTARGS $THREADSARG
 		if [ "$EGLX" = "1" ]; then
 			echo "===== VGL Transport plugin, JPEG compression (EGL/X11) ====="
 			echo
 			VGL_CLIENT=127.0.0.1 LD_LIBRARY_PATH=$LIB \
-				$BIN/vglrun $NODL -trans test $WRAP $BIN/eglxfakerut
+				$BIN/vglrun $NODL -trans test $WRAP $BIN/eglxfakerut $THREADSARG
 		fi
 		kill $VGLCLIENTPID
 		VGLCLIENTPID=-1
@@ -179,11 +185,11 @@ for SCREEN in $SCREENS; do
 			echo "===== VGL Transport, JPEG compression ====="
 			echo
 			VGL_CLIENT=::1 LD_LIBRARY_PATH=$LIB \
-				$BIN/vglrun $NODL -c jpeg $WRAP $BIN/fakerut $FAKERUTARGS
+				$BIN/vglrun $NODL -c jpeg $WRAP $BIN/fakerut $FAKERUTARGS $THREADSARG
 			echo "===== VGL Transport plugin, JPEG compression ====="
 			echo
 			VGL_CLIENT=[::1]:0 LD_LIBRARY_PATH=$LIB \
-				$BIN/vglrun $NODL -trans test $WRAP $BIN/fakerut -nostereo $FAKERUTARGS
+				$BIN/vglrun $NODL -trans test $WRAP $BIN/fakerut -nostereo $FAKERUTARGS $THREADSARG
 			kill $VGLCLIENTPID
 			VGLCLIENTPID=-1
 		fi
@@ -193,23 +199,23 @@ for SCREEN in $SCREENS; do
 	echo \*\*\*\*\* Testing X11 Transport, Screen $SCREEN \*\*\*\*\*
 	echo
 	LD_LIBRARY_PATH=$LIB \
-		$BIN/vglrun $NODL -c proxy $WRAP $BIN/fakerut $FAKERUTARGS
+		$BIN/vglrun $NODL -c proxy $WRAP $BIN/fakerut $FAKERUTARGS $THREADSARG
 	if [ "$EGLX" = "1" ]; then
 		echo "===== X11 Transport (EGL/X11) ====="
 		echo
 		LD_LIBRARY_PATH=$LIB \
-			$BIN/vglrun $NODL -c proxy $WRAP $BIN/eglxfakerut
+			$BIN/vglrun $NODL -c proxy $WRAP $BIN/eglxfakerut $THREADSARG
 	fi
 	if [ $DEPTH = 24 ]; then
 		echo "===== X11 Transport plugin ====="
 		echo
 		LD_LIBRARY_PATH=$LIB \
-			$BIN/vglrun $NODL -trans test2 $WRAP $BIN/fakerut $FAKERUTARGS
+			$BIN/vglrun $NODL -trans test2 $WRAP $BIN/fakerut $FAKERUTARGS $THREADSARG
 		if [ "$EGLX" = "1" ]; then
 			echo "===== X11 Transport plugin (EGL/X11) ====="
 			echo
 			LD_LIBRARY_PATH=$LIB \
-				$BIN/vglrun $NODL -trans test2 $WRAP $BIN/eglxfakerut
+				$BIN/vglrun $NODL -trans test2 $WRAP $BIN/eglxfakerut $THREADSARG
 		fi
 	fi
 
