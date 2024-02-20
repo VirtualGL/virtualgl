@@ -40,6 +40,10 @@ GtkGLArea widget with GTK v3.15.2 through v4.3.1 failed with "No available
 configurations for the given [RGBA] pixel format" if GTK v3.15.2 through v4.3.1
 had previously been initialized on the 2D X server without VirtualGL.
 
+9. Fixed an issue in the VirtualGL Faker that caused random characters and
+other elements of the Firefox browser window to disappear when the window was
+resized.
+
 
 3.0.2
 =====
