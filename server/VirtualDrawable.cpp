@@ -195,6 +195,9 @@ void VirtualDrawable::OGLDrawable::clear(void)
 {
 	if(cleared) return;
 	cleared = true;
+	int drawFBO = -1;
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFBO);
+	if(drawFBO != 0) return;
 	GLfloat params[4];
 	_glGetFloatv(GL_COLOR_CLEAR_VALUE, params);
 	_glClearColor(0, 0, 0, 0);

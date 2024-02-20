@@ -20,6 +20,10 @@ of Firefox.
 VirtualGL with 3D applications that use the EGL/X11 API.  If the GLX back end
 is enabled, then the EGL/X11 interposer will now use the 3D X server.
 
+5. Fixed an issue in the VirtualGL Faker that caused random characters and
+other elements of the Firefox browser window to disappear when the window was
+resized.
+
 
 3.1
 ===
