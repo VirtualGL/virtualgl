@@ -13,6 +13,10 @@ display manager was restarted.
 3. Fixed an issue whereby the VirtualGL Configuration dialog did not pop up if
 the X keyboard extension was enabled on the 2D X server.
 
+4. Fixed an issue in the VirtualGL Faker that caused random characters and
+other elements of the Firefox browser window to disappear when the window was
+resized.
+
 
 2.6.6 ESR
 =========

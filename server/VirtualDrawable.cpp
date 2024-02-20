@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009-2015, 2017-2020 D. R. Commander
+// Copyright (C)2009-2015, 2017-2020, 2024 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -169,6 +169,9 @@ void VirtualDrawable::OGLDrawable::clear(void)
 {
 	if(cleared) return;
 	cleared = true;
+	int drawFBO = -1;
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFBO);
+	if(drawFBO != 0) return;
 	GLfloat params[4];
 	_glGetFloatv(GL_COLOR_CLEAR_VALUE, params);
 	_glClearColor(0, 0, 0, 0);
