@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2024-02-20T15:49:46">
+<meta name="date" content="2024-02-20T22:06:19">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.1.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2179,7 +2179,7 @@ procedures:</p>
     <td class="standard">v85 through v111</td>
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun&nbsp;google-chrome&nbsp;--disable-seccomp-filter-sandbox&nbsp;--use-gl=egl</code><br /> or<br /> <code>vglrun&nbsp;chromium&nbsp;--disable-seccomp-filter-sandbox&nbsp;--use-gl=egl</code></td>
-    <td class="standard">The <code>--disable-seccomp-filter-sandbox</code> option prevents Chrome/Chromium from complaining about the X11 function calls that the VirtualGL faker makes.  The <code>--use-gl=egl</code> option forces Chrome/Chromium to use desktop OpenGL rather than OpenGL ES, which works around an issue whereby, when using OpenGL ES, Chrome/Chromium assumes that every X visual has an EGL framebuffer configuration associated with it. <br /><br /> Passing <code>--use-gl=egl</code> to Chrome v112 and later causes Chrome&rsquo;s GPU process to crash (regardless of whether VirtualGL is used), and as of this writing, there are no known workarounds.</td>
+    <td class="standard">The <code>--disable-seccomp-filter-sandbox</code> option prevents Chrome/Chromium from complaining about the X11 function calls that the VirtualGL faker makes.  The <code>--use-gl=egl</code> option forces Chrome/Chromium to use desktop OpenGL rather than ANGLE, which works around an issue whereby, when using ANGLE, Chrome/Chromium assumes that every X visual has an EGL framebuffer configuration associated with it. <br /><br /> Passing <code>--use-gl=egl</code> to Chrome v112 and later causes Chrome&rsquo;s GPU process to crash (regardless of whether VirtualGL is used), and as of this writing, there are no known workarounds.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Compiz</td>
@@ -2250,6 +2250,13 @@ procedures:</p>
     <td class="standard">Linux</td>
     <td class="standard">Set the <code>VGL_GLFLUSHTRIGGER</code> environment variable to <code>0</code> prior to launching the application with <code>vglrun</code></td>
     <td class="standard">When running Tecplot 360 with VirtualGL in a high-performance X proxy, flashing artifacts will be produced when the user zooms/pans/rotates the scene, unless VirtualGL is instructed not to use <code>glFlush()</code> as a frame trigger.  This has been fixed in Tecplot 2012 and later.  See Section <a href="#VGL_GLFLUSHTRIGGER" class="ref">19.1</a> for further information.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">Unity Hub / Unity Editor</td>
+    <td class="standard">v3.7.0 / v2021.X and later</td>
+    <td class="standard">Linux</td>
+    <td class="standard"><code>vglrun&nbsp;unityhub&nbsp;--use-gl=egl</code><br /></td>
+    <td class="standard">The <code>--use-gl=egl</code> option forces Unity to use desktop OpenGL rather than ANGLE, which works around an issue whereby, when using ANGLE, Unity assumes that every X visual has an EGL framebuffer configuration associated with it.</td>
   </tr>
 </table>
 </div>

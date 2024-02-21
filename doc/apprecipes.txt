@@ -102,9 +102,9 @@
 	| The ''--disable-seccomp-filter-sandbox'' option prevents Chrome/Chromium \
 		from complaining about the X11 function calls that the VirtualGL faker \
 		makes.  The ''--use-gl=egl'' option forces Chrome/Chromium to use desktop \
-		OpenGL rather than OpenGL ES, which works around an issue whereby, when \
-		using OpenGL ES, Chrome/Chromium assumes that every X visual has an EGL \
-		framebuffer configuration associated with it. \
+		OpenGL rather than ANGLE, which works around an issue whereby, when using \
+		ANGLE, Chrome/Chromium assumes that every X visual has an EGL framebuffer \
+		configuration associated with it. \
 		{nl}{nl} \
 	  Passing ''--use-gl=egl'' to Chrome v112 and later causes Chrome's GPU \
 		process to crash (regardless of whether VirtualGL is used), and as of \
@@ -204,4 +204,11 @@
 		scene, unless VirtualGL is instructed not to use ''glFlush()'' as a \
 		frame trigger.  This has been fixed in Tecplot 2012 and later.  See \
 		{ref prefix="Section ": VGL_GLFLUSHTRIGGER} for further information. \
+	|
+| Unity Hub / Unity Editor | v3.7.0 / v2021.X and later | Linux \
+	| ''vglrun unityhub --use-gl=egl''{nl} \
+	| The ''--use-gl=egl'' option forces Unity to use desktop OpenGL rather \
+		than ANGLE, which works around an issue whereby, when using ANGLE, Unity \
+		assumes that every X visual has an EGL framebuffer configuration \
+		associated with it. \
 	|
