@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2012, 2015, 2017-2021 D. R. Commander
+ * Copyright (C)2009, 2012, 2015, 2017-2021, 2024 D. R. Commander
  * Copyright (C)2015 Open Text SA and/or Open Text ULC (in Canada)
  *
  * This library is free software and may be redistributed and/or modified under
@@ -128,7 +128,8 @@ void *dlopen(const char *filename, int flag)
 			|| (!strncmp(filename, "libOpenCL.", 10) && fakeOpenCL)
 				|| (strstr(filename, "/libOpenCL.") && fakeOpenCL)
 			#endif
-			|| !strncmp(filename, "libEGL.", 7) || strstr(filename, "/libEGL.")
+			|| !strncmp(filename, "libEGL.so.", 10)
+				|| strstr(filename, "/libEGL.so.")
 			|| !strncmp(filename, "libX11.", 7) || strstr(filename, "/libX11.")
 			|| (flag & RTLD_LAZY
 					&& (!strncmp(filename, "libopengl.", 10)

@@ -24,6 +24,10 @@ is enabled, then the EGL/X11 interposer will now use the 3D X server.
 other elements of the Firefox browser window to disappear when the window was
 resized.
 
+6. Fixed an issue in VirtualGL's `dlopen()` interposer (**libdlfaker.so**) that
+interfered with the correct operation of ANGLE (Almost Native Graphics Layer
+Engine.)
+
 
 3.1
 ===
