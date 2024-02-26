@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2014-2015, 2017, 2019-2021 D. R. Commander
+ * Copyright (C)2009, 2014-2015, 2017, 2019-2021, 2024 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -374,7 +374,10 @@ int main(int argc, char **argv)
 		for(i = 1; i < argc; i++)
 		{
 			if(!strcasecmp(argv[i], "--prefix") && i < argc - 1)
+			{
 				prefix = argv[++i];
+				libEGL = "libEGL.so.1";
+			}
 			else if(!strcasecmp(argv[i], "--glvnd"))
 			{
 				libGLX = "libGLX.so";
