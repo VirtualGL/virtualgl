@@ -1,5 +1,5 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
- * Copyright (C)2011, 2013-2015, 2017-2019, 2021-2022 D. R. Commander
+ * Copyright (C)2011, 2013-2015, 2017-2019, 2021-2022, 2024 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -527,8 +527,6 @@ int main(int argc, char **argv)
 		}
 		else if(!stricmp(argv[i], "-srgb"))
 		{
-			if(!GLX_EXTENSION_EXISTS(GLX_EXT_framebuffer_sRGB))
-				THROW("GLX_EXT_framebuffer_sRGB extension is not available");
 			useSRGB = 1;  rgbAttribs[17] = 1;
 		}
 		else if(!stricmp(argv[i], "-s"))
@@ -588,6 +586,9 @@ int main(int argc, char **argv)
 		rgbAttribs[18] = GLX_ALPHA_SIZE;
 		rgbAttribs[19] = 32 - bpc * 3;
 	}
+
+	if(!GLX_EXTENSION_EXISTS(GLX_EXT_framebuffer_sRGB))
+		THROW("GLX_EXT_framebuffer_sRGB extension is not available");
 
 	c = glXChooseFBConfig(dpy, screen, rgbAttribs, &n);
 	if(!c || n < 1)
