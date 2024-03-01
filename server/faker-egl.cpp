@@ -247,6 +247,11 @@ EGLBoolean eglChooseConfig(EGLDisplay display, const EGLint *attrib_list,
 		retval = EGL_TRUE;
 		*num_config = 0;
 	}
+	if(surfaceType & EGL_SWAP_BEHAVIOR_PRESERVED_BIT)
+	{
+		retval = EGL_TRUE;
+		*num_config = 0;
+	}
 	if(nativeRenderable == EGL_FALSE
 		&& (surfaceType & (EGL_WINDOW_BIT | EGL_PIXMAP_BIT) || visualID >= 0
 			|| visualType >= 0))

@@ -507,7 +507,7 @@ int visTest(void)
 			EGLint surfaceType, transparentType, nativeRenderable, visualID,
 				visualType;
 			GET_CFG_ATTRIB(configs[i], EGL_SURFACE_TYPE, surfaceType);
-			if(surfaceType & EGL_PIXMAP_BIT)
+			if(surfaceType & (EGL_PIXMAP_BIT | EGL_SWAP_BEHAVIOR_PRESERVED_BIT))
 				PRERROR1("CFG 0x%.2x claims to support surface types that it doesn't actually support",
 					EGLConfigID(edpy, configs[i]));
 			GET_CFG_ATTRIB(configs[i], EGL_TRANSPARENT_TYPE, transparentType);
@@ -1106,6 +1106,10 @@ int extensionQueryTest(void)
 		if(eglChooseConfig(edpy, cfgAttribs2, &config, 1, &nc) == EGL_FALSE
 			|| nc != 0)
 			THROW("eglConfig() returned EGLConfigs with EGL_PIXMAP_BIT set");
+		cfgAttribs2[1] = EGL_WINDOW_BIT | EGL_SWAP_BEHAVIOR_PRESERVED_BIT;
+		if(eglChooseConfig(edpy, cfgAttribs2, &config, 1, &nc) == EGL_FALSE
+			|| nc != 0)
+			THROW("eglConfig() returned EGLConfigs with EGL_SWAP_BEHAVIOR_PRESERVED_BIT set");
 
 		//-------------------------------------------------------------------------
 		//    Pixmap rendering

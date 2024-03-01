@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1999-2014  Brian Paul   All Rights Reserved.
  * Copyright (C) 2005-2007  Sun Microsystems, Inc.   All Rights Reserved.
- * Copyright (C) 2011, 2013, 2015, 2019-2023  D. R. Commander
+ * Copyright (C) 2011, 2013, 2015, 2019-2024  D. R. Commander
  *                                            All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -459,7 +459,8 @@ config_surface_type(int type)
    static const struct bit_info bits[] = {
       { EGL_WINDOW_BIT, "Window" },
       { EGL_PIXMAP_BIT, "Pixmap" },
-      { EGL_PBUFFER_BIT, "Pbuffer" }
+      { EGL_PBUFFER_BIT, "Pbuffer" },
+      { EGL_SWAP_BEHAVIOR_PRESERVED_BIT, "Swap behavior preserved" }
    };
 
    return bitmask_to_string(bits, ELEMENTS(bits), type);
