@@ -139,7 +139,6 @@ EGLBoolean eglBindTexImage(EGLDisplay display, EGLSurface surface,
 	EGLint buffer)
 {
 	EGLBoolean retval = EGL_FALSE;
-	EGLSurface actualSurface = surface;
 
 	TRY();
 
@@ -150,15 +149,18 @@ EGLBoolean eglBindTexImage(EGLDisplay display, EGLSurface surface,
 	DISABLE_FAKER();
 
 	faker::EGLXVirtualWin *eglxvw = EGLXWINHASH.find(eglxdpy, surface);
-	if(eglxvw) actualSurface = (EGLSurface)eglxvw->getGLXDrawable();
+	if(eglxvw)
+	{
+		faker::setEGLError(EGL_BAD_SURFACE);
+		return EGL_FALSE;
+	}
 
 	/////////////////////////////////////////////////////////////////////////////
 	OPENTRACE(eglBindTexImage);  PRARGX(display);  PRARGX(surface);
-	if(surface != actualSurface) PRARGX(actualSurface);
 	PRARGI(buffer);  STARTTRACE();
 	/////////////////////////////////////////////////////////////////////////////
 
-	retval = _eglBindTexImage(display, actualSurface, buffer);
+	retval = _eglBindTexImage(display, surface, buffer);
 
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();  PRARGI(retval);  CLOSETRACE();
