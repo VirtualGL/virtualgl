@@ -400,29 +400,45 @@ EGLContext eglCreateContext(EGLDisplay display, EGLConfig config,
 EGLSurface eglCreatePixmapSurface(EGLDisplay display, EGLConfig config,
 	EGLNativePixmapType native_pixmap, const EGLint *attrib_list)
 {
-	WRAP_DISPLAY_INIT(EGL_NOT_INITIALIZED);
-	return _eglCreatePixmapSurface(display, config, native_pixmap, attrib_list);
-	bailout:
+	TRY();
+
+	if(IS_EXCLUDED_EGLX(display))
+		return _eglCreatePixmapSurface(display, config, native_pixmap,
+			attrib_list);
+
+	faker::setEGLError(EGL_BAD_MATCH);
+
+	CATCH();
 	return EGL_NO_SURFACE;
 }
 
 EGLSurface eglCreatePlatformPixmapSurface(EGLDisplay display, EGLConfig config,
 	void *native_pixmap, const EGLAttrib *attrib_list)
 {
-	WRAP_DISPLAY_INIT(EGL_NOT_INITIALIZED);
-	return _eglCreatePlatformPixmapSurface(display, config, native_pixmap,
-		attrib_list);
-	bailout:
+	TRY();
+
+	if(IS_EXCLUDED_EGLX(display))
+		return _eglCreatePlatformPixmapSurface(display, config, native_pixmap,
+			attrib_list);
+
+	faker::setEGLError(EGL_BAD_MATCH);
+
+	CATCH();
 	return EGL_NO_SURFACE;
 }
 
 EGLSurface eglCreatePlatformPixmapSurfaceEXT(EGLDisplay display,
 	EGLConfig config, void *native_pixmap, const EGLint *attrib_list)
 {
-	WRAP_DISPLAY_INIT(EGL_NOT_INITIALIZED);
-	return _eglCreatePlatformPixmapSurfaceEXT(display, config, native_pixmap,
-		attrib_list);
-	bailout:
+	TRY();
+
+	if(IS_EXCLUDED_EGLX(display))
+		return _eglCreatePlatformPixmapSurfaceEXT(display, config, native_pixmap,
+			attrib_list);
+
+	faker::setEGLError(EGL_BAD_MATCH);
+
+	CATCH();
 	return EGL_NO_SURFACE;
 }
 
@@ -704,7 +720,7 @@ EGLBoolean eglGetConfigAttrib(EGLDisplay display, EGLConfig config,
 	if(value && attribute == EGL_SURFACE_TYPE && *value & EGL_PBUFFER_BIT)
 	{
 		*value |= EGL_WINDOW_BIT;
-		*value &= ~EGL_SWAP_BEHAVIOR_PRESERVED_BIT;
+		*value &= ~(EGL_SWAP_BEHAVIOR_PRESERVED_BIT | EGL_PIXMAP_BIT);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////

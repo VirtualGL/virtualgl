@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2010-2015, 2017-2021, 2023 D. R. Commander
+// Copyright (C)2010-2015, 2017-2021, 2023-2024 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -507,6 +507,9 @@ int visTest(void)
 			EGLint surfaceType, transparentType, nativeRenderable, visualID,
 				visualType;
 			GET_CFG_ATTRIB(configs[i], EGL_SURFACE_TYPE, surfaceType);
+			if(surfaceType & EGL_PIXMAP_BIT)
+				PRERROR1("CFG 0x%.2x claims to support surface types that it doesn't actually support",
+					EGLConfigID(edpy, configs[i]));
 			GET_CFG_ATTRIB(configs[i], EGL_TRANSPARENT_TYPE, transparentType);
 			GET_CFG_ATTRIB(configs[i], EGL_NATIVE_RENDERABLE, nativeRenderable);
 			GET_CFG_ATTRIB(configs[i], EGL_NATIVE_VISUAL_ID, visualID);
@@ -1086,6 +1089,7 @@ int extensionQueryTest(void)
 		//-------------------------------------------------------------------------
 
 		EGLint cfgAttribs[] = { EGL_NONE };
+		EGLint cfgAttribs2[] = { EGL_NONE, EGL_NONE, EGL_NONE };
 
 		if(!eglTerminate(edpy))
 			THROW_EGL("eglTerminate()");
@@ -1096,6 +1100,25 @@ int extensionQueryTest(void)
 
 		EGLERRTEST(eglChooseConfig(edpy, cfgAttribs, &config, 1, NULL),
 			EGL_BAD_PARAMETER);
+
+		cfgAttribs2[0] = EGL_SURFACE_TYPE;
+		cfgAttribs2[1] = EGL_WINDOW_BIT | EGL_PIXMAP_BIT;
+		if(eglChooseConfig(edpy, cfgAttribs2, &config, 1, &nc) == EGL_FALSE
+			|| nc != 0)
+			THROW("eglConfig() returned EGLConfigs with EGL_PIXMAP_BIT set");
+
+		//-------------------------------------------------------------------------
+		//    Pixmap rendering
+		//-------------------------------------------------------------------------
+
+		EGLERRTEST(eglCopyBuffers(edpy, EGL_NO_SURFACE, 0),
+			EGL_BAD_NATIVE_PIXMAP);
+		EGLERRTEST(eglCreatePixmapSurface(edpy, EGL_NO_CONFIG_KHR, 0, NULL),
+			EGL_BAD_MATCH);
+		EGLERRTEST(eglCreatePlatformPixmapSurface(edpy, EGL_NO_CONFIG_KHR, NULL,
+			NULL), EGL_BAD_MATCH);
+		EGLERRTEST(eglCreatePlatformPixmapSurfaceEXT(edpy, EGL_NO_CONFIG_KHR, NULL,
+			NULL), EGL_BAD_MATCH);
 
 		//-------------------------------------------------------------------------
 		//    eglCreateWindowSurface()
