@@ -1121,8 +1121,14 @@ int extensionQueryTest(void)
 			EGL_BAD_MATCH);
 		EGLERRTEST(eglCreatePlatformPixmapSurface(edpy, EGL_NO_CONFIG_KHR, NULL,
 			NULL), EGL_BAD_MATCH);
-		EGLERRTEST(eglCreatePlatformPixmapSurfaceEXT(edpy, EGL_NO_CONFIG_KHR, NULL,
-			NULL), EGL_BAD_MATCH);
+		PFNEGLCREATEPLATFORMPIXMAPSURFACEEXTPROC
+			__eglCreatePlatformPixmapSurfaceEXT =
+				(PFNEGLCREATEPLATFORMPIXMAPSURFACEEXTPROC)eglGetProcAddress(
+					"eglCreatePlatformPixmapSurfaceEXT");
+		if(!__eglCreatePlatformPixmapSurfaceEXT)
+			THROW("eglCreatePlatformPixmapSurfaceEXT() is not available");
+		EGLERRTEST(__eglCreatePlatformPixmapSurfaceEXT(edpy, EGL_NO_CONFIG_KHR,
+			NULL, NULL), EGL_BAD_MATCH);
 
 		//-------------------------------------------------------------------------
 		//    eglCreateWindowSurface()
