@@ -125,6 +125,179 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 	return 0;
 }
 
+static const char *getX11ErrorName(CARD8 errorCode)
+{
+	switch (errorCode)
+	{
+	case Success:
+		return "Success"; /* everything's okay */
+	case BadRequest:
+		return "BadRequest"; /* bad request code */
+	case BadValue:
+		return "BadValue"; /* int parameter out of range */
+	case BadWindow:
+		return "BadWindow"; /* parameter not a Window */
+	case BadPixmap:
+		return "BadPixmap"; /* parameter not a Pixmap */
+	case BadAtom:
+		return "BadAtom"; /* parameter not an Atom */
+	case BadCursor:
+		return "BadCursor"; /* parameter not a Cursor */
+	case BadFont:
+		return "BadFont"; /* parameter not a Font */
+	case BadMatch:
+		return "BadMatch"; /* parameter mismatch */
+	case BadDrawable:
+		return "BadDrawable"; /* parameter not a Pixmap or Window */
+	case BadAccess:
+		return "BadAccess"; /* depending on context:
+		 - key/button already grabbed
+		 - attempt to free an illegal
+		   cmap entry
+		- attempt to store into a read-only
+		   color map entry.
+		- attempt to modify the access control
+		   list from other than the local host.
+		*/
+	case BadAlloc:
+		return "BadAlloc"; /* insufficient resources */
+	case BadColor:
+		return "BadColor"; /* no such colormap */
+	case BadGC:
+		return "BadGC"; /* parameter not a GC */
+	case BadIDChoice:
+		return "BadIDChoice"; /* choice not in range or already used */
+	case BadName:
+		return "BadName"; /* font or color name doesn't exist */
+	case BadLength:
+		return "BadLength"; /* Request length incorrect */
+	case BadImplementation:
+		return "BadImplementation"; /* server is defective */
+
+	case FirstExtensionError:
+		return "FirstExtensionError";
+	case LastExtensionError:
+		return "LastExtensionError";
+	default:
+		return "(unknown)";
+	}
+}
+
+static const char *getGLXErrorName(CARD8 errorCode)
+{
+	switch (errorCode)
+	{
+	case GLXBadContext:
+		return "GLXBadContext";
+	case GLXBadContextState:
+		return "GLXBadContextState";
+	case GLXBadDrawable:
+		return "GLXBadDrawable";
+	case GLXBadPixmap:
+		return "GLXBadPixmap";
+	case GLXBadContextTag:
+		return "GLXBadContextTag";
+	case GLXBadCurrentWindow:
+		return "GLXBadCurrentWindow";
+	case GLXBadRenderRequest:
+		return "GLXBadRenderRequest";
+	case GLXBadLargeRequest:
+		return "GLXBadLargeRequest";
+	case GLXUnsupportedPrivateRequest:
+		return "GLXUnsupportedPrivateRequest";
+	case GLXBadFBConfig:
+		return "GLXBadFBConfig";
+	case GLXBadPbuffer:
+		return "GLXBadPbuffer";
+	case GLXBadCurrentDrawable:
+		return "GLXBadCurrentDrawable";
+	case GLXBadWindow:
+		return "GLXBadWindow";
+	case GLXBadProfileARB:
+		return "GLXBadProfileARB";
+	default:
+		return "(unknown)";
+	}
+}
+
+static const char *getGLXCommandName(CARD16 minorCode)
+{
+	switch (minorCode)
+	{
+	case X_GLXRender:
+		return "GLXRender";
+	case X_GLXRenderLarge:
+		return "GLXRenderLarge";
+	case X_GLXCreateContext:
+		return "GLXCreateContext";
+	case X_GLXDestroyContext:
+		return "GLXDestroyContext";
+	case X_GLXMakeCurrent:
+		return "GLXMakeCurrent";
+	case X_GLXIsDirect:
+		return "GLXIsDirect";
+	case X_GLXQueryVersion:
+		return "GLXQueryVersion";
+	case X_GLXWaitGL:
+		return "GLXWaitGL";
+	case X_GLXWaitX:
+		return "GLXWaitX";
+	case X_GLXCopyContext:
+		return "GLXCopyContext";
+	case X_GLXSwapBuffers:
+		return "GLXSwapBuffers";
+	case X_GLXUseXFont:
+		return "GLXUseXFont";
+	case X_GLXCreateGLXPixmap:
+		return "GLXCreateGLXPixmap";
+	case X_GLXGetVisualConfigs:
+		return "GLXGetVisualConfigs";
+	case X_GLXDestroyGLXPixmap:
+		return "GLXDestroyGLXPixmap";
+	case X_GLXVendorPrivate:
+		return "GLXVendorPrivate";
+	case X_GLXVendorPrivateWithReply:
+		return "GLXVendorPrivateWithReply";
+	case X_GLXQueryExtensionsString:
+		return "GLXQueryExtensionsString";
+	case X_GLXQueryServerString:
+		return "GLXQueryServerString";
+	case X_GLXClientInfo:
+		return "GLXClientInfo";
+	case X_GLXGetFBConfigs:
+		return "GLXGetFBConfigs";
+	case X_GLXCreatePixmap:
+		return "GLXCreatePixmap";
+	case X_GLXDestroyPixmap:
+		return "GLXDestroyPixmap";
+	case X_GLXCreateNewContext:
+		return "GLXCreateNewContext";
+	case X_GLXQueryContext:
+		return "GLXQueryContext";
+	case X_GLXMakeContextCurrent:
+		return "GLXMakeContextCurrent";
+	case X_GLXCreatePbuffer:
+		return "GLXCreatePbuffer";
+	case X_GLXDestroyPbuffer:
+		return "GLXDestroyPbuffer";
+	case X_GLXGetDrawableAttributes:
+		return "GLXGetDrawableAttributes";
+	case X_GLXChangeDrawableAttributes:
+		return "GLXChangeDrawableAttributes";
+	case X_GLXCreateWindow:
+		return "GLXCreateWindow";
+	case X_GLXDestroyWindow:
+		return "GLXDestroyWindow";
+	case X_GLXSetClientInfoARB:
+		return "GLXSetClientInfoARB";
+	case X_GLXCreateContextAttribsARB:
+		return "GLXCreateContextAttribsARB";
+	case X_GLXSetClientInfo2ARB:
+		return "GLXSetClientInfo2ARB";
+	default:
+		return "(unknown)";
+	}
+}
 
 void sendGLXError(Display *dpy, CARD16 minorCode, CARD8 errorCode,
 	bool x11Error)
@@ -134,10 +307,12 @@ void sendGLXError(Display *dpy, CARD16 minorCode, CARD8 errorCode,
 
 	if(!backend::queryExtension(dpy, &majorCode, &dummy, &errorBase))
 	{
-		if(fconfig.egl)
-			THROW("The EGL back end requires a 2D X server with a GLX extension.");
-		else
-			THROW("The 3D X server does not have a GLX extension.");
+		// Cannot send error using GLX, so throw
+		char errorStr[256];
+		snprintf(errorStr, 256, "Error while faking GLX command %s: error code %s",
+				 getGLXCommandName(minorCode),
+				 (x11Error ? getX11ErrorName(errorCode) : getGLXErrorName(errorCode)));
+		THROW(errorStr);
 	}
 
 	if(!fconfig.egl) dpy = DPY3D;
