@@ -91,6 +91,8 @@ usage()
 	echo
 	echo "+/-v      : Enable/disable verbose VirtualGL messages [default = disabled]"
 	echo
+	echo "--version : Display version information"
+	echo
 	echo "+xcb/-xcb : Enable/disable XCB interposer [default = enabled]"
 	echo
 	echo "+wm/-wm   : Enable/disable window manager mode (for running Compiz, etc.)"
@@ -151,6 +153,10 @@ do
 	-ldp)       VGL_PRELOAD=$2 ; shift ;;
 	-h)         usage 0 ;;
 	--help)     usage 0 ;;
+	--version)
+		echo "@CMAKE_PROJECT_NAME@ v@VERSION@ (Build @BUILD@)"
+		exit 0
+		;;
 	--)         shift   ; break ;;
 	-*)         usage 1 ;;
 	*)          break   ;;
