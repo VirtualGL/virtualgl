@@ -4,8 +4,8 @@
 ** VirtualGL's Built-In Profiling System
 
 The easiest way to uncover bottlenecks in VirtualGL's image pipeline is to
-set the ''VGL_PROFILE'' environment variable to ''1'' on both server and client
-(passing an argument of ''+pr'' to ''vglrun'' on the server has the same
+set the ''VGL_PROFILE'' environment variable to ''1'' on both server and
+client.  (Passing an argument of ''+pr'' to ''vglrun'' on the server has the same
 effect.)  This will cause VirtualGL to measure and report the throughput of
 various stages in the pipeline.  For example, here are some measurements from a
 dual Pentium 4 server communicating with a Pentium III client on a 100-megabit
