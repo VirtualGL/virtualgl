@@ -49,15 +49,19 @@ users access to the 3D X server.
 
 It is important to understand the security risks associated with this.  Once a
 user has access to the 3D X server, there is nothing that would prevent the
-user from logging keystrokes or reading back images from that X server. Using
-''xauth'', one can obtain "untrusted" X authentication keys that prevent such
-exploits, but unfortunately, those untrusted keys also disallow access to the
-3D hardware.  Thus, it is necessary to grant full, trusted access to the 3D X
-server for any users that will need to use the GLX back end.  Unless you fully
-trust the users to whom you are granting this access, then you should avoid
-logging in locally to the 3D X server (particularly as root) unless absolutely
-necessary (logging in locally to the 3D X server is discouraged anyhow, for
-reasons explained in the previous section.)
+user from logging keystrokes or reading back images from that X server.  A user
+with 3D X server and framebuffer device access can also read back the contents
+of an off-screen buffer created by another user, provided that the off-screen
+buffer's drawable ID is known and provided that the GPU driver uses DRI2
+(example: nVidia proprietary drivers) rather than DRI3 (example: Mesa-based
+drivers.)  Using ''xauth'', one can obtain "untrusted" X authentication keys
+that prevent such exploits, but unfortunately, those untrusted keys also
+disallow access to the GPU.  Thus, it is necessary to grant full, trusted
+access to the 3D X server for any users that will need to use the GLX back end.
+Unless you fully trust the users to whom you are granting this access, then
+you should avoid logging in locally to the 3D X server (particularly as root)
+unless absolutely necessary.  (Logging in locally to the 3D X server is
+discouraged anyhow, for reasons explained in the previous section.)
 
 This section will explain how to configure a VirtualGL server such that
 selected users can use the GLX back end, even if the server is sitting at the
@@ -103,7 +107,7 @@ login prompt.
 		[Y/n]
 		---
 
-		Yes :: Only users in the ''vglusers'' group can use the GLX back end (the
+		Yes :: Only users in the ''vglusers'' group can use the GLX back end.  (The
 			configuration script will create the ''vglusers'' group if it doesn't
 			already exist.)  This is the most secure option, since it prevents any
 			users outside of the ''vglusers'' group from accessing (and thus
@@ -123,7 +127,7 @@ login prompt.
 		---
 
 		Yes :: Only users in the ''vglusers'' group can run OpenGL applications on
-			the VirtualGL server (the configuration script will create the
+			the VirtualGL server.  (The configuration script will create the
 			''vglusers'' group if it doesn't already exist.)  This limits the
 			possibility that an unauthorized user could snoop the 3D framebuffer
 			device(s) and thus see (or alter) the output of a 3D application that is
@@ -220,8 +224,8 @@ of the ''xdpyinfo'' command to verify that ''XTEST'' does not show up in the
 list of extensions.
 
 You should also examine the output of the ''glxinfo'' command to ensure that at
-least one of the visuals is 24-bit or 32-bit TrueColor and has Pbuffer support
-(the latter is indicated by a ''P'' in the last column.)  Example:
+least one of the visuals is 24-bit or 32-bit TrueColor and has Pbuffer support.
+(The latter is indicated by a ''P'' in the last column.)  Example:
 
 	#Verb <<---
 	    visual  x   bf lv rg d st  colorbuffer  ax dp st accumbuffer  ms  cav  drw
@@ -265,11 +269,14 @@ selected users can use the EGL back end.
 		---
 
 		Yes :: Only users in the ''vglusers'' group can run OpenGL applications on
-			the VirtualGL server (the configuration script will create the
+			the VirtualGL server.  (The configuration script will create the
 			''vglusers'' group if it doesn't already exist.)  This limits the
 			possibility that an unauthorized user could snoop the 3D framebuffer
 			device(s) and thus see (or alter) the output of a 3D application that is
-			being used with VirtualGL.
+			being used with VirtualGL.  Note, however, that such an exploit should
+			not normally be possible with the EGL back end, since it redirects 3D
+			rendering into renderbuffer objects that are not accessible by other
+			processes.
 
 		No :: Any authenticated user can run OpenGL applications on the VirtualGL
 			server.  If it is necessary for users outside of the ''vglusers'' group
@@ -330,7 +337,7 @@ server for use with VirtualGL (GLX + EGL back ends)'') will remove any shared
 access to the 3D X server and thus prevent VirtualGL from accessing a GPU in
 that manner.  Additionally, this option will re-enable the ''XTEST'' extension
 on the 3D X server and will restore the framebuffer device permissions to their
-default (by default, only root or the user that is currently logged into the
+default.  (By default, only root or the user that is currently logged into the
 application server locally can access the framebuffer devices.)
 
 After selecting Option 2, you must restart the display manager before the

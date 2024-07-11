@@ -91,7 +91,7 @@ into a single image (a "stereogram"), and thus it can be used with any image
 transport.  However, unlike anaglyphic stereo, passive stereo must be used
 with specific display hardware, such as a 3D TV or monitor, that decodes the
 left and right eye images from the stereogram and sends them separately to a
-pair of 3D glasses (typically, this is accomplished by way of polarization.)
+pair of 3D glasses.  (Typically, this is accomplished by way of polarization.)
 
 VirtualGL supports three methods of encoding stereograms:
 

@@ -38,7 +38,7 @@ previous method:
 	the X server is on a different machine and assume that the 3D rendering
 	commands will be sent over the network.  Thus, VirtualGL normally forces all
 	contexts to be direct in order to prevent severe readback performance
-	degradation with such applications (even on modern GPUs, and even when the
+	degradation with such applications.  (Even on modern GPUs, and even when the
 	connection to the 3D X server is local, ''glReadPixels()'' can perform very
 	slowly if an indirect OpenGL context is used.)
 	{nl}{nl}
@@ -243,7 +243,7 @@ previous method:
 	order for pixel buffer objects (PBOs) to behave correctly.  Since displaying
 	to an X proxy typically requires VirtualGL to read back the framebuffer in
 	BGRA format, enabling ''VGL_FORCEALPHA'' might be necessary in order to use
-	PBO readback mode with the aforementioned GPUs (as of this writing, nVidia
+	PBO readback mode with the aforementioned GPUs.  (As of this writing, nVidia
 	GeForce adapters are known to require this.)  See the
 	[[#VGL_READBACK][''VGL_READBACK'']] option for further information.
 
@@ -321,20 +321,20 @@ previous method:
 	VirtualGL cannot usually get away with ignoring ''glFlush()''.  However, some
 	3D applications call ''glFlush()'' so often that VirtualGL cannot get away
 	with reading back/transporting a frame every time ''glFlush()'' is called,
-	either (see [[#VGL_SPOILLAST][''VGL_SPOILLAST'']] for more information on how
-	VirtualGL tries to handle this, under normal circumstances.)
+	either.  (See [[#VGL_SPOILLAST][''VGL_SPOILLAST'']] for more information on
+	how VirtualGL tries to handle this, under normal circumstances.)
 	{nl}{nl}
 	Some 3D applications use ''glFlush()'' very liberally and intend for it to be
 	an intermediate rather than a final synchronization command.  Such
 	applications will call ''glFinish()'' after a sequence of ''glFlush()''
 	calls, so for those applications, using ''glFlush()'' as a frame trigger is a
-	waste of resources and can sometimes create visual artifacts (for instance,
-	if the application clears the front buffer with a particular color, calls
-	''glFlush()'', then clears it again with another color.  We wouldn't mention
-	it if it hadn't happened before.)  For such applications, setting
-	''VGL_GLFLUSHTRIGGER'' to ''0'' should make them display properly with
-	VirtualGL.  See [[#Application_Recipes][Application Recipes]] for a list of
-	3D applications that are known to require this.
+	waste of resources and can sometimes create visual artifacts.  (For instance,
+	this can happen if the application clears the front buffer with a particular
+	color, calls ''glFlush()'', then clears it again with another color.  We
+	wouldn't mention it if it hadn't happened before.)  For such applications,
+	setting ''VGL_GLFLUSHTRIGGER'' to ''0'' should make them display properly
+	with VirtualGL.  See [[#Application_Recipes][Application Recipes]] for a list
+	of 3D applications that are known to require this.
 
 | Environment Variable | {pcode: VGL_GLLIB = __{l}__ } |
 | Summary | __''{l}''__ = the location of an alternate OpenGL library |
@@ -649,8 +649,8 @@ previous method:
 	should be turned off when running benchmarks or other non-interactive 3D
 	applications.  Turning off frame spoiling will force every frame rendered on
 	the server to be transported, and thus the frame rate reported by OpenGL
-	benchmarks will accurately reflect the end-to-end performance of VirtualGL
-	(though, in X proxy environments, this may still not accurately reflect the
+	benchmarks will accurately reflect the end-to-end performance of VirtualGL.
+	(However, in X proxy environments, this may still not accurately reflect the
 	frame rate seen by the user.  See {ref prefix="Section ": Frame_Spoiling}.)
 	Disabling frame spoiling also prevents non-interactive 3D applications from
 	wasting graphics resources by rendering frames that will never be seen.

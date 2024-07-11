@@ -128,8 +128,8 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 You can set the ''VGL_GUI'' environment variable to change the key sequence
 used to pop up the VirtualGL Configuration dialog.  If the default of
 ''ctrl-shift-f9'' is not suitable, then set ''VGL_GUI'' to any combination of
-''ctrl'', ''shift'', ''alt'', and one of ''f1'', ''f2'', \.\.\., ''f12''
-(these are not case sensitive.)  For example:
+''ctrl'', ''shift'', ''alt'', and one of ''f1'', ''f2'', \.\.\., ''f12''.
+(These are not case sensitive.)  For example:
 
 #Verb: <<---
 export VGL_GUI=ctrl-f9
