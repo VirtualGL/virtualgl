@@ -1,3 +1,15 @@
+3.1.2
+=====
+
+### Significant changes relative to 3.1.1:
+
+1. Fixed an issue in the EGL back end whereby `GLX_EXT_framebuffer_sRGB` was
+not added to the list of extensions returned by
+`glXGetClientString(..., GLX_EXTENSIONS)`, `glXQueryExtensionsString()`, or
+`glXQueryServerString(..., GLX_EXTENSIONS)` unless the underlying EGL
+implementation supported v1.5 or later of the EGL API.
+
+
 3.1.1
 =====
 
