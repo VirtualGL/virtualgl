@@ -44,6 +44,12 @@ had previously been initialized on the 2D X server without VirtualGL.
 other elements of the Firefox browser window to disappear when the window was
 resized.
 
+10. Fixed an issue in the EGL back end whereby `GLX_EXT_framebuffer_sRGB` was
+not added to the list of extensions returned by
+`glXGetClientString(..., GLX_EXTENSIONS)`, `glXQueryExtensionsString()`, or
+`glXQueryServerString(..., GLX_EXTENSIONS)` unless the underlying EGL
+implementation supported v1.5 or later of the EGL API.
+
 
 3.0.2
 =====

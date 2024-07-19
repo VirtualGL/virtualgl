@@ -587,7 +587,7 @@ int main(int argc, char **argv)
 		rgbAttribs[19] = 32 - bpc * 3;
 	}
 
-	if(!GLX_EXTENSION_EXISTS(GLX_EXT_framebuffer_sRGB))
+	if(useSRGB && !GLX_EXTENSION_EXISTS(GLX_EXT_framebuffer_sRGB))
 		THROW("GLX_EXT_framebuffer_sRGB extension is not available");
 
 	c = glXChooseFBConfig(dpy, screen, rgbAttribs, &n);
