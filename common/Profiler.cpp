@@ -1,4 +1,4 @@
-// Copyright (C)2004 Landmark Graphics Corporation
+// Copyright (C)2004 Landmark Graphics Corporatio
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
 // Copyright (C)2014, 2021 D. R. Commander
 //
