@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2024-07-19T11:22:10">
+<meta name="date" content="2024-09-06T12:47:12">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.1.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2195,6 +2195,13 @@ displaying Windows 3D applications remotely.</p>
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun -ld <em>path-to-PyTorch-libs</em> <em>application</em></code><br /> or<br /> <code>vglrun -nodl <em>application</em></code><br /></td>
     <td class="standard">The PyTorch module and its dependency libraries are linked with a run-time library search path (rpath) of <code>$ORIGIN</code>, which would normally have the same effect as adding the directory in which the module is installed (for instance, <strong class="filename">/usr/local/lib64/python3.6/site-packages/torch/lib</strong>) to <code>LD_LIBRARY_PATH</code>.  However, when VirtualGL is interposing the <code>dlopen()</code> function (which it does by default), this causes the actual <code>dlopen()</code> system calls to come from <strong class="filename">libdlfaker.so</strong>, so <code>$ORIGIN</code> will resolve to the directory in which the VirtualGL faker libraries are installed.  This causes the <code>dlopen()</code> calls within the PyTorch module to fail.  The workaround is to add the PyTorch module path to <code>LD_LIBRARY_PATH</code>, which is most easily accomplished with <code>vglrun&nbsp;-ld</code>, or to disable VirtualGL&rsquo;s <code>dlopen()</code> interposer.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">Siemens Simcenter STAR-CCM+</td>
+    <td class="standard">v19.xx</td>
+    <td class="standard">Linux</td>
+    <td class="standard"><code>vglrun <em>path-to-STAR-CCM+-scripts</em>/starccm+ \</code><br /> <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-clientldpreload&nbsp;libdlfaker.so:libvglfaker.so</code></td>
+    <td class="standard">Failing to pass the aforementioned arguments to the STAR-CCM+ startup script prevents VirtualGL from being loaded into the application, resulting in unaccelerated OpenGL and error messages such as &ldquo;ERROR: in isDisplayExcluded&ndash; XX: Unexpected NULL condition&rdquo;</td>
   </tr>
   <tr class="standard">
     <td class="standard">Tecplot 360</td>
