@@ -205,6 +205,14 @@
 		to ''LD_LIBRARY_PATH'', which is most easily accomplished with \
 		''vglrun -ld'', or to disable VirtualGL's ''dlopen()'' interposer. \
 	|
+| Siemens Simcenter STAR-CCM+ | v19.xx | Linux \
+	| {pcode: vglrun __path-to-STAR-CCM+-scripts__/starccm+ \\}{nl} \
+		''       -clientldpreload libdlfaker.so:libvglfaker.so'' \
+	| Failing to pass the aforementioned arguments to the STAR-CCM+ startup \
+		script prevents VirtualGL from being loaded into the application, \
+		resulting in unaccelerated OpenGL and error messages such as "ERROR: in \
+		isDisplayExcluded-- XX: Unexpected NULL condition" \
+	|
 | Tecplot 360 | 2011 and earlier | Linux \
 	| Set the ''VGL_GLFLUSHTRIGGER'' environment variable to ''0'' prior to \
 		launching the application with ''vglrun'' \
