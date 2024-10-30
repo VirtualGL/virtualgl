@@ -95,7 +95,7 @@
 		layers of Python and shell scripts.  The ''LD_PRELOAD'' variable does not \
 		get propagated down from the initial shell that invoked ''vglrun''. \
 	|
-| Google Chrome/Chromium | v85 and later | Linux \
+| Google Chrome/Chromium | v85 through v128 | Linux \
 	| ''vglrun google-chrome --in-process-gpu --use-gl=egl''{nl} \
 		or{nl} \
 		''vglrun chromium --in-process-gpu --use-gl=egl'' \
@@ -106,7 +106,9 @@
 		rather than ANGLE, which works around an issue whereby, when using ANGLE, \
 		Chrome/Chromium assumes that every X visual has an EGL framebuffer \
 		configuration associated with it. \
-	|
+    {nl}{nl} \
+    As of this writing, there are no known workarounds that allow Chrome v129 \
+		and later to be used with VirtualGL. |
 | Compiz | All | Linux \
 	| Set the ''VGL_WM'' environment variable to ''1'' prior to launching the \
 		window manager with ''vglrun'', or pass an argument of ''+wm'' to \

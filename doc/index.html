@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2024-09-06T12:47:12">
+<meta name="date" content="2024-10-30T11:20:55">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.1.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2128,10 +2128,10 @@ displaying Windows 3D applications remotely.</p>
   </tr>
   <tr class="standard">
     <td class="standard">Google Chrome/Chromium</td>
-    <td class="standard">v85 and later</td>
+    <td class="standard">v85 through v128</td>
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun&nbsp;google-chrome&nbsp;--in-process-gpu&nbsp;--use-gl=egl</code><br /> or<br /> <code>vglrun&nbsp;chromium&nbsp;--in-process-gpu&nbsp;--use-gl=egl</code></td>
-    <td class="standard">The <code>--in-process-gpu</code> option causes Chrome/Chromium to use a thread rather than a separate process for 3D rendering, which prevents it from complaining about the X11 function calls that the VirtualGL Faker makes. The <code>--use-gl=egl</code> option forces Chrome/Chromium to use desktop OpenGL rather than ANGLE, which works around an issue whereby, when using ANGLE, Chrome/Chromium assumes that every X visual has an EGL framebuffer configuration associated with it.</td>
+    <td class="standard">The <code>--in-process-gpu</code> option causes Chrome/Chromium to use a thread rather than a separate process for 3D rendering, which prevents it from complaining about the X11 function calls that the VirtualGL Faker makes. The <code>--use-gl=egl</code> option forces Chrome/Chromium to use desktop OpenGL rather than ANGLE, which works around an issue whereby, when using ANGLE, Chrome/Chromium assumes that every X visual has an EGL framebuffer configuration associated with it. <br /><br /> As of this writing, there are no known workarounds that allow Chrome v129 and later to be used with VirtualGL.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Compiz</td>
