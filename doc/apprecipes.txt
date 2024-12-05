@@ -106,8 +106,8 @@
 		rather than ANGLE, which works around an issue whereby, when using ANGLE, \
 		Chrome/Chromium assumes that every X visual has an EGL framebuffer \
 		configuration associated with it. \
-    {nl}{nl} \
-    As of this writing, there are no known workarounds that allow Chrome v129 \
+		{nl}{nl} \
+		As of this writing, there are no known workarounds that allow Chrome v129 \
 		and later to be used with VirtualGL. |
 | Compiz | All | Linux \
 	| Set the ''VGL_WM'' environment variable to ''1'' prior to launching the \
