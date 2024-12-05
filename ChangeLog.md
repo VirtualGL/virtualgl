@@ -9,6 +9,11 @@ not added to the list of extensions returned by
 `glXQueryServerString(..., GLX_EXTENSIONS)` unless the underlying EGL
 implementation supported v1.5 or later of the EGL API.
 
+2. If `VGL_SYNC` is enabled, the X11 Transport now reuses the 3D application's
+X display connection(s), which may prevent a 3D application running with
+VirtualGL from exceeding the X server's connection limit if the application
+opens an excessive number of OpenGL windows.
+
 
 3.1.1
 =====

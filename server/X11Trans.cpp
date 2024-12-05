@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2010-2011, 2014, 2019-2021 D. R. Commander
+// Copyright (C)2010-2011, 2014, 2019-2021, 2024 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -31,7 +31,8 @@ using namespace server;
 
 X11Trans::X11Trans(void) : thread(NULL), deadYet(false)
 {
-	for(int i = 0; i < NFRAMES; i++) frames[i] = NULL;
+	if(fconfig.sync) nFrames = 1;
+	for(int i = 0; i < nFrames; i++) frames[i] = NULL;
 	thread = new Thread(this);
 	thread->start();
 	profBlit.setName("Blit      ");
@@ -116,12 +117,12 @@ FBXFrame *X11Trans::getFrame(Display *dpy, Window win, int width, int height)
 		CriticalSection::SafeLock l(mutex);
 
 		int index = -1;
-		for(int i = 0; i < NFRAMES; i++)
+		for(int i = 0; i < nFrames; i++)
 			if(!frames[i] || (frames[i] && frames[i]->isComplete()))
 				index = i;
 		if(index < 0) THROW("No free buffers in pool");
 		if(!frames[index])
-			frames[index] = new FBXFrame(dpy, win);
+			frames[index] = new FBXFrame(dpy, win, NULL, fconfig.sync);
 		f = frames[index];  f->waitUntilComplete();
 	}
 
