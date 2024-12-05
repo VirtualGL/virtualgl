@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2010-2011, 2014, 2021 D. R. Commander
+// Copyright (C)2010-2011, 2014, 2021, 2024 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -34,7 +34,7 @@ namespace server
 				deadYet = true;
 				q.release();
 				if(thread) { thread->stop();  delete thread;  thread = NULL; }
-				for(int i = 0; i < NFRAMES; i++)
+				for(int i = 0; i < nFrames; i++)
 				{
 					delete frames[i];  frames[i] = NULL;
 				}
@@ -49,9 +49,9 @@ namespace server
 
 		private:
 
-			static const int NFRAMES = 3;
+			int nFrames = 3;
 			util::CriticalSection mutex;
-			common::FBXFrame *frames[NFRAMES];
+			common::FBXFrame *frames[3];
 			util::Event ready;
 			util::GenericQ q;
 			util::Thread *thread;

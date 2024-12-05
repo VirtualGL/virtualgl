@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2024-09-06T12:47:48">
+<meta name="date" content="2024-12-05T18:23:01">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.0.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -4501,7 +4501,17 @@ Image transport plugins are free to handle or ignore any configuration option as
         potentially dire effects on performance when used with a 2D X server on 
         a machine other than the VirtualGL server.  It is strongly recommended 
         that <code>VGL_SYNC</code> be used only in conjunction with an X proxy 
-        running on the VirtualGL server.
+        running on the VirtualGL server. <br /><br /> In order to implement 
+        frame spoiling, and also to allow the last frame to be transported while 
+        the current frame is being rendered and read back, VirtualGL&rsquo;s 
+        built-in image transports use a separate &ldquo;transport thread&rdquo;.  
+        To ensure thread safety, the X11 Transport normally creates multiple X 
+        display connections for each OpenGL window.  However, when 
+        <code>VGL_SYNC</code> is enabled, the X11 Transport instead reuses the 
+        3D application&rsquo;s X display connection(s).  Thus, enabling 
+        <code>VGL_SYNC</code> may prevent a 3D application running with 
+        VirtualGL from exceeding the X server&rsquo;s connection limit if the 
+        application opens an excessive number of OpenGL windows.
         <div class="important"><p class="important">
         If an image transport plugin is being used, then VirtualGL does not automatically enable the X11 Transport or disable frame spoiling when <code>VGL_SYNC</code> is set.  This allows the plugin to handle synchronous image delivery as it sees fit (or to simply ignore this option.)
         </p></div>

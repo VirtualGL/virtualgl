@@ -857,6 +857,16 @@ previous method:
 	machine other than the VirtualGL server.  It is strongly recommended that
 	''VGL_SYNC'' be used only in conjunction with an X proxy running on the
 	VirtualGL server.
+	{nl}{nl}
+	In order to implement frame spoiling, and also to allow the last frame to be
+	transported while the current frame is being rendered and read back,
+	VirtualGL's built-in image transports use a separate "transport thread".  To
+	ensure thread safety, the X11 Transport normally creates multiple X display
+	connections for each OpenGL window.  However, when ''VGL_SYNC'' is enabled,
+	the X11 Transport instead reuses the 3D application's X display
+	connection(s).  Thus, enabling ''VGL_SYNC'' may prevent a 3D application
+	running with VirtualGL from exceeding the X server's connection limit if the
+	application opens an excessive number of OpenGL windows.
 
 	!!! If an image transport plugin is being used, then VirtualGL does not
 	automatically enable the X11 Transport or disable frame spoiling when
