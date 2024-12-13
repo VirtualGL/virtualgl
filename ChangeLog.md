@@ -3,13 +3,15 @@
 
 ### Significant changes relative to 3.1.1:
 
-1. Fixed an issue in the EGL back end whereby `GLX_EXT_framebuffer_sRGB` was
+1. Fixed a few minor conformance issues in the EGL/X11 interposer.
+
+2. Fixed an issue in the EGL back end whereby `GLX_EXT_framebuffer_sRGB` was
 not added to the list of extensions returned by
 `glXGetClientString(..., GLX_EXTENSIONS)`, `glXQueryExtensionsString()`, or
 `glXQueryServerString(..., GLX_EXTENSIONS)` unless the underlying EGL
 implementation supported v1.5 or later of the EGL API.
 
-2. If `VGL_SYNC` is enabled, the X11 Transport now reuses the 3D application's
+3. If `VGL_SYNC` is enabled, the X11 Transport now reuses the 3D application's
 X display connection(s), which may prevent a 3D application running with
 VirtualGL from exceeding the X server's connection limit if the application
 opens an excessive number of OpenGL windows.
