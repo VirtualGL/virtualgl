@@ -49,7 +49,7 @@ namespace server
 
 		private:
 
-			int nFrames = 3;
+			int nFrames;
 			util::CriticalSection mutex;
 			common::FBXFrame *frames[3];
 			util::Event ready;

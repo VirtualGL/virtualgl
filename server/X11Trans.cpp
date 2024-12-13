@@ -32,6 +32,7 @@ using namespace server;
 X11Trans::X11Trans(void) : thread(NULL), deadYet(false)
 {
 	if(fconfig.sync) nFrames = 1;
+	else nFrames = 3;
 	for(int i = 0; i < nFrames; i++) frames[i] = NULL;
 	thread = new Thread(this);
 	thread->start();
