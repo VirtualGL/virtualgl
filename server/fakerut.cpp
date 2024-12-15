@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2010-2015, 2017-2023 D. R. Commander
+// Copyright (C)2010-2015, 2017-2024 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -29,6 +29,7 @@
 #include <dlfcn.h>
 #include <unistd.h>
 #include "Error.h"
+#include "Mutex.h"
 #include "Thread.h"
 #include <X11/Xmd.h>
 #include <GL/glxproto.h>
@@ -1657,6 +1658,7 @@ class TestThread : public Runnable
 			ANNOTATE_BENIGN_RACE_SIZED(&width, sizeof(int), );
 			ANNOTATE_BENIGN_RACE_SIZED(&height, sizeof(int), );
 			#endif
+			ready.wait();
 		}
 
 		void run(void)
@@ -1666,6 +1668,7 @@ class TestThread : public Runnable
 
 			if(!(glXMakeContextCurrent(dpy, win, win, ctx)))
 				THROWNL("Could not make context current");
+			ready.signal();
 			int iter = 0;
 			while(!deadYet || !seenResize || iter < 3)
 			{
@@ -1694,12 +1697,15 @@ class TestThread : public Runnable
 			doResize = true;
 		}
 
+		void waitUntilReady(void) { ready.wait(); }
+
 	private:
 
 		int myRank;
 		Display *dpy;
 		Window win;
 		GLXContext ctx;
+		Event ready;
 		bool doResize;
 		int width, height;
 };
@@ -1764,6 +1770,7 @@ int multiThreadTest(int nThreads)
 		printf("Phase 1\n");
 		for(i = 0; i < nThreads; i++)
 		{
+			testThreads[i]->waitUntilReady();
 			int winX = (i % 10) * 100, winY = i / 10 * 120;
 			XMoveResizeWindow(dpy, windows[i], winX, winY, 200, 200);
 			testThreads[i]->resize(200, 200);

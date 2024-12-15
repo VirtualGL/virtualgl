@@ -26,6 +26,7 @@
 #include <unistd.h>
 #define _eglGetError  eglGetError
 #include "EGLError.h"
+#include "Mutex.h"
 #include "Thread.h"
 #ifdef USEHELGRIND
 	#include <valgrind/helgrind.h>
@@ -563,6 +564,7 @@ class TestThread : public Runnable
 			ANNOTATE_BENIGN_RACE_SIZED(&width, sizeof(int), );
 			ANNOTATE_BENIGN_RACE_SIZED(&height, sizeof(int), );
 			#endif
+			ready.wait();
 		}
 
 		void run(void)
@@ -585,6 +587,7 @@ class TestThread : public Runnable
 					THROW_EGL("eglCreateWindowSurface()");
 				if(!(eglMakeCurrent(edpy, surface, surface, ctx)))
 					THROW_EGL("eglMakeCurrent()");
+				ready.signal();
 
 				int iter = 0;
 				while(!deadYet || !seenResize || iter < 3)
@@ -629,12 +632,15 @@ class TestThread : public Runnable
 			doResize = true;
 		}
 
+		void waitUntilReady(void) { ready.wait(); }
+
 	private:
 
 		int myRank;
 		Display *dpy;
 		Window win;
 		EGLDisplay edpy;
+		Event ready;
 		bool doResize;
 		int width, height;
 };
@@ -706,6 +712,7 @@ int multiThreadTest(int nThreads)
 		printf("Phase 1\n");
 		for(i = 0; i < nThreads; i++)
 		{
+			testThreads[i]->waitUntilReady();
 			int winX = (i % 10) * 100, winY = i / 10 * 120;
 			XMoveResizeWindow(dpy, windows[i], winX, winY, 200, 200);
 			testThreads[i]->resize(200, 200);
