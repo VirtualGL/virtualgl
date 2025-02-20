@@ -1,3 +1,14 @@
+3.1.3
+=====
+
+### Significant changes relative to 3.1.2:
+
+1. Fixed an issue whereby, with certain GPU drivers (including nVidia's
+proprietary drivers), the EGL back end did not release the GPU resources
+associated with an OpenGL context when that context was unbound from a
+rendering thread.
+
+
 3.1.2
 =====
 

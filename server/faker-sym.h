@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011, 2013-2016, 2018-2022 D. R. Commander
+// Copyright (C)2009, 2011, 2013-2016, 2018-2022, 2025 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -1077,6 +1077,8 @@ FUNCDEF2(const char *, eglQueryDeviceStringEXT, EGLDeviceEXT, device, EGLint,
 	name, NULL)
 
 FUNCDEF0(EGLenum, eglQueryAPI, NULL)
+
+FUNCDEF0(EGLBoolean, eglReleaseThread, NULL)
 
 // We load all XCB functions dynamically, so that the same VirtualGL binary
 // can be used to support systems with and without XCB libraries.

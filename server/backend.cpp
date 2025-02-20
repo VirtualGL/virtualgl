@@ -1,4 +1,4 @@
-// Copyright (C)2019-2023 D. R. Commander
+// Copyright (C)2019-2023, 2025 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -764,7 +764,11 @@ Bool makeCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 			setCurrentContextEGL(ctx);
 			setCurrentDrawableEGL(draw);
 			setCurrentReadDrawableEGL(read);
-			if(!ctx) return True;
+			if(!ctx)
+			{
+				_eglReleaseThread();
+				return True;
+			}
 
 			FakePbuffer *drawpb = NULL, *readpb = NULL;
 			drawpb = PBHASHEGL.find(draw);
