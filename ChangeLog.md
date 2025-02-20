@@ -55,6 +55,11 @@ X display connection(s), which may prevent a 3D application running with
 VirtualGL from exceeding the X server's connection limit if the application
 opens an excessive number of OpenGL windows.
 
+12. Fixed an issue whereby, with certain GPU drivers (including nVidia's
+proprietary drivers), the EGL back end did not release the GPU resources
+associated with an OpenGL context when that context was unbound from a
+rendering thread.
+
 
 3.0.2
 =====
