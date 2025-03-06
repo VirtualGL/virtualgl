@@ -16,6 +16,10 @@
 <strong>{arg: @body}</strong>
 ---
 
+#DefMacroN id=note args=@body <<---
+<div class="important"><p class="important">{arg: @body}</p></div>
+---
+
 #DefRegionN id=Pverb args=@body <<---
 <pre class="verbatim">{arg: @body}</pre>
 ---
