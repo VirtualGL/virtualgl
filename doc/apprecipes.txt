@@ -200,7 +200,7 @@
 		run-time library search path (rpath) of ''$ORIGIN'', which would normally \
 		have the same effect as adding the directory in which the module is \
 		installed (for instance, \
-		{file: /usr/local/lib64/python3.6/site-packages/torch/lib}) to \
+		{file: /usr/local/lib64/python3.9/site-packages/torch/lib}) to \
 		''LD_LIBRARY_PATH''.  However, when VirtualGL is interposing the \
 		''dlopen()'' function (which it does by default), this causes the actual \
 		''dlopen()'' system calls to come from {file: libdlfaker.so}, so \
@@ -209,6 +209,11 @@
 		PyTorch module to fail.  The workaround is to add the PyTorch module path \
 		to ''LD_LIBRARY_PATH'', which is most easily accomplished with \
 		''vglrun -ld'', or to disable VirtualGL's ''dlopen()'' interposer. \
+		\
+		{note: If you are using CUDA with PyTorch, then it may also be necessary \
+		to add one or more of the CUDA module paths (for instance, \
+		{file: /usr/local/lib64/python3.9/site-packages/nvidia/cudnn/lib}) to \
+		''LD_LIBRARY_PATH''.} \
 	|
 | Tecplot 360 | 2011 and earlier | Linux \
 	| Set the ''VGL_GLFLUSHTRIGGER'' environment variable to ''0'' prior to \
