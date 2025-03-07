@@ -60,6 +60,9 @@ proprietary drivers), the EGL back end did not release the GPU resources
 associated with an OpenGL context when that context was unbound from a
 rendering thread.
 
+13. Fixed an error ("undefined symbol: eglGetProcAddress") that occurred when
+attempting to run a GLX application using the EGL back end and `vglrun -nodl`.
+
 
 3.0.2
 =====
