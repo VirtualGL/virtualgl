@@ -155,6 +155,9 @@ foreach(fakerlib ${FAKERLIBS})
 		target_link_libraries(${fakerlib} ${OPENGL_gl_LIBRARY}
 			${OPENGL_egl_LIBRARY})
 	endif()
+	if(${fakerlib} STREQUAL ${VGL_FAKER_NAME}-nodl)
+		target_link_libraries(${fakerlib} ${OPENGL_egl_LIBRARY})
+	endif()
 	if(${fakerlib} STREQUAL ${VGL_FAKER_NAME}-opencl)
 		target_link_libraries(${fakerlib} ${OPENGL_gl_LIBRARY}
 			${OPENGL_egl_LIBRARY} OpenCL::OpenCL)
