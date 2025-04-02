@@ -117,7 +117,7 @@
    || defined(__x86_64) || defined(__x86_64__) \
    || defined(_M_X64) || defined(__bfin__) \
    || defined(__ARMEL__) || defined(__aarch64__) \
-   || defined(__riscv) \
+   || defined(__riscv) || defined(__loongarch__) \
    || (defined(_WIN32) && defined(__ARM__) && defined(_MSC_VER)) /* ARM Windows CE don't define anything reasonably unique, but there are no big-endian Windows versions */
 
 # define BOOST_LITTLE_ENDIAN
