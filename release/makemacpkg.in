@@ -64,6 +64,14 @@ mkdir -p $PKGROOT
 
 DESTDIR=$PKGROOT @CMAKE_MAKE_PROGRAM@ install
 
+if [ "$MACOS_APP_CERT_NAME" != "" ]; then
+	find $PKGROOT$BINDIR/ -type f ! -name vglconnect | while read file; do
+		codesign -s "$MACOS_APP_CERT_NAME" --options=runtime \
+			--entitlements $SRCDIR/release/entitlements.plist --timestamp $file
+		codesign --verify --strict -v $file
+	done
+fi
+
 mkdir -p $PKGROOT/Library/Documentation
 safedirmove $PKGROOT$DOCDIR $PKGROOT/Library/Documentation/$PKGNAME $TMPDIR/__tmpdoc
 
@@ -80,10 +88,11 @@ fi
 install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
 osacompile -t APPL -o "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/uninstall.applescript
 if [ "$MACOS_APP_CERT_NAME" != "" ]; then
-	codesign -f -s "$MACOS_APP_CERT_NAME" --timestamp "$TMPDIR/Uninstall $PROJECT.app"
-	codesign -vv "$TMPDIR/Uninstall $PROJECT.app"
+	codesign -f -s "$MACOS_APP_CERT_NAME" --options runtime --timestamp \
+		"$TMPDIR/Uninstall $PROJECT.app"
+	codesign --verify --deep --strict -v "$TMPDIR/Uninstall $PROJECT.app"
 fi
-cp -RX "$TMPDIR/Uninstall $PROJECT.app" "$PKGROOT/Applications/$PROJECT/"
+cp -Rp "$TMPDIR/Uninstall $PROJECT.app" "$PKGROOT/Applications/$PROJECT/"
 
 mkdir $TMPDIR/dmg
 pkgbuild --root $PKGROOT --version $VERSION.$BUILD --identifier @PKGID@ \
