@@ -1,4 +1,4 @@
-/* Copyright (C)2017-2019, 2021 D. R. Commander
+/* Copyright (C)2017-2019, 2021, 2025 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -12,7 +12,6 @@
  */
 
 #include "pf.h"
-#include "boost/endian.h"
 #include "vglutil.h"
 #include <string.h>
 
@@ -23,7 +22,7 @@
 #define PF_RGB_BINDEX        2
 
 #define PF_RGBX_SIZE         4
-#ifdef BOOST_BIG_ENDIAN
+#ifdef VGL_BIG_ENDIAN
 #define PF_RGBX_RMASK        0xFF000000
 #define PF_RGBX_GMASK        0x00FF0000
 #define PF_RGBX_BMASK        0x0000FF00
@@ -43,7 +42,7 @@
 #define PF_RGBX_BINDEX       PF_RGB_BINDEX
 
 #define PF_RGB10_X2_SIZE     PF_RGBX_SIZE
-#ifdef BOOST_BIG_ENDIAN
+#ifdef VGL_BIG_ENDIAN
 #define PF_RGB10_X2_RMASK    0xFFC00000
 #define PF_RGB10_X2_GMASK    0x003FF000
 #define PF_RGB10_X2_BMASK    0x00000FFC
@@ -90,7 +89,7 @@
 #define PF_BGR10_X2_BINDEX   PF_RGB10_X2_RINDEX
 
 #define PF_XBGR_SIZE         PF_RGBX_SIZE
-#ifdef BOOST_BIG_ENDIAN
+#ifdef VGL_BIG_ENDIAN
 #define PF_XBGR_RMASK        0x000000FF
 #define PF_XBGR_GMASK        0x0000FF00
 #define PF_XBGR_BMASK        0x00FF0000
@@ -110,7 +109,7 @@
 #define PF_XBGR_BINDEX       1
 
 #define PF_X2_BGR10_SIZE     PF_RGB10_X2_SIZE
-#ifdef BOOST_BIG_ENDIAN
+#ifdef VGL_BIG_ENDIAN
 #define PF_X2_BGR10_RMASK    0x000003FF
 #define PF_X2_BGR10_GMASK    0x000FFC00
 #define PF_X2_BGR10_BMASK    0x3FF00000
