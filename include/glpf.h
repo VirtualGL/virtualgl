@@ -1,4 +1,4 @@
-/* Copyright (C)2017, 2019 D. R. Commander
+/* Copyright (C)2017, 2019, 2025 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -15,7 +15,6 @@
 #define __GLPF_H__
 
 #include "pf.h"
-#include "boost/endian.h"
 #include <GL/gl.h>
 
 
@@ -43,30 +42,30 @@ static const GLenum pf_gldatatype[PIXELFORMATS] =
 {
 	GL_UNSIGNED_BYTE,                /* PF_RGB */
 	GL_UNSIGNED_BYTE,                /* PF_RGBX */
-	#ifdef BOOST_BIG_ENDIAN
+	#ifdef VGL_BIG_ENDIAN
 	GL_UNSIGNED_INT_10_10_10_2,      /* PF_RGB10_X2 */
 	#else
 	GL_UNSIGNED_INT_2_10_10_10_REV,  /* PF_RGB10_X2 */
 	#endif
 	GL_UNSIGNED_BYTE,                /* PF_BGR */
 	GL_UNSIGNED_BYTE,                /* PF_BGRX */
-	#ifdef BOOST_BIG_ENDIAN
+	#ifdef VGL_BIG_ENDIAN
 	GL_UNSIGNED_INT_10_10_10_2,      /* PF_BGR10_X2 */
 	#else
 	GL_UNSIGNED_INT_2_10_10_10_REV,  /* PF_BGR10_X2 */
 	#endif
 	GL_UNSIGNED_BYTE,                /* PF_XBGR */
-	#ifdef BOOST_BIG_ENDIAN
+	#ifdef VGL_BIG_ENDIAN
 	GL_UNSIGNED_INT_2_10_10_10_REV,  /* PF_X2_BGR10 */
 	#else
 	GL_UNSIGNED_INT_10_10_10_2,      /* PF_X2_BGR10 */
 	#endif
-	#ifdef BOOST_BIG_ENDIAN
+	#ifdef VGL_BIG_ENDIAN
 	GL_UNSIGNED_INT_8_8_8_8_REV,     /* PF_XRGB */
 	#else
 	GL_UNSIGNED_INT_8_8_8_8,         /* PF_XRGB */
 	#endif
-	#ifdef BOOST_BIG_ENDIAN
+	#ifdef VGL_BIG_ENDIAN
 	GL_UNSIGNED_INT_2_10_10_10_REV,  /* PF_X2_RGB10 */
 	#else
 	GL_UNSIGNED_INT_10_10_10_2,      /* PF_X2_RGB10 */
