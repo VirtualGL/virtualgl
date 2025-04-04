@@ -11,6 +11,9 @@ rendering thread.
 2. Fixed an error ("undefined symbol: eglGetProcAddress") that occurred when
 attempting to run a GLX application using the EGL back end and `vglrun -nodl`.
 
+3. Fixed an issue whereby the VirtualGL Configuration dialog did not pop up if
+the Num Lock key was on.
+
 
 3.1.2
 =====
