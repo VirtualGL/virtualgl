@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011-2016, 2018-2023 D. R. Commander
+// Copyright (C)2009, 2011-2016, 2018-2023, 2025 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -674,16 +674,11 @@ static void handleEvent(Display *dpy, XEvent *xe)
 	}
 	else if(xe && xe->type == KeyPress)
 	{
-		unsigned int state2, state = (xe->xkey.state & (~(LockMask))) & 0xFF;
-		state2 = fconfig.guimod;
-		if(state2 & Mod1Mask)
-		{
-			state2 &= (~(Mod1Mask));  state2 |= Mod2Mask;
-		}
+		unsigned int state =
+			xe->xkey.state & (ShiftMask | ControlMask | Mod1Mask);
 		if(fconfig.gui
 			&& KeycodeToKeysym(dpy, xe->xkey.keycode, 0) == fconfig.guikey
-			&& (state == fconfig.guimod || state == state2)
-			&& fconfig_getshmid() != -1)
+			&& state == fconfig.guimod && fconfig_getshmid() != -1)
 			VGLPOPUP(dpy, fconfig_getshmid());
 	}
 	else if(xe && xe->type == ClientMessage)

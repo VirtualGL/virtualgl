@@ -17,6 +17,9 @@ the X keyboard extension was enabled on the 2D X server.
 other elements of the Firefox browser window to disappear when the window was
 resized.
 
+5. Fixed an issue whereby the VirtualGL Configuration dialog did not pop up if
+the Num Lock key was on.
+
 
 2.6.6 ESR
 =========
