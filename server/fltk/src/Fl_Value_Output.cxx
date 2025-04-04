@@ -1,28 +1,17 @@
 //
-// "$Id: Fl_Value_Output.cxx 5190 2006-06-09 16:16:34Z mike $"
-//
 // Value output widget for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2010 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 // Fltk widget for drag-adjusting a floating point value.
@@ -88,16 +77,17 @@ int Fl_Value_Output::handle(int event) {
   }
 }
 
+/**
+  Creates a new Fl_Value_Output widget using the given
+  position, size, and label string. The default boxtype is FL_NO_BOX.
+  <P> Inherited destructor destroys the Valuator.
+*/
 Fl_Value_Output::Fl_Value_Output(int X, int Y, int W, int H,const char *l)
 : Fl_Valuator(X,Y,W,H,l) {
   box(FL_NO_BOX);
   align(FL_ALIGN_LEFT);
   textfont_ = FL_HELVETICA;
-  textsize_ = (uchar)FL_NORMAL_SIZE;
+  textsize_ = FL_NORMAL_SIZE;
   textcolor_ = FL_FOREGROUND_COLOR;
   soft_ = 0;
 }
-
-//
-// End of "$Id: Fl_Value_Output.cxx 5190 2006-06-09 16:16:34Z mike $".
-//

@@ -2,21 +2,44 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 if(GNUCC)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing -w")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
 endif()
 if("${CMAKE_C_COMPILER_ID}" MATCHES SunPro)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -erroff")
 endif()
 
 if(GNUCXX)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing -w")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
 endif()
 if("${CMAKE_CXX_COMPILER_ID}" MATCHES SunPro)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -erroff")
 endif()
 
+add_definitions(-DFL_LIBRARY)
+
 
 add_library(fltk_static STATIC
+	src/drivers/Posix/Fl_Posix_System_Driver.cxx
+	src/drivers/Unix/Fl_Unix_Screen_Driver.cxx
+	src/drivers/Unix/Fl_Unix_System_Driver.cxx
+	src/drivers/X11/fl_X11_platform_init.cxx
+	src/drivers/X11/Fl_X11_Screen_Driver.cxx
+	src/drivers/X11/Fl_X11_Window_Driver.cxx
+	src/drivers/Xlib/Fl_Xlib_Copy_Surface_Driver.cxx
+	src/drivers/Xlib/Fl_Xlib_Graphics_Driver.cxx
+	src/drivers/Xlib/Fl_Xlib_Graphics_Driver_arci.cxx
+	src/drivers/Xlib/Fl_Xlib_Graphics_Driver_color.cxx
+	src/drivers/Xlib/Fl_Xlib_Graphics_Driver_font_x.cxx
+	src/drivers/Xlib/Fl_Xlib_Graphics_Driver_image.cxx
+	src/drivers/Xlib/Fl_Xlib_Graphics_Driver_line_style.cxx
+	src/drivers/Xlib/Fl_Xlib_Graphics_Driver_rect.cxx
+	src/drivers/Xlib/Fl_Xlib_Graphics_Driver_vertex.cxx
+	src/drivers/Xlib/Fl_Xlib_Image_Surface_Driver.cxx
+	src/xutf8/case.c
+	src/xutf8/is_spacing.c
+	src/xutf8/keysym2Ucs.c
+	src/xutf8/utf8Utils.c
+	src/xutf8/utf8Wrap.c
 	src/Fl.cxx
 	src/Fl_Adjuster.cxx
 	src/Fl_Bitmap.cxx
@@ -31,7 +54,9 @@ add_library(fltk_static STATIC
 	src/Fl_Choice.cxx
 	src/Fl_Clock.cxx
 	src/Fl_Color_Chooser.cxx
+	src/Fl_Copy_Surface.cxx
 	src/Fl_Counter.cxx
+	src/Fl_Device.cxx
 	src/Fl_Dial.cxx
 	src/Fl_Double_Window.cxx
 	src/Fl_File_Browser.cxx
@@ -39,9 +64,11 @@ add_library(fltk_static STATIC
 	src/Fl_File_Chooser2.cxx
 	src/Fl_File_Icon.cxx
 	src/Fl_File_Input.cxx
+	src/Fl_Graphics_Driver.cxx
 	src/Fl_Group.cxx
 	src/Fl_Help_View.cxx
 	src/Fl_Image.cxx
+	src/Fl_Image_Surface.cxx
 	src/Fl_Input.cxx
 	src/Fl_Input_.cxx
 	src/Fl_Light_Button.cxx
@@ -53,35 +80,45 @@ add_library(fltk_static STATIC
 	src/Fl_Menu_Window.cxx
 	src/Fl_Menu_add.cxx
 	src/Fl_Menu_global.cxx
+	src/Fl_Message.cxx
 	src/Fl_Multi_Label.cxx
 	src/Fl_Overlay_Window.cxx
 	src/Fl_Pack.cxx
+	src/Fl_Paged_Device.cxx
 	src/Fl_Pixmap.cxx
 	src/Fl_Positioner.cxx
 	src/Fl_Preferences.cxx
+	src/Fl_Printer.cxx
 	src/Fl_Progress.cxx
 	src/Fl_Repeat_Button.cxx
 	src/Fl_Return_Button.cxx
 	src/Fl_Roller.cxx
 	src/Fl_Round_Button.cxx
+	src/Fl_Screen_Driver.cxx
 	src/Fl_Scroll.cxx
 	src/Fl_Scrollbar.cxx
 	src/Fl_Shared_Image.cxx
 	src/Fl_Single_Window.cxx
 	src/Fl_Slider.cxx
+	src/Fl_String.cxx
+	src/Fl_System_Driver.cxx
 	src/Fl_Tabs.cxx
 	src/Fl_Text_Buffer.cxx
 	src/Fl_Text_Display.cxx
 	src/Fl_Text_Editor.cxx
 	src/Fl_Tile.cxx
 	src/Fl_Tiled_Image.cxx
+	src/Fl_Timeout.cxx
 	src/Fl_Tooltip.cxx
+	src/Fl_Tree_Prefs.cxx
 	src/Fl_Valuator.cxx
 	src/Fl_Value_Input.cxx
 	src/Fl_Value_Output.cxx
 	src/Fl_Value_Slider.cxx
 	src/Fl_Widget.cxx
+	src/Fl_Widget_Surface.cxx
 	src/Fl_Window.cxx
+	src/Fl_Window_Driver.cxx
 	src/Fl_Window_fullscreen.cxx
 	src/Fl_Window_hotspot.cxx
 	src/Fl_Window_iconize.cxx
@@ -108,38 +145,44 @@ add_library(fltk_static STATIC
 	src/filename_match.cxx
 	src/filename_setext.cxx
 	src/fl_arc.cxx
-	src/fl_arci.cxx
 	src/fl_ask.cxx
 	src/fl_boxtype.cxx
 	src/fl_color.cxx
 	src/fl_cursor.cxx
+	src/fl_contrast.cxx
 	src/fl_curve.cxx
 	src/fl_diamond_box.cxx
-	src/fl_dnd.cxx
+	src/fl_dnd_x.cxx
 	src/fl_draw.cxx
-	src/fl_draw_image.cxx
+	src/fl_draw_arrow.cxx
 	src/fl_draw_pixmap.cxx
+	src/fl_encoding_latin1.cxx
+	src/fl_encoding_mac_roman.cxx
 	src/fl_engraved_label.cxx
 	src/fl_file_dir.cxx
 	src/fl_font.cxx
+	src/fl_gleam.cxx
 	src/fl_gtk.cxx
 	src/fl_labeltype.cxx
-	src/fl_line_style.cxx
 	src/fl_oval_box.cxx
 	src/fl_overlay.cxx
-	src/fl_overlay_visual.cxx
+	src/fl_oxy.cxx
 	src/fl_plastic.cxx
 	src/fl_read_image.cxx
 	src/fl_rect.cxx
 	src/fl_round_box.cxx
 	src/fl_rounded_box.cxx
 	src/fl_set_font.cxx
-	src/fl_set_fonts.cxx
 	src/fl_scroll_area.cxx
 	src/fl_shadow_box.cxx
 	src/fl_shortcut.cxx
 	src/fl_show_colormap.cxx
+	src/fl_string_functions.cxx
 	src/fl_symbols.cxx
+	src/fl_utf8.cxx
 	src/fl_vertex.cxx
 	src/flstring.c
-	src/screen_xywh.cxx)
+	src/numericsort.c
+	src/print_button.cxx
+	src/screen_xywh.cxx
+	src/vsnprintf.c)

@@ -1,43 +1,32 @@
 //
-// "$Id: Fl_Fill_Dial.H 4288 2005-04-16 00:13:17Z mike $"
-//
 // Filled dial header file for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2010 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
+//     https://www.fltk.org/bugs.php
 //
-//     http://www.fltk.org/str.php
-//
+
+/* \file
+   Fl_Fill_Dial widget . */
 
 #ifndef Fl_Fill_Dial_H
 #define Fl_Fill_Dial_H
 
 #include "Fl_Dial.H"
 
-class Fl_Fill_Dial : public Fl_Dial {
+/** Draws a dial with a filled arc */
+class FL_EXPORT Fl_Fill_Dial : public Fl_Dial {
 public:
-    Fl_Fill_Dial(int x,int y,int w,int h, const char *l = 0)
-	: Fl_Dial(x,y,w,h,l) {type(FL_FILL_DIAL);}
+  /** Creates a filled dial, also setting its type to FL_FILL_DIAL. */
+  Fl_Fill_Dial(int X,int Y,int W,int H, const char *L = NULL);
 };
 
 #endif
-
-//
-// End of "$Id: Fl_Fill_Dial.H 4288 2005-04-16 00:13:17Z mike $".
-//

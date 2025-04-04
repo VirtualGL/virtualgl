@@ -1,32 +1,21 @@
 //
-// "$Id: Fl_Pack.cxx 6868 2009-09-13 12:10:56Z AlbrechtS $"
-//
 // Packing widget for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2006 by Bill Spitzak and others.
+// Copyright 1998-2023 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 // Based on code by Curtis Edwards
-// Group that compresses all it's children together and resizes to surround
+// Group that compresses all its children together and resizes to surround
 // them on each redraw (only if box() is zero)
 // Bugs: ?
 
@@ -34,8 +23,27 @@
 #include <FL/Fl_Pack.H>
 #include <FL/fl_draw.H>
 
-Fl_Pack::Fl_Pack(int X, int Y, int W, int H,const char *l)
-: Fl_Group(X, Y, W, H, l) {
+/**
+  Creates a new Fl_Pack widget using the given position, size,
+  and label string.
+
+  The default boxtype is FL_NO_BOX.
+
+  The default type() is Fl_Pack::VERTICAL.
+
+  The destructor <I>also deletes all the children</I>. This allows a
+  whole tree to be deleted at once, without having to keep a pointer to
+  all the children in the user code. A kludge has been done so the
+  Fl_Pack and all of its children can be automatic (local)
+  variables, but you must declare the Fl_Pack <I>first</I>, so
+  that it is destroyed last.
+
+  \param[in] X,Y        X and Y coordinates (position)
+  \param[in] W,H        width and height, respectively
+  \param[in] L          label (optional)
+*/
+Fl_Pack::Fl_Pack(int X, int Y, int W, int H, const char *L)
+: Fl_Group(X, Y, W, H, L) {
   resizable(0);
   spacing_ = 0;
   // type(VERTICAL); // already set like this
@@ -54,7 +62,7 @@ void Fl_Pack::draw() {
   if (horizontal()) {
     rw = -spacing_;
     rh = th;
-    
+
     for (int i = children(); i--;)
       if (child(i)->visible()) {
         if (child(i) != this->resizable()) rw += child(i)->w();
@@ -63,7 +71,7 @@ void Fl_Pack::draw() {
   } else {
     rw = tw;
     rh = -spacing_;
-    
+
     for (int i = children(); i--;)
       if (child(i)->visible()) {
         if (child(i) != this->resizable()) rh += child(i)->h();
@@ -102,12 +110,18 @@ void Fl_Pack::draw() {
       }
       if (X != o->x() || Y != o->y() || W != o->w() || H != o->h()) {
         o->resize(X,Y,W,H);
+        // Clear all damage flags, but *set* FL_DAMAGE_ALL, even if the widget
+        // may be clipped by the parent and needs no redraw.
         o->clear_damage(FL_DAMAGE_ALL);
       }
       if (d&FL_DAMAGE_ALL) {
         draw_child(*o);
         draw_outside_label(*o);
-      } else update_child(*o);
+      } else {
+        update_child(*o);
+      }
+      // Make sure that all damage flags are cleared.
+      o->clear_damage();
       // child's draw() can change it's size, so use new size:
       current_position += (horizontal() ? o->w() : o->h());
       if (current_position > maximum_position)
@@ -115,7 +129,7 @@ void Fl_Pack::draw() {
       current_position += spacing_;
     }
   }
-  
+
   if (horizontal()) {
     if (maximum_position < tx+tw && box()) {
       fl_color(color());
@@ -129,11 +143,13 @@ void Fl_Pack::draw() {
     }
     th = maximum_position-ty;
   }
-  
+
   tw += Fl::box_dw(box()); if (tw <= 0) tw = 1;
   th += Fl::box_dh(box()); if (th <= 0) th = 1;
   if (tw != w() || th != h()) {
     Fl_Widget::resize(x(),y(),tw,th);
+    Fl_Group *parent = this->parent();
+    if (parent) parent->init_sizes();
     d = FL_DAMAGE_ALL;
   }
   if (d&FL_DAMAGE_ALL) {
@@ -142,6 +158,14 @@ void Fl_Pack::draw() {
   }
 }
 
-//
-// End of "$Id: Fl_Pack.cxx 6868 2009-09-13 12:10:56Z AlbrechtS $".
-//
+/** Override Fl_Group resize behavior.
+
+  Resizing an Fl_Pack will not resize any of its children, but trigger a
+  redraw, which in turn recalculates the dimensions of all children.
+
+  \param[in] X, Y, W, H new position and size of the Fl_Pack widget
+*/
+void Fl_Pack::resize(int X, int Y, int W, int H) {
+  Fl_Widget::resize(X, Y, W, H);
+  redraw();
+}

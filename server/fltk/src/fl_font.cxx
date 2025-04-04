@@ -1,60 +1,71 @@
 //
-// "$Id: fl_font.cxx 5190 2006-06-09 16:16:34Z mike $"
-//
 // Font selection code for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2016 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
+//     https://www.fltk.org/bugs.php
 //
-//     http://www.fltk.org/str.php
-//
+
 
 // Select fonts from the FLTK font table.
 #include "flstring.h"
-#include <FL/Fl.H>
 #include <FL/fl_draw.H>
-#include <FL/x.H>
-#include "Fl_Font.H"
+#include "Fl_Screen_Driver.H"
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#ifdef WIN32
-#  include "fl_font_win32.cxx"
-#elif defined(__APPLE__)
-#  include "fl_font_mac.cxx"
-#elif USE_XFT
-#  include "fl_font_xft.cxx"
-#else
-#  include "fl_font_x.cxx"
-#endif // WIN32
-
+// -----------------------------------------------------------------------------
+// all driver code is now in drivers/XXX/Fl_XXX_Graphics_Driver_xyz.cxx
+// -----------------------------------------------------------------------------
 
 double fl_width(const char* c) {
-  if (c) return fl_width(c, strlen(c));
+  if (c) return fl_width(c, (int) strlen(c));
   else return 0.0f;
 }
 
 void fl_draw(const char* str, int x, int y) {
-  fl_draw(str, strlen(str), x, y);
+  fl_draw(str, (int) strlen(str), x, y);
 }
 
-//
-// End of "$Id: fl_font.cxx 5190 2006-06-09 16:16:34Z mike $".
-//
+void fl_draw(int angle, const char* str, int x, int y) {
+  fl_draw(angle, str, (int) strlen(str), x, y);//must be fixed!
+}
+
+void fl_text_extents(const char *c, int &dx, int &dy, int &w, int &h) {
+  if (c)  fl_text_extents(c, (int) strlen(c), dx, dy, w, h);
+  else {
+    w = 0; h = 0;
+    dx = 0; dy = 0;
+  }
+} // fl_text_extents
+
+
+void fl_draw(const char* str, int l, float x, float y) {
+  fl_graphics_driver->draw(str, l, x, y);
+}
+
+void fl_set_spot(int font, int size, int X, int Y, int W, int H, Fl_Window *win)
+{
+  Fl::screen_driver()->set_spot(font, size, X, Y, W, H, win);
+}
+
+void fl_reset_spot()
+{
+  Fl::screen_driver()->reset_spot();
+}
+
+/** Related to text input methods under X11.
+ This function is presently used only by the \c utf8 test application and only for the X11 platform.
+ This function is apparently not indispensable for text input to work correctly
+ as suggested by other apps that don't use it (e.g., editor).
+ */
+void fl_set_status(int X, int Y, int W, int H)
+{
+  Fl::screen_driver()->set_status(X, Y, W, H);
+}

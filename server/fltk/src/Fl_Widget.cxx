@@ -1,28 +1,17 @@
 //
-// "$Id: Fl_Widget.cxx 6978 2009-12-23 12:54:41Z AlbrechtS $"
-//
 // Base widget class for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2022 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 #include <FL/Fl.H>
@@ -30,14 +19,15 @@
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Tooltip.H>
 #include <FL/fl_draw.H>
+#include <FL/fl_string_functions.h>
 #include <stdlib.h>
 #include "flstring.h"
 
 
 ////////////////////////////////////////////////////////////////
-// for compatability with Forms, all widgets without callbacks are
+// for compatibility with Forms, all widgets without callbacks are
 // inserted into a "queue" when they are activated, and the forms
-// compatability interaction functions (fl_do_events, etc) will
+// compatibility interaction functions (fl_do_events, etc.) will
 // read one widget at a time from this queue and return it:
 
 const int QUEUE_SIZE = 20;
@@ -45,33 +35,39 @@ const int QUEUE_SIZE = 20;
 static Fl_Widget *obj_queue[QUEUE_SIZE];
 static int obj_head, obj_tail;
 
-void Fl_Widget::default_callback(Fl_Widget *o, void * /*v*/) {
-#if 0
-  // This is necessary for strict forms compatibility but is confusing.
-  // Use the parent's callback if this widget does not have one.
-  for (Fl_Widget *p = o->parent(); p; p = p->parent())
-    if (p->callback() != default_callback) {
-      p->do_callback(o,v);
-      return;
-    }
-#endif
-  obj_queue[obj_head++] = o;
+void Fl_Widget::default_callback(Fl_Widget *widget, void * /*v*/) {
+  obj_queue[obj_head++] = widget;
   if (obj_head >= QUEUE_SIZE) obj_head = 0;
   if (obj_head == obj_tail) {
     obj_tail++;
     if (obj_tail >= QUEUE_SIZE) obj_tail = 0;
   }
 }
-/*
-    All Fl_Widgets that don't have a callback defined use a
-    default callback that puts a pointer to the widget in this queue,
-    and this method reads the oldest widget out of this queue.
+/**
+    Reads the default callback queue and returns the first widget.
+
+    All Fl_Widgets that don't have a callback defined use the default
+    callback \p static Fl_Widget::default_callback() that puts a pointer
+    to the widget in a queue. This method reads the oldest widget out
+    of this queue.
+
+    The queue (FIFO) is limited (currently 20 items). If the queue
+    overflows, the oldest entry (Fl_Widget *) is discarded.
+
+    Relying on the default callback and reading the callback queue with
+    Fl::readqueue() is not recommended. If you need a callback, you should
+    set one with Fl_Widget::callback(Fl_Callback *cb, void *data)
+    or one of its variants.
+
+    \see Fl_Widget::callback()
+    \see Fl_Widget::callback(Fl_Callback *cb, void *data)
+    \see Fl_Widget::default_callback()
 */
 Fl_Widget *Fl::readqueue() {
   if (obj_tail==obj_head) return 0;
-  Fl_Widget *o = obj_queue[obj_tail++];
+  Fl_Widget *widget = obj_queue[obj_tail++];
   if (obj_tail >= QUEUE_SIZE) obj_tail = 0;
-  return o;
+  return widget;
 }
 /*
     This static internal function removes all pending callbacks for a
@@ -83,13 +79,13 @@ Fl_Widget *Fl::readqueue() {
 static void cleanup_readqueue(Fl_Widget *w) {
 
   if (obj_tail==obj_head) return;
-  
+
   // Read the entire queue and copy over all valid entries.
   // The new head will be determined after the last copied entry.
 
-  int old_head = obj_head;	// save newest entry
-  int entry = obj_tail;		// oldest entry
-  obj_head = obj_tail;		// new queue start
+  int old_head = obj_head;      // save newest entry
+  int entry = obj_tail;         // oldest entry
+  obj_head = obj_tail;          // new queue start
   for (;;) {
     Fl_Widget *o = obj_queue[entry++];
     if (entry >= QUEUE_SIZE) entry = 0;
@@ -101,37 +97,39 @@ static void cleanup_readqueue(Fl_Widget *w) {
   }
   return;
 }
-
 ////////////////////////////////////////////////////////////////
 
 int Fl_Widget::handle(int) {
   return 0;
 }
 
-int FL_NORMAL_SIZE = 14;
+/** Default font size for widgets */
+Fl_Fontsize FL_NORMAL_SIZE = 14;
 
 Fl_Widget::Fl_Widget(int X, int Y, int W, int H, const char* L) {
 
   x_ = X; y_ = Y; w_ = W; h_ = H;
 
-  label_.value	 = L;
+  label_.value   = L;
   label_.image   = 0;
   label_.deimage = 0;
-  label_.type	 = FL_NORMAL_LABEL;
-  label_.font	 = FL_HELVETICA;
-  label_.size	 = (uchar)FL_NORMAL_SIZE;
-  label_.color	 = FL_FOREGROUND_COLOR;
+  label_.type    = FL_NORMAL_LABEL;
+  label_.font    = FL_HELVETICA;
+  label_.size    = FL_NORMAL_SIZE;
+  label_.color   = FL_FOREGROUND_COLOR;
+  label_.align_  = FL_ALIGN_CENTER;
+  label_.h_margin_ = label_.v_margin_ = 0;
+  label_.spacing = 0;
   tooltip_       = 0;
-  callback_	 = default_callback;
-  user_data_ 	 = 0;
-  type_		 = 0;
-  flags_	 = VISIBLE_FOCUS;
-  damage_	 = 0;
-  box_		 = FL_NO_BOX;
-  color_	 = FL_GRAY;
-  color2_	 = FL_GRAY;
-  align_	 = FL_ALIGN_CENTER;
-  when_		 = FL_WHEN_RELEASE;
+  callback_      = default_callback;
+  user_data_     = 0;
+  type_          = 0;
+  flags_         = VISIBLE_FOCUS;
+  damage_        = 0;
+  box_           = FL_NO_BOX;
+  color_         = FL_GRAY;
+  color2_        = FL_GRAY;
+  when_          = FL_WHEN_RELEASE;
 
   parent_ = 0;
   if (Fl_Group::current()) Fl_Group::current()->add(this);
@@ -160,62 +158,65 @@ int Fl_Widget::take_focus() {
 
 extern void fl_throw_focus(Fl_Widget*); // in Fl_x.cxx
 
-// Destruction does not remove from any parent group!  And groups when
-// destroyed destroy all their children.  This is convienent and fast.
-// However, it is only legal to destroy a "root" such as an Fl_Window,
-// and automatic destructors may be called.
+/**
+   Destroys the widget, taking care of throwing focus before if any.
+   Destruction removes the widget from any parent group! And groups when
+   destroyed destroy all their children. This is convenient and fast.
+*/
 Fl_Widget::~Fl_Widget() {
   Fl::clear_widget_pointer(this);
   if (flags() & COPIED_LABEL) free((void *)(label_.value));
+  if (flags() & COPIED_TOOLTIP) free((void *)(tooltip_));
+  image(NULL);
+  deimage(NULL);
+  // remove from parent group
+  if (parent_) parent_->remove(this);
+#ifdef DEBUG_DELETE
+  if (parent_) { // this should never happen
+    printf("*** Fl_Widget: parent_->remove(this) failed [%p,%p]\n",parent_,this);
+  }
+#endif // DEBUG_DELETE
   parent_ = 0; // Don't throw focus to a parent widget.
   fl_throw_focus(this);
   // remove stale entries from default callback queue (Fl::readqueue())
   if (callback_ == default_callback) cleanup_readqueue(this);
+  if ( (flags_ & AUTO_DELETE_USER_DATA) && user_data_)
+    delete (Fl_Callback_User_Data*)user_data_;
 }
 
-// draw a focus box for the widget...
-void
-Fl_Widget::draw_focus(Fl_Boxtype B, int X, int Y, int W, int H) const {
+/**
+  Draws a focus box for the widget at the given position and size.
+
+  This method does nothing if
+  - the global option Fl::visible_focus() or
+  - the per-widget option visible_focus()
+  is false (off).
+
+  This means that Fl_Widget::draw_focus() or one of the more specialized
+  methods can be called without checking these visible focus options.
+
+  \note This method must only be called if the widget has the focus.
+        This is not tested internally.
+
+  The boxtype \p bt is used to calculate the inset so the focus box is drawn
+  inside the box borders.
+
+  The default focus box drawing color is black. The background color \p bg
+  is used to determine a better visible color if necessary by using
+  fl_contrast() with the given background color.
+
+  \param[in]  bt        Boxtype that needs to be considered (frame width)
+  \param[in]  X,Y,W,H   Bounding box
+  \param[in]  bg        Background color
+
+  \see Fl_Widget::draw_focus()
+  \see Fl_Widget::draw_focus(Fl_Boxtype, int, int, int, int) const
+*/
+void Fl_Widget::draw_focus(Fl_Boxtype bt, int X, int Y, int W, int H, Fl_Color bg) const {
   if (!Fl::visible_focus()) return;
-  switch (B) {
-    case FL_DOWN_BOX:
-    case FL_DOWN_FRAME:
-    case FL_THIN_DOWN_BOX:
-    case FL_THIN_DOWN_FRAME:
-      X ++;
-      Y ++;
-    default:
-      break;
-  }
-
-  fl_color(fl_contrast(FL_BLACK, color()));
-
-#if defined(WIN32) || defined(__APPLE_QD__)
-  // Windows 95/98/ME do not implement the dotted line style, so draw
-  // every other pixel around the focus area...
-  //
-  // Also, QuickDraw (MacOS) does not support line styles specifically,
-  // and the hack we use in fl_line_style() will not draw horizontal lines
-  // on odd-numbered rows...
-  int i, xx, yy;
-
-  X += Fl::box_dx(B);
-  Y += Fl::box_dy(B);
-  W -= Fl::box_dw(B) + 2;
-  H -= Fl::box_dh(B) + 2;
-
-  for (xx = 0, i = 1; xx < W; xx ++, i ++) if (i & 1) fl_point(X + xx, Y);
-  for (yy = 0; yy < H; yy ++, i ++) if (i & 1) fl_point(X + W, Y + yy);
-  for (xx = W; xx > 0; xx --, i ++) if (i & 1) fl_point(X + xx, Y + H);
-  for (yy = H; yy > 0; yy --, i ++) if (i & 1) fl_point(X, Y + yy);
-#else
-  fl_line_style(FL_DOT);
-  fl_rect(X + Fl::box_dx(B), Y + Fl::box_dy(B),
-          W - Fl::box_dw(B) - 1, H - Fl::box_dh(B) - 1);
-  fl_line_style(FL_SOLID);
-#endif // WIN32
+  if (!visible_focus()) return;
+  fl_draw_box_focus(bt, X, Y, W, H, FL_BLACK, bg);
 }
-
 
 void Fl_Widget::activate() {
   if (!active()) {
@@ -285,8 +286,7 @@ int Fl_Widget::contains(const Fl_Widget *o) const {
 }
 
 
-void
-Fl_Widget::label(const char *a) {
+void Fl_Widget::label(const char *a) {
   if (flags() & COPIED_LABEL) {
     // reassigning a copied label remains the same copied label
     if (label_.value == a)
@@ -299,20 +299,114 @@ Fl_Widget::label(const char *a) {
 }
 
 
-void
-Fl_Widget::copy_label(const char *a) {
-  if (flags() & COPIED_LABEL) free((void *)(label_.value));
+void Fl_Widget::copy_label(const char *a) {
+  // reassigning a copied label remains the same copied label
+  if ((flags() & COPIED_LABEL) && (label_.value == a))
+    return;
   if (a) {
+    label(fl_strdup(a));
     set_flag(COPIED_LABEL);
-    label_.value=strdup(a);
   } else {
-    clear_flag(COPIED_LABEL);
-    label_.value=(char *)0;
+    label(0);
   }
-  redraw_label();
 }
 
+void Fl_Widget::image(Fl_Image* img) {
+  if (image_bound()) {
+    if (label_.image && (label_.image != img)) {
+      label_.image->release();
+    }
+    bind_image(0);
+  }
+  label_.image = img;
+}
 
-//
-// End of "$Id: Fl_Widget.cxx 6978 2009-12-23 12:54:41Z AlbrechtS $".
-//
+void Fl_Widget::image(Fl_Image& img) {
+  image(&img);
+}
+
+void Fl_Widget::bind_image(Fl_Image* img) {
+  image(img);
+  bind_image( (img != NULL) );
+}
+
+void Fl_Widget::deimage(Fl_Image* img) {
+  if (deimage_bound()) {
+    if (label_.deimage && (label_.deimage != img))  {
+      label_.deimage->release();
+    }
+    bind_deimage(0);
+  }
+  label_.deimage = img;
+}
+
+void Fl_Widget::deimage(Fl_Image& img) {
+  deimage(&img);
+}
+
+void Fl_Widget::bind_deimage(Fl_Image* img) {
+  deimage(img);
+  bind_deimage( (img != NULL) );
+}
+
+/** Calls the widget callback function with arbitrary arguments.
+
+ All overloads of do_callback() call this method.
+ It does nothing if the widget's callback() is NULL.
+ It clears the widget's \e changed flag \b after the callback was
+ called unless the callback is the default callback. Hence it is not
+ necessary to call clear_changed() after calling do_callback()
+ in your own widget's handle() method.
+
+ A \p reason must be set for widgets if different actions can trigger
+ the same callback.
+
+ \note It is legal to delete the widget in the callback (i.e. in user code),
+ but you must not access the widget in the handle() method after
+ calling do_callback() if the widget was deleted in the callback.
+ We recommend to use Fl_Widget_Tracker to check whether the widget
+ was deleted in the callback.
+
+ \param[in] widget call the callback with \p widget as the first argument
+ \param[in] arg use \p arg as the user data (second) argument
+ \param[in] reason give a reason to why this callback was called, defaults to \ref FL_REASON_UNKNOWN
+
+ \see default_callback()
+ \see callback()
+ \see class Fl_Widget_Tracker
+ \see Fl::callback_reason()
+ */
+void Fl_Widget::do_callback(Fl_Widget *widget, void *arg, Fl_Callback_Reason reason) {
+  Fl::callback_reason_ = reason;
+  if (!callback_) return;
+  Fl_Widget_Tracker wp(this);
+  callback_(widget, arg);
+  if (wp.deleted()) return;
+  if (callback_ != default_callback)
+    clear_changed();
+}
+
+/*
+ \brief Sets the user data for this widget.
+ Sets the new user data (void *) argument that is passed to the callback function.
+ \param[in] v new user data
+ */
+void Fl_Widget::user_data(void* v) {
+  if ((flags_ & AUTO_DELETE_USER_DATA) && user_data_)
+    delete (Fl_Callback_User_Data*)user_data_;
+  clear_flag(AUTO_DELETE_USER_DATA);
+  user_data_ = v;
+}
+
+/*
+ \brief Sets the user data for this widget.
+ Sets the new user data (void *) argument that is passed to the callback function.
+ \param[in] v new user data
+ \param[in] auto_free if set, the widget will free user data when destroyed; defaults to false
+ */
+void Fl_Widget::user_data(Fl_Callback_User_Data* v, bool auto_free) {
+  user_data((void*)v);
+  if (auto_free)
+    set_flag(AUTO_DELETE_USER_DATA);
+}
+

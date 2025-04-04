@@ -1,38 +1,33 @@
 //
-// "$Id: Fl_Dial.cxx 5472 2006-09-20 03:03:14Z mike $"
-//
 // Circular dial widget for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2006 by Bill Spitzak and others.
+// Copyright 1998-2010 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 #include <FL/Fl.H>
 #include <FL/Fl_Dial.H>
+#include <FL/Fl_Fill_Dial.H>
+#include <FL/Fl_Line_Dial.H>
 #include <FL/fl_draw.H>
 #include <stdlib.h>
 #include <FL/math.h>
 
-// All angles are measured with 0 to the right and counter-clockwise
 
+// All angles are measured with 0 to the right and counter-clockwise
+/**
+  Draws dial at given position and size.
+  \param[in] X, Y, W, H position and size
+*/
 void Fl_Dial::draw(int X, int Y, int W, int H) {
   if (damage()&FL_DAMAGE_ALL) draw_box(box(), X, Y, W, H, color());
   X += Fl::box_dx(box());
@@ -92,15 +87,23 @@ void Fl_Dial::draw(int X, int Y, int W, int H) {
   fl_pop_matrix();
 }
 
+/**
+  Draws dial at current position and size.
+*/
 void Fl_Dial::draw() {
   draw(x(), y(), w(), h());
   draw_label();
 }
 
+/**
+  Allows subclasses to handle event based on given position and size.
+  \param[in] event, X, Y, W, H event to handle, related position and size.
+*/
 int Fl_Dial::handle(int event, int X, int Y, int W, int H) {
   switch (event) {
   case FL_PUSH:
     handle_push();
+    /* FALLTHROUGH */
   case FL_DRAG: {
     int mx = (Fl::event_x()-X-W/2)*H;
     int my = (Fl::event_y()-Y-H/2)*W;
@@ -118,30 +121,46 @@ int Fl_Dial::handle(int event, int X, int Y, int W, int H) {
       val = minimum() + (maximum()-minimum())*(angle-a1)/(a2-a1);
     }
     handle_drag(clamp(round(val)));
-  } return 1;
+    return 1;
+  } /* NOTREACHED */
   case FL_RELEASE:
     handle_release();
     return 1;
-  case FL_ENTER :
-  case FL_LEAVE :
+  case FL_ENTER: /* FALLTHROUGH */
+  case FL_LEAVE:
     return 1;
   default:
     return 0;
   }
 }
 
+/**
+  Allow subclasses to handle event based on current position and size.
+*/
 int Fl_Dial::handle(int e) {
   return handle(e, x(), y(), w(), h());
 }
 
 Fl_Dial::Fl_Dial(int X, int Y, int W, int H, const char* l)
-  : Fl_Valuator(X, Y, W, H, l) {
+/**
+  Creates a new Fl_Dial widget using the given position, size,
+  and label string. The default type is FL_NORMAL_DIAL.
+*/
+: Fl_Valuator(X, Y, W, H, l) {
   box(FL_OVAL_BOX);
   selection_color(FL_INACTIVE_COLOR); // was 37
   a1 = 45;
   a2 = 315;
 }
 
-//
-// End of "$Id: Fl_Dial.cxx 5472 2006-09-20 03:03:14Z mike $".
-//
+
+Fl_Fill_Dial::Fl_Fill_Dial(int X,int Y,int W,int H, const char *L)
+: Fl_Dial(X,Y,W,H,L) {
+  type(FL_FILL_DIAL);
+}
+
+
+Fl_Line_Dial::Fl_Line_Dial(int X,int Y,int W,int H, const char *L)
+: Fl_Dial(X,Y,W,H,L) {
+  type(FL_LINE_DIAL);
+}

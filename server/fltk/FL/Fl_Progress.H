@@ -1,29 +1,21 @@
 //
-// "$Id: Fl_Progress.H 4288 2005-04-16 00:13:17Z mike $"
-//
 // Progress bar widget definitions.
 //
-// Copyright 2000-2005 by Michael Sweet.
+// Copyright 2000-2010 by Michael Sweet.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
+//     https://www.fltk.org/bugs.php
 //
-//     http://www.fltk.org/str.php
-//
+
+/* \file
+   Fl_Progress widget . */
 
 #ifndef _Fl_Progress_H_
 #  define _Fl_Progress_H_
@@ -38,33 +30,37 @@
 //
 // Progress class...
 //
+/**
+    Displays a progress bar for the user.
+*/
+class FL_EXPORT Fl_Progress : public Fl_Widget {
 
-class FL_EXPORT Fl_Progress : public Fl_Widget
-{
-  float	value_,
-	minimum_,
-	maximum_;
+  float value_,
+        minimum_,
+        maximum_;
 
   protected:
 
-  virtual void draw();
+  void draw() FL_OVERRIDE;
 
   public:
 
   Fl_Progress(int x, int y, int w, int h, const char *l = 0);
 
-  void	maximum(float v) { maximum_ = v; redraw(); }
-  float	maximum() const { return (maximum_); }
+  /** Sets the maximum value in the progress widget.  */
+  void  maximum(float v) { maximum_ = v; redraw(); }
+  /** Gets the maximum value in the progress widget.  */
+  float maximum() const { return (maximum_); }
 
-  void	minimum(float v) { minimum_ = v; redraw(); }
-  float	minimum() const { return (minimum_); }
+  /** Sets the minimum value in the progress widget.  */
+  void  minimum(float v) { minimum_ = v; redraw(); }
+  /** Gets the minimum value in the progress widget.  */
+  float minimum() const { return (minimum_); }
 
-  void	value(float v) { value_ = v; redraw(); }
-  float	value() const { return (value_); }
+  /** Sets the current value in the progress widget.  */
+  void  value(float v) { value_ = v; redraw(); }
+  /** Gets the current value in the progress widget.  */
+  float value() const { return (value_); }
 };
 
 #endif // !_Fl_Progress_H_
-
-//
-// End of "$Id: Fl_Progress.H 4288 2005-04-16 00:13:17Z mike $".
-//

@@ -1,54 +1,139 @@
 //
-// "$Id: Fl_Input_.cxx 6104 2008-04-21 20:54:37Z matt $"
-//
 // Common input widget routines for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2006 by Bill Spitzak and others.
+// Copyright 1998-2011 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
+//     https://www.fltk.org/bugs.php
 //
-//     http://www.fltk.org/str.php
-//
-
-// This is the base class for Fl_Input.  You can use it directly
-// if you are one of those people who like to define their own
-// set of editing keys.  It may also be useful for adding scrollbars
-// to the input field.
 
 #include <FL/Fl.H>
 #include <FL/Fl_Input_.H>
 #include <FL/Fl_Window.H>
+#include "Fl_Screen_Driver.H"
 #include <FL/fl_draw.H>
 #include <FL/fl_ask.H>
 #include <math.h>
+#include <FL/fl_utf8.h>
 #include "flstring.h"
 #include <stdlib.h>
 #include <ctype.h>
 
 #define MAXBUF 1024
+static int l_secret;
 
 extern void fl_draw(const char*, int, float, float);
 
 ////////////////////////////////////////////////////////////////
 
-// Copy string p..e to the buffer, replacing characters with ^X and \nnn
-// as necessary.  Truncate if necessary so the resulting string and
-// null terminator fits in a buffer of size n.  Return new end pointer.
+// see: Fl_Text_Undo_Action
+class Fl_Input_Undo_Action {
+public:
+  Fl_Input_Undo_Action() :
+  undobuffer(NULL),
+  undobufferlength(0),
+  undoat(0),
+  undocut(0),
+  undoinsert(0),
+  undoyankcut(0)
+  { }
+  ~Fl_Input_Undo_Action() {
+    if (undobuffer)
+      ::free(undobuffer);
+  }
+
+  char *undobuffer;
+  int undobufferlength;
+  int undoat;              // points after insertion
+  int undocut;             // number of characters deleted there
+  int undoinsert;          // number of characters inserted
+  int undoyankcut;         // length of valid contents of buffer, even if undocut=0
+
+  /*
+   Resize the undo buffer to match at least the requested size.
+   */
+  void undobuffersize(int n)
+  {
+    if (n > undobufferlength) {
+      undobufferlength = n + 128;
+      undobuffer = (char *)realloc(undobuffer, undobufferlength);
+    }
+  }
+
+  void clear() {
+    undocut = undoinsert = 0;
+  }
+};
+
+// see: Fl_Text_Undo_Action_List
+class Fl_Input_Undo_Action_List {
+  Fl_Input_Undo_Action** list_;
+  int list_size_;
+  int list_capacity_;
+public:
+  Fl_Input_Undo_Action_List() :
+    list_(NULL),
+    list_size_(0),
+    list_capacity_(0)
+  { }
+
+  ~Fl_Input_Undo_Action_List() {
+    clear();
+  }
+
+  int size() const {
+    return list_size_;
+  }
+
+  void push(Fl_Input_Undo_Action* action) {
+    if (list_size_ == list_capacity_) {
+      list_capacity_ += 25;
+      list_ = (Fl_Input_Undo_Action**)realloc(list_, list_capacity_ * sizeof(Fl_Input_Undo_Action*));
+    }
+    list_[list_size_++] = action;
+  }
+
+  Fl_Input_Undo_Action* pop() {
+    if (list_size_ > 0)
+      return list_[--list_size_];
+    else
+      return NULL;
+  }
+
+  void clear() {
+    if (list_) {
+      for (int i=0; i<list_size_; i++) {
+        delete list_[i];
+      }
+      ::free(list_);
+    }
+    list_ = NULL;
+    list_size_ = 0;
+    list_capacity_ = 0;
+  }
+};
+
+
+/** \internal
+  Converts a given text segment into the text that will be rendered on screen.
+
+  This copies the text from \p p to \p buf, replacing characters with <tt>^X</tt>
+  and <tt>\\nnn</tt> as necessary.
+
+  The destination buffer is limited to \c MAXBUF (currently at 1024). All
+  following text is truncated.
+
+  \param [in] p pointer to source buffer
+  \param [in] buf pointer to destination buffer
+  \return pointer to the end of the destination buffer
+*/
 const char* Fl_Input_::expand(const char* p, char* buf) const {
   char* o = buf;
   char* e = buf+(MAXBUF-4);
@@ -57,18 +142,26 @@ const char* Fl_Input_::expand(const char* p, char* buf) const {
   int width_to_lastspace = 0;
   int word_count = 0;
   int word_wrap;
+//  const char *pe = p + strlen(p);
 
   if (input_type()==FL_SECRET_INPUT) {
-    while (o<e && p < value_+size_) {*o++ = '*'; p++;}
+    while (o<e && p < value_+size_) {
+      if (fl_utf8len((char)p[0]) >= 1) {
+        l_secret = fl_utf8encode(Fl_Screen_Driver::secret_input_character, o);
+        o += l_secret;
+      }
+      p++;
+    }
+
   } else while (o<e) {
     if (wrap() && (p >= value_+size_ || isspace(*p & 255))) {
       word_wrap = w() - Fl::box_dw(box()) - 2;
-      width_to_lastspace += (int)fl_width(lastspace_out, o-lastspace_out);
+      width_to_lastspace += (int)fl_width(lastspace_out, (int) (o-lastspace_out));
       if (p > lastspace+1) {
-	if (word_count && width_to_lastspace > word_wrap) {
-	  p = lastspace; o = lastspace_out; break;
-	}
-	word_count++;
+        if (word_count && width_to_lastspace > word_wrap) {
+          p = lastspace; o = lastspace_out; break;
+        }
+        word_count++;
       }
       lastspace = p;
       lastspace_out = o;
@@ -79,27 +172,13 @@ const char* Fl_Input_::expand(const char* p, char* buf) const {
     if (c < ' ' || c == 127) {
       if (c=='\n' && input_type()==FL_MULTILINE_INPUT) {p--; break;}
       if (c == '\t' && input_type()==FL_MULTILINE_INPUT) {
-	for (c = (o-buf)%8; c<8 && o<e; c++) *o++ = ' ';
+        for (c = fl_utf_nb_char((uchar*)buf, (int) (o-buf))%8; c<8 && o<e; c++) {
+          *o++ = ' ';
+        }
       } else {
-	*o++ = '^';
-	*o++ = c ^ 0x40;
+        *o++ = '^';
+        *o++ = c ^ 0x40;
       }
-#ifdef __APPLE__
-    // In MacRoman, all characters are defined, and non-break-space is 0xca
-    } else if (c == 0xCA) { // nbsp
-      *o++ = ' ';
-#else
-    // in ISO 8859-1, undefined characters are rendered as octal
-    // this is commented out since most X11 seems to use MSWindows Latin-1
-    //} else if (c >= 128 && c < 0xA0) {
-      // these codes are not defined in ISO code, so we output the octal code instead
-    //  *o++ = '\\'; 
-    //  *o++ = ((c>>6)&0x03) + '0'; 
-    //  *o++ = ((c>>3)&0x07) + '0'; 
-    //  *o++ = (c&0x07) + '0';
-    } else if (c == 0xA0) { // nbsp
-      *o++ = ' ';
-#endif
     } else {
       *o++ = c;
     }
@@ -108,31 +187,44 @@ const char* Fl_Input_::expand(const char* p, char* buf) const {
   return p;
 }
 
-// After filling in such a buffer, find the width to e
+/** \internal
+  Calculates the width in pixels of part of a text buffer.
+
+  This call takes a string, usually created by expand, and calculates
+  the width of the string when rendered with the given font.
+
+  \param [in] p pointer to the start of the original string
+  \param [in] e pointer to the end of the original string
+  \param [in] buf pointer to the buffer as returned by expand()
+  \return width of string in pixels
+*/
 double Fl_Input_::expandpos(
-  const char* p,	// real string
-  const char* e,	// pointer into real string
-  const char* buf,	// conversion of real string by expand()
-  int* returnn		// return offset into buf here
+  const char* p,        // real string
+  const char* e,        // pointer into real string
+  const char* buf,      // conversion of real string by expand()
+  int* returnn          // return offset into buf here
 ) const {
   int n = 0;
-  if (input_type()==FL_SECRET_INPUT) n = e-p;
-  else while (p<e) {
-    int c = *p++ & 255;
-    if (c < ' ' || c == 127) {
-      if (c == '\t' && input_type()==FL_MULTILINE_INPUT) n += 8-(n%8);
-      else n += 2;
-#ifdef __APPLE__
-    // in MacRoman, all characters are defined
-#else
-    // in Windows Latin-1 all characters are defined
-    //} else if (c >= 128 && c < 0xA0) {
-      // these codes are not defined in ISO code, so we output the octal code instead
-    //  n += 4;
-#endif
-    } else {
-      n++;
+  int chr = 0;
+  int l;
+  if (input_type()==FL_SECRET_INPUT) {
+    while (p<e) {
+      l = fl_utf8len((char)p[0]);
+      if (l >= 1) n += l_secret;
+      p += l;
     }
+  } else while (p<e) {
+    int c = *p & 255;
+    if (c < ' ' || c == 127) {
+      if (c == '\t' && input_type()==FL_MULTILINE_INPUT) {
+         n += 8-(chr%8);
+         chr += 7-(chr%8);
+      } else n += 2;
+    } else {
+      n += fl_utf8len1(*p);
+    }
+    chr += fl_utf8len((char)p[0]) >= 1;
+    p += fl_utf8len1(*p);
   }
   if (returnn) *returnn = n;
   return fl_width(buf, n);
@@ -140,12 +232,20 @@ double Fl_Input_::expandpos(
 
 ////////////////////////////////////////////////////////////////
 
-// minimal update:
-// Characters from mu_p to end of widget are redrawn.
-// If erase_cursor_only, small part at mu_p is redrawn.
-// Right now minimal update just keeps unchanged characters from
-// being erased, so they don't blink.
+/** \internal
+  Marks a range of characters for update.
 
+  This call marks all characters from \p p to the end of the
+  text buffer for update. At least these characters
+  will be redrawn in the next update cycle.
+
+  Characters from \p mu_p to end of widget are redrawn.
+  If \p erase_cursor_only, small part at \p mu_p is redrawn.
+  Right now minimal update just keeps unchanged characters from
+  being erased, so they don't blink.
+
+  \param [in] p start of update range
+*/
 void Fl_Input_::minimal_update(int p) {
   if (damage() & FL_DAMAGE_ALL) return; // don't waste time if it won't be done
   if (damage() & FL_DAMAGE_EXPOSE) {
@@ -158,6 +258,15 @@ void Fl_Input_::minimal_update(int p) {
   erase_cursor_only = 0;
 }
 
+/** \internal
+  Marks a range of characters for update.
+
+  This call marks a text range for update. At least all characters
+  from \p p to \p q will be redrawn in the next update cycle.
+
+  \param [in] p start of update range
+  \param [in] q end of update range
+*/
 void Fl_Input_::minimal_update(int p, int q) {
   if (q < p) p = q;
   minimal_update(p);
@@ -165,17 +274,51 @@ void Fl_Input_::minimal_update(int p, int q) {
 
 ////////////////////////////////////////////////////////////////
 
-static double up_down_pos;
-static int was_up_down;
+/* Horizontal cursor position in pixels while moving up or down. */
+double Fl_Input_::up_down_pos = 0;
 
+/* Flag to remember last cursor move. */
+int Fl_Input_::was_up_down = 0;
+
+/**
+  Sets the current font and font size.
+*/
 void Fl_Input_::setfont() const {
- fl_font(textfont(), textsize());
+  fl_font(textfont(), textsize());
 }
 
+/**
+ Draws the text in the passed bounding box.
+
+ If <tt>damage() & FL_DAMAGE_ALL</tt> is true, this assumes the
+ area has already been erased to color(). Otherwise it does
+ minimal update and erases the area itself.
+
+ \param X, Y, W, H area that must be redrawn
+ */
 void Fl_Input_::drawtext(int X, int Y, int W, int H) {
+  drawtext(X, Y, W, H, (Fl::focus()==this));
+}
+
+/**
+  Draws the text in the passed bounding box.
+
+  This version of `drawtext` allows the user to control whether the widget is
+  drawn as acitive, i.e. with the text cursor, or inactive. This is useful for
+  compound widgets where the input should be shown as active when actually
+  the container widget is the active one.
+
+  A caller should not draw the widget with `active` set if another text
+  widget may indeed be the active widget.
+
+  \param X, Y, W, H area that must be redrawn
+  \param draw_active if set, the cursor will be drawn, even if the widget is not active
+  \see Fl_Input_::drawtext(int X, int Y, int W, int H)
+*/
+void Fl_Input_::drawtext(int X, int Y, int W, int H, bool draw_active) {
   int do_mu = !(damage()&FL_DAMAGE_ALL);
 
-  if (Fl::focus()!=this && !size()) {
+  if (!draw_active && !size()) {
     if (do_mu) { // we have to erase it if cursor was there
       draw_box(box(), X-Fl::box_dx(box()), Y-Fl::box_dy(box()),
                W+Fl::box_dw(box()), H+Fl::box_dh(box()), color());
@@ -184,12 +327,12 @@ void Fl_Input_::drawtext(int X, int Y, int W, int H) {
   }
 
   int selstart, selend;
-  if (Fl::focus()!=this && /*Fl::selection_owner()!=this &&*/ Fl::pushed()!=this)
+  if (!draw_active && /*Fl::selection_owner()!=this &&*/ Fl::pushed()!=this)
     selstart = selend = 0;
-  else if (position() <= mark()) {
-    selstart = position(); selend = mark();
+  else if (insert_position() <= mark()) {
+    selstart = insert_position(); selend = mark();
   } else {
-    selend = position(); selstart = mark();
+    selend = insert_position(); selstart = mark();
   }
 
   setfont();
@@ -199,29 +342,30 @@ void Fl_Input_::drawtext(int X, int Y, int W, int H) {
   // count how many lines and put the last one into the buffer:
   // And figure out where the cursor is:
   int height = fl_height();
+  int threshold = height/2;
   int lines;
   int curx, cury;
   for (p=value(), curx=cury=lines=0; ;) {
     e = expand(p, buf);
-    if (position() >= p-value() && position() <= e-value()) {
-      curx = int(expandpos(p, value()+position(), buf, 0)+.5);
-      if (Fl::focus()==this && !was_up_down) up_down_pos = curx;
+    if (insert_position() >= p-value() && insert_position() <= e-value()) {
+      curx = int(expandpos(p, value()+insert_position(), buf, 0)+.5);
+      if (draw_active && !was_up_down) up_down_pos = curx;
       cury = lines*height;
       int newscroll = xscroll_;
-      if (curx > newscroll+W-20) {
-	// figure out scrolling so there is space after the cursor:
-	newscroll = curx+20-W;
-	// figure out the furthest left we ever want to scroll:
-	int ex = int(expandpos(p, e, buf, 0))+2-W;
-	// use minimum of both amounts:
-	if (ex < newscroll) newscroll = ex;
-      } else if (curx < newscroll+20) {
-	newscroll = curx-20;
+      if (curx > newscroll+W-threshold) {
+        // figure out scrolling so there is space after the cursor:
+        newscroll = curx+threshold-W;
+        // figure out the furthest left we ever want to scroll:
+        int ex = int(expandpos(p, e, buf, 0))+4-W;
+        // use minimum of both amounts:
+        if (ex < newscroll) newscroll = ex;
+      } else if (curx < newscroll+threshold) {
+        newscroll = curx-threshold;
       }
       if (newscroll < 0) newscroll = 0;
       if (newscroll != xscroll_) {
-	xscroll_ = newscroll;
-	mu_p = 0; erase_cursor_only = 0;
+        xscroll_ = newscroll;
+        mu_p = 0; erase_cursor_only = 0;
       }
     }
     lines++;
@@ -240,7 +384,7 @@ void Fl_Input_::drawtext(int X, int Y, int W, int H) {
     yscroll_ = -(H-height)/2;
   }
 
-  fl_clip(X, Y, W, H);
+  fl_push_clip(X, Y, W, H);
   Fl_Color tc = active_r() ? textcolor() : fl_inactive(textcolor());
 
   p = value();
@@ -248,6 +392,7 @@ void Fl_Input_::drawtext(int X, int Y, int W, int H) {
   int desc = height-fl_descent();
   float xpos = (float)(X - xscroll_ + 1);
   int ypos = -yscroll_;
+  int ypos_cur = 0; //fix issue #270
   for (; ypos < H;) {
 
     // re-expand line unless it is the last one calculated above:
@@ -255,7 +400,7 @@ void Fl_Input_::drawtext(int X, int Y, int W, int H) {
 
     if (ypos <= -height) goto CONTINUE; // clipped off top
 
-    if (do_mu) {	// for minimal update:
+    if (do_mu) {        // for minimal update:
       const char* pp = value()+mu_p; // pointer to where minimal update starts
       if (e < pp) goto CONTINUE2; // this line is before the changes
       if (readonly()) erase_cursor_only = 0; // this isn't the most efficient way
@@ -264,13 +409,13 @@ void Fl_Input_::drawtext(int X, int Y, int W, int H) {
       float r = (float)(X+W);
       float xx;
       if (p >= pp) {
-	xx = (float)X;
-	if (erase_cursor_only) r = xpos+2;
-	else if (readonly()) xx -= 3;
+        xx = (float)X;
+        if (erase_cursor_only) r = xpos+2;
+        else if (readonly()) xx -= 3;
       } else {
-	xx = xpos + (float)expandpos(p, pp, buf, 0);
-	if (erase_cursor_only) r = xx+2;
-	else if (readonly()) xx -= 3;
+        xx = xpos + (float)expandpos(p, pp, buf, 0);
+        if (erase_cursor_only) r = xx+2;
+        else if (readonly()) xx -= 3;
       }
       // clip to and erase it:
       fl_push_clip((int)xx-1-height/8, Y+ypos, (int)(r-xx+2+height/4), height);
@@ -287,43 +432,63 @@ void Fl_Input_::drawtext(int X, int Y, int W, int H) {
       float x1 = xpos;
       int offset1 = 0;
       if (pp > p) {
-	fl_color(tc);
-	x1 += (float)expandpos(p, pp, buf, &offset1);
-	fl_draw(buf, offset1, xpos, (float)(Y+ypos+desc));
+        fl_color(tc);
+        x1 += (float)expandpos(p, pp, buf, &offset1);
+        fl_draw(buf, offset1, xpos, (float)(Y+ypos+desc));
       }
       pp = value()+selend;
       float x2 = (float)(X+W);
       int offset2;
       if (pp <= e) x2 = xpos + (float)expandpos(p, pp, buf, &offset2);
-      else offset2 = strlen(buf);
-      fl_color(selection_color());
-      fl_rectf((int)(x1+0.5), Y+ypos, (int)(x2-x1+0.5), height);
-      fl_color(fl_contrast(textcolor(), selection_color()));
+      else offset2 = (int) strlen(buf);
+      if (Fl::screen_driver()->has_marked_text() && Fl::compose_state) {
+        fl_color(textcolor());
+      }
+      else
+      {
+        fl_color(selection_color());
+        fl_rectf((int)(x1+0.5), Y+ypos, (int)(x2-x1+0.5), height);
+        fl_color(fl_contrast(textcolor(), selection_color()));
+      }
       fl_draw(buf+offset1, offset2-offset1, x1, (float)(Y+ypos+desc));
+      if (Fl::screen_driver()->has_marked_text() && Fl::compose_state) {
+        fl_color( fl_color_average(textcolor(), color(), 0.6f) );
+        float width = (float)fl_width(buf+offset1, offset2-offset1);
+        fl_line((int)x1, Y+ypos+height-1, (int)(x1+width), Y+ypos+height-1);
+      }
       if (pp < e) {
-	fl_color(tc);
-	fl_draw(buf+offset2, strlen(buf+offset2), x2, (float)(Y+ypos+desc));
+        fl_color(tc);
+        fl_draw(buf+offset2, (int) strlen(buf+offset2), x2, (float)(Y+ypos+desc));
       }
     } else {
       // draw unselected text
       fl_color(tc);
-      fl_draw(buf, strlen(buf), xpos, (float)(Y+ypos+desc));
+      fl_draw(buf, (int) strlen(buf), xpos, (float)(Y+ypos+desc));
     }
 
     if (do_mu) fl_pop_clip();
 
   CONTINUE2:
     // draw the cursor:
-    if (Fl::focus() == this && selstart == selend &&
-	position() >= p-value() && position() <= e-value()) {
+    if ( draw_active
+         && ( (Fl::screen_driver()->has_marked_text() && Fl::compose_state)
+              || selstart == selend
+             )
+         && insert_position() >= p-value()
+         && insert_position() <= e-value()
+        ) {
       fl_color(cursor_color());
+      // cursor position may need to be recomputed (see STR #2486)
+      curx = int(expandpos(p, value()+insert_position(), buf, 0)+.5);
       if (readonly()) {
+        // Draw '^' caret cursor
         fl_line((int)(xpos+curx-2.5f), Y+ypos+height-1,
-	        (int)(xpos+curx+0.5f), Y+ypos+height-4,
-	        (int)(xpos+curx+3.5f), Y+ypos+height-1);
+                (int)(xpos+curx+0.5f), Y+ypos+height-4,
+                (int)(xpos+curx+3.5f), Y+ypos+height-1);
       } else {
         fl_rectf((int)(xpos+curx+0.5), Y+ypos, 2, height);
       }
+      ypos_cur = ypos+height; //fix issue #270
     }
 
   CONTINUE:
@@ -344,27 +509,69 @@ void Fl_Input_::drawtext(int X, int Y, int W, int H) {
   }
 
   fl_pop_clip();
+  if (draw_active) {
+    fl_set_spot(textfont(), textsize(),
+                (int)xpos+curx, Y+ypos_cur-fl_descent(), W, H, window()); //fix issue #270
+  }
 }
 
+/** \internal
+  Simple function that determines if a character could be part of a word.
+  \todo This function is not UTF-8-aware.
+*/
 static int isword(char c) {
-  return (c&128 || isalnum(c) || strchr("#%&-/@\\_~", c));
+  return (c&128 || isalnum(c) || strchr("#%-@_~", c));
 }
 
+/**
+  Finds the end of a word.
+
+  Returns the index after the last byte of a word.
+  If the index is already at the end of a word, it will find the
+  end of the following word, so if you call it repeatedly you will
+  move forwards to the end of the text.
+
+  Note that this is inconsistent with line_end().
+
+  \param [in] i starting index for the search
+  \return end of the word
+*/
 int Fl_Input_::word_end(int i) const {
   if (input_type() == FL_SECRET_INPUT) return size();
-  //while (i < size() && !isword(index(i))) i++;
+  while (i < size() && !isword(index(i))) i++;
   while (i < size() && isword(index(i))) i++;
   return i;
 }
 
+/**
+  Finds the start of a word.
+
+  Returns the index of the first byte of a word.
+  If the index is already at the beginning of a word, it will find the
+  beginning of the previous word, so if you call it repeatedly you will
+  move backwards to the beginning of the text.
+
+  Note that this is inconsistent with line_start().
+
+  \param [in] i starting index for the search
+  \return start of the word, or previous word
+*/
 int Fl_Input_::word_start(int i) const {
   if (input_type() == FL_SECRET_INPUT) return 0;
-//   if (i >= size() || !isword(index(i)))
-//     while (i > 0 && !isword(index(i-1))) i--;
+  while (i > 0 && !isword(index(i-1))) i--;
   while (i > 0 && isword(index(i-1))) i--;
   return i;
 }
 
+/**
+  Finds the end of a line.
+
+  This call calculates the end of a line based on the given
+  index \p i.
+
+  \param [in] i starting index for the search
+  \return end of the line
+*/
 int Fl_Input_::line_end(int i) const {
   if (input_type() != FL_MULTILINE_INPUT) return size();
 
@@ -377,7 +584,8 @@ int Fl_Input_::line_end(int i) const {
     for (const char* p=value()+j; ;) {
       char buf[MAXBUF];
       p = expand(p, buf);
-      if (p-value() >= i) return p-value();
+      int k = (int) (p-value());
+      if (k >= i) return k;
       p++;
     }
   } else {
@@ -386,6 +594,15 @@ int Fl_Input_::line_end(int i) const {
   }
 }
 
+/**
+  Finds the start of a line.
+
+  This call calculates the start of a line based on the given
+  index \p i.
+
+  \param [in] i starting index for the search
+  \return start of the line
+*/
 int Fl_Input_::line_start(int i) const {
   if (input_type() != FL_MULTILINE_INPUT) return 0;
   int j = i;
@@ -396,12 +613,30 @@ int Fl_Input_::line_start(int i) const {
     for (const char* p=value()+j; ;) {
       char buf[MAXBUF];
       const char* e = expand(p, buf);
-      if (e-value() >= i) return p-value();
+      if ((int) (e-value()) >= i) return (int) (p-value());
       p = e+1;
     }
   } else return j;
 }
 
+static int strict_word_start(const char *s, int i, int itype) {
+  if (itype == FL_SECRET_INPUT) return 0;
+  while (i > 0 && !isspace(s[i-1]))
+    i--;
+  return i;
+}
+
+static int strict_word_end(const char *s, int len, int i, int itype) {
+  if (itype == FL_SECRET_INPUT) return len;
+  while (i < len && !isspace(s[i]))
+    i++;
+  return i;
+}
+
+/**
+  Handles mouse clicks and mouse moves.
+  \todo Add comment and parameters
+*/
 void Fl_Input_::handle_mouse(int X, int Y, int /*W*/, int /*H*/, int drag) {
   was_up_down = 0;
   if (!size()) return;
@@ -423,59 +658,103 @@ void Fl_Input_::handle_mouse(int X, int Y, int /*W*/, int /*H*/, int drag) {
   const char *l, *r, *t; double f0 = Fl::event_x()-X+xscroll_;
   for (l = p, r = e; l<r; ) {
     double f;
-    t = l+(r-l+1)/2;
+    int cw = fl_utf8len((char)l[0]);
+    if (cw < 1) cw = 1;
+    t = l+cw;
     f = X-xscroll_+expandpos(p, t, buf, 0);
     if (f <= Fl::event_x()) {l = t; f0 = Fl::event_x()-f;}
-    else r = t-1;
+    else r = t-cw;
   }
   if (l < e) { // see if closer to character on right:
-    double f1 = X-xscroll_+expandpos(p, l+1, buf, 0)-Fl::event_x();
-    if (f1 < f0) l = l+1;
+    double f1;
+    int cw = fl_utf8len((char)l[0]);
+    if (cw > 0) {
+      f1 = X-xscroll_+expandpos(p, l + cw, buf, 0) - Fl::event_x();
+      if (f1 < f0) l = l+cw;
+    }
   }
-  newpos = l-value();
+  newpos = (int) (l-value());
 
   int newmark = drag ? mark() : newpos;
   if (Fl::event_clicks()) {
     if (newpos >= newmark) {
       if (newpos == newmark) {
-	if (newpos < size()) newpos++;
-	else newmark--;
+        if (newpos < size()) newpos++;
+        else newmark--;
       }
       if (Fl::event_clicks() > 1) {
-	newpos = line_end(newpos);
-	newmark = line_start(newmark);
+        newpos = line_end(newpos);
+        newmark = line_start(newmark);
       } else {
-	newpos = word_end(newpos);
-	newmark = word_start(newmark);
+        newpos = strict_word_end(value(), size(), newpos, input_type());
+        newmark = strict_word_start(value(), newmark, input_type());
       }
     } else {
       if (Fl::event_clicks() > 1) {
-	newpos = line_start(newpos);
-	newmark = line_end(newmark);
+        newpos = line_start(newpos);
+        newmark = line_end(newmark);
       } else {
-	newpos = word_start(newpos);
-	newmark = word_end(newmark);
+        newpos = strict_word_start(value(), newpos, input_type());
+        newmark = strict_word_end(value(), size(), newmark, input_type());
       }
     }
     // if the multiple click does not increase the selection, revert
     // to single-click behavior:
-    if (!drag && (mark() > position() ?
-                  (newmark >= position() && newpos <= mark()) :
-                  (newmark >= mark() && newpos <= position()))) {
+    if (!drag && (mark() > insert_position() ?
+                  (newmark >= insert_position() && newpos <= mark()) :
+                  (newmark >= mark() && newpos <= insert_position()))) {
       Fl::event_clicks(0);
-      newmark = newpos = l-value();
+      newmark = newpos = (int) (l-value());
     }
   }
-  position(newpos, newmark);
+  insert_position(newpos, newmark);
 }
 
-int Fl_Input_::position(int p, int m) {
+/**
+  Sets the index for the cursor and mark.
+
+  The input widget maintains two pointers into the string. The
+  \e position (\c p) is where the cursor is. The
+  \e mark (\c m) is the other end of the selected text. If they
+  are equal then there is no selection. Changing this does not
+  affect the clipboard (use copy() to do that).
+
+  Changing these values causes a redraw(). The new
+  values are bounds checked.
+
+  \param p index for the cursor position
+  \param m index for the mark
+  \return 0 if no positions changed
+  \see position(int), position(), mark(int)
+*/
+int Fl_Input_::insert_position(int p, int m) {
+  int is_same = 0;
   was_up_down = 0;
   if (p<0) p = 0;
   if (p>size()) p = size();
   if (m<0) m = 0;
   if (m>size()) m = size();
+  if (p == m) is_same = 1;
+
+  while (p < position_ && p > 0 && (size() - p) > 0 &&
+       (fl_utf8len((char)(value() + p)[0]) < 1)) { p--; }
+  int ul = fl_utf8len((char)(value() + p)[0]);
+  while (p < size() && p > position_ && ul < 0) {
+       p++;
+       ul = fl_utf8len((char)(value() + p)[0]);
+  }
+
+  while (m < mark_ && m > 0 && (size() - m) > 0 &&
+       (fl_utf8len((char)(value() + m)[0]) < 1)) { m--; }
+  ul = fl_utf8len((char)(value() + m)[0]);
+  while (m < size() && m > mark_ && ul < 0) {
+       m++;
+       ul = fl_utf8len((char)(value() + m)[0]);
+  }
+  if (is_same) m = p;
   if (p == position_ && m == mark_) return 0;
+
+
   //if (Fl::selection_owner() == this) Fl::selection_owner(0);
   if (p != m) {
     if (p != position_) minimal_update(position_, p);
@@ -485,7 +764,7 @@ int Fl_Input_::position(int p, int m) {
     if (position_ == mark_) {
       // old position was just a cursor
       if (Fl::focus() == this && !(damage()&FL_DAMAGE_EXPOSE)) {
-	minimal_update(position_); erase_cursor_only = 1;
+        minimal_update(position_); erase_cursor_only = 1;
       }
     } else { // old position was a selection
       minimal_update(position_, mark_);
@@ -496,6 +775,18 @@ int Fl_Input_::position(int p, int m) {
   return 1;
 }
 
+/**
+  Moves the cursor to the column given by \p up_down_pos.
+
+  This function is helpful when implementing up and down
+  cursor movement. It moves the cursor from the beginning
+  of a line to the column indicated by the global variable
+  \p up_down_pos in pixel units.
+
+  \param [in] i index into the beginning of a line of text
+  \param [in] keepmark if set, move only the cursor, but not the mark
+  \return index to new cursor position
+*/
 int Fl_Input_::up_down_position(int i, int keepmark) {
   // unlike before, i must be at the start of the line already!
 
@@ -509,17 +800,30 @@ int Fl_Input_::up_down_position(int i, int keepmark) {
     int f = (int)expandpos(p, t, buf, 0);
     if (f <= up_down_pos) l = t; else r = t-1;
   }
-  int j = l-value();
-  j = position(j, keepmark ? mark_ : j);
+  int j = (int) (l-value());
+  j = insert_position(j, keepmark ? mark_ : j);
   was_up_down = 1;
   return j;
 }
 
+/**
+  Put the current selection into the clipboard.
+
+  This function copies the current selection between mark() and
+  position() into the specified \c clipboard. This does not
+  replace the old clipboard contents if position() and
+  mark() are equal. Clipboard 0 maps to the current text
+  selection and clipboard 1 maps to the cut/paste clipboard.
+
+  \param clipboard the clipboard destination 0 or 1
+  \return 0 if no text is selected, 1 if the selection was copied
+  \see Fl::copy(const char *, int, int)
+*/
 int Fl_Input_::copy(int clipboard) {
-  int b = position();
+  int b = insert_position();
   int e = mark();
   if (b != e) {
-    if (b > e) {b = mark(); e = position();}
+    if (b > e) {b = mark(); e = insert_position();}
     if (input_type() == FL_SECRET_INPUT) e = b;
     Fl::copy(value()+b, e-b, clipboard);
     return 1;
@@ -529,29 +833,77 @@ int Fl_Input_::copy(int clipboard) {
 
 #define MAXFLOATSIZE 40
 
-static char* undobuffer;
-static int undobufferlength;
-static Fl_Input_* undowidget;
-static int undoat;	// points after insertion
-static int undocut;	// number of characters deleted there
-static int undoinsert;	// number of characters inserted
-static int yankcut;	// length of valid contents of buffer, even if undocut=0
+/**
+ Append text at the end.
 
-static void undobuffersize(int n) {
-  if (n > undobufferlength) {
-    if (undobuffer) {
-      do {undobufferlength *= 2;} while (undobufferlength < n);
-      undobuffer = (char*)realloc(undobuffer, undobufferlength);
-    } else {
-      undobufferlength = n+9;
-      undobuffer = (char*)malloc(undobufferlength);
-    }
+ This function appends the string in \p t to the end of the text.
+ It does not moves the new position or mark.
+
+ \param [in] t text that will be appended
+ \param [in] l length of text, or 0 if the string is terminated by \c nul.
+ \param [in] keep_selection if this is 1, the current text selection will
+    remain, if 0, the cursor will move to the end of the inserted text.
+ \return 0 if no text was appended
+ */
+int Fl_Input_::append(const char* t, int l, char keep_selection)
+{
+  int end = size();
+  int om = mark_, op = position_;
+  int ret = replace(end, end, t, l);
+  if (keep_selection) {
+    insert_position(op, om);
   }
+  return ret;
 }
 
-// all changes go through here, delete characters b-e and insert text:
-int Fl_Input_::replace(int b, int e, const char* text, int ilen) {
 
+/**
+  Deletes text from \p b to \p e and inserts the new string \p text.
+
+  All changes to the text buffer go through this function.
+  It deletes the region between \p b and \p e (either one may be less or
+  equal to the other), and then inserts the string \p text
+  at that point and moves the mark() and
+  position() to the end of the insertion. Does the callback if
+  <tt>when() & FL_WHEN_CHANGED</tt> and there is a change.
+
+  Set \p b and \p e equal to not delete anything.
+  Set \p text to \c NULL to not insert anything.
+
+  \p ilen can be zero or <tt>strlen(text)</tt>, which
+  saves a tiny bit of time if you happen to already know the
+  length of the insertion, or can be used to insert a portion of a
+  string. If \p ilen is zero, <tt>strlen(text)</tt> is used instead.
+
+  \p b and \p e are clamped to the <tt>0..size()</tt> range, so it is
+  safe to pass any values. \p b, \p e, and \p ilen are used as numbers
+  of bytes (not characters), where \p b and \p e count from 0 to
+  size() (end of buffer).
+
+  If \p b and/or \p e don't point to a valid UTF-8 character boundary,
+  they are adjusted to the previous (\p b) or the next (\p e) valid
+  UTF-8 character boundary, resp..
+
+  If the current number of characters in the buffer minus deleted
+  characters plus inserted characters in \p text would overflow the
+  number of allowed characters (maximum_size()), then only the first
+  characters of the string are inserted, so that maximum_size()
+  is not exceeded.
+
+  cut() and insert() are just inline functions that call replace().
+
+  \param [in] b beginning index of text to be deleted
+  \param [in] e ending index of text to be deleted and insertion position
+  \param [in] text string that will be inserted
+  \param [in] ilen length of \p text or 0 for \c nul terminated strings
+  \return 0 if nothing changed
+
+  \note If \p text does not point to a valid UTF-8 character or includes
+  invalid UTF-8 sequences, the text is inserted nevertheless (counting
+  invalid UTF-8 bytes as one character each).
+*/
+int Fl_Input_::replace(int b, int e, const char* text, int ilen) {
+  int ul, om, op;
   was_up_down = 0;
 
   if (b<0) b = 0;
@@ -559,53 +911,88 @@ int Fl_Input_::replace(int b, int e, const char* text, int ilen) {
   if (b>size_) b = size_;
   if (e>size_) e = size_;
   if (e<b) {int t=b; b=e; e=t;}
-  if (text && !ilen) ilen = strlen(text);
-  if (e<=b && !ilen) return 0; // don't clobber undo for a null operation
-  if (size_+ilen-(e-b) > maximum_size_) {
-    ilen = maximum_size_-size_+(e-b);
-    if (ilen < 0) ilen = 0;
+  while (b != e && b > 0 && (size_ - b) > 0 &&
+       (fl_utf8len((value_ + b)[0]) < 1)) { b--; }
+  ul = fl_utf8len((char)(value_ + e)[0]);
+  while (e < size_ && e > 0 && ul < 0) {
+       e++;
+       ul = fl_utf8len((char)(value_ + e)[0]);
   }
+  if (text && !ilen) ilen = (int) strlen(text);
+  if (e<=b && !ilen) return 0; // don't clobber undo for a null operation
+
+  // we must count UTF-8 *characters* to determine whether we can insert
+  // the full text or only a part of it (and how much this would be)
+
+  int nchars = 0;       // characters in value() - deleted + inserted
+  const char *p = value_;
+  while (p < (char *)(value_+size_)) {
+    if (p == (char *)(value_+b)) { // skip removed part
+      p = (char *)(value_+e);
+      if (p >= (char *)(value_+size_)) break;
+    }
+    int ulen = fl_utf8len(*p);
+    if (ulen < 1) ulen = 1; // invalid UTF-8 character: count as 1
+    nchars++;
+    p += ulen;
+  }
+  int nlen = 0;         // length (in bytes) to be inserted
+  p = text;
+  while (p < (char *)(text+ilen) && nchars < maximum_size()) {
+    int ulen = fl_utf8len(*p);
+    if (ulen < 1) ulen = 1; // invalid UTF-8 character: count as 1
+    nchars++;
+    p += ulen;
+    nlen += ulen;
+  }
+  ilen = nlen;
 
   put_in_buffer(size_+ilen);
 
   if (e>b) {
-    if (undowidget == this && b == undoat) {
-      undobuffersize(undocut+(e-b));
-      memcpy(undobuffer+undocut, value_+b, e-b);
-      undocut += e-b;
-    } else if (undowidget == this && e == undoat && !undoinsert) {
-      undobuffersize(undocut+(e-b));
-      memmove(undobuffer+(e-b), undobuffer, undocut);
-      memcpy(undobuffer, value_+b, e-b);
-      undocut += e-b;
-    } else if (undowidget == this && e == undoat && (e-b)<undoinsert) {
-      undoinsert -= e-b;
+    if (b == undo_->undoat) {
+      undo_->undobuffersize(undo_->undocut+(e-b));
+      memcpy(undo_->undobuffer+undo_->undocut, value_+b, e-b);
+      undo_->undocut += e-b;
+    } else if (e == undo_->undoat && !undo_->undoinsert) {
+      undo_->undobuffersize(undo_->undocut+(e-b));
+      memmove(undo_->undobuffer+(e-b), undo_->undobuffer, undo_->undocut);
+      memcpy(undo_->undobuffer, value_+b, e-b);
+      undo_->undocut += e-b;
+    } else if (e == undo_->undoat && (e-b)<undo_->undoinsert) {
+      undo_->undoinsert -= e-b;
     } else {
-      undobuffersize(e-b);
-      memcpy(undobuffer, value_+b, e-b);
-      undocut = e-b;
-      undoinsert = 0;
+      redo_list_->clear();
+      undo_list_->push(undo_);
+      undo_ = new Fl_Input_Undo_Action();
+      undo_->undobuffersize(e-b);
+      memcpy(undo_->undobuffer, value_+b, e-b);
+      undo_->undocut = e-b;
+      undo_->undoinsert = 0;
     }
     memmove(buffer+b, buffer+e, size_-e+1);
     size_ -= e-b;
-    undowidget = this;
-    undoat = b;
-    if (input_type() == FL_SECRET_INPUT) yankcut = 0; else yankcut = undocut;
+    undo_->undoat = b;
+    if (input_type() == FL_SECRET_INPUT) undo_->undoyankcut = 0; else undo_->undoyankcut = undo_->undocut;
   }
 
   if (ilen) {
-    if (undowidget == this && b == undoat)
-      undoinsert += ilen;
-    else {
-      undocut = 0;
-      undoinsert = ilen;
+    if (b == undo_->undoat) {
+      undo_->undoinsert += ilen;
+    } else {
+      redo_list_->clear();
+      undo_list_->push(undo_);
+      undo_ = new Fl_Input_Undo_Action();
+      undo_->undocut = 0;
+      undo_->undoinsert = ilen;
     }
     memmove(buffer+b+ilen, buffer+b, size_-b+1);
     memcpy(buffer+b, text, ilen);
     size_ += ilen;
   }
-  undowidget = this;
-  undoat = b+ilen;
+  om = mark_;
+  op = position_;
+  mark_ = position_ = undo_->undoat = b+ilen;
 
   // Insertions into the word at the end of the line will cause it to
   // wrap to the next line, so we must indicate that the changes may start
@@ -615,7 +1002,7 @@ int Fl_Input_::replace(int b, int e, const char* text, int ilen) {
   if (wrap()) {
     // if there is a space in the pasted text, the whole line may have rewrapped
     int i;
-    for (i=0; i<ilen; i++) 
+    for (i=0; i<ilen; i++)
       if (text[i]==' ') break;
     if (i==ilen)
       while (b > 0 && !isspace(index(b) & 255) && index(b)!='\n') b--;
@@ -624,47 +1011,56 @@ int Fl_Input_::replace(int b, int e, const char* text, int ilen) {
   }
 
   // make sure we redraw the old selection or cursor:
-  if (mark_ < b) b = mark_;
-  if (position_ < b) b = position_;
+  if (om < b) b = om;
+  if (op < b) b = op;
 
   minimal_update(b);
 
-  mark_ = position_ = undoat;
+  mark_ = position_ = undo_->undoat;
 
   set_changed();
-  if (when()&FL_WHEN_CHANGED) do_callback();
+  if (when()&FL_WHEN_CHANGED) do_callback(FL_REASON_CHANGED);
   return 1;
 }
 
-int Fl_Input_::undo() {
-  was_up_down = 0;
-  if (undowidget != this || !undocut && !undoinsert) return 0;
+/**
+ Apply the current undo/redo operation
 
-  int ilen = undocut;
-  int xlen = undoinsert;
-  int b = undoat-xlen;
+ It's up to undo() and redo() to push and pop actions to and from the lists.
+
+ \return 1 if the current action changed any text.
+ \see undo(), redo() */
+int Fl_Input_::apply_undo() {
+  was_up_down = 0;
+  if (!undo_->undocut && !undo_->undoinsert) return 0;
+
+  int ilen = undo_->undocut;
+  int xlen = undo_->undoinsert;
+  int b = undo_->undoat-xlen;
   int b1 = b;
+
+  minimal_update(position_);
 
   put_in_buffer(size_+ilen);
 
   if (ilen) {
     memmove(buffer+b+ilen, buffer+b, size_-b+1);
-    memcpy(buffer+b, undobuffer, ilen);
+    memcpy(buffer+b, undo_->undobuffer, ilen);
     size_ += ilen;
     b += ilen;
   }
 
   if (xlen) {
-    undobuffersize(xlen);
-    memcpy(undobuffer, buffer+b, xlen);
+    undo_->undobuffersize(xlen);
+    memcpy(undo_->undobuffer, buffer+b, xlen);
     memmove(buffer+b, buffer+b+xlen, size_-xlen-b+1);
     size_ -= xlen;
   }
 
-  undocut = xlen;
-  if (xlen) yankcut = xlen;
-  undoinsert = ilen;
-  undoat = b;
+  undo_->undocut = xlen;
+  if (xlen) undo_->undoyankcut = xlen;
+  undo_->undoinsert = ilen;
+  undo_->undoat = b;
   mark_ = b /* -ilen */;
   position_ = b;
 
@@ -672,23 +1068,104 @@ int Fl_Input_::undo() {
     while (b1 > 0 && index(b1)!='\n') b1--;
   minimal_update(b1);
   set_changed();
-  if (when()&FL_WHEN_CHANGED) do_callback();
+
   return 1;
 }
 
+/**
+ Undoes previous changes to the text buffer.
+
+ This call undoes a number of previous calls to replace().
+
+ \return non-zero if any change was made.
+ */
+int Fl_Input_::undo() {
+  if (apply_undo() == 0)
+    return 0;
+
+  redo_list_->push(undo_);
+  undo_ = undo_list_->pop();
+  if (!undo_) undo_ = new Fl_Input_Undo_Action();
+
+  if (when()&FL_WHEN_CHANGED) do_callback(FL_REASON_CHANGED);
+
+  return 1;
+}
+
+/**
+ Check if the last operation can be undone.
+
+ \return true if the widget can undo the last change
+ */
+bool Fl_Input_::can_undo() const {
+  return (undo_->undocut || undo_->undoinsert);
+}
+
+/**
+ Redo previous undo operation.
+
+ This call reapplies previously executed undo operations.
+
+ \return non-zero if any change was made.
+ */
+int Fl_Input_::redo() {
+  Fl_Input_Undo_Action *redo_action = redo_list_->pop();
+  if (!redo_action)
+    return 0;
+
+  if (undo_->undocut || undo_->undoinsert)
+    undo_list_->push(undo_);
+  else
+    delete undo_;
+  undo_ = redo_action;
+
+  int ret = apply_undo();
+  if (ret && (when()&FL_WHEN_CHANGED)) do_callback(FL_REASON_CHANGED);
+
+  return ret;
+}
+
+/**
+ Check if there is a redo action available.
+
+ \return true if the widget can redo the last undo action
+ */
+bool Fl_Input_::can_redo() const {
+  return (redo_list_->size() > 0);
+}
+
+/**
+  Copies the \e yank buffer to the clipboard.
+
+  This method copies all the previous contiguous cuts from the undo
+  information to the clipboard. This function implements
+  the \c ^K shortcut key.
+
+  \return 0 if the operation did not change the clipboard
+  \see copy(int), cut()
+*/
 int Fl_Input_::copy_cuts() {
   // put the yank buffer into the X clipboard
-  if (!yankcut || input_type()==FL_SECRET_INPUT) return 0;
-  Fl::copy(undobuffer, yankcut, 1);
+  if (!undo_->undoyankcut || input_type()==FL_SECRET_INPUT) return 0;
+  Fl::copy(undo_->undobuffer, undo_->undoyankcut, 1);
   return 1;
 }
 
-void Fl_Input_::maybe_do_callback() {
+/** \internal
+  Checks the when() field and does a callback if indicated.
+*/
+void Fl_Input_::maybe_do_callback(Fl_Callback_Reason reason) {
   if (changed() || (when()&FL_WHEN_NOT_CHANGED)) {
-    do_callback();
+    do_callback(reason);
   }
 }
 
+/**
+  Handles all kinds of text field related events.
+
+  This is called by derived classes.
+  \todo Add comment and parameters
+*/
 int Fl_Input_::handletext(int event, int X, int Y, int W, int H) {
   switch (event) {
 
@@ -702,6 +1179,7 @@ int Fl_Input_::handletext(int event, int X, int Y, int W, int H) {
     return 1;
 
   case FL_FOCUS:
+    fl_set_spot(textfont(), textsize(), x(), y(), w(), h(), window());
     if (mark_ == position_) {
       minimal_update(size()+1);
     } else //if (Fl::selection_owner() != this)
@@ -714,9 +1192,11 @@ int Fl_Input_::handletext(int event, int X, int Y, int W, int H) {
       if (!(damage()&FL_DAMAGE_EXPOSE)) {minimal_update(position_); erase_cursor_only = 1;}
     } else //if (Fl::selection_owner() != this)
       minimal_update(mark_, position_);
+      // FALLTHROUGH
   case FL_HIDE:
+    fl_reset_spot();
     if (!readonly() && (when() & FL_WHEN_RELEASE))
-      maybe_do_callback();
+      maybe_do_callback(FL_REASON_LOST_FOCUS);
     return 1;
 
   case FL_PUSH:
@@ -766,7 +1246,7 @@ int Fl_Input_::handletext(int event, int X, int Y, int W, int H) {
       if (p < e) {
         fl_beep(FL_BEEP_ERROR);
         return 1;
-      } else return replace(0, size(), t, e - t);
+      } else return replace(0, size(), t, (int) (e-t));
     } else if (input_type() == FL_FLOAT_INPUT) {
       while (isspace(*t & 255) && t < e) t ++;
       const char *p = t;
@@ -775,18 +1255,26 @@ int Fl_Input_::handletext(int event, int X, int Y, int W, int H) {
       if (*p == '.') {
         p ++;
         while (isdigit(*p & 255) && p < e) p ++;
-	if (*p == 'e' || *p == 'E') {
-	  p ++;
-	  if (*p == '+' || *p == '-') p ++;
-	  while (isdigit(*p & 255) && p < e) p ++;
-	}
+        if (*p == 'e' || *p == 'E') {
+          p ++;
+          if (*p == '+' || *p == '-') p ++;
+          while (isdigit(*p & 255) && p < e) p ++;
+        }
       }
       if (p < e) {
         fl_beep(FL_BEEP_ERROR);
         return 1;
-      } else return replace(0, size(), t, e - t);
+      } else return replace(0, size(), t, (int) (e-t));
     }
-    return replace(position(), mark(), t, e-t);}
+    return replace(insert_position(), mark(), t, (int) (e-t));}
+
+  case FL_SHORTCUT:
+    if (!(shortcut() ? Fl::test_shortcut(shortcut()) : test_shortcut()))
+      return 0;
+    if (Fl::visible_focus() && handle(FL_FOCUS)) {
+      Fl::focus(this);
+      return 1;
+    } // else fall through
 
   default:
     return 0;
@@ -795,12 +1283,22 @@ int Fl_Input_::handletext(int event, int X, int Y, int W, int H) {
 
 /*------------------------------*/
 
+/**
+  Creates a new Fl_Input_ widget.
+
+  This function creates a new Fl_Input_ widget and adds it to the current
+  Fl_Group. The value() is set to \c NULL.
+  The default boxtype is \c FL_DOWN_BOX.
+
+  \param X, Y, W, H the dimensions of the new widget
+  \param l an optional label text
+*/
 Fl_Input_::Fl_Input_(int X, int Y, int W, int H, const char* l)
 : Fl_Widget(X, Y, W, H, l) {
   box(FL_DOWN_BOX);
   color(FL_BACKGROUND2_COLOR, FL_SELECTION_COLOR);
   align(FL_ALIGN_LEFT);
-  textsize_ = (uchar)FL_NORMAL_SIZE;
+  textsize_ = FL_NORMAL_SIZE;
   textfont_ = FL_HELVETICA;
   textcolor_ = FL_FOREGROUND_COLOR;
   cursor_color_ = FL_FOREGROUND_COLOR; // was FL_BLUE
@@ -810,8 +1308,21 @@ Fl_Input_::Fl_Input_(int X, int Y, int W, int H, const char* l)
   value_ = "";
   xscroll_ = yscroll_ = 0;
   maximum_size_ = 32767;
+  shortcut_ = 0;
+  undo_list_ = new Fl_Input_Undo_Action_List();
+  redo_list_ = new Fl_Input_Undo_Action_List();
+  undo_ = new Fl_Input_Undo_Action();
+  set_flag(SHORTCUT_LABEL);
+  set_flag(MAC_USE_ACCENTS_MENU);
+  set_flag(NEEDS_KEYBOARD);
+  tab_nav(1);
 }
 
+/**
+ Copies the value from a possibly static entry into the internal buffer.
+
+ \param [in] len size of the current text
+*/
 void Fl_Input_::put_in_buffer(int len) {
   if (value_ == buffer && bufsize > len) {
     buffer[size_] = 0;
@@ -819,7 +1330,7 @@ void Fl_Input_::put_in_buffer(int len) {
   }
   if (!bufsize) {
     if (len > size_) len += 9; // let a few characters insert before realloc
-    bufsize = len+1; 
+    bufsize = len+1;
     buffer = (char*)malloc(bufsize);
   } else if (bufsize <= len) {
     // we may need to move old value in case it points into buffer:
@@ -847,9 +1358,29 @@ void Fl_Input_::put_in_buffer(int len) {
   value_ = buffer;
 }
 
+/**
+  Changes the widget text.
+
+  This function changes the text and sets the mark and the point to
+  the end of it. The string is \e not copied. If the user edits the
+  string it is copied to the internal buffer then. This can save a
+  great deal of time and memory if your program is rapidly
+  changing the values of text fields, but this will only work if
+  the passed string remains unchanged until either the
+  Fl_Input is destroyed or value() is called again.
+
+  You can use the \p len parameter to directly set the length
+  if you know it already or want to put \c nul characters in the text.
+
+  \param [in] str the new text
+  \param [in] len the length of the new text
+  \return non-zero if the new value is different than the current one
+*/
 int Fl_Input_::static_value(const char* str, int len) {
   clear_changed();
-  if (undowidget == this) undowidget = 0;
+  undo_->clear();
+  undo_list_->clear();
+  redo_list_->clear();
   if (str == value_ && len == size_) return 0;
   if (len) { // non-empty new value:
     if (xscroll_ || yscroll_) {
@@ -859,8 +1390,8 @@ int Fl_Input_::static_value(const char* str, int len) {
       int i = 0;
       // find first different character:
       if (value_) {
-	for (; i<size_ && i<len && str[i]==value_[i]; i++);
-	if (i==size_ && i==len) return 0;
+        for (; i<size_ && i<len && str[i]==value_[i]; i++) {/*empty*/}
+        if (i==size_ && i==len) return 0;
       }
       minimal_update(i);
     }
@@ -873,35 +1404,162 @@ int Fl_Input_::static_value(const char* str, int len) {
     xscroll_ = yscroll_ = 0;
     minimal_update(0);
   }
-  position(readonly() ? 0 : size());
+  insert_position(readonly() ? 0 : size());
   return 1;
 }
 
+/**
+  Changes the widget text.
+
+  This function changes the text and sets the mark and the point to
+  the end of it. The string is \e not copied. If the user edits the
+  string it is copied to the internal buffer then. This can save a
+  great deal of time and memory if your program is rapidly
+  changing the values of text fields, but this will only work if
+  the passed string remains unchanged until either the
+  Fl_Input is destroyed or value() is called again.
+
+  \param [in] str the new text
+  \return non-zero if the new value is different than the current one
+*/
 int Fl_Input_::static_value(const char* str) {
-  return static_value(str, str ? strlen(str) : 0);
+  return static_value(str, str ? (int) strlen(str) : 0);
 }
 
+/**
+  Changes the widget text.
+
+  This function changes the text and sets the mark and the
+  point to the end of it. The string is copied to the internal
+  buffer. Passing \c NULL is the same as "".
+
+  You can use the \p length parameter to directly set the length
+  if you know it already or want to put \c nul characters in the text.
+
+  \param [in] str the new text
+  \param [in] len the length of the new text
+  \return non-zero if the new value is different than the current one
+  \see Fl_Input_::value(const char* str), Fl_Input_::value()
+*/
 int Fl_Input_::value(const char* str, int len) {
   int r = static_value(str, len);
   if (len) put_in_buffer(len);
   return r;
 }
 
+/**
+  Changes the widget text.
+
+  This function changes the text and sets the mark and the
+  point to the end of it. The string is copied to the internal
+  buffer. Passing \c NULL is the same as \c "".
+
+  \param [in] str the new text
+  \return non-zero if the new value is different than the current one
+  \see Fl_Input_::value(const char* str, int len), Fl_Input_::value()
+*/
 int Fl_Input_::value(const char* str) {
-  return value(str, str ? strlen(str) : 0);
+  return value(str, str ? (int) strlen(str) : 0);
 }
 
+/**
+ Changes the widget text to a signed integer number.
+
+ \param [in] v the new value
+ \return non-zero if the new value is different than the current one
+ \see Fl_Input_::value(const char* str), Fl_Input_::ivalue()
+ */
+int Fl_Input_::value(int v) {
+  char buf[64];
+  snprintf(buf, sizeof(buf)-1, "%d", v);
+  return value(buf);
+}
+
+/**
+ Changes the widget text to a floating point number ("%g").
+
+ \param [in] v the new value
+ \return non-zero if the new value is different than the current one
+ \see Fl_Input_::value(const char* str), Fl_Input_::ivalue()
+ */
+int Fl_Input_::value(double v) {
+  char buf[64];
+  snprintf(buf, sizeof(buf)-1, "%g", v);
+  return value(buf);
+}
+
+/**
+ Returns the widget text interpreted as a signed integer.
+
+ \return signed integer value
+ \see Fl_Input_::dvalue()
+ \see Fl_Input_::value(int)
+ */
+int Fl_Input_::ivalue() const {
+  return atoi(value());
+}
+
+/**
+ Returns the widget text interpreted as a floating point number.
+
+ \return double precision floating point value
+ \see Fl_Input_::ivalue()
+ \see Fl_Input_::value(double)
+ */
+double Fl_Input_::dvalue() const {
+  return atof(value());
+}
+
+/**
+  Changes the size of the widget.
+  This call updates the text layout so that the cursor is visible.
+  \param [in] X, Y, W, H new size of the widget
+  \see Fl_Widget::resize(int, int, int, int)
+*/
 void Fl_Input_::resize(int X, int Y, int W, int H) {
   if (W != w()) xscroll_ = 0;
   if (H != h()) yscroll_ = 0;
   Fl_Widget::resize(X, Y, W, H);
 }
 
+/**
+  Destroys the widget.
+
+  The destructor clears all allocated buffers and removes the widget
+  from the parent Fl_Group.
+*/
 Fl_Input_::~Fl_Input_() {
-  if (undowidget == this) undowidget = 0;
+  delete undo_list_;
+  delete redo_list_;
+  delete undo_;
   if (bufsize) free((void*)buffer);
 }
 
-//
-// End of "$Id: Fl_Input_.cxx 6104 2008-04-21 20:54:37Z matt $".
-//
+/** \internal
+  Returns the number of lines displayed on a single page.
+  \return widget height divided by the font height
+*/
+int Fl_Input_::linesPerPage() {
+  int n = 1;
+  if (input_type() == FL_MULTILINE_INPUT) {
+    fl_font(textfont(),textsize()); //ensure current font is set to ours
+    n = h()/fl_height(); // number of lines to scroll
+    if (n<=0) n = 1;
+  }
+  return n;
+}
+
+/**
+  Returns the character at index \p i.
+
+  This function returns the UTF-8 character at \p i
+  as a ucs4 character code.
+
+  \param [in] i index into the value field
+  \return the character at index \p i
+*/
+unsigned int Fl_Input_::index(int i) const
+{
+  int len = 0;
+  return fl_utf8decode(value_+i, value_+size_, &len);
+}

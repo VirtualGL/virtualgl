@@ -1,28 +1,17 @@
 //
-// "$Id: Fl_XBM_Image.cxx 5190 2006-06-09 16:16:34Z mike $"
-//
 // Fl_XBM_Image routines.
 //
-// Copyright 1997-2005 by Bill Spitzak and others.
+// Copyright 1997-2016 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 // Contents:
 //
@@ -37,17 +26,24 @@
 #include <FL/Fl_XBM_Image.H>
 #include <stdio.h>
 #include <stdlib.h>
+#include <FL/fl_utf8.h>
 #include "flstring.h"
 
 //
 // 'Fl_XBM_Image::Fl_XBM_Image()' - Load an XBM file.
 //
 
-Fl_XBM_Image::Fl_XBM_Image(const char *name) : Fl_Bitmap((const char *)0,0,0) {
-  FILE	*f;
-  uchar	*ptr;
+/**
+  The constructor loads the named XBM file from the given name filename.
 
-  if ((f = fopen(name, "rb")) == NULL) return;
+  The destructor frees all memory and server resources that are used by
+  the image.
+*/
+Fl_XBM_Image::Fl_XBM_Image(const char *name) : Fl_Bitmap((const char *)0,0,0) {
+  FILE  *f;
+  uchar *ptr;
+
+  if ((f = fl_fopen(name, "rb")) == NULL) return;
 
   char buffer[1024];
   char junk[1024];
@@ -57,7 +53,7 @@ Fl_XBM_Image::Fl_XBM_Image(const char *name) : Fl_Bitmap((const char *)0,0,0) {
     for (;;) {
       if (!fgets(buffer,1024,f)) {
         fclose(f);
-	return;
+        return;
       }
       int r = sscanf(buffer,"#define %s %d",junk,&wh[i]);
       if (r >= 2) break;
@@ -91,16 +87,11 @@ Fl_XBM_Image::Fl_XBM_Image(const char *name) : Fl_Bitmap((const char *)0,0,0) {
       unsigned int t;
       if (sscanf(a," 0x%x",&t)>0) {
         *ptr++ = (uchar)t;
-	i ++;
+        i ++;
       }
-      while (*a && *a++ != ',');
+      while (*a && *a++ != ',') {/*empty*/}
     }
   }
 
   fclose(f);
 }
-
-
-//
-// End of "$Id: Fl_XBM_Image.cxx 5190 2006-06-09 16:16:34Z mike $".
-//

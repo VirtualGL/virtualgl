@@ -1,28 +1,17 @@
 //
-// "$Id: Fl_Positioner.cxx 5347 2006-08-23 12:57:42Z matt $"
-//
 // Positioner widget for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2010 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 // The positioner widget from Forms, gives 2D input
@@ -56,6 +45,7 @@ void Fl_Positioner::draw() {
   draw_label();
 }
 
+/** Returns the current position in x and y.*/
 int Fl_Positioner::value(double X, double Y) {
   clear_changed();
   if (X == xvalue_ && Y == yvalue_) return 0;
@@ -64,10 +54,12 @@ int Fl_Positioner::value(double X, double Y) {
   return 1;
 }
 
+/** Sets the X axis coordinate.*/
 int Fl_Positioner::xvalue(double X) {
   return(value(X, yvalue_));
 }
 
+/** Sets the Y axis coordinate.*/
 int Fl_Positioner::yvalue(double Y) {
   return(value(xvalue_, Y));
 }
@@ -105,10 +97,14 @@ int Fl_Positioner::handle(int event, int X, int Y, int W, int H) {
       redraw();
                    } }
     if (!(when() & FL_WHEN_CHANGED ||
-	  (when() & FL_WHEN_RELEASE && event == FL_RELEASE))) return 1;
+          (when() & FL_WHEN_RELEASE && event == FL_RELEASE))) return 1;
     if (changed() || when()&FL_WHEN_NOT_CHANGED) {
-      if (event == FL_RELEASE) clear_changed();
-      do_callback();
+      Fl_Callback_Reason reason = changed() ? FL_REASON_CHANGED : FL_REASON_SELECTED;
+      if (event == FL_RELEASE) {
+        clear_changed();
+        reason = FL_REASON_RELEASED;
+      }
+      do_callback(reason);
     }
     return 1;
   default:
@@ -120,6 +116,10 @@ int Fl_Positioner::handle(int e) {
   return handle(e, x(), y(), w(), h());
 }
 
+/**
+  Creates a new Fl_Positioner widget using the given position,
+  size, and label string. The default boxtype is FL_NO_BOX.
+*/
 Fl_Positioner::Fl_Positioner(int X, int Y, int W, int H, const char* l)
 : Fl_Widget(X, Y, W, H, l) {
   box(FL_DOWN_BOX);
@@ -132,6 +132,7 @@ Fl_Positioner::Fl_Positioner(int X, int Y, int W, int H, const char* l)
   xstep_ = ystep_ = 0;
 }
 
+/** Sets the X axis bounds.*/
 void Fl_Positioner::xbounds(double a, double b) {
   if (a != xmin || b != xmax) {
     xmin = a; xmax = b;
@@ -139,13 +140,10 @@ void Fl_Positioner::xbounds(double a, double b) {
   }
 }
 
+/** Sets the Y axis bounds.*/
 void Fl_Positioner::ybounds(double a, double b) {
   if (a != ymin || b != ymax) {
     ymin = a; ymax = b;
     redraw();
   }
 }
-
-//
-// End of "$Id: Fl_Positioner.cxx 5347 2006-08-23 12:57:42Z matt $".
-//

@@ -1,223 +1,87 @@
 //
-// "$Id: Fl_compose.cxx 5211 2006-06-19 07:43:39Z matt $"
-//
 // Character compose processing for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2010 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
+//     https://www.fltk.org/bugs.php
 //
-//     http://www.fltk.org/str.php
-//
+
+/**
+\file Fl_compose.cxx
+Utility functions to support text input.
+*/
 
 #include <FL/Fl.H>
+#include "Fl_Screen_Driver.H"
 
-//
-// MRS: Uncomment the following define to get the original (pre-1.1.2)
-//      dead key support code.  The original code apparently did not
-//      work on Belgian keyboards.
-//
-
-//#define OLD_DEAD_KEY_CODE
-
-
-#ifdef __APPLE__
-
-static const char* const compose_pairs =
-":A*A,C'E~N:O:U'a`a^a:a~a*a,c'e`e"
-"^e:e'i`i^i:i~n'o`o^o:o~o'u`u^u:u"
-"+ o /c# SS* P|ssrOcOTM' : !=AE/O"
-"oo+-<=>=Y=mudtSgPipiS a dgOmaeo/"
-"? ! !!v-f ~~Dt<<>>..  `A~A~OOEoe"
-"- --''``\"'\"`:-^V:y:Y//E=< > fifl"
-"++..,,_\"%%^A^E'A:E`E'I^I:I`I'O^O"
-"mc`O'U^U`U||^ ~^_ u . * , ~-; v ";
-
-#else
-
-static const char* const compose_pairs =
-"=E  _'f _\"..+ ++^ %%^S< OE  ^Z    ^''^^\"\"^-*- --~ TM^s> oe  ^z:Y" 
-"  ! % # $ y=| & : c a <<~ - r _ * +-2 3 ' u p . , 1 o >>141234? "
-"`A'A^A~A:A*AAE,C`E'E^E:E`I'I^I:I-D~N`O'O^O~O:Ox O/`U'U^U:U'YTHss"
-"`a'a^a~a:a*aae,c`e'e^e:e`i'i^i:i-d~n`o'o^o~o:o-:o/`u'u^u:u'yth:y";
-
-#endif
-
-#if !defined(WIN32) && defined(OLD_DEAD_KEY_CODE) // X only
-// X dead-key lookup table.  This turns a dead-key keysym into the
-// first of two characters for one of the compose sequences.  These
-// keysyms start at 0xFE50.
-// Win32 handles the dead keys before FLTK can see them.  This is
-// unfortunate, because you don't get the preview effect.
-static char dead_keys[] = {
-  '`',	// XK_dead_grave
-  '\'',	// XK_dead_acute
-  '^',	// XK_dead_circumflex
-  '~',	// XK_dead_tilde
-  '_',	// XK_dead_macron
-  0,	// XK_dead_breve
-  '.',	// XK_dead_abovedot
-  ':',	// XK_dead_diaeresis
-  '*',	// XK_dead_abovering
-  0,	// XK_dead_doubleacute
-  'v',	// XK_dead_caron
-  ','	// XK_dead_cedilla
-//   0,	// XK_dead_ogonek
-//   0,	// XK_dead_iota
-//   0,	// XK_dead_voiced_sound
-//   0,	// XK_dead_semivoiced_sound
-//   0	// XK_dead_belowdot
-};
-#endif // !WIN32 && OLD_DEAD_KEY_CODE
-
+#ifndef FL_DOXYGEN
 int Fl::compose_state = 0;
+#endif
 
+
+/** Any text editing widget should call this for each FL_KEYBOARD event.
+ Use of this function is very simple.
+
+ <p>If <i>true</i> is returned, then it has modified the
+ Fl::event_text() and Fl::event_length() to a set of <i>bytes</i> to
+ insert (it may be of zero length!).  It will also set the "del"
+ parameter to the number of <i>bytes</i> to the left of the cursor to
+ delete, this is used to delete the results of the previous call to
+ Fl::compose().
+
+ <p>If <i>false</i> is returned, the keys should be treated as function
+ keys, and del is set to zero. You could insert the text anyways, if
+ you don't know what else to do.
+
+ <p>Text editing widgets can preferentially call fl_set_spot() to indicate the window
+ coordinates of the bottom of the current insertion point and the line height.
+ This way, auxiliary windows that help choosing among alternative characters
+ with some text input methods appear just below or above the insertion point.
+ If widgets don't do that, such auxiliary windows appear at the widget's bottom.
+
+ <p>On some platforms, text input can involve marked text, that is,
+ temporary text replaced by other text during the input process. This occurs,
+ e.g., under Wayland or macOS when using dead keys or when entering CJK characters.
+ Text editing widgets should preferentially signal
+ marked text, usually underlining it. Widgets can use
+ <tt>int Fl::compose_state</tt> <i>after</i> having called Fl::compose(int&)
+ to obtain the length in bytes of marked text that always finishes at the
+ current insertion point. Widgets should also call
+ void fl_reset_spot() when processing FL_UNFOCUS
+ events. The Fl_Input and Fl_Text_Editor widgets underline marked text.
+ If none of this is done by a user-defined text editing widget,
+ text input will work, but will not signal to the user what text is marked.
+
+ <p>Finally, text editing widgets should call <tt>set_flag(MAC_USE_ACCENTS_MENU);</tt>
+ in their constructor if they want to use, on the macOS platform, the feature introduced with Mac OS 10.7 "Lion"
+ where pressing and holding certain keys on the keyboard opens a diacritic marks popup window.
+
+ \note For compatibility with FLTK 1.3, text editing widgets can call
+ <tt>Fl::insertion_point_location(int x, int y, int height)</tt> and <tt>Fl::reset_marked_text()</tt>
+ <u>only under the macOS platform</u>  to indicate/reset the coordinates of the current insertion point.
+ This is deprecated in version 1.4 because redundant with the platform-independent
+ fl_set_spot() and fl_reset_spot() functions.
+ */
 int Fl::compose(int& del) {
-
-  del = 0;
-  unsigned char ascii = (unsigned)e_text[0];
-
-  // Alt+letters are reserved for shortcuts.  But alt+foreign letters
-  // has to be allowed, because some key layouts require alt to be held
-  // down in order to type them...
-  //
-  // OSX users sometimes need to hold down ALT for keys, so we only check
-  // for META on OSX...
-#ifdef __APPLE__
-  if ((e_state & FL_META) && !(ascii & 128)) return 0;
-#else
-  if ((e_state & (FL_ALT|FL_META)) && !(ascii & 128)) return 0;
-#endif // __APPLE__
-
-  if (compose_state == 1) { // after the compose key
-    if ( // do not get distracted by any modifier keys
-      e_keysym==FL_Shift_L||
-      e_keysym==FL_Shift_R ||
-      e_keysym==FL_Alt_L ||
-      e_keysym==FL_Alt_R ||
-      e_keysym==FL_Meta_L ||
-      e_keysym==FL_Meta_R ||
-      e_keysym==FL_Control_R ||
-      e_keysym==FL_Control_L ||
-      e_keysym==FL_Menu
-      ) return 0;
-
-    if (ascii == ' ') { // space turns into nbsp
-#ifdef __APPLE__
-      e_text[0] = char(0xCA);
-#else
-      e_text[0] = char(0xA0);
-#endif
-      compose_state = 0;
-      return 1;
-    } else if (ascii < ' ' || ascii == 127) {
-      compose_state = 0;
-      return 0;
-    }
-
-    // see if it is either character of any pair:
-    for (const char *p = compose_pairs; *p; p += 2) 
-      if (p[0] == ascii || p[1] == ascii) {
-	if (p[1] == ' ') e_text[0] = (p-compose_pairs)/2+0x80;
-	compose_state = ascii;
-	return 1;
-      }
-
-    if (e_length) { // compose key also "quotes" control characters
-      compose_state = 0;
-      return 1;
-    }
-
-  } else if (compose_state) { // second character of compose
-
-    char c1 = char(compose_state); // retrieve first character
-#ifdef __APPLE__
-    if ( (c1==0x60 && ascii==0xab) || (c1==0x27 && ascii==0x60)) {
-      del = 1;
-      compose_state = '^';
-      e_text[0] = 0xf6;
-      return 1;
-    }
-    if (ascii==' ') {
-      del = 0;
-      compose_state = 0;
-      return 0;
-    }
-#endif
-    // now search for the pair in either order:
-    for (const char *p = compose_pairs; *p; p += 2) {
-      if (p[0] == ascii && p[1] == c1 || p[1] == ascii && p[0] == c1) {
-	e_text[0] = (p-compose_pairs)/2+0x80;
-	del = 1; // delete the old character and insert new one
-	compose_state = 0;
-	return 1;
-      }
-    }
-
-  }
-
-  int i = e_keysym;
-
-  // See if they type the compose prefix key:
-  if (i == FL_Control_R || i == 0xff20/* Multi-Key */) {
-    compose_state = 1;
-    return 1;
-  }
-
-#ifdef WIN32
-#elif (defined __APPLE__)
-  if (e_state & 0x40000000) {
-    if (ascii<0x80)
-      compose_state = ascii;
-    else
-      compose_state = compose_pairs[(ascii-0x80)*2];
-    return 1;
-  }
-#else
-  // See if they typed a dead key.  This gets it into the same state as
-  // typing prefix+accent:
-  if (i >= 0xfe50 && i <= 0xfe5b) {
-#  ifdef OLD_DEAD_KEY_CODE
-    ascii = dead_keys[i-0xfe50];
-    for (const char *p = compose_pairs; *p; p += 2)
-      if (p[0] == ascii) {
-	compose_state = ascii;
-	return 1;
-      }
-#  else
-    ascii = e_text[0];
-    for (const char *p = compose_pairs; *p; p += 2)
-      if (p[0] == ascii ||
-          (p[1] == ' ' && (p - compose_pairs) / 2 + 0x80 == ascii)) {
-        compose_state = p[0];
-        return 1;
-      }
-#  endif // OLD_DEAD_KEY_CODE
-    compose_state = 0;
-    return 1;
-  }
-#endif
-
-  // Only insert non-control characters:
-  if (e_length && (ascii & ~31 && ascii!=127)) {compose_state = 0; return 1;}
-
-  return 0;
+  return Fl::screen_driver()->compose(del);
 }
 
-
+/**
+ If the user moves the cursor, be sure to call Fl::compose_reset().
+ The next call to Fl::compose() will start out in an initial state. In
+ particular it will not set "del" to non-zero. This call is very fast
+ so it is ok to call it many times and in many places.
+ */
+void Fl::compose_reset()
+{
+  Fl::screen_driver()->compose_reset();
+}
 

@@ -1,32 +1,21 @@
 //
-// "$Id: fl_diamond_box.cxx 5190 2006-06-09 16:16:34Z mike $"
-//
 // Diamond box code for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2011 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 // Box drawing code for an obscure box type.
-// These box types are in seperate files so they are not linked
+// These box types are in separate files so they are not linked
 // in if not used.
 
 // The diamond box draws best if the area is square!
@@ -34,22 +23,23 @@
 #include <FL/Fl.H>
 #include <FL/fl_draw.H>
 
-extern uchar* fl_gray_ramp();
+extern const uchar* fl_gray_ramp();
 
 static void fl_diamond_up_box(int x,int y,int w,int h,Fl_Color bgcolor) {
   w &= -2;
   h &= -2;
   int x1 = x+w/2;
   int y1 = y+h/2;
-  fl_color(bgcolor); fl_polygon(x+3, y1, x1,y+3, x+w-3,y1, x1,y+h-3);
-  uchar *g = fl_gray_ramp();
-  fl_color(g['W']); fl_line(x+1, y1, x1, y+1, x+w-1, y1);
-  fl_color(g['U']); fl_line(x+2, y1, x1, y+2, x+w-2, y1);
-  fl_color(g['S']); fl_line(x+3, y1, x1, y+3, x+w-3, y1);
-  fl_color(g['P']); fl_line(x+3, y1, x1, y+h-3, x+w-3, y1);
-  fl_color(g['N']); fl_line(x+2, y1, x1, y+h-2, x+w-2, y1);
-  fl_color(g['H']); fl_line(x+1, y1, x1, y+h-1, x+w-1, y1);
-  fl_color(g['A']); fl_loop(x, y1, x1, y, x+w, y1, x1, y+h);
+  Fl::set_box_color(bgcolor);
+  fl_polygon(x+3, y1, x1,y+3, x+w-3,y1, x1,y+h-3);
+  const uchar *g = fl_gray_ramp();
+  fl_color(g[(int)'W']); fl_line(x+1, y1, x1, y+1, x+w-1, y1);
+  fl_color(g[(int)'U']); fl_line(x+2, y1, x1, y+2, x+w-2, y1);
+  fl_color(g[(int)'S']); fl_line(x+3, y1, x1, y+3, x+w-3, y1);
+  fl_color(g[(int)'P']); fl_line(x+3, y1, x1, y+h-3, x+w-3, y1);
+  fl_color(g[(int)'N']); fl_line(x+2, y1, x1, y+h-2, x+w-2, y1);
+  fl_color(g[(int)'H']); fl_line(x+1, y1, x1, y+h-1, x+w-1, y1);
+  fl_color(g[(int)'A']); fl_loop(x, y1, x1, y, x+w, y1, x1, y+h);
 }
 
 static void fl_diamond_down_box(int x,int y,int w,int h,Fl_Color bgcolor) {
@@ -57,24 +47,37 @@ static void fl_diamond_down_box(int x,int y,int w,int h,Fl_Color bgcolor) {
   h &= -2;
   int x1 = x+w/2;
   int y1 = y+h/2;
-  uchar *g = fl_gray_ramp();
-  fl_color(g['P']); fl_line(x+0, y1, x1, y+0, x+w-0, y1);
-  fl_color(g['N']); fl_line(x+1, y1, x1, y+1, x+w-1, y1);
-  fl_color(g['H']); fl_line(x+2, y1, x1, y+2, x+w-2, y1);
-  fl_color(g['W']); fl_line(x+2, y1, x1, y+h-2, x+w-2, y1);
-  fl_color(g['U']); fl_line(x+1, y1, x1, y+h-1, x+w-1, y1);
-  fl_color(g['S']); fl_line(x+0, y1, x1, y+h-0, x+w-0, y1);
-  fl_color(bgcolor); fl_polygon(x+3, y1, x1,y+3, x+w-3,y1, x1,y+h-3);
-  fl_color(g['A']); fl_loop(x+3, y1, x1, y+3, x+w-3, y1, x1, y+h-3);
+  const uchar *g = fl_gray_ramp();
+  fl_color(g[(int)'P']); fl_line(x+0, y1, x1, y+0, x+w-0, y1);
+  fl_color(g[(int)'N']); fl_line(x+1, y1, x1, y+1, x+w-1, y1);
+  fl_color(g[(int)'H']); fl_line(x+2, y1, x1, y+2, x+w-2, y1);
+  fl_color(g[(int)'W']); fl_line(x+2, y1, x1, y+h-2, x+w-2, y1);
+  fl_color(g[(int)'U']); fl_line(x+1, y1, x1, y+h-1, x+w-1, y1);
+  fl_color(g[(int)'S']); fl_line(x+0, y1, x1, y+h-0, x+w-0, y1);
+  Fl::set_box_color(bgcolor);
+  fl_polygon(x+3, y1, x1,y+3, x+w-3,y1, x1,y+h-3);
+  fl_color(g[(int)'A']); fl_loop(x+3, y1, x1, y+3, x+w-3, y1, x1, y+h-3);
 }
 
-extern void fl_internal_boxtype(Fl_Boxtype, Fl_Box_Draw_F*);
+void fl_diamond_focus(Fl_Boxtype bt, int x, int y, int w, int h, Fl_Color fg, Fl_Color bg) {
+  w &= -2;
+  h &= -2;
+  x += Fl::box_dx(bt)+4;
+  y += Fl::box_dy(bt)+4;
+  w -= Fl::box_dw(bt)+8;
+  h -= Fl::box_dh(bt)+8;
+  int x1 = x+w/2;
+  int y1 = y+h/2;
+  Fl_Color savecolor = fl_color();
+  fl_color(fl_contrast(fg, bg));
+  fl_line_style(FL_DOT);
+  fl_loop(x,y1, x1,y, x+w,y1, x1,y+h);
+  fl_line_style(FL_SOLID);
+  fl_color(savecolor);
+}
+extern void fl_internal_boxtype(Fl_Boxtype, Fl_Box_Draw_F*, Fl_Box_Draw_Focus_F* =NULL);
 Fl_Boxtype fl_define_FL_DIAMOND_BOX() {
-  fl_internal_boxtype(_FL_DIAMOND_DOWN_BOX, fl_diamond_down_box);
-  fl_internal_boxtype(_FL_DIAMOND_UP_BOX,fl_diamond_up_box);
+  fl_internal_boxtype(_FL_DIAMOND_DOWN_BOX, fl_diamond_down_box, fl_diamond_focus);
+  fl_internal_boxtype(_FL_DIAMOND_UP_BOX, fl_diamond_up_box, fl_diamond_focus);
   return _FL_DIAMOND_UP_BOX;
 }
-
-//
-// End of "$Id: fl_diamond_box.cxx 5190 2006-06-09 16:16:34Z mike $".
-//

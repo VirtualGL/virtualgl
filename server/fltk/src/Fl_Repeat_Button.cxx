@@ -1,28 +1,17 @@
 //
-// "$Id: Fl_Repeat_Button.cxx 5219 2006-06-21 06:52:10Z matt $"
-//
 // Repeat button widget for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2010 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 #include <FL/Fl.H>
@@ -34,7 +23,7 @@
 void Fl_Repeat_Button::repeat_callback(void *v) {
   Fl_Button *b = (Fl_Button*)v;
   Fl::add_timeout(REPEAT,repeat_callback,b);
-  b->do_callback();
+  b->do_callback(FL_REASON_RESELECTED);
 }
 
 int Fl_Repeat_Button::handle(int event) {
@@ -49,14 +38,14 @@ int Fl_Repeat_Button::handle(int event) {
     if (Fl::visible_focus()) Fl::focus(this);
     newval = Fl::event_inside(this);
   J1:
-    if (!active()) 
+    if (!active())
       newval = 0;
     if (value(newval)) {
       if (newval) {
-	Fl::add_timeout(INITIALREPEAT,repeat_callback,this);
-	do_callback();
+        Fl::add_timeout(INITIALREPEAT,repeat_callback,this);
+        do_callback(FL_REASON_SELECTED);
       } else {
-	Fl::remove_timeout(repeat_callback,this);
+        Fl::remove_timeout(repeat_callback,this);
       }
     }
     return 1;
@@ -65,6 +54,8 @@ int Fl_Repeat_Button::handle(int event) {
   }
 }
 
-//
-// End of "$Id: Fl_Repeat_Button.cxx 5219 2006-06-21 06:52:10Z matt $".
-//
+
+Fl_Repeat_Button::Fl_Repeat_Button(int X,int Y,int W,int H,const char *l)
+: Fl_Button(X,Y,W,H,l)
+{
+}

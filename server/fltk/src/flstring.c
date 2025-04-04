@@ -1,28 +1,17 @@
 /*
- * "$Id: flstring.c 4288 2005-04-16 00:13:17Z mike $"
- *
  * BSD string functions for the Fast Light Tool Kit (FLTK).
  *
- * Copyright 1998-2005 by Bill Spitzak and others.
+ * Copyright 1998-2010 by Bill Spitzak and others.
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * This library is free software. Distribution and use rights are outlined in
+ * the file "COPYING" which should have been included with this file.  If this
+ * file is missing or damaged, see the license at:
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ *     https://www.fltk.org/COPYING.php
  *
- * You should have received a copy of the GNU Library General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- * USA.
+ * Please see the following page on how to report bugs and issues:
  *
- * Please report all bugs and problems on the following page:
- *
- *     http://www.fltk.org/str.php
+ *     https://www.fltk.org/bugs.php
  */
 
 #include "flstring.h"
@@ -32,12 +21,12 @@
  * 'fl_strlcat()' - Safely concatenate two strings.
  */
 
-size_t				/* O - Length of string */
-fl_strlcat(char       *dst,	/* O - Destination string */
-           const char *src,	/* I - Source string */
-	   size_t     size) {	/* I - Size of destination string buffer */
-  size_t	srclen;		/* Length of source string */
-  size_t	dstlen;		/* Length of destination string */
+size_t                          /* O - Length of string */
+fl_strlcat(char       *dst,     /* O - Destination string */
+           const char *src,     /* I - Source string */
+           size_t     size) {   /* I - Size of destination string buffer */
+  size_t        srclen;         /* Length of source string */
+  size_t        dstlen;         /* Length of destination string */
 
 
  /*
@@ -47,7 +36,7 @@ fl_strlcat(char       *dst,	/* O - Destination string */
   dstlen = strlen(dst);
   size   -= dstlen + 1;
 
-  if (!size) return (dstlen);	/* No room, return immediately... */
+  if (!size) return (dstlen);   /* No room, return immediately... */
 
  /*
   * Figure out how much room is needed...
@@ -67,39 +56,22 @@ fl_strlcat(char       *dst,	/* O - Destination string */
   return (dstlen + srclen);
 }
 
+#define C_RANGE(c,l,r) ( (c) >= (l) && (c) <= (r) )
 
-/*
- * 'fl_strlcpy()' - Safely copy two strings.
+/**
+ * locale independent ascii oriented case cmp
+ * returns 0 if string successfully compare, -1 if s<t, +1 if s>t
  */
+int fl_ascii_strcasecmp(const char *s, const char *t) {
+  if (!s || !t) return (s==t ? 0 : (!s ? -1 : +1));
 
-size_t				/* O - Length of string */
-fl_strlcpy(char       *dst,	/* O - Destination string */
-           const char *src,	/* I - Source string */
-	   size_t      size) {	/* I - Size of destination string buffer */
-  size_t	srclen;		/* Length of source string */
-
-
- /*
-  * Figure out how much room is needed...
-  */
-
-  size --;
-
-  srclen = strlen(src);
-
- /*
-  * Copy the appropriate amount...
-  */
-
-  if (srclen > size) srclen = size;
-
-  memcpy(dst, src, srclen);
-  dst[srclen] = '\0';
-
-  return (srclen);
+  for(;*s && *t; s++,t++) {
+    if (*s == *t) continue;
+    if (*s < *t) {
+      if ( (*s+0x20)!=*t || !C_RANGE(*s,'A','Z') ) return -1;
+    } else {    /* (*s > *t) */
+      if ( (*s-0x20)!=*t || !C_RANGE(*s,'a','z') ) return +1;
+    }
+  }
+  return (*s==*t) ? 0 : (*t ? -1 : +1);
 }
-
-
-/*
- * End of "$Id: flstring.c 4288 2005-04-16 00:13:17Z mike $".
- */

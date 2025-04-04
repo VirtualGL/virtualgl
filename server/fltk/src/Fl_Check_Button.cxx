@@ -1,39 +1,53 @@
 //
-// "$Id: Fl_Check_Button.cxx 5190 2006-06-09 16:16:34Z mike $"
-//
 // Check button widget for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2014 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file. If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 #include <FL/Fl.H>
 #include <FL/Fl_Check_Button.H>
 
-// A subclass of Fl_Button that always draws as a diamond box.  This
-// diamond is smaller than the widget size and can be surchecked by
-// another box type, for compatability with Forms.
+/**
+  \class Fl_Check_Button
+  \brief A button with a "checkmark" to show its status.
 
-Fl_Check_Button::Fl_Check_Button(int X, int Y, int W, int H, const char *l)
-: Fl_Light_Button(X, Y, W, H, l) {
+  \image html Fl_Check_Button.png
+  \image latex Fl_Check_Button.png  "Fl_Check_Button" width=4cm
+
+  Buttons generate callbacks when they are clicked by the user. You control
+  exactly when and how by changing the values for type() and when().
+
+  The Fl_Check_Button subclass displays its "ON" state by showing a "checkmark"
+  rather than drawing itself pushed in.
+ */
+
+/**
+  Creates a new Fl_Check_Button widget using the given position, size, and label string.
+
+  The default box type is FL_NO_BOX, which draws the label w/o a box
+  right of the checkmark.
+
+  The selection_color() sets the color of the checkmark.
+  Default is FL_FOREGROUND_COLOR (usually black).
+
+  You can use down_box() to change the box type of the checkmark.
+  Default is FL_DOWN_BOX.
+
+  \param[in] X, Y, W, H position and size of the widget
+  \param[in] L widget label, default is no label
+ */
+Fl_Check_Button::Fl_Check_Button(int X, int Y, int W, int H, const char *L)
+: Fl_Light_Button(X, Y, W, H, L) {
   box(FL_NO_BOX);
   down_box(FL_DOWN_BOX);
   selection_color(FL_FOREGROUND_COLOR);

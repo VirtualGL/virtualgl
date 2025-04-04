@@ -1,28 +1,17 @@
 //
-// "$Id: Fl_Light_Button.cxx 5721 2007-02-27 19:23:24Z matt $"
-//
 // Lighted button widget for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2006 by Bill Spitzak and others.
+// Copyright 1998-2023 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 // Subclass of Fl_Button where the "box" indicates whether it is
@@ -34,6 +23,7 @@
 
 #include <FL/Fl.H>
 #include <FL/Fl_Light_Button.H>
+#include <FL/Fl_Radio_Light_Button.H>
 #include <FL/fl_draw.H>
 #include "flstring.h"
 
@@ -41,110 +31,85 @@ void Fl_Light_Button::draw() {
   if (box()) draw_box(this==Fl::pushed() ? fl_down(box()) : box(), color());
   Fl_Color col = value() ? (active_r() ? selection_color() :
                             fl_inactive(selection_color())) : color();
-  int W;
-  int dx, dy;
 
-  W  = labelsize();
-  dx = Fl::box_dx(box()) + 2;
-  dy = (h() - W) / 2;
-  // if (dy < 0) dy = 0;         // neg. offset o.k. for vertical centering
+  // determine the color of the check mark or radio button (circle)
 
-  if (down_box()) {
-    // draw other down_box() styles:
+  Fl_Color check_color = selection_color(); // default = selection color
+  if (Fl::is_scheme("gtk+"))
+    check_color = FL_SELECTION_COLOR;       // exception for gtk+
+  if (!active_r())
+    check_color = fl_inactive(check_color);
+  // select a color with enough contrast
+  check_color = fl_contrast(check_color, FL_BACKGROUND2_COLOR);
+
+  int W  = labelsize();         // check mark box size
+  if (W > 25) W = 25;           // limit box size
+  int bx = Fl::box_dx(box());   // box frame width
+  int dx = bx + 2;              // relative position of check mark box
+  int dy = (h() - W) / 2;       // neg. offset o.k. for vertical centering
+  int lx = 0;                   // relative label position (STR #3237)
+  int cx = x() + dx;            // check mark box x-position
+  int cy = y() + dy;            // check mark box y-position
+  int cw = 0;                   // check mark box width and height
+
+  // FIXME: the *box type* of the widget determines the drawing style:
+  // (a) down_box() ==  0: Fl_Light_Button style
+  // (b) down_box() !=  0: other button styles
+
+  if (down_box()) {             // draw "other" button styles (b):
     switch (down_box()) {
       case FL_DOWN_BOX :
       case FL_UP_BOX :
       case _FL_PLASTIC_DOWN_BOX :
       case _FL_PLASTIC_UP_BOX :
         // Check box...
-        draw_box(down_box(), x()+dx, y()+dy, W, W, FL_BACKGROUND2_COLOR);
-	if (value()) {
-	  if (Fl::scheme() && !strcmp(Fl::scheme(), "gtk+")) {
-	    fl_color(FL_SELECTION_COLOR);
-	  } else {
-	    fl_color(col);
-	  }
-	  int tx = x() + dx + 3;
-	  int tw = W - 6;
-	  int d1 = tw/3;
-	  int d2 = tw-d1;
-	  int ty = y() + dy + (W+d2)/2-d1-2;
-	  for (int n = 0; n < 3; n++, ty++) {
-	    fl_line(tx, ty, tx+d1, ty+d1);
-	    fl_line(tx+d1, ty+d1, tx+tw-1, ty+d1-d2+1);
-	  }
-	}
+        draw_box(down_box(), cx, cy, W, W, FL_BACKGROUND2_COLOR);
+        if (value()) {
+          // Check mark...
+          // Calculate box position and size
+          cx += Fl::box_dx(down_box());
+          cy += Fl::box_dy(down_box());
+          cw = W - Fl::box_dw(down_box());
+          fl_draw_check(Fl_Rect(cx, cy, cw, cw), check_color);
+        }
         break;
       case _FL_ROUND_DOWN_BOX :
       case _FL_ROUND_UP_BOX :
         // Radio button...
         draw_box(down_box(), x()+dx, y()+dy, W, W, FL_BACKGROUND2_COLOR);
-	if (value()) {
-	  int tW = (W - Fl::box_dw(down_box())) / 2 + 1;
-	  if ((W - tW) & 1) tW++; // Make sure difference is even to center
-	  int tdx = dx + (W - tW) / 2;
-	  int tdy = dy + (W - tW) / 2;
+        if (value()) {
 
-	  if (Fl::scheme() && !strcmp(Fl::scheme(), "gtk+")) {
-	    fl_color(FL_SELECTION_COLOR);
-	    tW --;
-	    fl_pie(x() + tdx - 1, y() + tdy - 1, tW + 3, tW + 3, 0.0, 360.0);
-	    fl_arc(x() + tdx - 1, y() + tdy - 1, tW + 3, tW + 3, 0.0, 360.0);
-	    fl_color(fl_color_average(FL_WHITE, FL_SELECTION_COLOR, 0.2f));
-	  } else fl_color(col);
+          // Draw round check mark of radio button
 
-	  switch (tW) {
-	    // Larger circles draw fine...
-	    default :
-              fl_pie(x() + tdx, y() + tdy, tW, tW, 0.0, 360.0);
-	      break;
+          int tW = (W - Fl::box_dw(down_box())) / 2 + 1;
+          if ((W - tW) & 1) tW++; // Make sure difference is even to center
+          int tdx = dx + (W - tW) / 2;
+          int tdy = dy + (W - tW) / 2;
+          fl_draw_radio(x() + tdx - 1, y() + tdy - 1, tW + 2, check_color);
 
-            // Small circles don't draw well on many systems...
-	    case 6 :
-	      fl_rectf(x() + tdx + 2, y() + tdy, tW - 4, tW);
-	      fl_rectf(x() + tdx + 1, y() + tdy + 1, tW - 2, tW - 2);
-	      fl_rectf(x() + tdx, y() + tdy + 2, tW, tW - 4);
-	      break;
-
-	    case 5 :
-	    case 4 :
-	    case 3 :
-	      fl_rectf(x() + tdx + 1, y() + tdy, tW - 2, tW);
-	      fl_rectf(x() + tdx, y() + tdy + 1, tW, tW - 2);
-	      break;
-
-	    case 2 :
-	    case 1 :
-	      fl_rectf(x() + tdx, y() + tdy, tW, tW);
-	      break;
-	  }
-
-	  if (Fl::scheme() && !strcmp(Fl::scheme(), "gtk+")) {
-	    fl_color(fl_color_average(FL_WHITE, FL_SELECTION_COLOR, 0.5));
-	    fl_arc(x() + tdx, y() + tdy, tW + 1, tW + 1, 60.0, 180.0);
-	  }
-	}
+        } // Radio button: if (value())
         break;
       default :
         draw_box(down_box(), x()+dx, y()+dy, W, W, col);
         break;
     }
+    lx = dx + W + 2;
   } else {
-    // if down_box() is zero, draw light button style:
+    // if down_box() is zero, draw light button style (a):
     int hh = h()-2*dy - 2;
     int ww = W/2+1;
     int xx = dx;
     if (w()<ww+2*xx) xx = (w()-ww)/2;
-    if (Fl::scheme() && !strcmp(Fl::scheme(), "plastic")) {
+    if (Fl::is_scheme("plastic")) {
       col = active_r() ? selection_color() : fl_inactive(selection_color());
       fl_color(value() ? col : fl_color_average(col, FL_BLACK, 0.5f));
       fl_pie(x()+xx, y()+dy+1, ww, hh, 0, 360);
     } else {
       draw_box(FL_THIN_DOWN_BOX, x()+xx, y()+dy+1, ww, hh, col);
     }
-    dx = (ww + 2 * dx - W) / 2;
+    lx = dx + ww + 2;
   }
-  draw_label(x()+W+2*dx, y(), w()-W-2*dx, h());
+  draw_label(x()+lx, y(), w()-lx-bx, h());
   if (Fl::focus() == this) draw_focus();
 }
 
@@ -157,6 +122,23 @@ int Fl_Light_Button::handle(int event) {
   }
 }
 
+/**
+  Creates a new Fl_Light_Button widget using the given
+  position, size, and label string.
+
+  The default box type is \p FL_UP_BOX and the default down box
+  type down_box() is \p FL_NO_BOX (0).
+
+  The selection_color() sets the color of the "light".
+  Default is FL_YELLOW.
+
+  The default label alignment is \p 'FL_ALIGN_LEFT|FL_ALIGN_INSIDE' so
+  the label is drawn inside the button area right of the "light".
+
+  \note Do not change the default box types of Fl_Light_Button. The
+    box types determine how the button is drawn. If you change the
+    down_box() type the drawing behavior is undefined.
+*/
 Fl_Light_Button::Fl_Light_Button(int X, int Y, int W, int H, const char* l)
 : Fl_Button(X, Y, W, H, l) {
   type(FL_TOGGLE_BUTTON);
@@ -164,6 +146,9 @@ Fl_Light_Button::Fl_Light_Button(int X, int Y, int W, int H, const char* l)
   align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
 }
 
-//
-// End of "$Id: Fl_Light_Button.cxx 5721 2007-02-27 19:23:24Z matt $".
-//
+
+Fl_Radio_Light_Button::Fl_Radio_Light_Button(int X,int Y,int W,int H,const char *l)
+: Fl_Light_Button(X,Y,W,H,l)
+{
+  type(FL_RADIO_BUTTON);
+}

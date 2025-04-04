@@ -1,28 +1,17 @@
 //
-// "$Id: Fl_own_colormap.cxx 5190 2006-06-09 16:16:34Z mike $"
-//
 // Private colormap support for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2021 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 // Using the default system colormap can be a bad idea on PseudoColor
@@ -33,51 +22,16 @@
 // and copy the first 16 colors from the default colormap so that we won't
 // get huge color changes when switching windows.
 
-#include <config.h>
 #include <FL/Fl.H>
-#include <FL/x.H>
+#include "Fl_Screen_Driver.H"
 
-#ifdef WIN32
-// There is probably something relevant to do on MSWindows 8-bit displays
-// but I don't know what it is
+/** \fn Fl::own_colormap()
+ Makes FLTK use its <a href="fltk-colormap.png">own colormap</a>.  This may make FLTK display better
+ and will reduce conflicts with other programs that want lots of colors.
+ However the colors may flash as you move the cursor between windows.
 
-void Fl::own_colormap() {}
-
-#elif defined(__APPLE__)
-// MacOS X always provides a TrueColor interface...
-
-void Fl::own_colormap() {}
-#else
-// X version
-
+ <P>This does nothing if the current visual is not colormapped.
+ */
 void Fl::own_colormap() {
-  fl_open_display();
-#if USE_COLORMAP
-  switch (fl_visual->c_class) {
-  case GrayScale :
-  case PseudoColor :
-  case DirectColor :
-    break;
-  default:
-    return; // don't do anything for non-colormapped visuals
-  }
-  int i;
-  XColor colors[16];
-  // Get the first 16 colors from the default colormap...
-  for (i = 0; i < 16; i ++) colors[i].pixel = i;
-  XQueryColors(fl_display, fl_colormap, colors, 16);
-  // Create a new colormap...
-  fl_colormap = XCreateColormap(fl_display,
-				RootWindow(fl_display,fl_screen),
-				fl_visual->visual, AllocNone);
-  // Copy those first 16 colors to our own colormap:
-  for (i = 0; i < 16; i ++)
-    XAllocColor(fl_display, fl_colormap, colors + i);
-#endif
+  Fl::screen_driver()->own_colormap();
 }
-
-#endif
-
-//
-// End of "$Id: Fl_own_colormap.cxx 5190 2006-06-09 16:16:34Z mike $".
-//

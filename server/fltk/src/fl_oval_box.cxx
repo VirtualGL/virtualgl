@@ -1,44 +1,37 @@
 //
-// "$Id: fl_oval_box.cxx 5190 2006-06-09 16:16:34Z mike $"
-//
 // Oval box drawing code for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2020 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
-
-// Less-used box types are in seperate files so they are not linked
+// Less-used box types are in separate files so they are not linked
 // in if not used.
 
 #include <FL/Fl.H>
 #include <FL/fl_draw.H>
 
+// Global parameters for box drawing algorithm:
+//
+//  BW = box shadow width
+#define BW (Fl::box_shadow_width())
+
 static void fl_oval_flat_box(int x, int y, int w, int h, Fl_Color c) {
-  fl_color(c);
+  Fl::set_box_color(c);
   fl_pie(x, y, w, h, 0, 360);
 }
 
 static void fl_oval_frame(int x, int y, int w, int h, Fl_Color c) {
-  fl_color(c);
+  Fl::set_box_color(c);
   fl_arc(x, y, w, h, 0, 360);
 }
 
@@ -48,19 +41,28 @@ static void fl_oval_box(int x, int y, int w, int h, Fl_Color c) {
 }
 
 static void fl_oval_shadow_box(int x, int y, int w, int h, Fl_Color c) {
-  fl_oval_flat_box(x+3,y+3,w,h,FL_DARK3);
+  fl_oval_flat_box(x+BW,y+BW,w,h,FL_DARK3);
   fl_oval_box(x,y,w,h,c);
 }
 
-extern void fl_internal_boxtype(Fl_Boxtype, Fl_Box_Draw_F*);
-Fl_Boxtype fl_define_FL_OVAL_BOX() {
-  fl_internal_boxtype(_FL_OSHADOW_BOX,fl_oval_shadow_box);
-  fl_internal_boxtype(_FL_OVAL_FRAME,fl_oval_frame);
-  fl_internal_boxtype(_FL_OFLAT_BOX,fl_oval_flat_box);
-  fl_internal_boxtype(_FL_OVAL_BOX,fl_oval_box);
-  return _FL_OVAL_BOX;
+void fl_oval_focus(Fl_Boxtype bt, int x, int y, int w, int h, Fl_Color fg, Fl_Color bg) {
+  x += Fl::box_dx(bt)+1;
+  y += Fl::box_dy(bt)+1;
+  w -= Fl::box_dw(bt)+2;
+  h -= Fl::box_dh(bt)+2;
+  Fl_Color savecolor = fl_color();
+  fl_color(fl_contrast(fg, bg));
+  fl_line_style(FL_DOT);
+  fl_arc(x, y, w, h, 0, 360);
+  fl_line_style(FL_SOLID);
+  fl_color(savecolor);
 }
 
-//
-// End of "$Id: fl_oval_box.cxx 5190 2006-06-09 16:16:34Z mike $".
-//
+extern void fl_internal_boxtype(Fl_Boxtype, Fl_Box_Draw_F*, Fl_Box_Draw_Focus_F* =NULL);
+Fl_Boxtype fl_define_FL_OVAL_BOX() {
+  fl_internal_boxtype(_FL_OSHADOW_BOX, fl_oval_shadow_box, fl_oval_focus);
+  fl_internal_boxtype(_FL_OVAL_FRAME, fl_oval_frame, fl_oval_focus);
+  fl_internal_boxtype(_FL_OFLAT_BOX, fl_oval_flat_box, fl_oval_focus);
+  fl_internal_boxtype(_FL_OVAL_BOX, fl_oval_box, fl_oval_focus);
+  return _FL_OVAL_BOX;
+}

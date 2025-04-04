@@ -1,28 +1,17 @@
 //
-// "$Id: Fl_Roller.cxx 5190 2006-06-09 16:16:34Z mike $"
-//
 // Roller widget for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2010 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 // Rapid-App style knob
@@ -36,53 +25,68 @@ int Fl_Roller::handle(int event) {
   static int ipos;
   int newpos = horizontal() ? Fl::event_x() : Fl::event_y();
   switch (event) {
-  case FL_PUSH:
-    if (Fl::visible_focus()) {
-      Fl::focus(this);
-      redraw();
-    }
-    handle_push();
-    ipos = newpos;
-    return 1;
-  case FL_DRAG:
-    handle_drag(clamp(round(increment(previous_value(),newpos-ipos))));
-    return 1;
-  case FL_RELEASE:
-    handle_release();
-    return 1;
-  case FL_KEYBOARD :
-    switch (Fl::event_key()) {
-      case FL_Up:
-        if (horizontal()) return 0;
-	handle_drag(clamp(increment(value(),-1)));
-	return 1;
-      case FL_Down:
-        if (horizontal()) return 0;
-	handle_drag(clamp(increment(value(),1)));
-	return 1;
-      case FL_Left:
-        if (!horizontal()) return 0;
-	handle_drag(clamp(increment(value(),-1)));
-	return 1;
-      case FL_Right:
-        if (!horizontal()) return 0;
-	handle_drag(clamp(increment(value(),1)));
-	return 1;
-      default:
-        return 0;
-    }
-    // break not required because of switch...
-  case FL_FOCUS :
-  case FL_UNFOCUS :
-    if (Fl::visible_focus()) {
-      redraw();
+    case FL_PUSH:
+      if (Fl::visible_focus()) {
+        Fl::focus(this);
+        redraw();
+      }
+      handle_push();
+      ipos = newpos;
       return 1;
-    } else return 0;
-  case FL_ENTER :
-  case FL_LEAVE :
-    return 1;
-  default:
-    return 0;
+    case FL_DRAG:
+      handle_drag(clamp(round(increment(previous_value(),newpos-ipos))));
+      return 1;
+    case FL_RELEASE:
+      handle_release();
+      return 1;
+    case FL_MOUSEWHEEL :
+      if (Fl::belowmouse()==this) {
+        if (horizontal()) {
+          if (Fl::e_dx!=0) {
+            handle_drag(clamp(round(increment(value(),-Fl::e_dx))));
+          }
+        } else {
+          if (Fl::e_dy!=0) {
+            handle_drag(clamp(round(increment(value(),-Fl::e_dy))));
+          }
+        }
+        return 1;
+      } else {
+        return 0;
+      }
+    case FL_KEYBOARD :
+      switch (Fl::event_key()) {
+        case FL_Up:
+          if (horizontal()) return 0;
+          handle_drag(clamp(increment(value(),-1)));
+          return 1;
+        case FL_Down:
+          if (horizontal()) return 0;
+          handle_drag(clamp(increment(value(),1)));
+          return 1;
+        case FL_Left:
+          if (!horizontal()) return 0;
+          handle_drag(clamp(increment(value(),-1)));
+          return 1;
+        case FL_Right:
+          if (!horizontal()) return 0;
+          handle_drag(clamp(increment(value(),1)));
+          return 1;
+        default:
+          return 0;
+      }
+      // break not required because of switch...
+    case FL_FOCUS :
+    case FL_UNFOCUS :
+      if (Fl::visible_focus()) {
+        redraw();
+        return 1;
+      } else return 0;
+    case FL_ENTER :
+    case FL_LEAVE :
+      return 1;
+    default:
+      return 0;
   }
 }
 
@@ -111,12 +115,12 @@ void Fl_Roller::draw() {
       // draw ridges:
       double junk;
       for (double yy = -ARC+modf(offset*sin(ARC)/(W/2)/delta,&junk)*delta;;
-	   yy += delta) {
-	int yy1 = int((sin(yy)/sin(ARC)+1)*W/2);
-	if (yy1 <= 0) continue; else if (yy1 >= W-1) break;
-	fl_color(FL_DARK3); fl_yxline(X+yy1,Y+1,Y+H-1);
-	if (yy < 0) yy1--; else yy1++;
-	fl_color(FL_LIGHT1);fl_yxline(X+yy1,Y+1,Y+H-1);
+           yy += delta) {
+        int yy1 = int((sin(yy)/sin(ARC)+1)*W/2);
+        if (yy1 <= 0) continue; else if (yy1 >= W-1) break;
+        fl_color(FL_DARK3); fl_yxline(X+yy1,Y+1,Y+H-1);
+        if (yy < 0) yy1--; else yy1++;
+        fl_color(FL_LIGHT1);fl_yxline(X+yy1,Y+1,Y+H-1);
       }
       // draw edges:
       h1 = W/8+1; // distance from end the color inverts
@@ -145,12 +149,12 @@ void Fl_Roller::draw() {
       // draw ridges:
       double junk;
       for (double yy = -ARC+modf(offset*sin(ARC)/(H/2)/delta,&junk)*delta;
-	   ; yy += delta) {
-	int yy1 = int((sin(yy)/sin(ARC)+1)*H/2);
-	if (yy1 <= 0) continue; else if (yy1 >= H-1) break;
-	fl_color(FL_DARK3); fl_xyline(X+1,Y+yy1,X+W-1);
-	if (yy < 0) yy1--; else yy1++;
-	fl_color(FL_LIGHT1);fl_xyline(X+1,Y+yy1,X+W-1);
+           ; yy += delta) {
+        int yy1 = int((sin(yy)/sin(ARC)+1)*H/2);
+        if (yy1 <= 0) continue; else if (yy1 >= H-1) break;
+        fl_color(FL_DARK3); fl_xyline(X+1,Y+yy1,X+W-1);
+        if (yy < 0) yy1--; else yy1++;
+        fl_color(FL_LIGHT1);fl_xyline(X+1,Y+yy1,X+W-1);
       }
       // draw edges:
       h1 = H/8+1; // distance from end the color inverts
@@ -169,12 +173,13 @@ void Fl_Roller::draw() {
   if (Fl::focus() == this) draw_focus(FL_THIN_UP_FRAME, x(), y(), w(), h());
 }
 
+/**
+  Creates a new Fl_Roller widget using the given position,
+  size, and label string. The default boxtype is FL_NO_BOX.
+  <P>Inherited destructor destroys the valuator.
+*/
 Fl_Roller::Fl_Roller(int X,int Y,int W,int H,const char* L)
   : Fl_Valuator(X,Y,W,H,L) {
   box(FL_UP_BOX);
   step(1,1000);
 }
-
-//
-// End of "$Id: Fl_Roller.cxx 5190 2006-06-09 16:16:34Z mike $".
-//

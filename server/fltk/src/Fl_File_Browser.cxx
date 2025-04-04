@@ -1,28 +1,18 @@
 //
-// "$Id: Fl_File_Browser.cxx 5635 2007-01-23 15:02:00Z mike $"
-//
 // Fl_File_Browser routines.
 //
-// Copyright 1999-2006 by Michael Sweet.
+// Copyright 1999-2010 by Michael Sweet.
+// Copyright 2016 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 // Contents:
 //
@@ -40,38 +30,15 @@
 //
 
 #include <FL/Fl_File_Browser.H>
+#include <FL/Fl.H>
+#include "Fl_System_Driver.H"
 #include <FL/fl_draw.H>
 #include <FL/filename.H>
+#include <FL/fl_string_functions.h>
+#include <FL/Fl_Image.H>        // icon
 #include <stdio.h>
 #include <stdlib.h>
 #include "flstring.h"
-
-#ifdef __CYGWIN__
-#  include <mntent.h>
-#elif defined(WIN32)
-#  include <windows.h>
-#  include <direct.h>
-// Apparently Borland C++ defines DIRECTORY in <direct.h>, which
-// interfers with the Fl_File_Icon enumeration of the same name.
-#  ifdef DIRECTORY
-#    undef DIRECTORY
-#  endif // DIRECTORY
-#endif // __CYGWIN__
-
-#ifdef __EMX__
-#  define  INCL_DOS
-#  define  INCL_DOSMISC
-#  include <os2.h>
-#endif // __EMX__
-
-// CodeWarrior (__MWERKS__) gets its include paths confused, so we
-// temporarily disable this...
-#if defined(__APPLE__) && !defined(__MWERKS__)
-#  include <sys/param.h>
-#  include <sys/ucred.h>
-#  include <sys/mount.h>
-#endif // __APPLE__ && !__MWERKS__
-
 
 //
 // FL_BLINE definition from "Fl_Browser.cxx"...
@@ -80,14 +47,20 @@
 #define SELECTED 1
 #define NOTDISPLAYED 2
 
-struct FL_BLINE			// data is in a linked list of these
+// TODO -- Warning: The definition of FL_BLINE here is a hack.
+//    Fl_File_Browser should not do this. PLEASE FIX.
+//    FL_BLINE should be private to Fl_Browser, and not re-defined here.
+//    For now, make sure this struct is precisely consistent with Fl_Browser.cxx.
+//
+struct FL_BLINE                 // data is in a linked list of these
 {
-  FL_BLINE	*prev;		// Previous item in list
-  FL_BLINE	*next;		// Next item in list
-  void		*data;		// Pointer to data (function)
-  short		length;		// sizeof(txt)-1, may be longer than string
-  char		flags;		// selected, displayed
-  char		txt[1];		// start of allocated array
+  FL_BLINE      *prev;          // Previous item in list
+  FL_BLINE      *next;          // Next item in list
+  void          *data;          // Pointer to data (function)
+  Fl_Image      *icon;          // Pointer to optional icon
+  short         length;         // sizeof(txt)-1, may be longer than string
+  char          flags;          // selected, displayed
+  char          txt[1];         // start of allocated array
 };
 
 
@@ -95,15 +68,15 @@ struct FL_BLINE			// data is in a linked list of these
 // 'Fl_File_Browser::full_height()' - Return the height of the list.
 //
 
-int					// O - Height in pixels
+int                                     // O - Height in pixels
 Fl_File_Browser::full_height() const
 {
-  int	i,				// Looping var
-	th;				// Total height of list.
+  int   i,                              // Looping var
+        th;                             // Total height of list.
 
 
   for (i = 0, th = 0; i < size(); i ++)
-    th += item_height(find_line(i));
+    th += item_height(find_line(i)) + linespacing();
 
   return (th);
 }
@@ -113,13 +86,13 @@ Fl_File_Browser::full_height() const
 // 'Fl_File_Browser::item_height()' - Return the height of a list item.
 //
 
-int					// O - Height in pixels
-Fl_File_Browser::item_height(void *p) const	// I - List item data
+int                                     // O - Height in pixels
+Fl_File_Browser::item_height(void *p) const     // I - List item data
 {
-  FL_BLINE	*line;			// Pointer to line
-  char		*t;			// Pointer into text
-  int		height;			// Width of line
-  int		textheight;		// Height of text
+  FL_BLINE      *line;                  // Pointer to line
+  char          *t;                     // Pointer into text
+  int           height;                 // Width of line
+  int           textheight;             // Height of text
 
 
   // Figure out the standard text height...
@@ -135,7 +108,7 @@ Fl_File_Browser::item_height(void *p) const	// I - List item data
   if (line != NULL)
     for (t = line->txt; *t != '\0'; t ++)
       if (*t == '\n')
-	height += textheight;
+        height += textheight;
 
   // If we have enabled icons then add space for them...
   if (Fl_File_Icon::first() != NULL && height < iconsize_)
@@ -153,18 +126,18 @@ Fl_File_Browser::item_height(void *p) const	// I - List item data
 // 'Fl_File_Browser::item_width()' - Return the width of a list item.
 //
 
-int					// O - Width in pixels
-Fl_File_Browser::item_width(void *p) const	// I - List item data
+int                                     // O - Width in pixels
+Fl_File_Browser::item_width(void *p) const      // I - List item data
 {
-  int		i;			// Looping var
-  FL_BLINE	*line;			// Pointer to line
-  char		*t,			// Pointer into text
-		*ptr,			// Pointer into fragment
-		fragment[10240];	// Fragment of text
-  int		width,			// Width of line
-		tempwidth;		// Width of fragment
-  int		column;			// Current column
-  const int	*columns;		// Columns
+  int           i;                      // Looping var
+  FL_BLINE      *line;                  // Pointer to line
+  char          *t,                     // Pointer into text
+                *ptr,                   // Pointer into fragment
+                fragment[10240];        // Fragment of text
+  int           width,                  // Width of line
+                tempwidth;              // Width of fragment
+  int           column;                 // Current column
+  const int     *columns;               // Columns
 
 
   // Scan for newlines...
@@ -196,33 +169,33 @@ Fl_File_Browser::item_width(void *p) const	// I - List item data
         // Newline - nul terminate this fragment and get the width...
         *ptr = '\0';
 
-	tempwidth += (int)fl_width(fragment);
+        tempwidth += (int)fl_width(fragment);
 
         // Update the max width as needed...
-	if (tempwidth > width)
-	  width = tempwidth;
+        if (tempwidth > width)
+          width = tempwidth;
 
         // Point back to the start of the fragment...
-	ptr       = fragment;
-	tempwidth = 0;
-	column    = 0;
+        ptr       = fragment;
+        tempwidth = 0;
+        column    = 0;
       }
       else if (*t == column_char())
       {
         // Advance to the next column...
         column ++;
-	if (columns)
-	{
-	  for (i = 0, tempwidth = 0; i < column && columns[i]; i ++)
-	    tempwidth += columns[i];
-	}
-	else
+        if (columns)
+        {
+          for (i = 0, tempwidth = 0; i < column && columns[i]; i ++)
+            tempwidth += columns[i];
+        }
+        else
           tempwidth = column * (int)(fl_height() * 0.6 * 8.0);
 
         if (tempwidth > width)
-	  width = tempwidth;
+          width = tempwidth;
 
-	ptr = fragment;
+        ptr = fragment;
       }
       else
         *ptr++ = *t;
@@ -236,7 +209,7 @@ Fl_File_Browser::item_width(void *p) const	// I - List item data
 
       // Update the max width as needed...
       if (tempwidth > width)
-	width = tempwidth;
+        width = tempwidth;
     }
   }
 
@@ -257,22 +230,22 @@ Fl_File_Browser::item_width(void *p) const	// I - List item data
 //
 
 void
-Fl_File_Browser::item_draw(void *p,	// I - List item data
-                 	   int  X,	// I - Upper-lefthand X coordinate
-		 	   int  Y,	// I - Upper-lefthand Y coordinate
-		 	   int  W,	// I - Width of item
-			   int) const	// I - Height of item
+Fl_File_Browser::item_draw(void *p,     // I - List item data
+                           int  X,      // I - Upper-lefthand X coordinate
+                           int  Y,      // I - Upper-lefthand Y coordinate
+                           int  W,      // I - Width of item
+                           int  H) const// I - Height of item
 {
-  int		i;			// Looping var
-  FL_BLINE	*line;			// Pointer to line
-  Fl_Color	c;			// Text color
-  char		*t,			// Pointer into text
-		*ptr,			// Pointer into fragment
-		fragment[10240];	// Fragment of text
-  int		width,			// Width of line
-		height;			// Height of line
-  int		column;			// Current column
-  const int	*columns;		// Columns
+  int           i;                      // Looping var
+  FL_BLINE      *line;                  // Pointer to line
+  Fl_Color      c;                      // Text color
+  char          *t,                     // Pointer into text
+                *ptr,                   // Pointer into fragment
+                fragment[10240];        // Fragment of text
+  int           width,                  // Width of line
+                height;                 // Height of line
+  int           column;                 // Current column
+  const int     *columns;               // Columns
 
 
   // Draw the list item text...
@@ -298,25 +271,23 @@ Fl_File_Browser::item_draw(void *p,	// I - List item data
   {
     // Draw the icon if it is set...
     if (line->data)
-      ((Fl_File_Icon *)line->data)->draw(X, Y, iconsize_, iconsize_,
-                                	(line->flags & SELECTED) ? FL_YELLOW :
-				                                   FL_LIGHT2,
-					active_r());
+      ((Fl_File_Icon *)line->data)->draw(X, Y + (H - iconsize_) / 2,
+                                         iconsize_, iconsize_,
+                                         (line->flags & SELECTED) ? FL_YELLOW :
+                                                                   FL_LIGHT2,
+                                         active_r());
 
     // Draw the text offset to the right...
     X += iconsize_ + 9;
     W -= iconsize_ - 10;
-
-    // Center the text vertically...
-    height = fl_height();
-
-    for (t = line->txt; *t != '\0'; t ++)
-      if (*t == '\n')
-	height += fl_height();
-
-    if (height < iconsize_)
-      Y += (iconsize_ - height) / 2;
   }
+  // Center the text vertically...
+  height = fl_height();
+
+  for (t = line->txt; *t != '\0'; t ++)
+    if (*t == '\n')
+      height += fl_height();
+  Y += (H - height) / 2;
 
   // Draw the text...
   line    = (FL_BLINE *)p;
@@ -329,9 +300,8 @@ Fl_File_Browser::item_draw(void *p,	// I - List item data
   else
     fl_color(fl_inactive(c));
 
-  for (t = line->txt, ptr = fragment; *t != '\0'; t ++)
-    if (*t == '\n')
-    {
+  for (t = line->txt, ptr = fragment; *t != '\0'; t ++) {
+    if (*t == '\n') {
       // Newline - nul terminate this fragment and draw it...
       *ptr = '\0';
 
@@ -343,18 +313,15 @@ Fl_File_Browser::item_draw(void *p,	// I - List item data
       width  = 0;
       Y      += fl_height();
       column = 0;
-    }
-    else if (*t == column_char())
-    {
+    } else if (*t == column_char()) {
       // Tab - nul terminate this fragment and draw it...
       *ptr = '\0';
 
       int cW = W - width; // Clip width...
 
-      if (columns)
-      {
+      if (columns) {
         // Try clipping inside this column...
-	for (i = 0; i < column && columns[i]; i ++);
+        for (i = 0; i < column && columns[i]; i ++) { ; }
 
         if (columns[i])
           cW = columns[i];
@@ -365,21 +332,18 @@ Fl_File_Browser::item_draw(void *p,	// I - List item data
 
       // Advance to the next column...
       column ++;
-      if (columns)
-      {
-	for (i = 0, width = 0; i < column && columns[i]; i ++)
-	  width += columns[i];
+      if (columns) {
+        for (i = 0, width = 0; i < column && columns[i]; i ++)
+          width += columns[i];
       }
       else
         width = column * (int)(fl_height() * 0.6 * 8.0);
-
       ptr = fragment;
     }
     else
       *ptr++ = *t;
-
-  if (ptr > fragment)
-  {
+  }
+  if (ptr > fragment) {
     // Nul terminate this fragment and draw it...
     *ptr = '\0';
 
@@ -389,15 +353,15 @@ Fl_File_Browser::item_draw(void *p,	// I - List item data
 }
 
 
-//
-// 'Fl_File_Browser::Fl_File_Browser()' - Create a Fl_File_Browser widget.
-//
-
+/**
+  The constructor creates the Fl_File_Browser widget at the specified position and size.
+  The destructor destroys the widget and frees all memory that has been allocated.
+*/
 Fl_File_Browser::Fl_File_Browser(int        X,  // I - Upper-lefthand X coordinate
-                        	 int        Y,  // I - Upper-lefthand Y coordinate
-				 int        W,  // I - Width in pixels
-				 int        H,  // I - Height in pixels
-				 const char *l)	// I - Label text
+                                 int        Y,  // I - Upper-lefthand Y coordinate
+                                 int        W,  // I - Width in pixels
+                                 int        H,  // I - Height in pixels
+                                 const char *l) // I - Label text
     : Fl_Browser(X, Y, W, H, l)
 {
   // Initialize the filter pattern, current directory, and icon size...
@@ -405,23 +369,51 @@ Fl_File_Browser::Fl_File_Browser(int        X,  // I - Upper-lefthand X coordina
   directory_ = "";
   iconsize_  = (uchar)(3 * textsize() / 2);
   filetype_  = FILES;
+  errmsg_    = NULL;
 }
 
 
-//
-// 'Fl_File_Browser::load()' - Load a directory into the browser.
-//
+// DTOR
+Fl_File_Browser::~Fl_File_Browser() {
+  errmsg(NULL);       // free()s prev errmsg, if any
+}
 
-int						// O - Number of files loaded
+
+/**
+  Sets OS error message to a string, which can be NULL.
+  Frees previous if any.
+  void errmsg(const char *emsg);
+ */
+void Fl_File_Browser::errmsg(const char* emsg) {
+  if ( errmsg_ ) { free((void*)errmsg_); errmsg_ = NULL; }
+  errmsg_ = emsg ? fl_strdup(emsg) : NULL;
+}
+
+
+/**
+  Loads the specified directory into the browser. If icons have been
+  loaded then the correct icon is associated with each file in the list.
+
+  If directory is "", all mount points (unix) or drive letters (Windows)
+  are listed.
+
+  The sort argument specifies a sort function to be used with
+  fl_filename_list().
+
+  Return value is the number of filename entries, or 0 if none.
+  On error, 0 is returned, and errmsg() has OS error string if non-NULL.
+*/
+int                                             // O - Number of files loaded
 Fl_File_Browser::load(const char     *directory,// I - Directory to load
-                      Fl_File_Sort_F *sort)	// I - Sort function to use
+                      Fl_File_Sort_F *sort)     // I - Sort function to use
 {
-  int		i;				// Looping var
-  int		num_files;			// Number of files in directory
-  int		num_dirs;			// Number of directories in list
-  char		filename[4096];			// Current file
-  Fl_File_Icon	*icon;				// Icon to use
+  int           i;                              // Looping var
+  int           num_files;                      // Number of files in directory
+  int           num_dirs;                       // Number of directories in list
+  char          filename[4096];                 // Current file
+  Fl_File_Icon  *icon;                          // Icon to use
 
+  errmsg(NULL); // clear errors first
 
 //  printf("Fl_File_Browser::load(\"%s\")\n", directory);
 
@@ -429,184 +421,48 @@ Fl_File_Browser::load(const char     *directory,// I - Directory to load
 
   directory_ = directory;
 
-  if (!directory)
-    return (0);
+  if (!directory) {
+    errmsg("NULL directory specified");
+    return 0;
+  }
 
-  if (directory_[0] == '\0')
-  {
+  if (directory_[0] == '\0') {
     //
     // No directory specified; for UNIX list all mount points.  For DOS
     // list all valid drive letters...
     //
-
-    num_files = 0;
     if ((icon = Fl_File_Icon::find("any", Fl_File_Icon::DEVICE)) == NULL)
       icon = Fl_File_Icon::find("any", Fl_File_Icon::DIRECTORY);
+    num_files = Fl::system_driver()->file_browser_load_filesystem(this, filename, (int)sizeof(filename), icon);
+  } else {
+    dirent **files;        // Files in in directory
+    char emsg[1024] = "";
 
-#ifdef WIN32
-#  ifdef __CYGWIN__
-    //
-    // Cygwin provides an implementation of setmntent() to get the list
-    // of available drives...
-    //
-    FILE          *m = setmntent("/-not-used-", "r");
-    struct mntent *p;
+    // Build the file list, check for errors
+    num_files = Fl::system_driver()->file_browser_load_directory(directory_,
+                                                                 filename, sizeof(filename),
+                                                                 &files, sort,
+                                                                 emsg, sizeof(emsg));
+    // printf("Fl_File_Browser::load(dir='%s',filename='%s'): failed, emsg='%s'\n", directory_, filename, emsg);
 
-    while ((p = getmntent (m)) != NULL) {
-      add(p->mnt_dir, icon);
-      num_files ++;
+    if (num_files <= 0) {
+      errmsg(emsg);
+      return 0;
     }
-
-    endmntent(m);
-#  else
-    //
-    // Normal WIN32 code uses drive bits...
-    //
-    DWORD	drives;		// Drive available bits
-
-    drives = GetLogicalDrives();
-    for (i = 'A'; i <= 'Z'; i ++, drives >>= 1)
-      if (drives & 1)
-      {
-        sprintf(filename, "%c:/", i);
-
-	if (i < 'C') // see also: GetDriveType and GetVolumeInformation in WIN32
-	  add(filename, icon);
-	else
-	  add(filename, icon);
-
-	num_files ++;
-      }
-#  endif // __CYGWIN__
-#elif defined(__EMX__)
-    //
-    // OS/2 code uses drive bits...
-    //
-    ULONG	curdrive;	// Current drive
-    ULONG	drives;		// Drive available bits
-    int		start = 3;      // 'C' (MRS - dunno if this is correct!)
-
-
-    DosQueryCurrentDisk(&curdrive, &drives);
-    drives >>= start - 1;
-    for (i = 'A'; i <= 'Z'; i ++, drives >>= 1)
-      if (drives & 1)
-      {
-        sprintf(filename, "%c:/", i);
-        add(filename, icon);
-
-	num_files ++;
-      }
-#elif defined(__APPLE__) && !defined(__MWERKS__)
-    // MacOS X and Darwin use getfsstat() system call...
-    int			numfs;	// Number of file systems
-    struct statfs	*fs;	// Buffer for file system info
-
-
-    // We always have the root filesystem.
-    add("/", icon);
-
-    // Get the mounted filesystems...
-    numfs = getfsstat(NULL, 0, MNT_NOWAIT);
-    if (numfs > 0) {
-      // We have file systems, get them...
-      fs = new struct statfs[numfs];
-      getfsstat(fs, sizeof(struct statfs) * numfs, MNT_NOWAIT);
-
-      // Add filesystems to the list...
-      for (i = 0; i < numfs; i ++) {
-	// Ignore "/", "/dev", and "/.vol"...
-        if (fs[i].f_mntonname[1] && strcmp(fs[i].f_mntonname, "/dev") &&
-	    strcmp(fs[i].f_mntonname, "/.vol")) {
-          snprintf(filename, sizeof(filename), "%s/", fs[i].f_mntonname);
-          add(filename, icon);
-        }
-        num_files ++;
-      }
-
-      // Free the memory used for the file system info array...
-      delete[] fs;
-    }
-#else
-    //
-    // UNIX code uses /etc/fstab or similar...
-    //
-    FILE	*mtab;		// /etc/mtab or /etc/mnttab file
-    char	line[1024];	// Input line
-
-    //
-    // Open the file that contains a list of mounted filesystems...
-    //
-
-    mtab = fopen("/etc/mnttab", "r");	// Fairly standard
-    if (mtab == NULL)
-      mtab = fopen("/etc/mtab", "r");	// More standard
-    if (mtab == NULL)
-      mtab = fopen("/etc/fstab", "r");	// Otherwise fallback to full list
-    if (mtab == NULL)
-      mtab = fopen("/etc/vfstab", "r");	// Alternate full list file
-
-    if (mtab != NULL)
-    {
-      while (fgets(line, sizeof(line), mtab) != NULL)
-      {
-        if (line[0] == '#' || line[0] == '\n')
-	  continue;
-        if (sscanf(line, "%*s%4095s", filename) != 1)
-	  continue;
-
-        strlcat(filename, "/", sizeof(filename));
-
-//        printf("Fl_File_Browser::load() - adding \"%s\" to list...\n", filename);
-        add(filename, icon);
-	num_files ++;
-      }
-
-      fclose(mtab);
-    }
-#endif // WIN32 || __EMX__
-  }
-  else
-  {
-    dirent	**files;	// Files in in directory
-
-
-    //
-    // Build the file list...
-    //
-
-#if (defined(WIN32) && !defined(__CYGWIN__)) || defined(__EMX__)
-    strlcpy(filename, directory_, sizeof(filename));
-    i = strlen(filename) - 1;
-
-    if (i == 2 && filename[1] == ':' &&
-        (filename[2] == '/' || filename[2] == '\\'))
-      filename[2] = '/';
-    else if (filename[i] != '/' && filename[i] != '\\')
-      strlcat(filename, "/", sizeof(filename));
-
-    num_files = fl_filename_list(filename, &files, sort);
-#else
-    num_files = fl_filename_list(directory_, &files, sort);
-#endif /* WIN32 || __EMX__ */
-
-    if (num_files <= 0)
-      return (0);
 
     for (i = 0, num_dirs = 0; i < num_files; i ++) {
       if (strcmp(files[i]->d_name, "./")) {
-	snprintf(filename, sizeof(filename), "%s/%s", directory_,
-	         files[i]->d_name);
+        fl_snprintf(filename, sizeof(filename), "%s/%s", directory_, files[i]->d_name);
 
         icon = Fl_File_Icon::find(filename);
-	if ((icon && icon->type() == Fl_File_Icon::DIRECTORY) ||
-	     _fl_filename_isdir_quick(filename)) {
+        if ((icon && icon->type() == Fl_File_Icon::DIRECTORY) ||
+            Fl::system_driver()->filename_isdir_quick(filename)) {
           num_dirs ++;
           insert(num_dirs, files[i]->d_name, icon);
-	} else if (filetype_ == FILES &&
-	           fl_filename_match(files[i]->d_name, pattern_)) {
+        } else if (filetype_ == FILES &&
+                   fl_filename_match(files[i]->d_name, pattern_)) {
           add(files[i]->d_name, icon);
-	}
+        }
       }
 
       free(files[i]);
@@ -624,7 +480,7 @@ Fl_File_Browser::load(const char     *directory,// I - Directory to load
 //
 
 void
-Fl_File_Browser::filter(const char *pattern)	// I - Pattern string
+Fl_File_Browser::filter(const char *pattern)    // I - Pattern string
 {
   // If pattern is NULL set the pattern to "*"...
   if (pattern)
@@ -632,8 +488,3 @@ Fl_File_Browser::filter(const char *pattern)	// I - Pattern string
   else
     pattern_ = "*";
 }
-
-
-//
-// End of "$Id: Fl_File_Browser.cxx 5635 2007-01-23 15:02:00Z mike $".
-//

@@ -1,256 +1,206 @@
 //
-// "$Id: screen_xywh.cxx 5848 2007-05-20 16:18:31Z mike $"
-//
 // Screen/monitor bounding box API for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2024 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
+//     https://www.fltk.org/bugs.php
 //
-//     http://www.fltk.org/str.php
-//
-
 
 #include <FL/Fl.H>
-#include <FL/x.H>
+#include <FL/platform.H>
+#include "Fl_Screen_Driver.H"
 #include <config.h>
 
 
-// Number of screens...
-static int num_screens = 0;
-
-#ifdef WIN32
-#  if !defined(HMONITOR_DECLARED) && (_WIN32_WINNT < 0x0500)
-#    define COMPILE_MULTIMON_STUBS
-#    include <multimon.h>
-#  endif // !HMONITOR_DECLARED && _WIN32_WINNT < 0x0500
-
-// We go the much more difficult route of individually picking some multi-screen
-// functions from the USER32.DLL . If these functions are not available, we
-// will gracefully fall back to single monitor support.
-//
-// If we were to insist on the existence of "EnumDisplayMonitors" and 
-// "GetMonitorInfoA", it would be impossible to use FLTK on Windows 2000
-// before SP2 or earlier.
-
-// BOOL EnumDisplayMonitors(HDC, LPCRECT, MONITORENUMPROC, LPARAM)
-typedef BOOL (WINAPI* fl_edm_func)(HDC, LPCRECT, MONITORENUMPROC, LPARAM);
-// BOOL GetMonitorInfo(HMONITOR, LPMONITORINFO)
-typedef BOOL (WINAPI* fl_gmi_func)(HMONITOR, LPMONITORINFO);
-
-static fl_gmi_func fl_gmi = NULL; // used to get a proc pointer for GetMonitorInfoA
-
-static RECT screens[16];
-
-static BOOL CALLBACK screen_cb(HMONITOR mon, HDC, LPRECT r, LPARAM) {
-  if (num_screens >= 16) return TRUE;
-
-  MONITORINFO mi;
-  mi.cbSize = sizeof(mi);
-
-//  GetMonitorInfo(mon, &mi);
-//  (but we use our self-aquired function pointer instead)
-  if (fl_gmi(mon, &mi)) {
-    screens[num_screens] = mi.rcWork;
-    num_screens ++;
-  }
-  return TRUE;
+#ifndef FL_DOXYGEN
+void Fl::call_screen_init()
+{
+  screen_driver()->init();
 }
+#endif
 
-static void screen_init() {
-  // Since not all versions of Windows include multiple monitor support,
-  // we do a run-time check for the required functions...
-  HMODULE hMod = GetModuleHandle("USER32.DLL");
-
-  if (hMod) {
-    // check that EnumDisplayMonitors is available
-    fl_edm_func fl_edm = (fl_edm_func)GetProcAddress(hMod, "EnumDisplayMonitors");
-
-    if (fl_edm) {
-      // We do have EnumDisplayMonitors, so lets find out how many monitors...
-      num_screens = GetSystemMetrics(SM_CMONITORS);
-
-      if (num_screens > 1) {
-        // If there is more than 1 monitor, enumerate them...
-        fl_gmi = (fl_gmi_func)GetProcAddress(hMod, "GetMonitorInfoA");
-
-        if (fl_gmi) {
-          // We have GetMonitorInfoA, enumerate all the screens...
-          num_screens = 0;
-//        EnumDisplayMonitors(0,0,screen_cb,0);
-//        (but we use our self-aquired function pointer instead)
-          fl_edm(0, 0, screen_cb, 0);
-          return;
-        }
-      }
-    }
-  }
-
-  // If we get here, assume we have 1 monitor...
-  num_screens = 1;
-}
-#elif defined(__APPLE__)
-XRectangle screens[16];
-
-static void screen_init() {
-  GDHandle gd;
-
-  for (gd = GetDeviceList(), num_screens = 0; gd; gd = GetNextDevice(gd)) {
-    GDPtr gp = *gd;
-    screens[num_screens].x      = gp->gdRect.left;
-    screens[num_screens].y      = gp->gdRect.top;
-    screens[num_screens].width  = gp->gdRect.right - gp->gdRect.left;
-    screens[num_screens].height = gp->gdRect.bottom - gp->gdRect.top;
-
-    num_screens ++;
-    if (num_screens >= 16) break;
-  }
-}
-#elif HAVE_XINERAMA
-#  include <X11/extensions/Xinerama.h>
-
-// Screen data...
-static XineramaScreenInfo *screens;
-
-static void screen_init() {
-  if (!fl_display) fl_open_display();
-
-  if (XineramaIsActive(fl_display)) {
-    screens = XineramaQueryScreens(fl_display, &num_screens);
-  } else num_screens = 1;
-}
-#else
-static void screen_init() {
-  num_screens = 1;
-}
-#endif // WIN32
-
-
-// Return the number of screens...
-int Fl::screen_count() {
-  if (!num_screens) screen_init();
-
-  return num_screens;
-}
-
-// Return the screen bounding rect for the given mouse position...
-void Fl::screen_xywh(int &X, int &Y, int &W, int &H, int mx, int my) {
-  if (!num_screens) screen_init();
-
-#ifdef WIN32
-  if (num_screens > 1) {
-    int i;
-
-    for (i = 0; i < num_screens; i ++) {
-      if (mx >= screens[i].left && mx < screens[i].right &&
-	  my >= screens[i].top && my < screens[i].bottom) {
-	X = screens[i].left;
-	Y = screens[i].top;
-	W = screens[i].right - screens[i].left;
-	H = screens[i].bottom - screens[i].top;
-	return;
-      }
-    }
-  }
-#elif defined(__APPLE__)
-  if (num_screens > 1) {
-    int i;
-
-    for (i = 0; i < num_screens; i ++) {
-      if (mx >= screens[i].x &&
-	  mx < (screens[i].x + screens[i].width) &&
-	  my >= screens[i].y &&
-	  my < (screens[i].y + screens[i].height)) {
-	X = screens[i].x;
-	Y = screens[i].y;
-	W = screens[i].width;
-	H = screens[i].height;
-	return;
-      }
-    }
-  }
-#elif HAVE_XINERAMA
-  if (num_screens > 1) {
-    int i;
-
-    for (i = 0; i < num_screens; i ++) {
-      if (mx >= screens[i].x_org &&
-	  mx < (screens[i].x_org + screens[i].width) &&
-	  my >= screens[i].y_org &&
-	  my < (screens[i].y_org + screens[i].height)) {
-	X = screens[i].x_org;
-	Y = screens[i].y_org;
-	W = screens[i].width;
-	H = screens[i].height;
-	return;
-      }
-    }
-  }
-#else
-  (void)mx;
-  (void)my;
-#endif // WIN32
-
-  X = Fl::x();
-  Y = Fl::y();
-  W = Fl::w();
-  H = Fl::h();
-}
-
-// Return the screen bounding rect for the given screen...
-void Fl::screen_xywh(int &X, int &Y, int &W, int &H, int n) {
-  if (!num_screens) screen_init();
-
-#ifdef WIN32
-  if (num_screens > 1 && n >= 0 && n < num_screens) {
-    X = screens[n].left;
-    Y = screens[n].top;
-    W = screens[n].right - screens[n].left;
-    H = screens[n].bottom - screens[n].top;
-    return;
-  }
-#elif defined(__APPLE__)
-  if (num_screens > 1 && n >= 0 && n < num_screens) {
-    X = screens[n].x;
-    Y = screens[n].y;
-    W = screens[n].width;
-    H = screens[n].height;
-    return;
-  }
-#elif HAVE_XINERAMA
-  if (num_screens > 1 && n >= 0 && n < num_screens) {
-    X = screens[n].x_org;
-    Y = screens[n].y_org;
-    W = screens[n].width;
-    H = screens[n].height;
-    return;
-  }
-#else
-  (void)n;
-#endif // WIN32
-
-  X = Fl::x();
-  Y = Fl::y();
-  W = Fl::w();
-  H = Fl::h();
+/** Returns the leftmost x coordinate of the main screen work area. */
+int Fl::x()
+{
+  return screen_driver()->x();
 }
 
 
-//
-// End of "$Id: screen_xywh.cxx 5848 2007-05-20 16:18:31Z mike $".
-//
+/** Returns the topmost y coordinate of the main screen work area. */
+int Fl::y()
+{
+  return screen_driver()->y();
+}
+
+
+/** Returns the width in pixels of the main screen work area. */
+int Fl::w()
+{
+  return screen_driver()->w();
+}
+
+
+/** Returns the height in pixels of the main screen work area. */
+int Fl::h()
+{
+  return screen_driver()->h();
+}
+
+
+/**
+  Gets the total count of available screens.
+  \note Screen numbers range from 0 to Fl::screen_count() - 1 in the FLTK API.
+*/
+int Fl::screen_count()
+{
+  return screen_driver()->screen_count();
+}
+
+
+/**
+  Gets the bounding box of a screen
+  that contains the specified screen position \p mx, \p my
+  \param[out]  X,Y,W,H the corresponding screen bounding box
+  \param[in] mx, my the absolute screen position
+*/
+void Fl::screen_xywh(int &X, int &Y, int &W, int &H, int mx, int my)
+{
+  screen_driver()->screen_xywh(X, Y, W, H, mx, my);
+}
+
+
+/**
+ Gets the bounding box of the work area of a screen
+ that contains the specified screen position \p mx, \p my
+ \param[out]  X,Y,W,H the work area bounding box
+ \param[in] mx, my the absolute screen position
+ \see void screen_work_area(int &x, int &y, int &w, int &h, int n)
+ */
+void Fl::screen_work_area(int &X, int &Y, int &W, int &H, int mx, int my)
+{
+  screen_driver()->screen_work_area(X, Y, W, H, mx, my);
+}
+
+
+/**
+ Gets the bounding box of the work area of the given screen.
+ \param[out]  X,Y,W,H the work area bounding box
+ \param[in] n the screen number (0 to Fl::screen_count() - 1)
+ \see void screen_xywh(int &x, int &y, int &w, int &h, int mx, int my)
+ \note Under X11, the screen work area is given values that differ from that screen's bounding box
+ only if the system contains a single screen. Under Wayland, a screen work area is always
+ equal to that screen's bounding box.
+ \note Like all quantities accessible via public APIs of FLTK, values of \p X,Y,W,H
+ are given in FLTK units, that is, in drawing units divided by the scaling factor of screen \p n.
+*/
+void Fl::screen_work_area(int &X, int &Y, int &W, int &H, int n)
+{
+  screen_driver()->screen_work_area(X, Y, W, H, n);
+}
+
+
+/**
+  Gets the screen bounding rect for the given screen.
+  Under Windows, Mac OS X, and X11 + the Gnome desktop, screen #0 contains the menubar/taskbar
+  \param[out]  X,Y,W,H the corresponding screen bounding box
+  \param[in] n the screen number (0 to Fl::screen_count() - 1)
+  \note Like all quantities accessible via public APIs of FLTK, values of \p X,Y,W,H
+  are given in FLTK units, that is, in drawing units divided by the scaling factor of screen \p n.
+  \see void screen_xywh(int &x, int &y, int &w, int &h, int mx, int my)
+*/
+void Fl::screen_xywh(int &X, int &Y, int &W, int &H, int n)
+{
+  screen_driver()->screen_xywh(X, Y, W, H, n);
+}
+
+
+/**
+  Gets the screen bounding rect for the screen
+  which intersects the most with the rectangle
+  defined by \p mx, \p my, \p mw, \p mh.
+  \param[out]  X,Y,W,H the corresponding screen bounding box
+  \param[in] mx, my, mw, mh the rectangle to search for intersection with
+  \see void screen_xywh(int &X, int &Y, int &W, int &H, int n)
+  */
+void Fl::screen_xywh(int &X, int &Y, int &W, int &H, int mx, int my, int mw, int mh)
+{
+  screen_driver()->screen_xywh(X, Y, W, H, mx, my, mw, mh);
+}
+
+
+/**
+  Gets the screen number of a screen that contains the specified
+  screen position \p x, \p y.
+
+  \param[in] x, y the absolute screen position
+  \return a screen number ∈ [0 , Fl::screen_count()-1]
+
+  \attention When the running system contains screens with different scaling
+    factors, this API may become ambiguous because a given value pair (\p x, \p y)
+    may belong to distinct screens. In that situation other APIs should be
+    preferred, e.g. Fl_Window::screen_num() and Fl::screen_scale(int).
+*/
+int Fl::screen_num(int x, int y)
+{
+  return screen_driver()->screen_num(x, y);
+}
+
+
+/**
+  Gets the screen number of the screen which intersects the most with
+  the rectangle defined by \p x, \p y, \p w, \p h.
+
+  \param[in] x, y, w, h the rectangle to search for intersection with
+
+  \return a screen number ∈ [0 , Fl::screen_count()-1]
+*/
+int Fl::screen_num(int x, int y, int w, int h)
+{
+  return screen_driver()->screen_num(x, y, w, h);
+}
+
+
+/**
+ Gets the screen resolution in dots-per-inch for the given screen.
+ \param[out]  h, v  horizontal and vertical resolution
+ \param[in]   n     the screen number (0 to Fl::screen_count() - 1)
+ \see void screen_xywh(int &x, int &y, int &w, int &h, int mx, int my)
+ */
+void Fl::screen_dpi(float &h, float &v, int n)
+{
+  screen_driver()->screen_dpi(h, v, n);
+}
+
+
+/**
+ Gets the bounding box of a screen that contains the mouse pointer.
+ \param[out]  X,Y,W,H the corresponding screen bounding box
+ \see void screen_xywh(int &x, int &y, int &w, int &h, int mx, int my)
+ */
+void Fl::screen_xywh(int &X, int &Y, int &W, int &H)
+{
+  int mx, my;
+  int nscreen = Fl::screen_driver()->get_mouse(mx, my);
+  Fl::screen_driver()->screen_xywh(X, Y, W, H, nscreen);
+}
+
+
+/**
+ Gets the bounding box of the work area of the screen that contains the mouse pointer.
+ \param[out]  X,Y,W,H the work area bounding box
+ \see void screen_work_area(int &x, int &y, int &w, int &h, int n)
+ */
+void Fl::screen_work_area(int &X, int &Y, int &W, int &H)
+{
+  int mx, my;
+  int nscreen = Fl::screen_driver()->get_mouse(mx, my);
+  Fl::screen_driver()->screen_work_area(X, Y, W, H, nscreen);
+}

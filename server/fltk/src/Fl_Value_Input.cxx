@@ -1,28 +1,17 @@
 //
-// "$Id: Fl_Value_Input.cxx 5190 2006-06-09 16:16:34Z mike $"
-//
 // Value input widget for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2010 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 // FLTK widget for drag-adjusting a floating point value.
@@ -44,7 +33,7 @@ void Fl_Value_Input::input_cb(Fl_Widget*, void* v) {
   if (nv != t.value() || t.when() & FL_WHEN_NOT_CHANGED) {
     t.set_value(nv);
     t.set_changed();
-    if (t.when()) t.do_callback();
+    if (t.when()) t.do_callback(FL_REASON_CHANGED);
   }
 }
 
@@ -52,7 +41,7 @@ void Fl_Value_Input::draw() {
   if (damage()&~FL_DAMAGE_CHILD) input.clear_damage(FL_DAMAGE_ALL);
   input.box(box());
   input.color(color(), selection_color());
-  input.draw();
+  Fl_Widget *i = &input; i->draw(); // calls protected input.draw()
   input.clear_damage();
 }
 
@@ -65,7 +54,7 @@ void Fl_Value_Input::value_damage() {
   char buf[128];
   format(buf);
   input.value(buf);
-  input.mark(input.position()); // turn off selection highlight
+  input.mark(input.insert_position()); // turn off selection highlight
 }
 
 int Fl_Value_Input::handle(int event) {
@@ -100,12 +89,16 @@ int Fl_Value_Input::handle(int event) {
     if (value() != previous_value() || !Fl::event_is_click())
       handle_release();
     else {
+      Fl_Widget_Tracker wp(&input);
       input.handle(FL_PUSH);
-      input.handle(FL_RELEASE);
+      if (wp.exists())
+        input.handle(FL_RELEASE);
     }
     return 1;
   case FL_FOCUS:
     return input.take_focus();
+  case FL_SHORTCUT:
+    return input.handle(event);
   default:
   DEFAULT:
     input.type(((step() - floor(step()))>0.0 || step() == 0.0) ? FL_FLOAT_INPUT : FL_INT_INPUT);
@@ -113,11 +106,16 @@ int Fl_Value_Input::handle(int event) {
   }
 }
 
+/**
+  Creates a new Fl_Value_Input widget using the given
+  position, size, and label string. The default boxtype is
+  FL_DOWN_BOX.
+*/
 Fl_Value_Input::Fl_Value_Input(int X, int Y, int W, int H, const char* l)
 : Fl_Valuator(X, Y, W, H, l), input(X, Y, W, H, 0) {
   soft_ = 0;
   if (input.parent())  // defeat automatic-add
-    ((Fl_Group*)input.parent())->remove(input);
+    input.parent()->remove(input);
   input.parent((Fl_Group *)this); // kludge!
   input.callback(input_cb, this);
   input.when(FL_WHEN_CHANGED);
@@ -126,8 +124,11 @@ Fl_Value_Input::Fl_Value_Input(int X, int Y, int W, int H, const char* l)
   selection_color(input.selection_color());
   align(FL_ALIGN_LEFT);
   value_damage();
+  set_flag(SHORTCUT_LABEL);
 }
 
-//
-// End of "$Id: Fl_Value_Input.cxx 5190 2006-06-09 16:16:34Z mike $".
-//
+Fl_Value_Input::~Fl_Value_Input() {
+
+  if (input.parent() == (Fl_Group *)this)
+    input.parent(0);   // *revert* ctor kludge!
+}

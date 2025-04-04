@@ -1,54 +1,34 @@
 //
-// "$Id: Fl_display.cxx 5190 2006-06-09 16:16:34Z mike $"
-//
 // Display function for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2010 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 // Startup method to set what display to use.
 // Using setenv makes programs that are exec'd use the same display.
 
 #include <FL/Fl.H>
-#include <stdlib.h>
-#include "flstring.h"
+#include "Fl_Screen_Driver.H"
 
-void Fl::display(const char *d) {
-#if defined(__APPLE__) || defined(WIN32)
-  (void)d;
-#else
-  static char e[1024];
-  strcpy(e,"DISPLAY=");
-  strlcat(e,d,sizeof(e));
-  for (char *c = e+8; *c!=':'; c++) {
-    if (!*c) {
-      strlcat(e,":0.0",sizeof(e));
-      break;
-    }
-  }
-  putenv(e);
-#endif // __APPLE__
+/**
+ Sets the X or Wayland display to use for all windows.
+
+ This sets the environment variable $DISPLAY or $WAYLAND_DISPLAY to the passed string,
+ so this only works before you show() the first window or otherwise open the display.
+
+ This does nothing on other platforms.
+*/
+void Fl::display(const char *d)
+{
+  screen_driver()->display(d);
 }
-
-//
-// End of "$Id: Fl_display.cxx 5190 2006-06-09 16:16:34Z mike $".
-//

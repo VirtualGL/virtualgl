@@ -1,34 +1,22 @@
 //
-// "$Id: Fl_Window_hotspot.cxx 5697 2007-02-13 14:38:43Z matt $"
-//
 // Common hotspot routines for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2010 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
-#include <FL/x.H>
-#include <stdio.h>
+#include "Fl_Window_Driver.H"
 
 void Fl_Window::hotspot(int X, int Y, int offscreen) {
   int mx,my;
@@ -41,7 +29,7 @@ void Fl_Window::hotspot(int X, int Y, int offscreen) {
   // stays on the screen, if possible.
   if (!offscreen) {
     int scr_x, scr_y, scr_w, scr_h;
-    Fl::screen_xywh(scr_x, scr_y, scr_w, scr_h);
+    Fl::screen_work_area(scr_x, scr_y, scr_w, scr_h);
 
     int top = 0;
     int left = 0;
@@ -49,34 +37,13 @@ void Fl_Window::hotspot(int X, int Y, int offscreen) {
     int bottom = 0;
 
     if (border()) {
-#ifdef WIN32
-      if (size_range_set && (maxw != minw || maxh != minh)) {
-        left = right = GetSystemMetrics(SM_CXSIZEFRAME);
-        top = bottom = GetSystemMetrics(SM_CYSIZEFRAME);
-      } else {
-        left = right = GetSystemMetrics(SM_CXFIXEDFRAME); 
-        top = bottom = GetSystemMetrics(SM_CYFIXEDFRAME);
-      }
-      top += GetSystemMetrics(SM_CYCAPTION);
-#elif defined(__APPLE__)
-      top = 24;
-      left = 2;
-      right = 2;
-      bottom = 2;
-#else
-      // Ensure border is on screen; these values are generic enough
-      // to work with many window managers, and are based on KDE defaults.
-      top = 20;
-      left = 4;
-      right = 4;
-      bottom = 8;
-#endif
+      pWindowDriver->decoration_sizes(&top, &left, &right, &bottom);
     }
-    // now insure contents are on-screen (more important than border):
-    if (X+w()+right > scr_w-scr_x) X = scr_w-scr_x-right-w();
-    if (X-left < scr_x) X = left;
-    if (Y+h()+bottom > scr_h-scr_y) Y = scr_h-scr_y-bottom-h();
-    if (Y-top < scr_y) Y = top;
+    // now ensure contents are on-screen (more important than border):
+    if (X+w()+right > scr_w+scr_x) X = scr_w+scr_x-right-w();
+    if (X-left < scr_x) X = left + scr_x;
+    if (Y+h()+bottom > scr_h+scr_y) Y = scr_h+scr_y-bottom-h();
+    if (Y-top < scr_y) Y = top + scr_y;
     // make sure that we will force this position
     if (X==x()) x(X-1);
   }
@@ -93,8 +60,3 @@ void Fl_Window::hotspot(const Fl_Widget *o, int offscreen) {
   }
   hotspot(X,Y,offscreen);
 }
-
-
-//
-// End of "$Id: Fl_Window_hotspot.cxx 5697 2007-02-13 14:38:43Z matt $".
-//

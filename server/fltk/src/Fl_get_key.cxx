@@ -1,46 +1,33 @@
 //
-// "$Id: Fl_get_key.cxx 5190 2006-06-09 16:16:34Z mike $"
-//
 // Keyboard state routines for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2021 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
-#ifdef WIN32
-#  include "Fl_get_key_win32.cxx"
-#elif defined(__APPLE__)
-#  include "Fl_get_key_mac.cxx"
-#else
+#include <config.h>
+#if !defined(FL_DOXYGEN)
 
 // Return the current state of a key.  This is the X version.  I identify
 // keys (mostly) by the X keysym.  So this turns the keysym into a keycode
 // and looks it up in the X key bit vector, which Fl_x.cxx keeps track of.
 
-#  include <FL/Fl.H>
-#  include <FL/x.H>
+#include <FL/Fl.H>
+#include "drivers/X11/Fl_X11_Screen_Driver.H"
+#include <FL/platform.H> // for fl_display
 
 extern char fl_key_vector[32]; // in Fl_x.cxx
 
-int Fl::event_key(int k) {
+int Fl_X11_Screen_Driver::event_key(int k) {
   if (k > FL_Button && k <= FL_Button+8)
     return Fl::event_state(8<<(k-FL_Button));
   int i;
@@ -56,14 +43,10 @@ int Fl::event_key(int k) {
   return fl_key_vector[i/8] & (1 << (i%8));
 }
 
-int Fl::get_key(int k) {
+int Fl_X11_Screen_Driver::get_key(int k) {
   fl_open_display();
   XQueryKeymap(fl_display, fl_key_vector);
   return event_key(k);
 }
 
-#endif
-
-//
-// End of "$Id: Fl_get_key.cxx 5190 2006-06-09 16:16:34Z mike $".
-//
+#endif // FL_DOXYGEN

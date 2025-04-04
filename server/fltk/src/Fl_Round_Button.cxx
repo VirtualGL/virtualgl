@@ -1,44 +1,66 @@
 //
-// "$Id: Fl_Round_Button.cxx 5190 2006-06-09 16:16:34Z mike $"
-//
 // Round button for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2014 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file. If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 // A subclass of Fl_Button that always draws as a round circle.  This
 // circle is smaller than the widget size and can be surrounded by
-// another box type, for compatability with Forms.
+// another box type, for compatibility with Forms.
 
 #include <FL/Fl.H>
 #include <FL/Fl_Round_Button.H>
+#include <FL/Fl_Radio_Round_Button.H>
 
-Fl_Round_Button::Fl_Round_Button(int X,int Y,int W,int H, const char *l)
-: Fl_Light_Button(X,Y,W,H,l) {
+/**
+  Creates a new Fl_Round_Button widget using the given position, size, and label string.
+
+  \image html Fl_Round_Button.png
+  \image latex Fl_Round_Button.png " Fl_Round_Button" width=4cm
+
+  The Fl_Round_Button subclass displays the "ON" state by
+  turning on a light, rather than drawing pushed in.
+
+  The default box type is FL_NO_BOX, which draws the label w/o a box
+  right of the checkmark.
+
+  The shape of the "light" is set with down_box() and its default
+  value is FL_ROUND_DOWN_BOX.
+
+  The color of the light when on is controlled with selection_color(),
+  which defaults to FL_FOREGROUND_COLOR (usually black).
+
+  \param[in] X, Y, W, H position and size of the widget
+  \param[in] L widget label, default is no label
+*/
+Fl_Round_Button::Fl_Round_Button(int X,int Y,int W,int H, const char *L)
+: Fl_Light_Button(X,Y,W,H,L) {
   box(FL_NO_BOX);
   down_box(FL_ROUND_DOWN_BOX);
   selection_color(FL_FOREGROUND_COLOR);
 }
 
-//
-// End of "$Id: Fl_Round_Button.cxx 5190 2006-06-09 16:16:34Z mike $".
-//
+/**
+  Creates a new Fl_Radio_Button widget using the given position, size, and label string.
+
+  The button type() is set to FL_RADIO_BUTTON.
+
+  \param[in] X, Y, W, H position and size of the widget
+  \param[in] L widget label, default is no label
+*/
+
+Fl_Radio_Round_Button::Fl_Radio_Round_Button(int X,int Y,int W,int H,const char *L)
+: Fl_Round_Button(X,Y,W,H,L)
+{
+  type(FL_RADIO_BUTTON);
+}

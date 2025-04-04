@@ -1,48 +1,31 @@
 //
-// "$Id: math.h 4288 2005-04-16 00:13:17Z mike $"
-//
 // Math header file for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2020 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
+//     https://www.fltk.org/bugs.php
 //
-//     http://www.fltk.org/str.php
-//
+
+// Xcode on macOS includes files by recursing down into directories.
+// This code catches the cycle and directly includes the required file.
+#ifdef fl_math_h_cyclic_include
+#  include "/usr/include/math.h"
+#endif
 
 #ifndef fl_math_h
 #  define fl_math_h
 
-// Apple's ProjectBuilder has the nasty habit of including recursively
-// down the file tree. To avoid re-including <FL/math.h> we must 
-// directly include the systems math file. (Plus, I could not find a 
-// predefined macro for ProjectBuilder builds, so we have to define it 
-// in the project)
-#  if defined(__APPLE__) && defined(__PROJECTBUILDER__)
-#    include "/usr/include/math.h"
-#  else
-#    include <math.h>
-#  endif
-
-#  ifdef __EMX__
-#    include <float.h>
-#  endif
-
+#  define fl_math_h_cyclic_include
+#  include <math.h>
+#  undef fl_math_h_cyclic_include
 
 #  ifndef M_PI
 #    define M_PI            3.14159265358979323846
@@ -57,16 +40,11 @@
 #    define M_SQRT1_2       0.70710678118654752440
 #  endif // !M_SQRT2
 
-#  if (defined(WIN32) || defined(CRAY)) && !defined(__MINGW32__) && !defined(__MWERKS__)
+#  if (defined(_WIN32) || defined(CRAY)) && !defined(__MINGW32__)
 
 inline double rint(double v) {return floor(v+.5);}
 inline double copysign(double a, double b) {return b<0 ? -a : a;}
 
-#  endif // (WIN32 || CRAY) && !__MINGW32__ && !__MWERKS__
+#  endif // (_WIN32 || CRAY) && !__MINGW32__
 
 #endif // !fl_math_h
-
-
-//
-// End of "$Id: math.h 4288 2005-04-16 00:13:17Z mike $".
-//

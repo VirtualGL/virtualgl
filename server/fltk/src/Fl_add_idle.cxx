@@ -1,28 +1,17 @@
 //
-// "$Id: Fl_add_idle.cxx 5190 2006-06-09 16:16:34Z mike $"
-//
 // Idle routine support for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2022 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 // Allows you to manage an arbitrary set of idle() callbacks.
@@ -43,13 +32,37 @@ static idle_cb* first;
 static idle_cb* last;
 static idle_cb* freelist;
 
+// The function call_idle()
+// - removes the first idle callback from the front of the list (ring)
+// - adds it as the last entry and
+// - calls the idle callback.
+// The idle callback may remove itself from the list of idle callbacks
+// by calling Fl::remove_idle()
+
 static void call_idle() {
   idle_cb* p = first;
   last = p; first = p->next;
   p->cb(p->data); // this may call add_idle() or remove_idle()!
 }
 
-void Fl::add_idle(void (*cb)(void*), void* data) {
+/**
+  Adds a callback function that is called every time by Fl::wait() and also
+  makes it act as though the timeout is zero (this makes Fl::wait() return
+  immediately, so if it is in a loop it is called repeatedly, and thus the
+  idle function is called repeatedly).  The idle function can be used to get
+  background processing done.
+
+  You can have multiple idle callbacks. To remove an idle callback use
+  Fl::remove_idle().
+
+  Fl::wait() and Fl::check() call idle callbacks, but Fl::ready() does not.
+
+  The idle callback can call any FLTK functions, including Fl::wait(),
+  Fl::check(), and Fl::ready().
+
+  FLTK will not recursively call the idle callback.
+*/
+void Fl::add_idle(Fl_Idle_Handler cb, void* data) {
   idle_cb* p = freelist;
   if (p) freelist = p->next;
   else p = new idle_cb;
@@ -66,7 +79,10 @@ void Fl::add_idle(void (*cb)(void*), void* data) {
   }
 }
 
-int Fl::has_idle(void (*cb)(void*), void* data) {
+/**
+  Returns true if the specified idle callback is currently installed.
+*/
+int Fl::has_idle(Fl_Idle_Handler cb, void* data) {
   idle_cb* p = first;
   if (!p) return 0;
   for (;; p = p->next) {
@@ -75,7 +91,10 @@ int Fl::has_idle(void (*cb)(void*), void* data) {
   }
 }
 
-void Fl::remove_idle(void (*cb)(void*), void* data) {
+/**
+  Removes the specified idle callback, if it is installed.
+*/
+void Fl::remove_idle(Fl_Idle_Handler cb, void* data) {
   idle_cb* p = first;
   if (!p) return;
   idle_cb* l = last;
@@ -94,7 +113,3 @@ void Fl::remove_idle(void (*cb)(void*), void* data) {
   p->next = freelist;
   freelist = p;
 }
-
-//
-// End of "$Id: Fl_add_idle.cxx 5190 2006-06-09 16:16:34Z mike $".
-//

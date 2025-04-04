@@ -1,28 +1,17 @@
 //
-// "$Id: Fl_Menu_Bar.cxx 5190 2006-06-09 16:16:34Z mike $"
-//
 // Menu bar widget for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2010 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 #include <FL/Fl.H>
@@ -65,7 +54,7 @@ int Fl_Menu_Bar::handle(int event) {
     return 1;
   case FL_SHORTCUT:
     if (visible_r()) {
-      v = menu()->find_shortcut();
+      v = menu()->find_shortcut(0, true);
       if (v && v->submenu()) goto J1;
     }
     return test_shortcut() != 0;
@@ -73,6 +62,16 @@ int Fl_Menu_Bar::handle(int event) {
   return 0;
 }
 
-//
-// End of "$Id: Fl_Menu_Bar.cxx 5190 2006-06-09 16:16:34Z mike $".
-//
+
+Fl_Menu_Bar::Fl_Menu_Bar(int X, int Y, int W, int H,const char *l)
+: Fl_Menu_(X,Y,W,H,l)
+{
+}
+
+
+void Fl_Menu_Bar::play_menu(const Fl_Menu_Item *v) {
+  if (v) {
+    v = menu()->pulldown(x(), y(), w(), h(), v, this, 0, 1);
+    picked(v);
+  }
+}

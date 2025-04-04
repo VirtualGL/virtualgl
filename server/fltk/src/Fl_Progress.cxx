@@ -1,30 +1,20 @@
 //
-// "$Id: Fl_Progress.cxx 5540 2006-11-12 20:44:12Z matt $"
-//
 // Progress bar widget routines.
 //
-// Copyright 2000-2005 by Michael Sweet.
+// Copyright 2000-2010 by Michael Sweet.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 // Contents:
+
 //
 //   Fl_Progress::draw()        - Draw the check button.
 //   Fl_Progress::Fl_Progress() - Construct a Fl_Progress widget.
@@ -46,14 +36,15 @@
 
 
 //
-// 'Fl_Progress::draw()' - Draw the check button.
+// 'Fl_Progress::draw()' - Draw the progress bar.
 //
 
+/** Draws the progress bar. */
 void Fl_Progress::draw()
 {
-  int	progress;	// Size of progress bar...
-  int	bx, by, bw, bh;	// Box areas...
-  int	tx, tw;		// Temporary X + width
+  int   progress;       // Size of progress bar...
+  int   bx, by, bw, bh; // Box areas...
+  int   tx, tw;         // Temporary X + width
 
 
   // Get the box borders...
@@ -74,17 +65,17 @@ void Fl_Progress::draw()
   // Draw the box and label...
   if (progress > 0) {
     Fl_Color c = labelcolor();
-    labelcolor(fl_contrast(labelcolor(), color2()));
+    labelcolor(fl_contrast(labelcolor(), selection_color()));
 
-    fl_clip(x(), y(), progress + bx, h());
-      draw_box(box(), x(), y(), w(), h(), active_r() ? color2() : fl_inactive(color2()));
+    fl_push_clip(x(), y(), progress + bx, h());
+      draw_box(box(), x(), y(), w(), h(), active_r() ? selection_color() : fl_inactive(selection_color()));
       draw_label(tx, y() + by, tw, h() - bh);
     fl_pop_clip();
 
     labelcolor(c);
 
     if (progress<w()) {
-      fl_clip(tx + progress, y(), w() - progress, h());
+      fl_push_clip(tx + progress, y(), w() - progress, h());
         draw_box(box(), x(), y(), w(), h(), active_r() ? color() : fl_inactive(color()));
         draw_label(tx, y() + by, tw, h() - bh);
       fl_pop_clip();
@@ -96,13 +87,17 @@ void Fl_Progress::draw()
 }
 
 
-//
-// 'Fl_Progress::Fl_Progress()' - Construct a Fl_Progress widget.
-//
+/**
+    The constructor creates the progress bar using the position, size, and label.
 
-Fl_Progress::Fl_Progress(int X, int Y, int W, int H, const char* l)
-: Fl_Widget(X, Y, W, H, l)
-{
+    You can set the background color with color() and the
+    progress bar color with selection_color(), or you can set both colors
+    together with color(unsigned bg, unsigned sel).
+
+    The default colors are FL_BACKGROUND2_COLOR and FL_YELLOW, resp.
+*/
+Fl_Progress::Fl_Progress(int X, int Y, int W, int H, const char* L)
+: Fl_Widget(X, Y, W, H, L) {
   align(FL_ALIGN_INSIDE);
   box(FL_DOWN_BOX);
   color(FL_BACKGROUND2_COLOR, FL_YELLOW);
@@ -110,8 +105,3 @@ Fl_Progress::Fl_Progress(int X, int Y, int W, int H, const char* l)
   maximum(100.0f);
   value(0.0f);
 }
-
-
-//
-// End of "$Id: Fl_Progress.cxx 5540 2006-11-12 20:44:12Z matt $".
-//

@@ -1,49 +1,61 @@
 //
-// "$Id: Fl_Single_Window.H 4288 2005-04-16 00:13:17Z mike $"
-//
 // Single-buffered window header file for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2024 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
+//     https://www.fltk.org/bugs.php
 //
-//     http://www.fltk.org/str.php
-//
+
+/* \file
+   Fl_Single_Window class . */
 
 #ifndef Fl_Single_Window_H
 #define Fl_Single_Window_H
 
 #include "Fl_Window.H"
 
+/**
+  This is the same as Fl_Window.  However, it is possible that
+  some implementations will provide double-buffered windows by default.
+  This subclass can be used to force single-buffering.  This may be
+  useful for modifying existing programs that use incremental update, or
+  for some types of image data, such as a movie flipbook.
+*/
 class FL_EXPORT Fl_Single_Window : public Fl_Window {
 public:
-  void show();
-  void show(int a, char **b) {Fl_Window::show(a,b);}
-  void flush();
-  Fl_Single_Window(int W, int H, const char *l=0)
-    : Fl_Window(W,H,l) {}
-  Fl_Single_Window(int X, int Y, int W, int H, const char *l=0)
-    : Fl_Window(X,Y,W,H,l) {}
-  int make_current();
+  void show() FL_OVERRIDE;
+  /** Same as Fl_Window::show(int argc, char **argv) */
+  void show(int argc, char **argv) { Fl_Window::show(argc, argv);}
+
+   /**
+    Creates a new Fl_Single_Window widget using the given
+    size, and label (title) string.
+  */
+  Fl_Single_Window(int W, int H, const char *l=0);
+
+  /**
+    Creates a new Fl_Single_Window widget using the given
+    position, size, and label (title) string.
+  */
+  Fl_Single_Window(int X, int Y, int W, int H, const char *l=0);
+
+  /**
+    Same as Fl_Window::make_current()
+  */
+  void make_current() { Fl_Window::make_current(); }
+
+  /**
+    Same as Fl_Window::flush()
+  */
+  void flush() FL_OVERRIDE { Fl_Window::flush(); }
 };
 
 #endif
-
-//
-// End of "$Id: Fl_Single_Window.H 4288 2005-04-16 00:13:17Z mike $".
-//

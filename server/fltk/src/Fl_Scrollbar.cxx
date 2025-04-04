@@ -1,29 +1,19 @@
 //
-// "$Id: Fl_Scrollbar.cxx 6042 2008-02-25 13:00:53Z matt $"
-//
 // Scroll bar widget for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2006 by Bill Spitzak and others.
+// Copyright 1998-2022 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
+//     https://www.fltk.org/bugs.php
 //
-//     http://www.fltk.org/str.php
-//
+
 
 #include <FL/Fl.H>
 #include <FL/Fl_Scrollbar.H>
@@ -35,23 +25,32 @@
 #define REPEAT .05
 
 void Fl_Scrollbar::increment_cb() {
-  int ls = maximum()>=minimum() ? linesize_ : -linesize_;
+  char inv = maximum()<minimum();
+  int ls = inv ? -linesize_ : linesize_;
   int i;
   switch (pushed_) {
-  case 1:
-    i = -ls;
-    break;
-  default:
-    i =  ls;
-    break;
-  case 5:
-    i = -int((maximum()-minimum())*slider_size()/(1.0-slider_size())) + ls;
-    if (i > -ls) i = -ls;
-    break;
-  case 6:
-    i =  int((maximum()-minimum())*slider_size()/(1.0-slider_size())) - ls;
-    if (i < ls) i = ls;
-    break;
+    case 1: // clicked on arrow left
+      i = -ls;
+      break;
+    default: // clicked on arrow right
+      i =  ls;
+      break;
+    case 5: // clicked into the box next to the slider on the left
+      i = -(int((maximum()-minimum())*slider_size()/(1.0-slider_size())));
+      if (inv) {
+        if (i<-ls) i = -ls;
+      } else {
+        if (i>-ls) i = -ls; // err
+      }
+      break;
+    case 6: // clicked into the box next to the slider on the right
+      i = (int((maximum()-minimum())*slider_size()/(1.0-slider_size())));
+      if (inv) {
+        if (i>ls) i = ls;
+      } else {
+        if (i<ls) i = ls; // err
+      }
+      break;
   }
   handle_drag(clamp(value() + i));
 }
@@ -132,11 +131,13 @@ int Fl_Scrollbar::handle(int event) {
   case FL_MOUSEWHEEL :
     if (horizontal()) {
       if (Fl::e_dx==0) return 0;
-      handle_drag(clamp(value() + linesize_ * Fl::e_dx));
+      int ls = maximum()>=minimum() ? linesize_ : -linesize_;
+      handle_drag(clamp(value() + ls * Fl::e_dx));
       return 1;
     } else {
       if (Fl::e_dy==0) return 0;
-      handle_drag(clamp(value() + linesize_ * Fl::e_dy));
+      int ls = maximum()>=minimum() ? linesize_ : -linesize_;
+      handle_drag(clamp(value() + ls * Fl::e_dy));
       return 1;
     }
   case FL_SHORTCUT:
@@ -146,40 +147,40 @@ int Fl_Scrollbar::handle(int event) {
     if (horizontal()) {
       switch (Fl::event_key()) {
       case FL_Left:
-	v -= ls;
-	break;
+        v -= ls;
+        break;
       case FL_Right:
-	v += ls;
-	break;
+        v += ls;
+        break;
       default:
-	return 0;
+        return 0;
       }
     } else { // vertical
       switch (Fl::event_key()) {
       case FL_Up:
-	v -= ls;
-	break;
+        v -= ls;
+        break;
       case FL_Down:
-	v += ls;
-	break;
+        v += ls;
+        break;
       case FL_Page_Up:
-	if (slider_size() >= 1.0) return 0;
-	v -= int((maximum()-minimum())*slider_size()/(1.0-slider_size()));
-	v += ls;
-	break;
+        if (slider_size() >= 1.0) return 0;
+        v -= int((maximum()-minimum())*slider_size()/(1.0-slider_size()));
+        v += ls;
+        break;
       case FL_Page_Down:
-	if (slider_size() >= 1.0) return 0;
-	v += int((maximum()-minimum())*slider_size()/(1.0-slider_size()));
-	v -= ls;
-	break;
+        if (slider_size() >= 1.0) return 0;
+        v += int((maximum()-minimum())*slider_size()/(1.0-slider_size()));
+        v -= ls;
+        break;
       case FL_Home:
-	v = int(minimum());
-	break;
+        v = int(minimum());
+        break;
       case FL_End:
-	v = int(maximum());
-	break;
+        v = int(maximum());
+        break;
       default:
-	return 0;
+        return 0;
       }
     }
     v = int(clamp(v));
@@ -187,7 +188,7 @@ int Fl_Scrollbar::handle(int event) {
       Fl_Slider::value(v);
       value_damage();
       set_changed();
-      do_callback();
+      do_callback(FL_REASON_DRAGGED);
     }
     return 1;}
   }
@@ -195,68 +196,66 @@ int Fl_Scrollbar::handle(int event) {
 }
 
 void Fl_Scrollbar::draw() {
-  if (damage()&FL_DAMAGE_ALL) draw_box();
-  int X = x()+Fl::box_dx(box());
-  int Y = y()+Fl::box_dy(box());
-  int W = w()-Fl::box_dw(box());
-  int H = h()-Fl::box_dh(box());
+  if (damage() & FL_DAMAGE_ALL) draw_box();
+  int X = x() + Fl::box_dx(box());
+  int Y = y() + Fl::box_dy(box());
+  int W = w() - Fl::box_dw(box());
+  int H = h() - Fl::box_dh(box());
+  Fl_Rect ab; // arrow box
+
+  int inset = 2;
+  if (W < 8 || H < 8)
+    inset = 1;
+
   if (horizontal()) {
-    if (W < 3*H) {Fl_Slider::draw(X,Y,W,H); return;}
-    Fl_Slider::draw(X+H,Y,W-2*H,H);
+    if (W < 3*H) {
+      Fl_Slider::draw(X, Y, W, H);
+      return;
+    }
+    Fl_Slider::draw(X+H, Y, W-2*H, H);
     if (damage()&FL_DAMAGE_ALL) {
       draw_box((pushed_==1) ? fl_down(slider()) : slider(),
-	       X, Y, H, H, selection_color());
+               X, Y, H, H, selection_color());
       draw_box((pushed_==2) ? fl_down(slider()) : slider(),
-	       X+W-H, Y, H, H, selection_color());
-      if (active_r())
-        fl_color(labelcolor());
-      else
-        fl_color(fl_inactive(labelcolor()));
-      int w1 = (H-4)/3; if (w1 < 1) w1 = 1;
-      int x1 = X+(H-w1-1)/2;
-      int yy1 = Y+(H-2*w1-1)/2;
-      if (Fl::scheme_ && !strcmp(Fl::scheme_, "gtk+")) {
-	fl_polygon(x1, yy1+w1, x1+w1, yy1+2*w1, x1+w1-1, yy1+w1, x1+w1, yy1);
-	x1 += (W-H);
-	fl_polygon(x1, yy1, x1+1, yy1+w1, x1, yy1+2*w1, x1+w1, yy1+w1);
-      } else {
-	fl_polygon(x1, yy1+w1, x1+w1, yy1+2*w1, x1+w1, yy1);
-	x1 += (W-H);
-	fl_polygon(x1, yy1, x1, yy1+2*w1, x1+w1, yy1+w1);
-      }
+               X+W-H, Y, H, H, selection_color());
+
+      Fl_Color arrowcolor = active_r() ? labelcolor() : fl_inactive(labelcolor());
+      ab = Fl_Rect(X, Y, H, H);
+      ab.inset(inset);
+      fl_draw_arrow(ab, FL_ARROW_SINGLE, FL_ORIENT_LEFT, arrowcolor); // left arrow
+      ab = Fl_Rect(X+W-H, Y, H, H);
+      ab.inset(inset);
+      fl_draw_arrow(ab, FL_ARROW_SINGLE, FL_ORIENT_RIGHT, arrowcolor); // right arrow
     }
   } else { // vertical
-    if (H < 3*W) {Fl_Slider::draw(X,Y,W,H); return;}
-    Fl_Slider::draw(X,Y+W,W,H-2*W);
-    if (damage()&FL_DAMAGE_ALL) {
+    if (H < 3*W) {
+      Fl_Slider::draw(X, Y, W, H);
+      return;
+    }
+    Fl_Slider::draw(X, Y+W, W, H-2*W);
+    if (damage() & FL_DAMAGE_ALL) {
       draw_box((pushed_==1) ? fl_down(slider()) : slider(),
-	       X, Y, W, W, selection_color());
+               X, Y, W, W, selection_color());
       draw_box((pushed_==2) ? fl_down(slider()) : slider(),
-	       X, Y+H-W, W, W, selection_color());
-      if (active_r())
-        fl_color(labelcolor());
-      else
-        fl_color(fl_inactive(labelcolor()));
-      int w1 = (W-4)/3; if (w1 < 1) w1 = 1;
-      int x1 = X+(W-2*w1-1)/2;
-      int yy1 = Y+(W-w1-1)/2;
-      if (Fl::scheme_ && !strcmp(Fl::scheme_, "gtk+")) {
-	fl_polygon(x1, yy1+w1, x1+w1, yy1+w1-1, x1+2*w1, yy1+w1, x1+w1, yy1);
-	yy1 += H-W;
-	fl_polygon(x1, yy1, x1+w1, yy1+1, x1+w1, yy1+w1);
-	fl_polygon(x1+w1, yy1+1, x1+2*w1, yy1, x1+w1, yy1+w1);
-      } else {
-	fl_polygon(x1, yy1+w1, x1+2*w1, yy1+w1, x1+w1, yy1);
-	yy1 += H-W;
-	fl_polygon(x1, yy1, x1+w1, yy1+w1, x1+2*w1, yy1);
-      }
+               X, Y+H-W, W, W, selection_color());
+
+      Fl_Color arrowcolor = active_r() ? labelcolor() : fl_inactive(labelcolor());
+      ab = Fl_Rect(X, Y, W, W);
+      ab.inset(inset);
+      fl_draw_arrow(ab, FL_ARROW_SINGLE, FL_ORIENT_UP, arrowcolor); // up arrow
+      ab = Fl_Rect(X, Y+H-W, W, W);
+      ab.inset(inset);
+      fl_draw_arrow(ab, FL_ARROW_SINGLE, FL_ORIENT_DOWN, arrowcolor); // down arrow
     }
   }
 }
 
+/**
+  Creates a new Fl_Scrollbar widget with given position, size, and label.
+  You need to do type(FL_HORIZONTAL) if you want a horizontal scrollbar.
+*/
 Fl_Scrollbar::Fl_Scrollbar(int X, int Y, int W, int H, const char* L)
-  : Fl_Slider(X, Y, W, H, L)
-{
+  : Fl_Slider(X, Y, W, H, L) {
   box(FL_FLAT_BOX);
   color(FL_DARK2);
   slider(FL_UP_BOX);
@@ -265,13 +264,8 @@ Fl_Scrollbar::Fl_Scrollbar(int X, int Y, int W, int H, const char* L)
   step(1);
 }
 
-Fl_Scrollbar::~Fl_Scrollbar()
-{
+/**  Destroys the Scrollbar. */
+Fl_Scrollbar::~Fl_Scrollbar() {
   if (pushed_)
     Fl::remove_timeout(timeout_cb, this);
 }
-
-
-//
-// End of "$Id: Fl_Scrollbar.cxx 6042 2008-02-25 13:00:53Z matt $".
-//

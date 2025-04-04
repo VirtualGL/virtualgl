@@ -1,396 +1,699 @@
 //
-// "$Id: fl_ask.cxx 6870 2009-09-13 22:02:30Z AlbrechtS $"
-//
 // Standard dialog functions for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2022 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
-// Implementation of fl_message, fl_ask, fl_choice, fl_input
-// The three-message fl_show_x functions are for forms compatibility
-// mostly.  In most cases it is easier to get a multi-line message
-// by putting newlines in the message.
+/**
+  \addtogroup group_comdlg
+  @{
+*/
+
+/**
+  \file fl_ask.cxx
+
+  \brief Utility functions for common dialogs.
+
+  This file defines the functions
+
+  - fl_alert()
+  - fl_beep()
+  - fl_message()
+  - fl_ask()
+  - fl_choice()
+  - fl_input()
+  - fl_input_str()
+  - fl_password()
+  - fl_password_str()
+
+  and some more functions to change their behavior (positioning,
+  window title, and more).
+
+  Since FLTK 1.4.0 a big part of these functions is
+    implemented in class Fl_Message.
+*/
+
+#include <FL/Fl.H>
+#include <FL/Fl_Box.H>
+#include <FL/Fl_Input_.H>
+#include "flstring.h"
+#include "Fl_Screen_Driver.H"
+#include <FL/fl_ask.H>
+#include "Fl_Message.h" // intentionally "hidden" in src/...
 
 #include <stdio.h>
 #include <stdarg.h>
-#include "flstring.h"
 
-#include <FL/Fl.H>
+// static, configurable variables
 
-#include <FL/fl_ask.H>
-
-#include <FL/Fl_Box.H>
-#include <FL/Fl_Button.H>
-#include <FL/Fl_Return_Button.H>
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Input.H>
-#include <FL/Fl_Secret_Input.H>
-#include <FL/x.H>
-#include <FL/fl_draw.H>
-
-static Fl_Window *message_form;
-static Fl_Box *message;
-static Fl_Box *icon;
-static Fl_Button *button[3];
-static Fl_Input *input;
-static const char *iconlabel = "?";
 Fl_Font fl_message_font_ = FL_HELVETICA;
-uchar fl_message_size_ = 14;
+Fl_Fontsize fl_message_size_ = -1;
 
-static char avoidRecursion = 0;
-
-static Fl_Window *makeform() {
- if (message_form) {
-   message_form->size(410,103);
-   return message_form;
- }
- // make sure that the dialog does not become the child of some 
- // current group
- Fl_Group *previously_current_group = Fl_Group::current();
- Fl_Group::current(0);
- // create a new top level window
- Fl_Window *w = message_form = new Fl_Window(410,103,"");
- // w->clear_border();
- // w->box(FL_UP_BOX);
- (message = new Fl_Box(60, 25, 340, 20))
-   ->align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE|FL_ALIGN_WRAP);
- (input = new Fl_Input(60, 37, 340, 23))->hide();
- {Fl_Box* o = icon = new Fl_Box(10, 10, 50, 50);
-  o->box(FL_THIN_UP_BOX);
-  o->labelfont(FL_TIMES_BOLD);
-  o->labelsize(34);
-  o->color(FL_WHITE);
-  o->labelcolor(FL_BLUE);
- }
- button[0] = new Fl_Button(310, 70, 90, 23);
- button[0]->shortcut(FL_Escape);
- button[0]->align(FL_ALIGN_INSIDE|FL_ALIGN_WRAP);
- button[1] = new Fl_Return_Button(210, 70, 90, 23);
- button[1]->align(FL_ALIGN_INSIDE|FL_ALIGN_WRAP);
- button[2] = new Fl_Button(110, 70, 90, 23);
- button[2]->align(FL_ALIGN_INSIDE|FL_ALIGN_WRAP);
- w->resizable(new Fl_Box(60,10,110-60,27));
- w->end();
- w->set_modal();
- Fl_Group::current(previously_current_group);
- return w;
-}
-
-/*
- * 'resizeform()' - Resize the form and widgets so that they hold everything
- *                  that is asked of them...
- */
-
-void resizeform() {
-  int	i;
-  int	message_w, message_h;
-  int	text_height;
-  int	button_w[3], button_h[3];
-  int	x, w, h, max_w, max_h;
-	const int icon_size = 50;
-
-  fl_font(fl_message_font_, fl_message_size_);
-  message_w = message_h = 0;
-  fl_measure(message->label(), message_w, message_h);
-
-  message_w += 10;
-  message_h += 10;
-  if (message_w < 340)
-    message_w = 340;
-  if (message_h < 30)
-    message_h = 30;
-
-  fl_font(button[0]->labelfont(), button[0]->labelsize());
-
-  memset(button_w, 0, sizeof(button_w));
-  memset(button_h, 0, sizeof(button_h));
-
-  for (max_h = 25, i = 0; i < 3; i ++)
-    if (button[i]->visible())
-    {
-      fl_measure(button[i]->label(), button_w[i], button_h[i]);
-
-      if (i == 1)
-        button_w[1] += 20;
-
-      button_w[i] += 30;
-      button_h[i] += 10;
-
-      if (button_h[i] > max_h)
-        max_h = button_h[i];
-    }
-
-  if (input->visible()) text_height = message_h + 25;
-  else text_height = message_h;
-
-  max_w = message_w + 10 + icon_size;
-  w     = button_w[0] + button_w[1] + button_w[2] - 10;
-
-  if (w > max_w)
-    max_w = w;
-
-  message_w = max_w - 10 - icon_size;
-
-  w = max_w + 20;
-  h = max_h + 30 + text_height;
-
-  message_form->size(w, h);
-  message_form->size_range(w, h, w, h);
-
-  message->resize(20 + icon_size, 10, message_w, message_h);
-  icon->resize(10, 10, icon_size, icon_size);
-  icon->labelsize((uchar)(icon_size - 10));
-  input->resize(20 + icon_size, 10 + message_h, message_w, 25);
-
-  for (x = w, i = 0; i < 3; i ++)
-    if (button_w[i])
-    {
-      x -= button_w[i];
-      button[i]->resize(x, h - 10 - max_h, button_w[i] - 10, max_h);
-
-//      printf("button %d (%s) is %dx%d+%d,%d\n", i, button[i]->label(),
-//             button[i]->w(), button[i]->h(),
-//	     button[i]->x(), button[i]->y());
-    }
-}
-
-static int innards(const char* fmt, va_list ap,
-  const char *b0,
-  const char *b1,
-  const char *b2)
-{
-  Fl::pushed(0); // stop dragging (STR #2159)
-
-  avoidRecursion = 1;
-
-  makeform();
-  char buffer[1024];
-  if (!strcmp(fmt,"%s")) {
-    message->label(va_arg(ap, const char*));
-  } else {
-    //: matt: MacOS provides two equally named vsnprintf's...
-    ::vsnprintf(buffer, 1024, fmt, ap);
-    message->label(buffer);
-  }
-
-  message->labelfont(fl_message_font_);
-  message->labelsize(fl_message_size_);
-  if (b0) {button[0]->show(); button[0]->label(b0); button[1]->position(210,70);}
-  else {button[0]->hide(); button[1]->position(310,70);}
-  if (b1) {button[1]->show(); button[1]->label(b1);}
-  else button[1]->hide();
-  if (b2) {button[2]->show(); button[2]->label(b2);}
-  else button[2]->hide();
-  const char* prev_icon_label = icon->label();
-  if (!prev_icon_label) icon->label(iconlabel);
-
-  resizeform();
-
-  if (button[1]->visible() && !input->visible()) 
-    button[1]->take_focus();
-  message_form->hotspot(button[0]);
-  if (b0 && Fl_Widget::label_shortcut(b0))
-    button[0]->shortcut(0);
-  else
-    button[0]->shortcut(FL_Escape);
-
-  message_form->show();
-  // deactivate Fl::grab(), because it is incompatible with Fl::readqueue()
-  Fl_Window* g = Fl::grab();
-  if (g) Fl::grab(0);
-  int r = 0;
-  for (;;) {
-    Fl_Widget *o = Fl::readqueue();
-    if (!o) Fl::wait();
-    else if (o == button[0]) {r = 0; break;}
-    else if (o == button[1]) {r = 1; break;}
-    else if (o == button[2]) {r = 2; break;}
-    else if (o == message_form) {r = 0; break;}
-  }
-  if (g) // regrab the previous popup menu, if there was one
-    Fl::grab(g);
-  message_form->hide();
-  icon->label(prev_icon_label);
-
-  avoidRecursion = 0;
-  return r;
-}
-
-// pointers you can use to change FLTK to a foreign language:
-const char* fl_no = "No";
-const char* fl_yes= "Yes";
-const char* fl_ok = "OK";
-const char* fl_cancel= "Cancel";
-const char* fl_close= "Close";
+// pointers you can use to change FLTK to another language:
+const char *fl_no = "No";         ///< string pointer used in common dialogs, you can change it to another language
+const char *fl_yes = "Yes";       ///< string pointer used in common dialogs, you can change it to another language
+const char *fl_ok = "OK";         ///< string pointer used in common dialogs, you can change it to another language
+const char *fl_cancel = "Cancel"; ///< string pointer used in common dialogs, you can change it to another language
+const char *fl_close = "Close";   ///< string pointer used in common dialogs, you can change it to another language
 
 // fltk functions:
+
+/**
+  Emits a system beep.
+
+  This function is platform specific. Depending on the input \p type a different
+  sound may be played or the system speaker may beep with a different volume.
+
+  On X the system speaker is used which may not work at all on newer systems
+  that don't have a speaker. Since 1.4.0 \c FL_BEEP_DEFAULT and other types
+  honor the system or user settings whereas \c FL_BEEP_ERROR uses 100% volume.
+  This may be changed in a future version.
+
+  On Wayland an ASCII \p BEL (0x07) is output to stderr.
+
+  On Windows the \c MessageBeep() function is used to play different sounds
+  depending on the \p type argument.
+
+  On macOS the system beep function \c NSBeep() is used for \c FL_BEEP_DEFAULT
+  and \c FL_BEEP_ERROR. Other types are ignored.
+
+  On other platforms the behavior is undefined and may change in the future.
+
+  \param[in] type The beep type from the \ref Fl_Beep enumeration (optional)
+
+  \code #include <FL/fl_ask.H> \endcode
+*/
 void fl_beep(int type) {
-#ifdef WIN32
-  switch (type) {
-    case FL_BEEP_QUESTION :
-    case FL_BEEP_PASSWORD :
-      MessageBeep(MB_ICONQUESTION);
-      break;
-    case FL_BEEP_MESSAGE :
-      MessageBeep(MB_ICONASTERISK);
-      break;
-    case FL_BEEP_NOTIFICATION :
-      MessageBeep(MB_ICONASTERISK);
-      break;
-    case FL_BEEP_ERROR :
-      MessageBeep(MB_ICONERROR);
-      break;
-    default :
-      MessageBeep(0xFFFFFFFF);
-      break;
-  }
-#elif defined(__APPLE__)
-  switch (type) {
-    case FL_BEEP_DEFAULT :
-    case FL_BEEP_ERROR :
-      SysBeep(30);
-      break;
-    default :
-      break;
-  }
-#else
-  switch (type) {
-    case FL_BEEP_DEFAULT :
-    case FL_BEEP_ERROR :
-      if (!fl_display) fl_open_display();
-
-      XBell(fl_display, 100);
-      break;
-    default :
-      if (!fl_display) fl_open_display();
-
-      XBell(fl_display, 50);
-      break;
-  }
-#endif // WIN32
+  Fl::screen_driver()->beep(type);
 }
 
+/** Shows an information message dialog box.
+
+  \code #include <FL/fl_ask.H> \endcode
+
+  \param[in] fmt can be used as an sprintf-like format and variables for the message text
+*/
 void fl_message(const char *fmt, ...) {
 
-  if (avoidRecursion) return;
-
+  Fl_Message msg("i");
   va_list ap;
 
-  fl_beep(FL_BEEP_MESSAGE);
-
   va_start(ap, fmt);
-  iconlabel = "i";
-  innards(fmt, ap, 0, fl_close, 0);
+  msg.innards(fmt, ap, 0, fl_close, 0);
   va_end(ap);
-  iconlabel = "?";
 }
 
+/** Shows an alert message dialog box.
+
+   \code #include <FL/fl_ask.H> \endcode
+
+   \param[in] fmt can be used as an sprintf-like format and variables for the message text
+*/
 void fl_alert(const char *fmt, ...) {
 
-  if (avoidRecursion) return;
-
+  Fl_Message msg("!");
   va_list ap;
 
-  fl_beep(FL_BEEP_ERROR);
-
   va_start(ap, fmt);
-  iconlabel = "!";
-  innards(fmt, ap, 0, fl_close, 0);
+  msg.innards(fmt, ap, 0, fl_close, 0);
   va_end(ap);
-  iconlabel = "?";
 }
 
+/** Shows a dialog displaying the \p fmt message,
+    this dialog features 2 yes/no buttons.
+
+   \code #include <FL/fl_ask.H> \endcode
+
+   \param[in] fmt can be used as an sprintf-like format and variables for the message text
+   \retval 0 if the no button is selected
+   \retval 1 if yes is selected
+
+   \deprecated fl_ask() is deprecated since it uses "Yes" and "No" for the buttons which
+               does not conform to the current FLTK Human Interface Guidelines.
+               Use fl_choice() with the appropriate verbs instead.
+*/
 int fl_ask(const char *fmt, ...) {
 
-  if (avoidRecursion) return 0;
-
+  Fl_Message msg("?");
   va_list ap;
-
-  fl_beep(FL_BEEP_QUESTION);
 
   va_start(ap, fmt);
-  int r = innards(fmt, ap, fl_no, fl_yes, 0);
+  int r = msg.innards(fmt, ap, fl_no, fl_yes, 0);
   va_end(ap);
 
   return r;
 }
 
-int fl_choice(const char*fmt,const char *b0,const char *b1,const char *b2,...){
+/** Shows a dialog displaying the printf style \p fmt message.
 
-  if (avoidRecursion) return 0;
+  This dialog features up to 3 customizable choice buttons
+  which are specified in order of *right-to-left* in the dialog, e.g.
+  \image html  fl_choice_left_middle_right.png
+  \image latex fl_choice_left_middle_right.png  "fl_choice() button ordering" width=4cm
 
+  \code #include <FL/fl_ask.H> \endcode
+
+  Three choices with printf() style formatting:
+  \image html  fl_choice_three_fmt.png
+  \image latex fl_choice_three_fmt.png  "fl_choice() three choices with printf formatting" width=4cm
+  \code
+    int num_msgs = GetNumberOfMessages();
+    switch ( fl_choice("What to do with %d messages?", "Send", "Save", "Delete", num_msgs) ) {
+      case 0: .. // Send
+      case 1: .. // Save (default)
+      case 2: .. // Delete
+      ..
+    }
+  \endcode
+
+  Three choice example:
+  \image html  fl_choice_three.png
+  \image latex fl_choice_three.png  "fl_choice() three choices" width=4cm
+  \code
+  switch ( fl_choice("How many bedrooms?", "Zero", "One", "Two") ) {
+    case 0: .. // "Zero"
+    case 1: .. // "One" (default)
+    case 2: .. // "Two"
+  }
+  \endcode
+
+  Two choice example:
+  \image html  fl_choice_two.png
+  \image latex fl_choice_two.png  "fl_choice() two choices" width=4cm
+  \code
+    switch ( fl_choice("Empty trash?", "Yes", "No", 0) ) {
+      case 0: .. // Yes
+      case 1: .. // No (default)
+    }
+  \endcode
+
+  One choice example:
+  \image html  fl_choice_one.png
+  \image latex fl_choice_one.png  "fl_choice() one choice" width=4cm
+  \code
+    fl_choice("All hope is lost.", "OK", 0, 0);   // "OK" default
+  \endcode
+
+  \param[in] fmt can be used as an sprintf-like format and variables for the message text
+  \param[in] b0 text label for right button 0
+  \param[in] b1 text label for middle button 1 (can be 0)
+  \param[in] b2 text label for left button 2 (can be 0)
+  \retval 0 if the button with \p b0 text is pushed or the user pressed
+      the \c Escape key or clicked the window close button
+  \retval 1 if the button with \p b1 text is pushed or the user pressed
+      the \c Return key
+  \retval 2 if the button with \p b2 text is pushed
+*/
+int fl_choice(const char *fmt, const char *b0, const char *b1, const char *b2, ...) {
+
+  Fl_Message msg("?");
   va_list ap;
-
-  fl_beep(FL_BEEP_QUESTION);
 
   va_start(ap, b2);
-  int r = innards(fmt, ap, b0, b1, b2);
+  int r = msg.innards(fmt, ap, b0, b1, b2);
   va_end(ap);
   return r;
 }
 
-Fl_Widget *fl_message_icon() {makeform(); return icon;}
+/** Shows a dialog displaying the printf style \p fmt message.
 
-static const char* input_innards(const char* fmt, va_list ap,
-				 const char* defstr, uchar type) {
-  makeform();
-  message->position(60,10);
-  input->type(type);
-  input->show();
-  input->value(defstr);
-  input->take_focus();
+  This function is like fl_choice() but returns \c -1 if the dialog window
+  was closed by pressing the \c Escape key or the window close button
+  rather than pushing one of the dialog buttons.
 
-  int r = innards(fmt, ap, fl_cancel, fl_ok, 0);
-  input->hide();
-  message->position(60,25);
-  return r ? input->value() : 0;
+  \see fl_choice()
+
+  \param[in] fmt can be used as an sprintf-like format and variables for the message text
+  \param[in] b0 text label for right button 0
+  \param[in] b1 text label for middle button 1 (can be 0)
+  \param[in] b2 text label for left button 2 (can be 0)
+
+  \retval -3 reserved, FLTK 1.3 only: another dialog is still open (not possible in 1.4)
+  \retval -2 if the dialog was closed by pushing the window close button
+  \retval -1 if the dialog was closed by hitting Escape
+  \retval  0 if the button with \p b0 text is pushed
+  \retval  1 if the button with \p b1 text is pushed
+  \retval  2 if the button with \p b2 text is pushed
+*/
+int fl_choice_n(const char *fmt, const char *b0, const char *b1, const char *b2, ...) {
+
+  Fl_Message msg("?");
+  va_list ap;
+
+  va_start(ap, b2);
+  int r = msg.innards(fmt, ap, b0, b1, b2);
+  va_end(ap);
+  if (msg.window_closed() != 0)
+    return msg.window_closed();
+  return r;
 }
 
-const char* fl_input(const char *fmt, const char *defstr, ...) {
+/**
+  Gets the Fl_Box icon container of the current default dialog used in
+  many common dialogs like fl_message(), fl_alert(),
+  fl_ask(), fl_choice(), fl_input(), fl_password().
 
-  if (avoidRecursion) return 0;
+  The return value cannot be Null. The object pointed to is an Fl_Box widget.
+  The returned pointer (Fl_Widget *) can be safely cast to an Fl_Box* pointer.
 
-  fl_beep(FL_BEEP_QUESTION);
+  \note You can set some attributes of this \b default icon box. These attributes
+    are sticky, i.e. they will be used in all subsequent common dialogs unless
+    overridden by specific "one shot" variables. Setting any attribute except
+    those mentioned below causes undefined behavior.
 
+  Supported icon attributes:
+
+    - box()
+    - labelfont()
+    - labelsize()
+    - color()
+    - labelcolor()
+    - image()
+    - align()
+
+  The icon size can not be changed. If you set an image() you should scale it
+  to the available size, i.e. \p w() and \p h() of the icon box.
+
+  \code #include <FL/fl_ask.H> \endcode
+*/
+Fl_Widget *fl_message_icon() {
+  return Fl_Message::message_icon();
+}
+
+/** Shows an input dialog displaying the \p fmt message with variable arguments.
+
+  Returns the string in an internally allocated buffer that may be changed later.
+  You \b must copy the string immediately after return from this method - at least
+  before the next execution of the event loop.
+
+  \code #include <FL/fl_ask.H> \endcode
+
+  \param[in] fmt can be used as an sprintf-like format and variables for the message text
+  \param[in] defstr defines the default returned string if no text is entered
+
+  \return the user string input if OK was pushed
+  \retval NULL if Cancel was pushed or the window was closed by the user
+*/
+const char *fl_input(const char *fmt, const char *defstr, ...) {
+
+  Fl_Message msg("?");
   va_list ap;
   va_start(ap, defstr);
-  const char* r = input_innards(fmt, ap, defstr, FL_NORMAL_INPUT);
+  const char *r = msg.input_innards(fmt, ap, defstr, FL_NORMAL_INPUT, 0, false);
   va_end(ap);
   return r;
 }
 
+
+/** Shows an input dialog displaying the \p fmt message with variable arguments.
+
+  This is the same as const char *fl_input(const char *fmt, const char *defstr, ...)
+  except that it has an additional parameter to limit the number of characters
+  the user can input.
+
+  Returns the string in an internally allocated buffer that may be changed later.
+  You \b must copy the string immediately after return from this method - at least
+  before the next execution of the event loop.
+
+  \code #include <FL/fl_ask.H> \endcode
+
+  \param[in] maxchar maximum number of characters the user can input (UTF-8 aware)
+  \param[in] fmt can be used as an sprintf-like format and variables for the message text
+  \param[in] defstr defines the default returned string if no text is entered
+
+  \return the user string input if OK was pushed
+  \retval NULL if Cancel was pushed or the window was closed by the user
+*/
+const char *fl_input(int maxchar, const char *fmt, const char *defstr, ...) {
+
+  Fl_Message msg("?");
+  if (maxchar < 0) maxchar = 0;
+  va_list ap;
+  va_start(ap, defstr);
+  const char *r = msg.input_innards(fmt, ap, defstr, FL_NORMAL_INPUT, maxchar, false);
+  va_end(ap);
+  return r;
+}
+
+
+
+#if (FLTK_USE_STD)
+
+/** Shows an input dialog displaying the \p fmt message with variable arguments.
+
+  Like fl_input(), but this method has the additional argument \p maxchar
+  that limits the number of \b characters that can be input. Since the
+  string is encoded in UTF-8 it is possible that the number of bytes
+  in the string is larger than \p maxchar.
+
+  Other than the deprecated fl_input() method w/o the \p maxchar argument, this one
+  returns the string in an std::string object that must be released after use. This
+  can be a local/automatic variable.
+
+  The \p ret variable is set to 0 if the user clicked OK, and to a negative
+  value if the user canceled the dialog. If the dialog was canceled, the returned
+  string will be empty.
+
+  \code #include <FL/fl_ask.H> \endcode
+
+  Example:
+  \code
+    { int ret;
+      std::string str = fl_input_str(ret, 0, "Enter text:", "");
+      if (ret < 0)
+        printf("Text input was canceled.\n");
+      else
+        printf("Text is: '%s'\n", str.c_str());
+    } // (str goes out of scope)
+  \endcode
+
+  \param[out] ret    0 if user clicked OK, negative if dialog was canceled
+  \param[in] maxchar input size limit in characters (not bytes), use 0 for no limit
+  \param[in] fmt     can be used as an sprintf-like format and variables for the message text
+  \param[in] defstr  defines the default returned string if no text is entered
+
+  \return the user string input if OK was clicked which can be empty
+  \return an empty string and set \p ret to a negative value if the user canceled the dialog
+
+  \since 1.4.0
+*/
+std::string fl_input_str(int &ret, int maxchar, const char *fmt, const char *defstr, ...) {
+  Fl_Message msg("?");
+  if (maxchar < 0) maxchar = 0;
+  va_list ap;
+  va_start(ap, defstr);
+  const char *r = msg.input_innards(fmt, ap, defstr, FL_NORMAL_INPUT, maxchar, true);
+  va_end(ap);
+  ret = (r == NULL) ? -1 : 0;
+  return (r == NULL) ? std::string("") : std::string(r);
+}
+
+/** Shows an input dialog displaying the \p fmt message with variable arguments.
+ \note No information is given if the user canceled the dialog or clicked OK.
+ \see fl_input_str(int &ret, int maxchar, const char *label, const char *deflt = 0, ...)
+ */
+std::string fl_input_str(int maxchar, const char *fmt, const char *defstr, ...) {
+  Fl_Message msg("?");
+  if (maxchar < 0) maxchar = 0;
+  va_list ap;
+  va_start(ap, defstr);
+  const char *r = msg.input_innards(fmt, ap, defstr, FL_NORMAL_INPUT, maxchar, true);
+  va_end(ap);
+  return (r == NULL) ? std::string("") : std::string(r);
+}
+
+#endif // FLTK_USE_STD
+
+/** Shows an input dialog displaying the \p fmt message with variable arguments.
+
+  Like fl_input() except the input text is not shown,
+  '*' or similar replacement characters are displayed instead.
+
+  \code #include <FL/fl_ask.H> \endcode
+
+  \param[in] fmt can be used as an sprintf-like format and variables for the message text
+  \param[in] defstr defines the default returned string if no text is entered
+
+  \return the user string input if OK was pushed
+  \retval NULL if Cancel was pushed or the window was closed by the user
+*/
 const char *fl_password(const char *fmt, const char *defstr, ...) {
-
-  if (avoidRecursion) return 0;
-
-  fl_beep(FL_BEEP_PASSWORD);
-
+  Fl_Message msg("?");
   va_list ap;
   va_start(ap, defstr);
-  const char* r = input_innards(fmt, ap, defstr, FL_SECRET_INPUT);
+  const char *r = msg.input_innards(fmt, ap, defstr, FL_SECRET_INPUT, 0, false);
   va_end(ap);
   return r;
 }
 
-//
-// End of "$Id: fl_ask.cxx 6870 2009-09-13 22:02:30Z AlbrechtS $".
-//
+/** Shows an input dialog displaying the \p fmt message with variable arguments.
+
+  Like fl_input() except the input text is not shown,
+  '*' or similar replacement characters are displayed instead.
+
+  \code #include <FL/fl_ask.H> \endcode
+
+  \param[in] maxchar  input lenght limit in chars, 0 = no limit
+  \param[in] fmt can be used as an sprintf-like format and variables for the message text
+  \param[in] defstr defines the default returned string if no text is entered
+
+  \return the user string input if OK was pushed
+  \retval NULL if Cancel was pushed or the window was closed by the user
+*/
+const char *fl_password(int maxchar, const char *fmt, const char *defstr, ...) {
+  Fl_Message msg("?");
+  if (maxchar < 0) maxchar = 0;
+  va_list ap;
+  va_start(ap, defstr);
+  const char *r = msg.input_innards(fmt, ap, defstr, FL_SECRET_INPUT, maxchar, false);
+  va_end(ap);
+  return r;
+}
+
+#if (FLTK_USE_STD)
+
+/** Shows an input dialog displaying the \p fmt message with variable arguments.
+
+  Like fl_input_str() except the input text is not shown,
+  '*' or similar replacement characters are displayed instead.
+
+  Other than the fl_password() method w/o the \p maxchar argument, this one
+  returns the string in an std::string object that must be released after use.
+  This can be a local/automatic variable.
+
+  For an example see fl_input_str()
+
+  \code #include <FL/fl_ask.H> \endcode
+
+  \param[out] ret    0 if user clicked OK, negative if dialog was canceled
+  \param[in] maxchar input size limit in characters (not bytes), use 0 for no limit
+  \param[in] fmt     can be used as an sprintf-like format and variables for the message text
+  \param[in] defstr  defines the default returned string if no text is entered
+
+  \return the user string input if OK was clicked which can be empty
+  \return an empty string and set \p ret to a negative value if the user canceled the dialog
+
+  \since 1.4.0
+*/
+std::string fl_password_str(int &ret, int maxchar, const char *fmt, const char *defstr, ...) {
+  Fl_Message msg("?");
+  if (maxchar < 0) maxchar = 0;
+  va_list ap;
+  va_start(ap, defstr);
+  const char *r = msg.input_innards(fmt, ap, defstr, FL_SECRET_INPUT, maxchar, true);
+  va_end(ap);
+  ret = (r == NULL) ? -1 : 0;
+  return (r == NULL) ? std::string("") : std::string(r);
+}
+
+/** Shows an input dialog displaying the \p fmt message with variable arguments.
+ \note No information is given if the user canceled the dialog or clicked OK.
+ \see fl_password_str(int &ret, int maxchar, const char *label, const char *deflt = 0, ...)
+ */
+std::string fl_password_str(int maxchar, const char *fmt, const char *defstr, ...) {
+  Fl_Message msg("?");
+  if (maxchar < 0) maxchar = 0;
+  va_list ap;
+  va_start(ap, defstr);
+  const char *r = msg.input_innards(fmt, ap, defstr, FL_SECRET_INPUT, maxchar, true);
+  va_end(ap);
+  return (r == NULL) ? std::string("") : std::string(r);
+}
+
+#endif // FLTK_USE_STD
+
+
+/** Sets the preferred position for the message box used in
+  many common dialogs like fl_message(), fl_alert(),
+  fl_ask(), fl_choice(), fl_input(), fl_password().
+
+  The position set with this method overrides the hotspot setting,
+  i.e. setting a position has higher priority than the hotspot mode
+  set by fl_message_hotspot(int).
+
+  The preferred position set by any of the fl_message_position() variants
+  affects only the next call of one of the common dialogs. The preferred
+  position is reset to 0 (unset) as soon as the dialog is shown.
+
+  If the optional argument \p center is non-zero (true) the message box
+  will be centered at the given coordinates rather than using the X/Y
+  position as the window position (top left corner).
+
+  \code #include <FL/fl_ask.H> \endcode
+
+  \param[in] x        Preferred X position
+  \param[in] y        Preferred Y position
+  \param[in] center   1 = centered, 0 = absolute
+
+  \see int fl_message_position(int *x, int *y)
+*/
+void fl_message_position(const int x, const int y, const int center) {
+  Fl_Message::message_position(x, y, center);
+}
+
+/** Sets the preferred position for the message box used in
+  many common dialogs like fl_message(), fl_alert(),
+  fl_ask(), fl_choice(), fl_input(), fl_password().
+
+  The message box will be centered over the given widget
+  or window extensions.
+
+  Everything else is like fl_message_position(int, int, int) with
+  argument 'center' set to 1.
+
+  \code #include <FL/fl_ask.H> \endcode
+
+  \param[in] widget   Widget or window to position the message box over.
+
+  \see int fl_message_position(int x, int y, int center)
+*/
+void fl_message_position(Fl_Widget *widget) {
+  Fl_Message::message_position(widget);
+}
+
+/** Gets the preferred position for the message box used in
+  many common dialogs like fl_message(), fl_alert(),
+  fl_ask(), fl_choice(), fl_input(), fl_password().
+
+  \code #include <FL/fl_ask.H> \endcode
+
+  The position set with this method overrides the hotspot setting,
+  i.e. setting a position has higher priority than the hotspot mode
+  set by fl_message_hotspot(int).
+
+  The preferred position set by any of the fl_message_position() variants
+  affects only the next call of one of the common dialogs. The preferred
+  position is reset to 0 (unset) as soon as the dialog is shown.
+
+  \param[out] x  Preferred X position, returns -1 if not set
+  \param[out] y  Preferred Y position, returns -1 if not set
+
+  \returns   whether position is currently set or not
+  \retval 0  position is not set (hotspot may be enabled or not)
+  \retval 1  position is set (window position)
+  \retval 2  position is set (message box centered)
+
+  \see fl_message_hotspot()
+  \see fl_message_hotspot(int)
+  \see fl_message_position(int, int)
+  \see fl_message_position(const int x, const int y, const int center)
+  \see fl_message_position(Fl_Widget *)
+*/
+int fl_message_position(int *x, int *y) {
+  return Fl_Message::message_position(x, y);
+}
+
+/** Sets whether or not to move the message box used in
+  many common dialogs like fl_message(), fl_alert(),
+  fl_ask(), fl_choice(), fl_input(), fl_password() to follow
+  the mouse pointer.
+
+  The default is \e enabled, so that the default button is the
+  hotspot and appears at the mouse position.
+
+  \code #include <FL/fl_ask.H> \endcode
+
+  \param[in]  enable  non-zero enables hotspot behavior,
+                      0 disables hotspot
+*/
+void fl_message_hotspot(int enable) {
+  Fl_Message::message_hotspot(enable);
+}
+
+/** Gets whether or not to move the message box used in
+  many common dialogs like fl_message(), fl_alert(),
+  fl_ask(), fl_choice(), fl_input(), fl_password() to follow
+  the mouse pointer.
+
+  This is a permanent setting. It remains active and affects the window
+  position unless overridden by an explicit positioning request by means
+  of one of the fl_message_position() variants.
+
+  \code #include <FL/fl_ask.H> \endcode
+
+  \return  0 if disabled, non-zero otherwise
+
+  \see void fl_message_hotspot(int)
+  \see int fl_message_position(int *x, int *y)
+  \see void fl_message_position(Fl_Widget *)
+  \see fl_message_position()
+*/
+int fl_message_hotspot() {
+  return Fl_Message::message_hotspot();
+}
+
+/** Sets the title of the dialog window used in many common dialogs.
+
+  This window \p title will be used in the next call of one of the
+  common dialogs like fl_message(), fl_alert(), fl_ask(), fl_choice(),
+  fl_input(), fl_password().
+
+  The \p title string is copied internally, so that you can use a
+  local variable or free the string immediately after this call. It
+  applies only to the \b next call of one of the common dialogs and
+  will be reset to an empty title (the default for all dialogs) after
+  that call.
+
+  \code #include <FL/fl_ask.H> \endcode
+  \param[in] title    window label, string copied internally
+*/
+void fl_message_title(const char *title) {
+  Fl_Message::message_title(title);
+}
+
+/** Sets the default title of the dialog window used in many common dialogs.
+
+  This window \p title will be used in all subsequent calls of one of the
+  common dialogs like fl_message(), fl_alert(), fl_ask(), fl_choice(),
+  fl_input(), fl_password(), unless a specific title has been set
+  with fl_message_title(const char *title).
+
+  The default is no title. You can override the default title for a
+  single dialog with fl_message_title(const char *title).
+
+  The \p title string is copied internally, so that you can use a
+  local variable or free the string immediately after this call.
+
+  \code #include <FL/fl_ask.H> \endcode
+
+  \param[in] title default window label, string copied internally
+*/
+void fl_message_title_default(const char *title) {
+  Fl_Message::message_title_default(title);
+}
+
+/** Sets the icon label of the dialog window used in many common dialogs.
+
+  This icon label will be used in the next call of one of the
+  common dialogs like fl_message(), fl_alert(), fl_ask(), fl_choice(),
+  fl_input(), fl_password().
+
+  The label \p str is stored internally as a reference, it must be
+  in scope until the dialog function (e.g. fl_choice) is called.
+
+  It applies only to the \b next call of one of the common dialogs and
+  will be reset after that call so the next dialog will use its default
+  label unless set again.
+
+  \note This label string must be short, usually only one character so
+    it fits in the icon box. You can use any valid UTF-8 character, e.g.
+    the Euro sign ("€") which is three bytes in UTF-8 encoding.
+
+  \code #include <FL/fl_ask.H> \endcode
+  \param[in] str    icon label
+*/
+void fl_message_icon_label(const char *str) {
+  Fl_Message::icon_label(str);
+}
+
+/** @} */

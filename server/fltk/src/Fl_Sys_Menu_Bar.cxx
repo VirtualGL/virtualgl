@@ -1,334 +1,263 @@
 //
-// "$Id: Fl_Sys_Menu_Bar.cxx 6016 2008-01-09 21:32:40Z matt $"
+// system menu bar widget for the Fast Light Tool Kit (FLTK).
 //
-// MacOS system menu bar widget for the Fast Light Tool Kit (FLTK).
+// Copyright 1998-2021 by Bill Spitzak and others.
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+//     https://www.fltk.org/COPYING.php
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+// Please see the following page on how to report bugs and issues:
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+//     https://www.fltk.org/bugs.php
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
-//
+
+
+#include <config.h>
+#include "Fl_Sys_Menu_Bar_Driver.H"
+#include <FL/platform.H>
+#include "Fl_System_Driver.H"
+
+
+Fl_Sys_Menu_Bar *fl_sys_menu_bar = 0;
 
 /**
- * This code is a quick hack! It was written as a proof of concept.
- * It has been tested on the "menubar" sample program and provides
- * basic functionality. 
- * 
- * To use the System Menu Bar, simply replace the main Fl_Menu_Bar
- * in an application with Fl_Sys_Menu_Bar.
- *
- * FLTK features not supported by the Mac System menu
- *
- * - no invisible menu items
- * - no sybolic labels
- * - embossed labels will be underlined instead
- * - no font sizes
- * - Shortcut Characters should be English alphanumeric only, no modifiers yet
- * - no disable main menus
- * - changes to menubar in run-time don't update! 
- *     (disable, etc. - toggle and readio button do!)
- *
- * No care was taken to clean up the menu bar after destruction!
- * ::menu(bar) should only be called once!
- * Many other calls of the parent class don't work.
- * Changing the menu items has no effect on the menu bar.
- * Starting with OS X 10.5, FLTK applications must be created as
- * a bundle for the System Menu Bar (and maybe other features) to work!
+ The constructor.
+ On Mac OS X, all arguments are unused. On other platforms they are used as by Fl_Menu_Bar::Fl_Menu_Bar().
  */
-
-#if defined(__APPLE__)
-
-#include <FL/x.H>
-#include <FL/Fl.H>
-#include <FL/Fl_Sys_Menu_Bar.H>
-
-#include "flstring.h"
-#include <stdio.h>
-#include <ctype.h>
-
-typedef const Fl_Menu_Item *pFl_Menu_Item;
-
-/**
- * copy the text of a menuitem into a buffer.
- * Skip all '&' which would mark the shortcut in FLTK
- * Skip all Mac control characters ('(', '<', ';', '^', '!' )
- */
-static void catMenuText( const char *src, char *dst )
+Fl_Sys_Menu_Bar::Fl_Sys_Menu_Bar(int x,int y,int w,int h,const char *l)
+: Fl_Menu_Bar(x,y,w,h,l)
 {
-  char c;
-  while ( *dst ) 
-    dst++;
-  if ( *src == '-' ) 
-    src++;
-  while ( ( c = *src++ ) ) 
-  {
-    if ( !strchr( "&(<;^!", c )  )
-      *dst++ = c;
+  if (driver()) {
+    if (fl_sys_menu_bar) delete fl_sys_menu_bar;
+    fl_sys_menu_bar = this;
+    driver()->bar = this;
+    // Remove macOS menubar from its parent Fl_Group so it's activated
+    // by system menu shortcuts
+    Fl_Group *p = parent();
+    if (p) p->remove(this);
   }
-  *dst = 0;
+}
+
+/** The destructor */
+Fl_Sys_Menu_Bar::~Fl_Sys_Menu_Bar()
+{
+  if (driver()) {
+    fl_sys_menu_bar = 0;
+    clear();
+  }
+}
+
+void Fl_Sys_Menu_Bar::update() {
+  if (driver()) driver()->update();
 }
 
 /**
- * append a marker to identify the menu font style
- * <B, I, U, O, and S
+ \brief create a system menu bar using the given list of menu structs
+
+ \author Matthias Melcher
+
+ \param m Zero-ending list of Fl_Menu_Item's
  */
-static void catMenuFont( const Fl_Menu_Item *m, char *dst )
+void Fl_Sys_Menu_Bar::menu(const Fl_Menu_Item *m)
 {
-  if ( !m->labeltype_ && !m->labelfont_ ) 
-    return;
-  while ( *dst ) 
-    dst++;
-    
-  if ( m->labelfont_ & FL_BOLD )
-    strcat( dst, "<B" );
-  if ( m->labelfont_ & FL_ITALIC )
-    strcat( dst, "<I" );
-  //if ( m->labelfont_ & FL_UNDERLINE )
-  //  strcat( dst, "<U" );
-  
-  if ( m->labeltype_ == FL_EMBOSSED_LABEL )
-      strcat( dst, "<U" );
-  else if ( m->labeltype_ == FL_ENGRAVED_LABEL )
-      strcat( dst, "<O" );
-  else if ( m->labeltype_ == FL_SHADOW_LABEL )
-      strcat( dst, "<S" );
-  //else if ( m->labeltype_ == FL_SYMBOL_LABEL )
-      ; // not supported
+  if (driver()) driver()->menu(m);
+  else Fl_Menu_Bar::menu(m);
+}
+
+/** Changes the shortcut of item i to n.
+ */
+void Fl_Sys_Menu_Bar::shortcut (int i, int s) {
+  if (driver()) driver()->shortcut(i, s);
+  else Fl_Menu_Bar::shortcut(i, s);
+}
+
+/** Turns the radio item "on" for the menu item and turns "off" adjacent radio items of the same group.*/
+void Fl_Sys_Menu_Bar::setonly (Fl_Menu_Item *item) {
+  if (driver()) driver()->setonly(item);
+  else Fl_Menu_Bar::setonly(item);
+
+}
+
+/** Sets the flags of item i
+ \see Fl_Menu_::mode(int i, int fl) */
+void   Fl_Sys_Menu_Bar::mode (int i, int fl) {
+  if (driver()) driver()->mode(i, fl);
+  else Fl_Menu_Bar::mode(i, fl);
 }
 
 /**
- * append a marker to identify the menu shortcut
- * <B, I, U, O, and S
-enum {
-  kMenuNoModifiers = 0,
-  kMenuShiftModifier = (1 << 0),
-  kMenuOptionModifier = (1 << 1),
-  kMenuControlModifier = (1 << 2),
-  kMenuNoCommandModifier = (1 << 3)
-}; 
+ \brief Add a new menu item to the system menu bar.
+
+ Add to the system menu bar a new menu item, with a title string, shortcut int,
+ callback, argument to the callback, and flags.
+
+ \param label     - new menu item's label
+ \param shortcut  - new menu item's integer shortcut (can be 0 for none, or e.g. FL_ALT+'x')
+ \param cb        - callback to be invoked when item selected (can be 0 for none, in which case the menubar's callback() can be used instead)
+ \param user_data - argument to the callback
+ \param flags     - item's flags, e.g. ::FL_MENU_TOGGLE, etc.
+
+ \returns the index into the menu() array, where the entry was added
+
+ \see Fl_Menu_::add(const char* label, int shortcut, Fl_Callback *cb, void *user_data, int flags)
  */
-static void setMenuShortcut( MenuHandle mh, int miCnt, const Fl_Menu_Item *m )
+int Fl_Sys_Menu_Bar::add(const char* label, int shortcut, Fl_Callback *cb, void *user_data, int flags)
 {
-  if ( !m->shortcut_ ) 
-    return;
-  if ( m->flags & FL_SUBMENU )
-    return;
-  if ( m->flags & FL_SUBMENU_POINTER )
-    return;
-  char key = m->shortcut_ & 0xff;
-  if ( !isalnum( key ) )
-    return;
-  
-  long macMod = kMenuNoCommandModifier;
-  if ( m->shortcut_ & FL_META ) macMod = kMenuNoModifiers;
-  if ( m->shortcut_ & FL_SHIFT || isupper(key) ) macMod |= kMenuShiftModifier;
-  if ( m->shortcut_ & FL_ALT ) macMod |= kMenuOptionModifier;
-  if ( m->shortcut_ & FL_CTRL ) macMod |= kMenuControlModifier;
-  
-  //SetMenuItemKeyGlyph( mh, miCnt, key );
-  SetItemCmd( mh, miCnt, toupper(key) );
-  SetMenuItemModifiers( mh, miCnt, macMod );
-}
-
-#if 0
-// this function needs to be verified before we compile it back in.
-static void catMenuShortcut( const Fl_Menu_Item *m, char *dst )
-{
-  if ( !m->shortcut_ ) 
-    return;
-  char c = m->shortcut_ & 0xff;
-  if ( !isalnum( c & 0xff ) )
-    return;
-  while ( *dst ) 
-    dst++;
-  if ( m->shortcut_ & FL_CTRL )
-  {
-    sprintf( dst, "/%c", toupper( c ) );
-  }
-  //if ( isalnum( mm->shortcut_ ) && !( mm->flags & FL_SUBMENU ) )
-  //sprintf( buf+strlen(buf), "/%c", mm->shortcut_ );
-}
-#endif
-
-static void setMenuFlags( MenuHandle mh, int miCnt, const Fl_Menu_Item *m )
-{
-  if ( m->flags & FL_MENU_TOGGLE )
-  {
-    SetItemMark( mh, miCnt, ( m->flags & FL_MENU_VALUE ) ? 0x12 : 0 );
-  }
-  else if ( m->flags & FL_MENU_RADIO )
-    SetItemMark( mh, miCnt, ( m->flags & FL_MENU_VALUE ) ? 0x13 : 0 );
-}
-
-static void catMenuFlags( const Fl_Menu_Item *m, char *dst )
-{
-  if ( !m->flags ) 
-    return;
-  if ( m->flags & FL_MENU_INACTIVE )
-    strcat( dst, "(" );
+  if (driver()) return driver()->add(label, shortcut, cb, user_data, flags);
+  else return Fl_Menu_Bar::add(label, shortcut, cb, user_data, flags);
 }
 
 /**
- * create a sub menu for a specific menu handle
+ Forms-compatible procedure to add items to the system menu bar
+
+ \returns the index into the menu() array, where the entry was added
+ \see Fl_Menu_::add(const char* str)
  */
-static void createSubMenu( MenuHandle mh, int &cnt, pFl_Menu_Item &mm )
+int Fl_Sys_Menu_Bar::add(const char* str)
 {
-  char buf[255];
-  int miCnt = 1;
-  while ( mm->text )
-  {
-    MenuHandle smh = 0;
-    buf[1] = 0;
-    catMenuFont( mm, buf+1 );
-    //catMenuShortcut( mm, buf+1 );
-    catMenuText( mm->text, buf+1 );
-    catMenuFlags( mm, buf+1 );
-    if ( mm->flags & (FL_SUBMENU | FL_SUBMENU_POINTER) )
-    {
-      cnt++;
-      smh = NewMenu( cnt, (unsigned char*)"\001 " );
-      sprintf( buf+1+strlen(buf+1), "/\033!%c", cnt );
-    }
-    if ( mm->flags & FL_MENU_DIVIDER )
-      strcat( buf+1, ";-" );
-    buf[0] = strlen( buf+1 );
-    AppendMenu( mh, (unsigned char*)buf );
-    // insert Appearanc manager functions here!
-    setMenuFlags( mh, miCnt, mm );
-    setMenuShortcut( mh, miCnt, mm );
-    SetMenuItemRefCon( mh, miCnt, (UInt32)mm );
-    miCnt++;
-    if ( mm->flags & FL_MENU_DIVIDER )
-      miCnt++;
-    if ( mm->flags & FL_SUBMENU )
-    {
-      createSubMenu( smh, cnt, ++mm );
-    }
-    else if ( mm->flags & FL_SUBMENU_POINTER )
-    {
-      const Fl_Menu_Item *smm = (Fl_Menu_Item*)mm->user_data_;
-      createSubMenu( mh, cnt, smm );
-    }
-    mm++;
-  }
-  InsertMenu( mh, -1 );
+  return driver() ? driver()->add(str) : Fl_Menu_Bar::add(str);
 }
- 
 
 /**
- * create a system menu bar using the given list of menu structs
- *
- * \author Matthias Melcher
- *
- * @param m list of Fl_Menu_Item
+ \brief insert in the system menu bar a new menu item
+
+ Insert in the system menu bar a new menu item, with a title string, shortcut int,
+ callback, argument to the callback, and flags.
+
+ \returns the index into the menu() array, where the entry was inserted
+ \see Fl_Menu_::insert(int index, const char* label, int shortcut, Fl_Callback *cb, void *user_data, int flags)
  */
-void Fl_Sys_Menu_Bar::menu(const Fl_Menu_Item *m) 
+int Fl_Sys_Menu_Bar::insert(int index, const char* label, int shortcut, Fl_Callback *cb, void *user_data, int flags)
 {
-  fl_open_display();
-  Fl_Menu_Bar::menu( m );
-  fl_sys_menu_bar = this;
-
-  char buf[255];
-
-  int cnt = 1; // first menu is no 2. no 1 is the Apple Menu
-  const Fl_Menu_Item *mm = m;
-  for (;;)
-  {
-    if ( !mm || !mm->text )
-      break;
-    char visible = mm->visible() ? 1 : 0;
-    buf[1] = 0;
-    catMenuText( mm->text, buf+1 );
-    buf[0] = strlen( buf+1 );
-    MenuHandle mh = NewMenu( ++cnt, (unsigned char*)buf );
-    if ( mm->flags & FL_MENU_INACTIVE ) {
-      ChangeMenuAttributes(mh, kMenuAttrAutoDisable, 0);
-      DisableAllMenuItems(mh);
-      DisableMenuItem(mh, 0);
-    }
-    if ( mm->flags & FL_SUBMENU )
-      createSubMenu( mh, cnt, ++mm );
-    else if ( mm->flags & FL_SUBMENU_POINTER ) {
-      const Fl_Menu_Item *smm = (Fl_Menu_Item*)mm->user_data_;
-      createSubMenu( mh, cnt, smm );
-    }
-    if ( visible ) {
-      InsertMenu( mh, 0 );
-    }
-    mm++;
-  }
-  DrawMenuBar();
+  return driver() ? driver()->insert(index, label, shortcut, cb, user_data, flags) :
+  Fl_Menu_Bar::insert(index, label, shortcut, cb, user_data, flags);
 }
 
-/*
-const Fl_Menu_Item* Fl_Sys_Menu_Bar::picked(const Fl_Menu_Item* v) {
-  Fl_menu_Item *ret = Fl_Menu_Bar::picked( v );
-  
-  if ( m->flags & FL_MENU_TOGGLE )
-  {
-    SetItemMark( mh, miCnt, ( m->flags & FL_MENU_VALUE ) ? 0x12 : 0 );
-  }
-  
-  return ret;
+/** Set the Fl_Menu_Item array pointer to null, indicating a zero-length menu.
+ \see Fl_Menu_::clear()
+ */
+void Fl_Sys_Menu_Bar::clear()
+{
+  if (driver()) driver()->clear();
+  else Fl_Menu_Bar::clear();
 }
-*/
+
+/** Clears the specified submenu pointed to by index of all menu items.
+ \see Fl_Menu_::clear_submenu(int index)
+ */
+int Fl_Sys_Menu_Bar::clear_submenu(int index)
+{
+  return driver() ? driver()->clear_submenu(index) : Fl_Menu_Bar::clear_submenu(index);
+}
+
+/**
+ \brief remove an item from the system menu bar
+
+ \param index    the index of the item to remove
+ */
+void Fl_Sys_Menu_Bar::remove(int index)
+{
+  if (driver()) driver()->remove(index);
+  else Fl_Menu_Bar::remove(index);
+}
+
+/**
+ \brief rename an item from the system menu bar
+
+ \param index    the index of the item to rename
+ \param name    the new item name as a UTF8 string
+ */
+void Fl_Sys_Menu_Bar::replace(int index, const char *name)
+{
+  if (driver()) driver()->replace(index, name);
+  else Fl_Menu_Bar::replace(index, name);
+}
+
+/**
+  Attaches a callback to the "About myprog" item of the system application menu.
+ This cross-platform function is effective only under the MacOS platform.
+ \param cb   a callback that will be called by "About myprog" menu item
+       with NULL 1st argument.
+ \param data   a pointer transmitted as 2nd argument to the callback.
+ */
+void Fl_Sys_Menu_Bar::about(Fl_Callback *cb, void *data) {
+  if (driver()) {
+    fl_open_display(); // create the system menu, if needed
+    driver()->about(cb, data);
+  }
+}
 
 void Fl_Sys_Menu_Bar::draw() {
-/* -- nothing to do, system should take care of this
-  draw_box();
-  if (!menu() || !menu()->text) return;
-  const Fl_Menu_Item* m;
-  int X = x()+6;
-  for (m=menu(); m->text; m = m->next()) {
-    int W = m->measure(0,this) + 16;
-    m->draw(X, y(), W, h(), this);
-    X += W;
-  }
-  */
+  if (driver()) driver()->draw();
+  else Fl_Menu_Bar::draw();
 }
 
-/*
-int Fl_Menu_Bar::handle(int event) {
-  const Fl_Menu_Item* v;
-  if (menu() && menu()->text) switch (event) {
-  case FL_ENTER:
-  case FL_LEAVE:
-    return 1;
-  case FL_PUSH:
-    v = 0;
-  J1:
-    v = menu()->pulldown(x(), y(), w(), h(), v, this, 0, 1);
-    picked(v);
-    return 1;
-  case FL_SHORTCUT:
-    if (visible_r()) {
-      v = menu()->find_shortcut();
-      if (v && v->submenu()) goto J1;
-    }
-    return test_shortcut() != 0;
-  }
-  return 0;
+
+
+/** Get the style of the Window menu in the system menu bar */
+Fl_Sys_Menu_Bar::window_menu_style_enum Fl_Sys_Menu_Bar::window_menu_style() {
+  return driver() ? Fl_Sys_Menu_Bar_Driver::window_menu_style() : no_window_menu;
 }
-*/
 
-#endif /* __APPLE__ */
+/** Set the desired style of the Window menu in the system menu bar.
+ This function, to be called before the first call to Fl_Window::show(), allows to
+ control whether the system menu bar should contain a Window menu,
+ and if yes, whether new windows should be displayed in tabbed form. These are
+ the effects of various values for \p style :
+ \li \c  no_window_menu : don't add a Window menu to the system menu bar
+ \li \c tabbing_mode_none :   add a simple Window menu to the system menu bar
+ \li \c  tabbing_mode_automatic : the window menu also contains "Merge All Windows" to group
+ all windows in a single tabbed display mode. This is the \b default Window menu style
+ for FLTK apps.
+ \li \c tabbing_mode_preferred : new windows are displayed in tabbed mode when first created
 
-//
-// End of "$Id: Fl_Sys_Menu_Bar.cxx 6016 2008-01-09 21:32:40Z matt $".
-//
+ The Window menu, if present, is entirely created and controlled by the FLTK library.
+ Mac OS version 10.12 or later must be running for windows to be displayed in tabbed form.
+ Under non MacOS platforms, this function does nothing.
+ \version 1.4
+ */
+void Fl_Sys_Menu_Bar::window_menu_style(Fl_Sys_Menu_Bar::window_menu_style_enum style) {
+  if (driver()) Fl_Sys_Menu_Bar_Driver::window_menu_style(style);
+}
+
+/** Adds a Window menu, to the end of the system menu bar.
+ FLTK apps typically don't need to call this function which is automatically
+ called by the library the first time a window is shown. The default system menu bar
+ contains a Window menu with a "Merge All Windows" item.
+ Other Window menu styles can be obtained calling
+ Fl_Sys_Menu_Bar::window_menu_style(window_menu_style_enum) before the first Fl_Window::show().
+ Alternatively, an app can call create_window_menu() after having populated the system menu bar,
+ for example with menu(const Fl_Menu_Item *), and before the first Fl_Window::show().
+
+ This function does nothing on non MacOS platforms.
+ \version 1.4
+ */
+void Fl_Sys_Menu_Bar::create_window_menu() {
+  if (driver()) {
+    fl_open_display();
+    fl_sys_menu_bar->driver()->create_window_menu();
+  }
+}
+
+void Fl_Sys_Menu_Bar::play_menu(const Fl_Menu_Item *item) {
+  Fl_Sys_Menu_Bar_Driver *dr = driver();
+  if (dr) dr->play_menu(item);
+  else Fl_Menu_Bar::play_menu(item);
+}
+
+#if !defined(FL_DOXYGEN)
+Fl_Sys_Menu_Bar_Driver *Fl_Sys_Menu_Bar::driver() {
+  return Fl::system_driver()->sys_menu_bar_driver();
+}
+
+Fl_Sys_Menu_Bar_Driver *Fl_Sys_Menu_Bar_Driver::driver_ = 0;
+
+Fl_Sys_Menu_Bar_Driver::Fl_Sys_Menu_Bar_Driver() {bar = NULL;}
+
+Fl_Sys_Menu_Bar_Driver::~Fl_Sys_Menu_Bar_Driver() {}
+
+Fl_Sys_Menu_Bar::window_menu_style_enum Fl_Sys_Menu_Bar_Driver::window_menu_style_ = Fl_Sys_Menu_Bar::tabbing_mode_automatic;
+#endif // !defined(FL_DOXYGEN)

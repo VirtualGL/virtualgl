@@ -1,29 +1,21 @@
 //
-// "$Id: Fl_Help_View.cxx 6745 2009-04-07 18:37:25Z AlbrechtS $"
+// Fl_Help_View widget for the Fast Light Tool Kit (FLTK).
 //
-// Fl_Help_View widget routines.
+// Copyright 1997-2010 by Easy Software Products.
+// Image support by Matthias Melcher, Copyright 2000-2009.
 //
-// Copyright 1997-2007 by Easy Software Products.
-// Image support donated by Matthias Melcher, Copyright 2000.
+// Buffer management (HV_Edit_Buffer) and more by AlbrechtS and others.
+// Copyright 2011-2025 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 // Contents:
 //
@@ -31,8 +23,7 @@
 //   Fl_Help_View::add_link()        - Add a new link to the list.
 //   Fl_Help_View::add_target()      - Add a new target to the list.
 //   Fl_Help_View::compare_targets() - Compare two targets.
-//   Fl_Help_View::do_align()        - Compute the alignment for a line in
-//                                     a block.
+//   Fl_Help_View::do_align()        - Compute the alignment for a line in a block.
 //   Fl_Help_View::draw()            - Draw the Fl_Help_View widget.
 //   Fl_Help_View::format()          - Format the help text.
 //   Fl_Help_View::format_table()    - Format a table...
@@ -56,28 +47,24 @@
 //
 
 #include <FL/Fl_Help_View.H>
+#include <FL/Fl_Shared_Image.H>
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Pixmap.H>
-#include <FL/x.H>
+#include <FL/Fl_Menu_Item.H>
+#include "Fl_Int_Vector.H"
+#include "Fl_String.H"
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <FL/fl_utf8.h>
+#include <FL/filename.H>                // fl_open_uri()
+#include <FL/fl_string_functions.h>     // fl_strdup()
 #include "flstring.h"
 #include <ctype.h>
 #include <errno.h>
 #include <math.h>
 
-#if defined(WIN32) && ! defined(__CYGWIN__)
-#  include <io.h>
-#  include <direct.h>
-// Visual C++ 2005 incorrectly displays a warning about the use of POSIX APIs
-// on Windows, which is supposed to be POSIX compliant...
-#  define getcwd _getcwd
-#else
-#  include <unistd.h>
-#endif // WIN32
-
-#define MAX_COLUMNS	200
-
+#define MAX_COLUMNS     200
 
 //
 // Typedef the C API sort function type the only way I know how...
@@ -93,9 +80,27 @@ extern "C"
 // Local functions...
 //
 
-static int	quote_char(const char *);
-static void	scrollbar_callback(Fl_Widget *s, void *);
-static void	hscrollbar_callback(Fl_Widget *s, void *);
+static int      quote_char(const char *);
+static void     scrollbar_callback(Fl_Widget *s, void *);
+static void     hscrollbar_callback(Fl_Widget *s, void *);
+
+// This function skips 'n' bytes *within* a string, i.e. it checks
+// for a NUL byte as string terminator.
+// If a NUL byte is found before 'n' bytes have been scanned it returns
+// a pointer to the end of the string (the NUL byte).
+// This avoids pure pointer arithmetic that would potentially overrun
+// the end of the string (buffer), see GitHub Issue #1196.
+//
+// Note: this should be rewritten and improved in FLTK 1.5.0 or later
+// by using std::string etc..
+
+static char *skip_bytes(const char *p, int n) {
+  for (int i = 0; i < n; ++i) {
+    if (*p == '\0') break;
+    ++p;
+  }
+  return const_cast<char *>(p);
+}
 
 //
 // global flag for image loading (see get_image).
@@ -107,42 +112,50 @@ static char initial_load = 0;
 // Broken image...
 //
 
-static const char *broken_xpm[] =
-		{
-		  "16 24 4 1",
-		  "@ c #000000",
-		  "  c #ffffff",
-		  "+ c none",
-		  "x c #ff0000",
-		  // pixels
-		  "@@@@@@@+++++++++",
-		  "@    @++++++++++",
-		  "@   @+++++++++++",
-		  "@   @++@++++++++",
-		  "@    @@+++++++++",
-		  "@     @+++@+++++",
-		  "@     @++@@++++@",
-		  "@ xxx  @@  @++@@",
-		  "@  xxx    xx@@ @",
-		  "@   xxx  xxx   @",
-		  "@    xxxxxx    @",
-		  "@     xxxx     @",
-		  "@    xxxxxx    @",
-		  "@   xxx  xxx   @",
-		  "@  xxx    xxx  @",
-		  "@ xxx      xxx @",
-		  "@              @",
-		  "@              @",
-		  "@              @",
-		  "@              @",
-		  "@              @",
-		  "@              @",
-		  "@              @",
-		  "@@@@@@@@@@@@@@@@",
-		  NULL
-		};
+static const char * const broken_xpm[] =
+                {
+                  "16 24 4 1",
+                  "@ c #000000",
+                  "  c #ffffff",
+                  "+ c none",
+                  "x c #ff0000",
+                  // pixels
+                  "@@@@@@@+++++++++",
+                  "@    @++++++++++",
+                  "@   @+++++++++++",
+                  "@   @++@++++++++",
+                  "@    @@+++++++++",
+                  "@     @+++@+++++",
+                  "@     @++@@++++@",
+                  "@ xxx  @@  @++@@",
+                  "@  xxx    xx@@ @",
+                  "@   xxx  xxx   @",
+                  "@    xxxxxx    @",
+                  "@     xxxx     @",
+                  "@    xxxxxx    @",
+                  "@   xxx  xxx   @",
+                  "@  xxx    xxx  @",
+                  "@ xxx      xxx @",
+                  "@              @",
+                  "@              @",
+                  "@              @",
+                  "@              @",
+                  "@              @",
+                  "@              @",
+                  "@              @",
+                  "@@@@@@@@@@@@@@@@",
+                  NULL
+                };
 
 static Fl_Pixmap broken_image(broken_xpm);
+
+/** [this text may be customized at run-time] */
+const char *Fl_Help_View::copy_menu_text = "Copy";
+
+static Fl_Menu_Item rmb_menu[] = {
+  { NULL, 0, NULL, (void*)1 },  // Copy
+  { NULL }
+};
 
 //
 // Simple margin stack for Fl_Help_View::format()...
@@ -155,8 +168,7 @@ struct fl_margins {
   fl_margins() { clear();  }
 
   int clear() {
-//    puts("fl_margins::clear()");
-
+    // puts("fl_margins::clear()");
     depth_ = 0;
     return margins_[0] = 4;
   }
@@ -164,8 +176,8 @@ struct fl_margins {
   int current() { return margins_[depth_]; }
 
   int pop() {
-//    printf("fl_margins::pop(): depth_=%d, xx=%d\n", depth_,
-//           depth_ > 0 ? margins_[depth_ - 1] : 4);
+    // printf("fl_margins::pop(): depth_=%d, xx=%d\n", depth_,
+    //        depth_ > 0 ? margins_[depth_ - 1] : 4);
 
     if (depth_ > 0) {
       depth_ --;
@@ -178,8 +190,8 @@ struct fl_margins {
 
     xx = margins_[depth_] + indent;
 
-//    printf("fl_margins::push(indent=%d): depth_=%d, xx=%d\n", indent,
-//           depth_ + 1, xx);
+    // printf("fl_margins::push(indent=%d): depth_=%d, xx=%d\n", indent,
+    //        depth_ + 1, xx);
 
     if (depth_ < 99) {
       depth_ ++;
@@ -223,79 +235,149 @@ img->draw()
 */
 
 // We don't put the offscreen buffer in the help view class because
-// we'd need to include x.H in the header...
+// we'd need to include platform.H in the header...
 static Fl_Offscreen fl_help_view_buffer;
-int Fl_Help_View::selection_first = 0;
-int Fl_Help_View::selection_last = 0;
-int Fl_Help_View::selection_push_first = 0;
-int Fl_Help_View::selection_push_last = 0;
-int Fl_Help_View::selection_drag_first = 0;
-int Fl_Help_View::selection_drag_last = 0;
-int Fl_Help_View::selected = 0;
-int Fl_Help_View::draw_mode = 0;
-int Fl_Help_View::mouse_x = 0;
-int Fl_Help_View::mouse_y = 0;
-int Fl_Help_View::current_pos = 0;
-Fl_Help_View *Fl_Help_View::current_view = 0L;
-Fl_Color Fl_Help_View::hv_selection_color;
-Fl_Color Fl_Help_View::hv_selection_text_color;
+int Fl_Help_View::selection_first_ = 0;
+int Fl_Help_View::selection_last_ = 0;
+int Fl_Help_View::selection_push_first_ = 0;
+int Fl_Help_View::selection_push_last_ = 0;
+int Fl_Help_View::selection_drag_first_ = 0;
+int Fl_Help_View::selection_drag_last_ = 0;
+int Fl_Help_View::selected_ = 0;
+int Fl_Help_View::draw_mode_ = 0;
+int Fl_Help_View::mouse_x_ = 0;
+int Fl_Help_View::mouse_y_ = 0;
+int Fl_Help_View::current_pos_ = 0;
+Fl_Help_View *Fl_Help_View::current_view_ = 0L;
+Fl_Color Fl_Help_View::hv_selection_color_;
+Fl_Color Fl_Help_View::hv_selection_text_color_;
 
 /*
- * Limitation: if a word contains &code; notations, we will calculate a wrong length.
- *
  * This function must be optimized for speed!
  */
-void Fl_Help_View::hv_draw(const char *t, int x, int y)
+void Fl_Help_View::hv_draw(const char *t, int x, int y, int entity_extra_length)
 {
-  if (selected && current_view==this && current_pos<selection_last && current_pos>=selection_first) {
+  if (selected_ && current_view_==this && current_pos_<selection_last_ && current_pos_>=selection_first_) {
     Fl_Color c = fl_color();
-    fl_color(hv_selection_color);
+    fl_color(hv_selection_color_);
     int w = (int)fl_width(t);
-    if (current_pos+(int)strlen(t)<selection_last) 
+    if (current_pos_+(int)strlen(t)<selection_last_)
       w += (int)fl_width(' ');
     fl_rectf(x, y+fl_descent()-fl_height(), w, fl_height());
-    fl_color(hv_selection_text_color);
+    fl_color(hv_selection_text_color_);
     fl_draw(t, x, y);
     fl_color(c);
   } else {
     fl_draw(t, x, y);
   }
-  if (draw_mode) {
+  if (draw_mode_) {
     int w = (int)fl_width(t);
-    if (mouse_x>=x && mouse_x<x+w) {
-      if (mouse_y>=y-fl_height()+fl_descent()&&mouse_y<=y+fl_descent()) {
-        int f = current_pos;
-        int l = f+strlen(t); // use 'quote_char' to calculate the true length of the HTML string
-        if (draw_mode==1) {
-          selection_push_first = f;
-          selection_push_last = l;
+    if (mouse_x_>=x && mouse_x_<x+w) {
+      if (mouse_y_>=y-fl_height()+fl_descent()&&mouse_y_<=y+fl_descent()) {
+        int f = (int) current_pos_;
+        int l = (int) (f+strlen(t)); // use 'quote_char' to calculate the true length of the HTML string
+        if (draw_mode_==1) {
+          selection_push_first_ = f;
+          selection_push_last_ = l;
         } else {
-          selection_drag_first = f;
-          selection_drag_last = l;
+          selection_drag_first_ = f;
+          selection_drag_last_ = l + entity_extra_length;
         }
       }
     }
   }
 }
 
+// [Internal class HV_Edit_Buffer]
 
-//
-// 'Fl_Help_View::add_block()' - Add a text block to the list.
-//
+// Debug: set to 1 for basic debugging, 2 for more, 0 for none
+#define DEBUG_EDIT_BUFFER 0
 
-Fl_Help_Block *					// O - Pointer to new block
-Fl_Help_View::add_block(const char   *s,	// I - Pointer to start of block text
-                	int           xx,	// I - X position of block
-			int           yy,	// I - Y position of block
-			int           ww,	// I - Right margin of block
-			int           hh,	// I - Height of block
-			unsigned char border)	// I - Draw border?
+#if (DEBUG_EDIT_BUFFER > 1)
+#define DEBUG_FUNCTION(L,F) \
+  printf("\n========\n  [%d] --- %s\n========\n", L, F); \
+  fflush(stdout);
+#else
+#define DEBUG_FUNCTION(L,F)
+#endif
+
+/* Note: Don't use Doxygen docs for this internal class.
+
+  Internal class to manage the Fl_Help_View edit buffer.
+  This is a subclass of Fl_String since FLTK 1.4.0.
+
+  This class is for internal use in this file. Its sole purpose is to
+  allow buffer management to avoid buffer overflows in stack variables
+  used to edit strings for formatting and drawing (STR #3275).
+*/
+
+class HV_Edit_Buffer : public Fl_String {
+public:
+  // use default constructor and destructor, none defined here
+
+  // append a Unicode character (Code Point) to the string
+  void add(int ucs);
+
+  // case insensitive comparison of buffer contents with a string
+  int cmp(const char *str) {
+    return !strcasecmp(c_str(), str);
+  }
+
+  // string width of the entire buffer contents
+  int width() {
+    return (int)fl_width(c_str());
+  }
+
+#if (DEBUG_EDIT_BUFFER)
+  void print(const char *text = "");
+#endif
+};
+
+/*
+  Append one Unicode character (code point) to the buffer.
+
+  The Unicode character \p ucs is converted to UTF-8 and appended to
+  the buffer.
+
+  \param[in]  ucs  Unicode character (code point) to be added
+*/
+void HV_Edit_Buffer::add(int ucs) {
+  int len;
+  char cbuf[6];
+  len = fl_utf8encode((unsigned int)ucs, cbuf);
+  if (len < 1) len = 1;
+  append(cbuf, len);
+} // add(int ucs)
+
+/*
+  Print the edit buffer (Debug only).
+*/
+#if (DEBUG_EDIT_BUFFER)
+void HV_Edit_Buffer::print(const char *text) {
+  printf("HV_Edit_Buffer::print(%s), capacity=%d, size=%d\n",
+         text, capacity(), size());
+  printf("    \"%s\"\n", c_str() && size() ? c_str() : "");
+  fflush(stdout);
+} // print()
+#endif
+
+// [End of internal class HV_Edit_Buffer]
+
+
+/** Adds a text block to the list. */
+Fl_Help_Block *                                 // O - Pointer to new block
+Fl_Help_View::add_block(const char   *s,        // I - Pointer to start of block text
+                        int           xx,       // I - X position of block
+                        int           yy,       // I - Y position of block
+                        int           ww,       // I - Right margin of block
+                        int           hh,       // I - Height of block
+                        unsigned char border)   // I - Draw border?
 {
-  Fl_Help_Block	*temp;				// New block
+  Fl_Help_Block *temp;                          // New block
 
 
-//  printf("add_block(s = %p, xx = %d, yy = %d, ww = %d, hh = %d, border = %d)\n",
-//         s, xx, yy, ww, hh, border);
+  // printf("add_block(s = %p, xx = %d, yy = %d, ww = %d, hh = %d, border = %d)\n",
+  //        s, xx, yy, ww, hh, border);
 
   if (nblocks_ >= ablocks_)
   {
@@ -323,19 +405,15 @@ Fl_Help_View::add_block(const char   *s,	// I - Pointer to start of block text
 }
 
 
-//
-// 'Fl_Help_View::add_link()' - Add a new link to the list.
-//
-
-void
-Fl_Help_View::add_link(const char *n,	// I - Name of link
-                      int        xx,	// I - X position of link
-		      int        yy,	// I - Y position of link
-		      int        ww,	// I - Width of link text
-		      int        hh)	// I - Height of link text
+/** Adds a new link to the list. */
+void Fl_Help_View::add_link(const char *n,      // I - Name of link
+                      int        xx,    // I - X position of link
+                      int        yy,    // I - Y position of link
+                      int        ww,    // I - Width of link text
+                      int        hh)    // I - Height of link text
 {
-  Fl_Help_Link	*temp;			// New link
-  char		*target;		// Pointer to target name
+  Fl_Help_Link  *temp;                  // New link
+  char          *target;                // Pointer to target name
 
 
   if (nlinks_ >= alinks_)
@@ -369,15 +447,11 @@ Fl_Help_View::add_link(const char *n,	// I - Name of link
 }
 
 
-//
-// 'Fl_Help_View::add_target()' - Add a new target to the list.
-//
-
-void
-Fl_Help_View::add_target(const char *n,	// I - Name of target
-                	int        yy)	// I - Y position of target
+/** Adds a new target to the list. */
+void Fl_Help_View::add_target(const char *n,    // I - Name of target
+                              int        yy)    // I - Y position of target
 {
-  Fl_Help_Target	*temp;			// New target
+  Fl_Help_Target        *temp;                  // New target
 
 
   if (ntargets_ >= atargets_)
@@ -398,44 +472,36 @@ Fl_Help_View::add_target(const char *n,	// I - Name of target
   ntargets_ ++;
 }
 
-
-//
-// 'Fl_Help_View::compare_targets()' - Compare two targets.
-//
-
-int							// O - Result of comparison
-Fl_Help_View::compare_targets(const Fl_Help_Target *t0,	// I - First target
-                             const Fl_Help_Target *t1)	// I - Second target
+/** Compares two targets.*/
+int                                                     // O - Result of comparison
+Fl_Help_View::compare_targets(const Fl_Help_Target *t0, // I - First target
+                             const Fl_Help_Target *t1)  // I - Second target
 {
   return (strcasecmp(t0->name, t1->name));
 }
 
-
-//
-// 'Fl_Help_View::do_align()' - Compute the alignment for a line in a block.
-//
-
-int						// O - New line
-Fl_Help_View::do_align(Fl_Help_Block *block,	// I - Block to add to
-                      int          line,	// I - Current line
-		      int          xx,		// I - Current X position
-		      int          a,		// I - Current alignment
-		      int          &l)		// IO - Starting link
+/** Computes the alignment for a line in a block.*/
+int                                             // O - New line
+Fl_Help_View::do_align(Fl_Help_Block *block,    // I - Block to add to
+                      int          line,        // I - Current line
+                      int          xx,          // I - Current X position
+                      int          a,           // I - Current alignment
+                      int          &l)          // IO - Starting link
 {
-  int	offset;					// Alignment offset
+  int   offset;                                 // Alignment offset
 
 
   switch (a)
   {
-    case RIGHT :	// Right align
-	offset = block->w - xx;
-	break;
-    case CENTER :	// Center
-	offset = (block->w - xx) / 2;
-	break;
-    default :		// Left align
-	offset = 0;
-	break;
+    case RIGHT :        // Right align
+        offset = block->w - xx;
+        break;
+    case CENTER :       // Center
+        offset = (block->w - xx) / 2;
+        break;
+    default :           // Left align
+        offset = 0;
+        break;
   }
 
   block->line[line] = block->x + offset;
@@ -453,64 +519,75 @@ Fl_Help_View::do_align(Fl_Help_Block *block,	// I - Block to add to
   return (line);
 }
 
-
-//
-// 'Fl_Help_View::draw()' - Draw the Fl_Help_View widget.
-//
-
+/** Draws the Fl_Help_View widget. */
 void
 Fl_Help_View::draw()
 {
-  int			i;		// Looping var
-  const Fl_Help_Block	*block;		// Pointer to current block
-  const char		*ptr,		// Pointer to text in block
-			*attrs;		// Pointer to start of element attributes
-  char			*s,		// Pointer into buffer
-			buf[1024],	// Text buffer
-			attr[1024];	// Attribute buffer
-  int			xx, yy, ww, hh;	// Current positions and sizes
-  int			line;		// Current line
-  unsigned char		font, fsize;	// Current font and size
-  int			head, pre,	// Flags for text
-			needspace;	// Do we need whitespace?
-  Fl_Boxtype		b = box() ? box() : FL_DOWN_BOX;
-					// Box to draw...
-  int			underline,	// Underline text?
+  int                   i;              // Looping var
+  const Fl_Help_Block   *block;         // Pointer to current block
+  const char            *ptr,           // Pointer to text in block
+                        *attrs;         // Pointer to start of element attributes
+  HV_Edit_Buffer        buf;            // Text buffer
+  char                  attr[1024];     // Attribute buffer
+  int                   xx, yy, ww, hh; // Current positions and sizes
+  int                   line;           // Current line
+  Fl_Font               font;
+  Fl_Fontsize           fsize;          // Current font and size
+  Fl_Color              fcolor;         // current font color
+  int                   head, pre,      // Flags for text
+                        needspace;      // Do we need whitespace?
+  Fl_Boxtype            b = box() ? box() : FL_DOWN_BOX;
+                                        // Box to draw...
+  int                   underline,      // Underline text?
                         xtra_ww;        // Extra width for underlined space between words
 
+  DEBUG_FUNCTION(__LINE__,__FUNCTION__);
 
   // Draw the scrollbar(s) and box first...
-  ww = w() ;
+  ww = w();
   hh = h();
   i  = 0;
 
   draw_box(b, x(), y(), ww, hh, bgcolor_);
 
-  int ss = Fl::scrollbar_size();
-  if (hscrollbar_.visible()) {
-    draw_child(hscrollbar_);
-    hh -= ss;
-    i ++;
-  }
-  if (scrollbar_.visible()) {
-    draw_child(scrollbar_);
-    ww -= ss;
-    i ++;
-  }
-  if (i == 2) {
-    fl_color(FL_GRAY);
-    fl_rectf(x() + ww - Fl::box_dw(b) + Fl::box_dx(b),
-             y() + hh - Fl::box_dh(b) + Fl::box_dy(b), ss, ss);
+  if ( hscrollbar_.visible() || scrollbar_.visible() ) {
+    int scrollsize = scrollbar_size_ ? scrollbar_size_ : Fl::scrollbar_size();
+    int hor_vis = hscrollbar_.visible();
+    int ver_vis = scrollbar_.visible();
+    // Scrollbar corner
+    int scorn_x = x() + ww - (ver_vis?scrollsize:0) - Fl::box_dw(b) + Fl::box_dx(b);
+    int scorn_y = y() + hh - (hor_vis?scrollsize:0) - Fl::box_dh(b) + Fl::box_dy(b);
+    if ( hor_vis ) {
+      if ( hscrollbar_.h() != scrollsize ) {            // scrollsize changed?
+        hscrollbar_.resize(x(), scorn_y, scorn_x - x(), scrollsize);
+        init_sizes();
+      }
+      draw_child(hscrollbar_);
+      hh -= scrollsize;
+    }
+    if ( ver_vis ) {
+      if ( scrollbar_.w() != scrollsize ) {             // scrollsize changed?
+        scrollbar_.resize(scorn_x, y(), scrollsize, scorn_y - y());
+        init_sizes();
+      }
+      draw_child(scrollbar_);
+      ww -= scrollsize;
+    }
+    if ( hor_vis && ver_vis ) {
+      // Both scrollbars visible? Draw little gray box in corner
+      fl_color(FL_GRAY);
+      fl_rectf(scorn_x, scorn_y, scrollsize, scrollsize);
+    }
   }
 
   if (!value_)
     return;
 
-  if (current_view == this && selected) {
-    hv_selection_color      = FL_SELECTION_COLOR;
-    hv_selection_text_color = fl_contrast(textcolor_, FL_SELECTION_COLOR);
+  if (current_view_ == this && selected_) {
+    hv_selection_color_      = FL_SELECTION_COLOR;
+    hv_selection_text_color_ = fl_contrast(textcolor_, FL_SELECTION_COLOR);
   }
-  current_pos = 0;
+  current_pos_ = 0;
 
   // Clip the drawing to the inside of the box...
   fl_push_clip(x() + Fl::box_dx(b), y() + Fl::box_dy(b),
@@ -530,528 +607,598 @@ Fl_Help_View::draw()
       needspace = 0;
       underline = 0;
 
-      initfont(font, fsize);
-
-      for (ptr = block->start, s = buf; ptr < block->end;)
+      initfont(font, fsize, fcolor);
+      // byte length difference between html entity (encoded by &...;) and
+      // UTF-8 encoding of same character
+      int entity_extra_length = 0;
+      for (ptr = block->start, buf.clear(); ptr < block->end;)
       {
-	if ((*ptr == '<' || isspace((*ptr)&255)) && s > buf)
-	{
-	  if (!head && !pre)
-	  {
+        if ((*ptr == '<' || isspace((*ptr)&255)) && buf.size() > 0)
+        {
+          if (!head && !pre)
+          {
             // Check width...
-            *s = '\0';
-            s  = buf;
-            ww = (int)fl_width(buf);
+            ww = buf.width();
 
             if (needspace && xx > block->x)
-	      xx += (int)fl_width(' ');
+              xx += (int)fl_width(' ');
 
             if ((xx + ww) > block->w)
-	    {
-	      if (line < 31)
-	        line ++;
-	      xx = block->line[line];
-	      yy += hh;
-	      hh = 0;
-	    }
+            {
+              if (line < 31)
+                line ++;
+              xx = block->line[line];
+              yy += hh;
+              hh = 0;
+            }
 
-            hv_draw(buf, xx + x() - leftline_, yy + y());
-	    if (underline) {
+            hv_draw(buf.c_str(), xx + x() - leftline_, yy + y(), entity_extra_length);
+            buf.clear();
+            entity_extra_length = 0;
+            if (underline) {
               xtra_ww = isspace((*ptr)&255)?(int)fl_width(' '):0;
               fl_xyline(xx + x() - leftline_, yy + y() + 1,
-	                xx + x() - leftline_ + ww + xtra_ww);
+                        xx + x() - leftline_ + ww + xtra_ww);
             }
-            current_pos = ptr-value_;
+            current_pos_ = (int) (ptr-value_);
 
             xx += ww;
-	    if ((fsize + 2) > hh)
-	      hh = fsize + 2;
+            if ((fsize + 2) > hh)
+              hh = fsize + 2;
 
-	    needspace = 0;
-	  }
-	  else if (pre)
-	  {
-	    while (isspace((*ptr)&255))
-	    {
-	      if (*ptr == '\n')
-	      {
-	        *s = '\0';
-                s = buf;
-
-                hv_draw(buf, xx + x() - leftline_, yy + y());
-		if (underline) fl_xyline(xx + x() - leftline_, yy + y() + 1,
-	                        	 xx + x() - leftline_ +
-					     (int)fl_width(buf));
-
-                current_pos = ptr-value_;
-		if (line < 31)
-	          line ++;
-		xx = block->line[line];
-		yy += hh;
-		hh = fsize + 2;
-	      }
-	      else if (*ptr == '\t')
-	      {
-		// Do tabs every 8 columns...
-		while (((s - buf) & 7))
-	          *s++ = ' ';
-	      }
-	      else
-	        *s++ = ' ';
-
+            needspace = 0;
+          }
+          else if (pre)
+          {
+            while (isspace((*ptr)&255))
+            {
+              if (*ptr == '\n')
+              {
+                hv_draw(buf.c_str(), xx + x() - leftline_, yy + y());
+                if (underline) fl_xyline(xx + x() - leftline_, yy + y() + 1,
+                                         xx + x() - leftline_ + buf.width());
+                buf.clear();
+                current_pos_ = (int) (ptr-value_);
+                if (line < 31)
+                  line ++;
+                xx = block->line[line];
+                yy += hh;
+                hh = fsize + 2;
+              }
+              else if (*ptr == '\t')
+              {
+                // Do tabs every 8 columns...
+                buf += ' '; // add at least one space
+                while (buf.size() & 7)
+                  buf += ' ';
+              }
+              else {
+                buf += ' ';
+              }
               if ((fsize + 2) > hh)
-	        hh = fsize + 2;
+                hh = fsize + 2;
 
               ptr ++;
-	    }
+            }
 
-            if (s > buf)
-	    {
-	      *s = '\0';
-	      s = buf;
-
-              hv_draw(buf, xx + x() - leftline_, yy + y());
-	      ww = (int)fl_width(buf);
-	      if (underline) fl_xyline(xx + x() - leftline_, yy + y() + 1,
-	                               xx + x() - leftline_ + ww);
+            if (buf.size() > 0)
+            {
+              hv_draw(buf.c_str(), xx + x() - leftline_, yy + y());
+              ww = buf.width();
+              buf.clear();
+              if (underline) fl_xyline(xx + x() - leftline_, yy + y() + 1,
+                                       xx + x() - leftline_ + ww);
               xx += ww;
-              current_pos = ptr-value_;
-	    }
+              current_pos_ = (int) (ptr-value_);
+            }
 
-	    needspace = 0;
-	  }
-	  else
-	  {
-            s = buf;
+            needspace = 0;
+          }
+          else
+          {
+            buf.clear();
 
-	    while (isspace((*ptr)&255))
+            while (isspace((*ptr)&255))
               ptr ++;
-            current_pos = ptr-value_;
-	  }
-	}
+            current_pos_ = (int) (ptr-value_);
+          }
+        }
 
-	if (*ptr == '<')
-	{
-	  ptr ++;
+        if (*ptr == '<')
+        {
+          ptr ++;
 
           if (strncmp(ptr, "!--", 3) == 0)
-	  {
-	    // Comment...
-	    ptr += 3;
-	    if ((ptr = strstr(ptr, "-->")) != NULL)
-	    {
-	      ptr += 3;
-	      continue;
-	    }
-	    else
-	      break;
-	  }
+          {
+            // Comment...
+            ptr += 3;
+            if ((ptr = strstr(ptr, "-->")) != NULL)
+            {
+              ptr += 3;
+              continue;
+            }
+            else
+              break;
+          }
 
-	  while (*ptr && *ptr != '>' && !isspace((*ptr)&255))
-            if (s < (buf + sizeof(buf) - 1))
-	      *s++ = *ptr++;
-	    else
-	      ptr ++;
+          while (*ptr && *ptr != '>' && !isspace((*ptr)&255))
+            buf += *ptr++;
 
-	  *s = '\0';
-	  s = buf;
-
-	  attrs = ptr;
-	  while (*ptr && *ptr != '>')
+          attrs = ptr;
+          while (*ptr && *ptr != '>')
             ptr ++;
 
-	  if (*ptr == '>')
+          if (*ptr == '>')
             ptr ++;
 
           // end of command reached, set the supposed start of printed eord here
-          current_pos = ptr-value_;
-	  if (strcasecmp(buf, "HEAD") == 0)
+          current_pos_ = (int) (ptr-value_);
+          if (buf.cmp("HEAD"))
             head = 1;
-	  else if (strcasecmp(buf, "BR") == 0)
-	  {
-	    if (line < 31)
-	      line ++;
-	    xx = block->line[line];
+          else if (buf.cmp("BR"))
+          {
+            if (line < 31)
+              line ++;
+            xx = block->line[line];
             yy += hh;
-	    hh = 0;
-	  }
-	  else if (strcasecmp(buf, "HR") == 0)
-	  {
-	    fl_line(block->x + x(), yy + y(), block->w + x(),
-	            yy + y());
+            hh = 0;
+          }
+          else if (buf.cmp("HR"))
+          {
+            fl_line(block->x + x(), yy + y(), block->w + x(),
+                    yy + y());
 
-	    if (line < 31)
-	      line ++;
-	    xx = block->line[line];
-            yy += 2 * hh;
-	    hh = 0;
-	  }
-	  else if (strcasecmp(buf, "CENTER") == 0 ||
-        	   strcasecmp(buf, "P") == 0 ||
-        	   strcasecmp(buf, "H1") == 0 ||
-		   strcasecmp(buf, "H2") == 0 ||
-		   strcasecmp(buf, "H3") == 0 ||
-		   strcasecmp(buf, "H4") == 0 ||
-		   strcasecmp(buf, "H5") == 0 ||
-		   strcasecmp(buf, "H6") == 0 ||
-		   strcasecmp(buf, "UL") == 0 ||
-		   strcasecmp(buf, "OL") == 0 ||
-		   strcasecmp(buf, "DL") == 0 ||
-		   strcasecmp(buf, "LI") == 0 ||
-		   strcasecmp(buf, "DD") == 0 ||
-		   strcasecmp(buf, "DT") == 0 ||
-		   strcasecmp(buf, "PRE") == 0)
-	  {
+            if (line < 31)
+              line ++;
+            xx = block->line[line];
+            yy += 2 * fsize;//hh;
+            hh = 0;
+          }
+          else if (buf.cmp("CENTER") ||
+                   buf.cmp("P") ||
+                   buf.cmp("H1") ||
+                   buf.cmp("H2") ||
+                   buf.cmp("H3") ||
+                   buf.cmp("H4") ||
+                   buf.cmp("H5") ||
+                   buf.cmp("H6") ||
+                   buf.cmp("UL") ||
+                   buf.cmp("OL") ||
+                   buf.cmp("DL") ||
+                   buf.cmp("LI") ||
+                   buf.cmp("DD") ||
+                   buf.cmp("DT") ||
+                   buf.cmp("PRE"))
+          {
             if (tolower(buf[0]) == 'h')
-	    {
-	      font  = FL_HELVETICA_BOLD;
-	      fsize = (uchar)(textsize_ + '7' - buf[1]);
-	    }
-	    else if (strcasecmp(buf, "DT") == 0)
-	    {
-	      font  = (uchar)(textfont_ | FL_ITALIC);
-	      fsize = textsize_;
-	    }
-	    else if (strcasecmp(buf, "PRE") == 0)
-	    {
-	      font  = FL_COURIER;
-	      fsize = textsize_;
-	      pre   = 1;
-	    }
+            {
+              font  = FL_HELVETICA_BOLD;
+              fsize = textsize_ + '7' - buf[1];
+            }
+            else if (buf.cmp("DT"))
+            {
+              font  = textfont_ | FL_ITALIC;
+              fsize = textsize_;
+            }
+            else if (buf.cmp("PRE"))
+            {
+              font  = FL_COURIER;
+              fsize = textsize_;
+              pre   = 1;
+            }
 
-            if (strcasecmp(buf, "LI") == 0)
-	    {
-#ifdef __APPLE_QUARTZ__
-              fl_font(FL_SYMBOL, fsize); 
-              hv_draw("\245", xx - fsize + x() - leftline_, yy + y());
-#else
-              fl_font(FL_SYMBOL, fsize);
-              hv_draw("\267", xx - fsize + x() - leftline_, yy + y());
-#endif
-	    }
+            if (buf.cmp("LI"))
+            {
+              if (block->ol) {
+                char buf[10];
+                snprintf(buf, sizeof(buf), "%d. ", block->ol_num);
+                hv_draw(buf, xx - (int)fl_width(buf) + x() - leftline_, yy + y());
+              }
+              else {
+                // draw bullet (&bull;) Unicode: U+2022, UTF-8 (hex): e2 80 a2
+                unsigned char bullet[4] = { 0xe2, 0x80, 0xa2, 0x00 };
+                hv_draw((char *)bullet, xx - fsize + x() - leftline_, yy + y());
+              }
+            }
 
-	    pushfont(font, fsize);
-	  }
-	  else if (strcasecmp(buf, "A") == 0 &&
-	           get_attr(attrs, "HREF", attr, sizeof(attr)) != NULL)
-	  {
-	    fl_color(linkcolor_);
-	    underline = 1;
-	  }
-	  else if (strcasecmp(buf, "/A") == 0)
-	  {
-	    fl_color(textcolor_);
-	    underline = 0;
-	  }
-	  else if (strcasecmp(buf, "FONT") == 0)
-	  {
-	    if (get_attr(attrs, "COLOR", attr, sizeof(attr)) != NULL) {
-	      fl_color(get_color(attr, textcolor_));
-	    }
+            pushfont(font, fsize);
+            buf.clear();
+          }
+          else if (buf.cmp("A") &&
+                   get_attr(attrs, "HREF", attr, sizeof(attr)) != NULL)
+          {
+            fl_color(linkcolor_);
+            underline = 1;
+          }
+          else if (buf.cmp("/A"))
+          {
+            fl_color(textcolor_);
+            underline = 0;
+          }
+          else if (buf.cmp("FONT"))
+          {
+            if (get_attr(attrs, "COLOR", attr, sizeof(attr)) != NULL) {
+              textcolor_ = get_color(attr, textcolor_);
+            }
 
             if (get_attr(attrs, "FACE", attr, sizeof(attr)) != NULL) {
-	      if (!strncasecmp(attr, "helvetica", 9) ||
-	          !strncasecmp(attr, "arial", 5) ||
-		  !strncasecmp(attr, "sans", 4)) font = FL_HELVETICA;
+              if (!strncasecmp(attr, "helvetica", 9) ||
+                  !strncasecmp(attr, "arial", 5) ||
+                  !strncasecmp(attr, "sans", 4)) font = FL_HELVETICA;
               else if (!strncasecmp(attr, "times", 5) ||
-	               !strncasecmp(attr, "serif", 5)) font = FL_TIMES;
+                       !strncasecmp(attr, "serif", 5)) font = FL_TIMES;
               else if (!strncasecmp(attr, "symbol", 6)) font = FL_SYMBOL;
-	      else font = FL_COURIER;
+              else font = FL_COURIER;
             }
 
             if (get_attr(attrs, "SIZE", attr, sizeof(attr)) != NULL) {
               if (isdigit(attr[0] & 255)) {
-	        // Absolute size
-	        fsize = (int)(textsize_ * pow(1.2, atof(attr) - 3.0));
-	      } else {
-	        // Relative size
-	        fsize = (int)(fsize * pow(1.2, atof(attr) - 3.0));
-	      }
-	    }
+                // Absolute size
+                fsize = (int)(textsize_ * pow(1.2, atof(attr) - 3.0));
+              } else {
+                // Relative size
+                fsize = (int)(fsize * pow(1.2, atof(attr) - 3.0));
+              }
+            }
 
             pushfont(font, fsize);
-	  }
-	  else if (strcasecmp(buf, "/FONT") == 0)
-	  {
-	    fl_color(textcolor_);
-	    popfont(font, fsize);
-	  }
-	  else if (strcasecmp(buf, "U") == 0)
-	    underline = 1;
-	  else if (strcasecmp(buf, "/U") == 0)
-	    underline = 0;
-	  else if (strcasecmp(buf, "B") == 0 ||
-	           strcasecmp(buf, "STRONG") == 0)
-	    pushfont(font |= FL_BOLD, fsize);
-	  else if (strcasecmp(buf, "TD") == 0 ||
-	           strcasecmp(buf, "TH") == 0)
+          }
+          else if (buf.cmp("/FONT"))
           {
-	    int tx, ty, tw, th;
+            popfont(font, fsize, textcolor_);
+          }
+          else if (buf.cmp("U"))
+            underline = 1;
+          else if (buf.cmp("/U"))
+            underline = 0;
+          else if (buf.cmp("B") ||
+                   buf.cmp("STRONG"))
+            pushfont(font |= FL_BOLD, fsize);
+          else if (buf.cmp("TD") ||
+                   buf.cmp("TH"))
+          {
+            int tx, ty, tw, th;
 
-	    if (tolower(buf[1]) == 'h')
-	      pushfont(font |= FL_BOLD, fsize);
-	    else
-	      pushfont(font = textfont_, fsize);
+            if (tolower(buf[1]) == 'h')
+              pushfont(font |= FL_BOLD, fsize);
+            else
+              pushfont(font = textfont_, fsize);
 
             tx = block->x - 4 - leftline_;
-	    ty = block->y - topline_ - fsize - 3;
+            ty = block->y - topline_ - fsize - 3;
             tw = block->w - block->x + 7;
-	    th = block->h + fsize - 5;
+            th = block->h + fsize - 5;
 
             if (tx < 0)
-	    {
-	      tw += tx;
-	      tx  = 0;
-	    }
+            {
+              tw += tx;
+              tx  = 0;
+            }
 
-	    if (ty < 0)
-	    {
-	      th += ty;
-	      ty  = 0;
-	    }
+            if (ty < 0)
+            {
+              th += ty;
+              ty  = 0;
+            }
 
             tx += x();
-	    ty += y();
+            ty += y();
 
             if (block->bgcolor != bgcolor_)
-	    {
-	      fl_color(block->bgcolor);
+            {
+              fl_color(block->bgcolor);
               fl_rectf(tx, ty, tw, th);
               fl_color(textcolor_);
-	    }
+            }
 
             if (block->border)
               fl_rect(tx, ty, tw, th);
-	  }
-	  else if (strcasecmp(buf, "I") == 0 ||
-                   strcasecmp(buf, "EM") == 0)
-	    pushfont(font |= FL_ITALIC, fsize);
-	  else if (strcasecmp(buf, "CODE") == 0 ||
-	           strcasecmp(buf, "TT") == 0)
-	    pushfont(font = FL_COURIER, fsize);
-	  else if (strcasecmp(buf, "KBD") == 0)
-	    pushfont(font = FL_COURIER_BOLD, fsize);
-	  else if (strcasecmp(buf, "VAR") == 0)
-	    pushfont(font = FL_COURIER_ITALIC, fsize);
-	  else if (strcasecmp(buf, "/HEAD") == 0)
+          }
+          else if (buf.cmp("I") ||
+                   buf.cmp("EM"))
+            pushfont(font |= FL_ITALIC, fsize);
+          else if (buf.cmp("CODE") ||
+                   buf.cmp("TT"))
+            pushfont(font = FL_COURIER, fsize);
+          else if (buf.cmp("KBD"))
+            pushfont(font = FL_COURIER_BOLD, fsize);
+          else if (buf.cmp("VAR"))
+            pushfont(font = FL_COURIER_ITALIC, fsize);
+          else if (buf.cmp("/HEAD"))
             head = 0;
-	  else if (strcasecmp(buf, "/H1") == 0 ||
-		   strcasecmp(buf, "/H2") == 0 ||
-		   strcasecmp(buf, "/H3") == 0 ||
-		   strcasecmp(buf, "/H4") == 0 ||
-		   strcasecmp(buf, "/H5") == 0 ||
-		   strcasecmp(buf, "/H6") == 0 ||
-		   strcasecmp(buf, "/B") == 0 ||
-		   strcasecmp(buf, "/STRONG") == 0 ||
-		   strcasecmp(buf, "/I") == 0 ||
-		   strcasecmp(buf, "/EM") == 0 ||
-		   strcasecmp(buf, "/CODE") == 0 ||
-		   strcasecmp(buf, "/TT") == 0 ||
-		   strcasecmp(buf, "/KBD") == 0 ||
-		   strcasecmp(buf, "/VAR") == 0)
-	    popfont(font, fsize);
-	  else if (strcasecmp(buf, "/PRE") == 0)
-	  {
-	    popfont(font, fsize);
-	    pre = 0;
-	  }
-	  else if (strcasecmp(buf, "IMG") == 0)
-	  {
-	    Fl_Shared_Image *img = 0;
-	    int		width, height;
-	    char	wattr[8], hattr[8];
+          else if (buf.cmp("/H1") ||
+                   buf.cmp("/H2") ||
+                   buf.cmp("/H3") ||
+                   buf.cmp("/H4") ||
+                   buf.cmp("/H5") ||
+                   buf.cmp("/H6") ||
+                   buf.cmp("/B") ||
+                   buf.cmp("/STRONG") ||
+                   buf.cmp("/I") ||
+                   buf.cmp("/EM") ||
+                   buf.cmp("/CODE") ||
+                   buf.cmp("/TT") ||
+                   buf.cmp("/KBD") ||
+                   buf.cmp("/VAR"))
+            popfont(font, fsize, fcolor);
+          else if (buf.cmp("/PRE"))
+          {
+            popfont(font, fsize, fcolor);
+            pre = 0;
+          }
+          else if (buf.cmp("IMG"))
+          {
+            Fl_Shared_Image *img = 0;
+            int         width, height;
+            char        wattr[8], hattr[8];
 
 
             get_attr(attrs, "WIDTH", wattr, sizeof(wattr));
             get_attr(attrs, "HEIGHT", hattr, sizeof(hattr));
-	    width  = get_length(wattr);
-	    height = get_length(hattr);
+            width  = get_length(wattr);
+            height = get_length(hattr);
 
-	    if (get_attr(attrs, "SRC", attr, sizeof(attr))) {
-	      img = get_image(attr, width, height);
-	      if (!width) width = img->w();
-	      if (!height) height = img->h();
-	    }
-
-	    if (!width || !height) {
-              if (get_attr(attrs, "ALT", attr, sizeof(attr)) == NULL) {
-	        strcpy(attr, "IMG");
-              }
-	    }
-
-	    ww = width;
-
-	    if (needspace && xx > block->x)
-	      xx += (int)fl_width(' ');
-
-	    if ((xx + ww) > block->w)
-	    {
-	      if (line < 31)
-		line ++;
-
-	      xx = block->line[line];
-	      yy += hh;
-	      hh = 0;
-	    }
-
-	    if (img) {
-	      img->draw(xx + x() - leftline_,
-	                yy + y() - fl_height() + fl_descent() + 2);
-	    }
-
-	    xx += ww;
-	    if ((height + 2) > hh)
-	      hh = height + 2;
-
-	    needspace = 0;
-	  }
-	}
-	else if (*ptr == '\n' && pre)
-	{
-	  *s = '\0';
-	  s = buf;
-
-          hv_draw(buf, xx + x() - leftline_, yy + y());
-
-	  if (line < 31)
-	    line ++;
-	  xx = block->line[line];
-	  yy += hh;
-	  hh = fsize + 2;
-	  needspace = 0;
-
-	  ptr ++;
-          current_pos = ptr-value_;
-	}
-	else if (isspace((*ptr)&255))
-	{
-	  if (pre)
-	  {
-	    if (*ptr == ' ')
-	      *s++ = ' ';
-	    else
-	    {
-	      // Do tabs every 8 columns...
-	      while (((s - buf) & 7))
-	        *s++ = ' ';
+            if (get_attr(attrs, "SRC", attr, sizeof(attr))) {
+              img = get_image(attr, width, height);
+              if (!width) width = img->w();
+              if (!height) height = img->h();
             }
-	  }
+
+            if (!width || !height) {
+              if (get_attr(attrs, "ALT", attr, sizeof(attr)) == NULL) {
+                strcpy(attr, "IMG");
+              }
+            }
+
+            ww = width;
+
+            if (needspace && xx > block->x)
+              xx += (int)fl_width(' ');
+
+            if ((xx + ww) > block->w)
+            {
+              if (line < 31)
+                line ++;
+
+              xx = block->line[line];
+              yy += hh;
+              hh = 0;
+            }
+
+            if (img) {
+              img->draw(xx + x() - leftline_,
+                        yy + y() - fl_height() + fl_descent() + 2);
+            }
+
+            xx += ww;
+            if ((height + 2) > hh)
+              hh = height + 2;
+
+            needspace = 0;
+          }
+          buf.clear();
+        }
+        else if (*ptr == '\n' && pre)
+        {
+          hv_draw(buf.c_str(), xx + x() - leftline_, yy + y());
+          buf.clear();
+
+          if (line < 31)
+            line ++;
+          xx = block->line[line];
+          yy += hh;
+          hh = fsize + 2;
+          needspace = 0;
 
           ptr ++;
-          if (!pre) current_pos = ptr-value_;
-	  needspace = 1;
-	}
-	else if (*ptr == '&')
-	{
-	  ptr ++;
+          current_pos_ = (int) (ptr-value_);
+        }
+        else if (isspace((*ptr)&255))
+        {
+          if (pre)
+          {
+            if (*ptr == ' ')
+              buf += ' ';
+            else
+            {
+              // Do tabs every 8 columns...
+              buf += ' '; // at least one space
+              while (buf.size() & 7)
+                buf += ' ';
+            }
+          }
+
+          ptr ++;
+          if (!pre) current_pos_ = (int) (ptr-value_);
+          needspace = 1;
+        }
+        else if (*ptr == '&') // process html entity
+        {
+          ptr ++;
 
           int qch = quote_char(ptr);
 
-	  if (qch < 0)
-	    *s++ = '&';
-	  else {
-	    *s++ = qch;
-	    ptr = strchr(ptr, ';') + 1;
-	  }
+          if (qch < 0)
+            buf += '&';
+          else {
+            int utf8l = buf.size();
+            buf.add(qch);
+            utf8l = buf.size() - utf8l; // length of added UTF-8 text
+            const char *oldptr = ptr;
+            ptr = strchr(ptr, ';') + 1;
+            entity_extra_length += int(ptr - (oldptr-1)) - utf8l; // extra length between html entity and UTF-8
+          }
 
           if ((fsize + 2) > hh)
-	    hh = fsize + 2;
-	}
-	else
-	{
-	  *s++ = *ptr++;
+            hh = fsize + 2;
+        }
+        else
+        {
+          buf += *ptr++;
 
           if ((fsize + 2) > hh)
-	    hh = fsize + 2;
+            hh = fsize + 2;
         }
       }
 
-      *s = '\0';
-
-      if (s > buf && !pre && !head)
+      if (buf.size() > 0 && !pre && !head)
       {
-	ww = (int)fl_width(buf);
+        ww = buf.width();
 
         if (needspace && xx > block->x)
-	  xx += (int)fl_width(' ');
+          xx += (int)fl_width(' ');
 
-	if ((xx + ww) > block->w)
-	{
-	  if (line < 31)
-	    line ++;
-	  xx = block->line[line];
-	  yy += hh;
-	  hh = 0;
-	}
+        if ((xx + ww) > block->w)
+        {
+          if (line < 31)
+            line ++;
+          xx = block->line[line];
+          yy += hh;
+          hh = 0;
+        }
       }
 
-      if (s > buf && !head)
+      if (buf.size() > 0 && !head)
       {
-        hv_draw(buf, xx + x() - leftline_, yy + y());
-	if (underline) fl_xyline(xx + x() - leftline_, yy + y() + 1,
-	                         xx + x() - leftline_ + ww);
-        current_pos = ptr-value_;
+        hv_draw(buf.c_str(), xx + x() - leftline_, yy + y());
+        if (underline) fl_xyline(xx + x() - leftline_, yy + y() + 1,
+                                 xx + x() - leftline_ + ww);
+        current_pos_ = (int) (ptr-value_);
       }
     }
 
   fl_pop_clip();
+} // draw()
+
+// In an html style text, set the character pointer p, skipping anything from a
+// leading '<' up to and including the closing '>'. If the end of the buffer is
+// reached, the function returns `end`.
+// No need to handle UTF-8 here.
+//
+// \param[in] p pointer to html text, UTF-8 characters possible
+// \param[in] end pointer to the end of the text (need nut be NUL)
+// \return new pointer to text after skipping over '<...>' blocks, or `end`
+//    if NUL was found or a '<...>' block was not closed.
+static const char *vanilla(const char *p, const char *end) {
+  if (*p == '\0' || p >= end) return end;
+  for (;;) {
+    if (*p != '<') {
+      return p;
+    } else {
+      while (*p && p < end && *p != '>') p++;
+    }
+    p++;
+    if (*p == '\0' || p >= end) return end;
+  }
 }
 
+/** Finds the specified string \p s at starting position \p p.
 
-//
-// 'Fl_Help_View::find()' - Find the specified string...
-//
+  The argument \p p and the return value are offsets in Fl_Help_View::value(),
+  counting from 0. If \p p is out of range, 0 is used.
 
-int						// O - Matching position or -1 if not found
-Fl_Help_View::find(const char *s,		// I - String to find
-                   int        p)		// I - Starting position
+  The string comparison is simple but honors some special cases:
+  - the specified string \p s must be in UTF-8 encoding
+  - HTML tags in value() are filtered (not compared as such, they never match)
+  - HTML entities like '\&lt;' or '\&x#20ac;' are converted to Unicode (UTF-8)
+  - ASCII characters (7-bit, \< 0x80) are compared case insensitive
+  - every newline (LF, '\\n') in value() is treated like a single space
+  - all other strings are compared as-is (byte by byte)
+
+  \param[in]  s   search string in UTF-8 encoding
+  \param[in]  p   starting position for search (0,...), Default = 0
+
+  \return the matching position or -1 if not found
+*/
+int                                             // O - Matching position or -1 if not found
+Fl_Help_View::find(const char *s,               // I - String to find
+                   int        p)                // I - Starting position
 {
-  int		i,				// Looping var
-		c;				// Current character
-  Fl_Help_Block	*b;				// Current block
-  const char	*bp,				// Block matching pointer
-		*bs,				// Start of current comparison
-		*sp;				// Search string pointer
+  int           i,                              // Looping var
+                c;                              // Current character
+  Fl_Help_Block *b;                             // Current block
+  const char    *bp,                            // Block matching pointer
+                *bs,                            // Start of current comparison
+                *sp;                            // Search string pointer
 
+  DEBUG_FUNCTION(__LINE__,__FUNCTION__);
 
   // Range check input and value...
   if (!s || !value_) return -1;
 
   if (p < 0 || p >= (int)strlen(value_)) p = 0;
-  else if (p > 0) p ++;
 
   // Look for the string...
-  for (i = nblocks_, b = blocks_; i > 0; i --, b ++) {
+  for (i = nblocks_, b = blocks_; i > 0; i--, b++) {
     if (b->end < (value_ + p))
       continue;
 
-    if (b->start < (value_ + p)) bp = value_ + p;
-    else bp = b->start;
+    if (b->start < (value_ + p))
+      bp = value_ + p;
+    else
+      bp = b->start;
 
-    for (sp = s, bs = bp; *sp && *bp && bp < b->end; bp ++) {
-      if (*bp == '<') {
-        // skip to end of element...
-	while (*bp && bp < b->end && *bp != '>') bp ++;
-	continue;
-      } else if (*bp == '&') {
+    bp = vanilla(bp, b->end);
+    if (bp == b->end)
+      continue;
+
+    for (sp = s, bs = bp; *sp && *bp && bp < b->end; ) {
+      bool is_html_entity = false;
+      if (*bp == '&') {
         // decode HTML entity...
-	if ((c = quote_char(bp + 1)) < 0) c = '&';
-	else bp = strchr(bp + 1, ';') + 1;
-      } else c = *bp;
+        if ((c = quote_char(bp + 1)) < 0) {
+          c = '&';
+        } else {
+          const char *entity_end = strchr(bp + 1, ';');
+          if (entity_end) {
+            is_html_entity = true; // c contains the unicode character
+            bp = entity_end;
+          } else {
+            c = '&';
+          }
+        }
+      } else {
+        c = *bp;
+      }
 
-      if (tolower(*sp) == tolower(c)) sp ++;
-      else {
-        // No match, so reset to start of search...
-	sp = s;
-	bs ++;
-	bp = bs;
+      if (c == '\n') c = ' '; // treat newline as a single space
+
+      // *FIXME* *UTF-8* (A.S. 02/14/2016)
+      // At this point c may be an arbitrary Unicode Code Point corresponding
+      // to a quoted character (see above), i.e. it _can_ be a multi byte
+      // UTF-8 sequence and must be compared with the corresponding
+      // multi byte string in (*sp)...
+      // For instance: "&euro;" == 0x20ac -> 0xe2 0x82 0xac (UTF-8: 3 bytes).
+      // Hint: use fl_utf8encode() [see below]
+
+      int utf_len = 1;
+      if (c > 0x20 && c < 0x80 && tolower(*sp) == tolower(c)) {
+        // Check for ASCII case insensitive match.
+        //printf("%ld text match %c/%c\n", bp-value_, *sp, c);
+        sp++;
+        bp = vanilla(bp+1, b->end);
+      } else if (is_html_entity && fl_utf8decode(sp, NULL, &utf_len) == (unsigned int)c ) {
+        // Check if a &lt; entity ini html matches a UTF-8 character in the
+        // search string.
+        //printf("%ld unicode match 0x%02X 0x%02X\n", bp-value_, *sp, c);
+        sp += utf_len;
+        bp = vanilla(bp+1, b->end);
+      } else if (*sp == c) {
+        // Check if UTF-8 bytes in html and the search string match.
+        //printf("%ld binary match %c/%c\n", bp-value_, *sp, c);
+        sp++;
+        bp = vanilla(bp+1, b->end);
+      } else {
+        // No match, so reset to start of search... .
+        //printf("reset search (%c/%c)\n", *sp, c);
+        sp = s;
+        bp = bs = vanilla(bs+1, b->end);
       }
     }
 
-    if (!*sp) {
-      // Found a match!
+    if (!*sp) { // Found a match!
       topline(b->y - b->h);
-      return (b->end - value_);
+      return int(bs - value_);
     }
   }
 
@@ -1059,53 +1206,53 @@ Fl_Help_View::find(const char *s,		// I - String to find
   return (-1);
 }
 
+/** Formats the help text. */
+void Fl_Help_View::format() {
+  int           i;              // Looping var
+  int           done;           // Are we done yet?
+  Fl_Help_Block *block,         // Current block
+                *cell;          // Current table cell
+  int           cells[MAX_COLUMNS],
+                                // Cells in the current row...
+                row;            // Current table row (block number)
+  const char    *ptr,           // Pointer into block
+                *start,         // Pointer to start of element
+                *attrs;         // Pointer to start of element attributes
+  HV_Edit_Buffer buf;           // Text buffer
+  char          attr[1024],     // Attribute buffer
+                wattr[1024],    // Width attribute buffer
+                hattr[1024],    // Height attribute buffer
+                linkdest[1024]; // Link destination
+  int           xx, yy, ww, hh; // Size of current text fragment
+  int           line;           // Current line in block
+  int           links;          // Links for current line
+  Fl_Font       font;
+  Fl_Fontsize   fsize;          // Current font and size
+  Fl_Color      fcolor;         // Current font color
+  unsigned char border;         // Draw border?
+  int           talign,         // Current alignment
+                newalign,       // New alignment
+                head,           // In the <HEAD> section?
+                pre,            // <PRE> text?
+                needspace;      // Do we need whitespace?
+  int           table_width,    // Width of table
+                table_offset;   // Offset of table
+  int           column,         // Current table column number
+                columns[MAX_COLUMNS];
+                                // Column widths
+  Fl_Color      tc, rc;         // Table/row background color
+  Fl_Boxtype    b = box() ? box() : FL_DOWN_BOX;
+                                // Box to draw...
+  fl_margins    margins;        // Left margin stack...
+  Fl_Int_Vector OL_num;         // if nonnegative, in OL mode and this is the item number
 
-//
-// 'Fl_Help_View::format()' - Format the help text.
-//
+  OL_num.push_back(-1);
 
-void
-Fl_Help_View::format()
-{
-  int		i;		// Looping var
-  int		done;		// Are we done yet?
-  Fl_Help_Block	*block,		// Current block
-		*cell;		// Current table cell
-  int		cells[MAX_COLUMNS],
-				// Cells in the current row...
-		row;		// Current table row (block number)
-  const char	*ptr,		// Pointer into block
-		*start,		// Pointer to start of element
-		*attrs;		// Pointer to start of element attributes
-  char		*s,		// Pointer into buffer
-		buf[1024],	// Text buffer
-		attr[1024],	// Attribute buffer
-		wattr[1024],	// Width attribute buffer
-		hattr[1024],	// Height attribute buffer
-		linkdest[1024];	// Link destination
-  int		xx, yy, ww, hh;	// Size of current text fragment
-  int		line;		// Current line in block
-  int		links;		// Links for current line
-  unsigned char	font, fsize;	// Current font and size
-  unsigned char	border;		// Draw border?
-  int		talign,		// Current alignment
-		newalign,	// New alignment
-		head,		// In the <HEAD> section?
-		pre,		// <PRE> text?
-		needspace;	// Do we need whitespace?
-  int		table_width,	// Width of table
-		table_offset;	// Offset of table
-  int		column,		// Current table column number
-		columns[MAX_COLUMNS];
-				// Column widths
-  Fl_Color	tc, rc;		// Table/row background color
-  Fl_Boxtype	b = box() ? box() : FL_DOWN_BOX;
-				// Box to draw...
-  fl_margins	margins;	// Left margin stack...
-
+  DEBUG_FUNCTION(__LINE__,__FUNCTION__);
 
   // Reset document width...
-  hsize_ = w() - Fl::scrollbar_size() - Fl::box_dw(b);
+  int scrollsize = scrollbar_size_ ? scrollbar_size_ : Fl::scrollbar_size();
+  hsize_ = w() - scrollsize - Fl::box_dw(b);
 
   done = 0;
   while (!done)
@@ -1128,7 +1275,7 @@ Fl_Help_View::format()
       return;
 
     // Setup for formatting...
-    initfont(font, fsize);
+    initfont(font, fsize, fcolor);
 
     line         = 0;
     links        = 0;
@@ -1148,339 +1295,366 @@ Fl_Help_View::format()
     linkdest[0]  = '\0';
     table_offset = 0;
 
-    for (ptr = value_, s = buf; *ptr;)
+    // Html text character loop
+    for (ptr = value_, buf.clear(); *ptr;)
     {
-      if ((*ptr == '<' || isspace((*ptr)&255)) && s > buf)
+      // End of word?
+      if ((*ptr == '<' || isspace((*ptr)&255)) && buf.size() > 0)
       {
-        // Get width...
-        *s = '\0';
-        ww = (int)fl_width(buf);
+        // Get width of word parsed so far...
+        ww = buf.width();
 
-	if (!head && !pre)
-	{
+        if (!head && !pre)
+        {
           // Check width...
           if (ww > hsize_) {
-	    hsize_ = ww;
-	    done   = 0;
-	    break;
-	  }
+            hsize_ = ww;
+            done   = 0;
+            break;
+          }
 
           if (needspace && xx > block->x)
-	    ww += (int)fl_width(' ');
+            ww += (int)fl_width(' ');
 
   //        printf("line = %d, xx = %d, ww = %d, block->x = %d, block->w = %d\n",
-  //	       line, xx, ww, block->x, block->w);
+  //           line, xx, ww, block->x, block->w);
 
           if ((xx + ww) > block->w)
-	  {
+          {
             line     = do_align(block, line, xx, newalign, links);
-	    xx       = block->x;
-	    yy       += hh;
-	    block->h += hh;
-	    hh       = 0;
-	  }
+            xx       = block->x;
+            yy       += hh;
+            block->h += hh;
+            hh       = 0;
+          }
 
           if (linkdest[0])
-	    add_link(linkdest, xx, yy - fsize, ww, fsize);
+            add_link(linkdest, xx, yy - fsize, ww, fsize);
 
-	  xx += ww;
-	  if ((fsize + 2) > hh)
-	    hh = fsize + 2;
+          xx += ww;
+          if ((fsize + 2) > hh)
+            hh = fsize + 2;
 
-	  needspace = 0;
-	}
-	else if (pre)
-	{
+          needspace = 0;
+        }
+        else if (pre)
+        {
           // Add a link as needed...
           if (linkdest[0])
-	    add_link(linkdest, xx, yy - hh, ww, hh);
+            add_link(linkdest, xx, yy - hh, ww, hh);
 
-	  xx += ww;
-	  if ((fsize + 2) > hh)
-	    hh = fsize + 2;
+          xx += ww;
+          if ((fsize + 2) > hh)
+            hh = fsize + 2;
 
           // Handle preformatted text...
-	  while (isspace((*ptr)&255))
-	  {
-	    if (*ptr == '\n')
-	    {
+          while (isspace((*ptr)&255))
+          {
+            if (*ptr == '\n')
+            {
               if (xx > hsize_) break;
 
               line     = do_align(block, line, xx, newalign, links);
               xx       = block->x;
-	      yy       += hh;
-	      block->h += hh;
-	      hh       = fsize + 2;
-	    }
-	    else
+              yy       += hh;
+              block->h += hh;
+              hh       = fsize + 2;
+            }
+            else
               xx += (int)fl_width(' ');
 
             if ((fsize + 2) > hh)
-	      hh = fsize + 2;
+              hh = fsize + 2;
 
             ptr ++;
-	  }
+          }
 
           if (xx > hsize_) {
-	    hsize_ = xx;
-	    done   = 0;
-	    break;
-	  }
+            hsize_ = xx;
+            done   = 0;
+            break;
+          }
 
-	  needspace = 0;
-	}
-	else
-	{
+          needspace = 0;
+        }
+        else
+        {
           // Handle normal text or stuff in the <HEAD> section...
-	  while (isspace((*ptr)&255))
+          while (isspace((*ptr)&255))
             ptr ++;
-	}
+        }
 
-	s = buf;
+        buf.clear();
       }
 
       if (*ptr == '<')
       {
-	start = ptr;
-	ptr ++;
+        // Handle html tags..
+        start = ptr;
+        ptr ++;
 
         if (strncmp(ptr, "!--", 3) == 0)
-	{
-	  // Comment...
-	  ptr += 3;
-	  if ((ptr = strstr(ptr, "-->")) != NULL)
-	  {
-	    ptr += 3;
-	    continue;
-	  }
-	  else
-	    break;
-	}
+        {
+          // Comment...
+          ptr += 3;
+          if ((ptr = strstr(ptr, "-->")) != NULL)
+          {
+            ptr += 3;
+            continue;
+          }
+          else
+            break;
+        }
 
-	while (*ptr && *ptr != '>' && !isspace((*ptr)&255))
-          if (s < (buf + sizeof(buf) - 1))
-            *s++ = *ptr++;
-	  else
-	    ptr ++;
+        while (*ptr && *ptr != '>' && !isspace((*ptr)&255))
+          buf += *ptr++;
 
-	*s = '\0';
-	s = buf;
-
-//        puts(buf);
-
-	attrs = ptr;
-	while (*ptr && *ptr != '>')
+        attrs = ptr;
+        while (*ptr && *ptr != '>')
           ptr ++;
 
-	if (*ptr == '>')
+        if (*ptr == '>')
           ptr ++;
 
-	if (strcasecmp(buf, "HEAD") == 0)
+        if (buf.cmp("HEAD"))
           head = 1;
-	else if (strcasecmp(buf, "/HEAD") == 0)
+        else if (buf.cmp("/HEAD"))
           head = 0;
-	else if (strcasecmp(buf, "TITLE") == 0)
-	{
+        else if (buf.cmp("TITLE"))
+        {
           // Copy the title in the document...
-          for (s = title_;
-	       *ptr != '<' && *ptr && s < (title_ + sizeof(title_) - 1);
-	       *s++ = *ptr++);
+          char *st;
+          for (st = title_;
+               *ptr != '<' && *ptr && st < (title_ + sizeof(title_) - 1);
+               *st++ = *ptr++) {/*empty*/}
 
-	  *s = '\0';
-	  s = buf;
-	}
-	else if (strcasecmp(buf, "A") == 0)
-	{
+          *st = '\0';
+          buf.clear();
+        }
+        else if (buf.cmp("A"))
+        {
           if (get_attr(attrs, "NAME", attr, sizeof(attr)) != NULL)
-	    add_target(attr, yy - fsize - 2);
+            add_target(attr, yy - fsize - 2);
 
-	  if (get_attr(attrs, "HREF", attr, sizeof(attr)) != NULL)
-	    strlcpy(linkdest, attr, sizeof(linkdest));
-	}
-	else if (strcasecmp(buf, "/A") == 0)
+          if (get_attr(attrs, "HREF", attr, sizeof(attr)) != NULL)
+            strlcpy(linkdest, attr, sizeof(linkdest));
+        }
+        else if (buf.cmp("/A"))
           linkdest[0] = '\0';
-	else if (strcasecmp(buf, "BODY") == 0)
-	{
+        else if (buf.cmp("BODY"))
+        {
           bgcolor_   = get_color(get_attr(attrs, "BGCOLOR", attr, sizeof(attr)),
-	                	 color());
+                                 color());
           textcolor_ = get_color(get_attr(attrs, "TEXT", attr, sizeof(attr)),
-	                	 textcolor());
+                                 textcolor());
           linkcolor_ = get_color(get_attr(attrs, "LINK", attr, sizeof(attr)),
-	                	 fl_contrast(FL_BLUE, color()));
-	}
-	else if (strcasecmp(buf, "BR") == 0)
-	{
+                                 fl_contrast(FL_BLUE, color()));
+        }
+        else if (buf.cmp("BR"))
+        {
           line     = do_align(block, line, xx, newalign, links);
           xx       = block->x;
-	  block->h += hh;
+          block->h += hh;
           yy       += hh;
-	  hh       = 0;
-	}
-	else if (strcasecmp(buf, "CENTER") == 0 ||
-        	 strcasecmp(buf, "P") == 0 ||
-        	 strcasecmp(buf, "H1") == 0 ||
-		 strcasecmp(buf, "H2") == 0 ||
-		 strcasecmp(buf, "H3") == 0 ||
-		 strcasecmp(buf, "H4") == 0 ||
-		 strcasecmp(buf, "H5") == 0 ||
-		 strcasecmp(buf, "H6") == 0 ||
-		 strcasecmp(buf, "UL") == 0 ||
-		 strcasecmp(buf, "OL") == 0 ||
-		 strcasecmp(buf, "DL") == 0 ||
-		 strcasecmp(buf, "LI") == 0 ||
-		 strcasecmp(buf, "DD") == 0 ||
-		 strcasecmp(buf, "DT") == 0 ||
-		 strcasecmp(buf, "HR") == 0 ||
-		 strcasecmp(buf, "PRE") == 0 ||
-		 strcasecmp(buf, "TABLE") == 0)
-	{
+          hh       = 0;
+        }
+        else if (buf.cmp("CENTER") ||
+                 buf.cmp("P") ||
+                 buf.cmp("H1") ||
+                 buf.cmp("H2") ||
+                 buf.cmp("H3") ||
+                 buf.cmp("H4") ||
+                 buf.cmp("H5") ||
+                 buf.cmp("H6") ||
+                 buf.cmp("UL") ||
+                 buf.cmp("OL") ||
+                 buf.cmp("DL") ||
+                 buf.cmp("LI") ||
+                 buf.cmp("DD") ||
+                 buf.cmp("DT") ||
+                 buf.cmp("HR") ||
+                 buf.cmp("PRE") ||
+                 buf.cmp("TABLE"))
+        {
           block->end = start;
           line       = do_align(block, line, xx, newalign, links);
-	  newalign   = strcasecmp(buf, "CENTER") ? LEFT : CENTER;
+          newalign   = buf.cmp("CENTER") ? CENTER : LEFT;
           xx         = block->x;
           block->h   += hh;
 
-          if (strcasecmp(buf, "UL") == 0 ||
-	      strcasecmp(buf, "OL") == 0 ||
-	      strcasecmp(buf, "DL") == 0)
+          if (buf.cmp("OL")) {
+            int ol_num = 1;
+            if (get_attr(attrs, "START", attr, sizeof(attr)) != NULL) {
+              errno = 0;
+              char *endptr = 0;
+              ol_num = (int)strtol(attr, &endptr, 10);
+              if (errno || endptr == attr || ol_num < 0)
+                ol_num = 1;
+            }
+            OL_num.push_back(ol_num);
+          }
+          else if (buf.cmp("UL"))
+            OL_num.push_back(-1);
+
+          if (buf.cmp("UL") ||
+              buf.cmp("OL") ||
+              buf.cmp("DL"))
           {
-	    block->h += fsize + 2;
-	    xx       = margins.push(4 * fsize);
-	  }
-          else if (strcasecmp(buf, "TABLE") == 0)
-	  {
-	    if (get_attr(attrs, "BORDER", attr, sizeof(attr)))
-	      border = (uchar)atoi(attr);
-	    else
-	      border = 0;
+            block->h += fsize + 2;
+            xx       = margins.push(4 * fsize);
+          }
+          else if (buf.cmp("TABLE"))
+          {
+            if (get_attr(attrs, "BORDER", attr, sizeof(attr)))
+              border = (uchar)atoi(attr);
+            else
+              border = 0;
 
             tc = rc = get_color(get_attr(attrs, "BGCOLOR", attr, sizeof(attr)), bgcolor_);
 
-	    block->h += fsize + 2;
+            block->h += fsize + 2;
 
             format_table(&table_width, columns, start);
 
             if ((xx + table_width) > hsize_) {
 #ifdef DEBUG
               printf("xx=%d, table_width=%d, hsize_=%d\n", xx, table_width,
-	             hsize_);
+                     hsize_);
 #endif // DEBUG
-	      hsize_ = xx + table_width;
-	      done   = 0;
-	      break;
-	    }
+              hsize_ = xx + table_width;
+              done   = 0;
+              break;
+            }
 
             switch (get_align(attrs, talign))
-	    {
-	      default :
-	          table_offset = 0;
-	          break;
+            {
+              default :
+                  table_offset = 0;
+                  break;
 
-	      case CENTER :
-	          table_offset = (hsize_ - table_width) / 2 - textsize_;
-	          break;
+              case CENTER :
+                  table_offset = (hsize_ - table_width) / 2 - textsize_;
+                  break;
 
-	      case RIGHT :
-	          table_offset = hsize_ - table_width - textsize_;
-	          break;
-	    }
+              case RIGHT :
+                  table_offset = hsize_ - table_width - textsize_;
+                  break;
+            }
 
-	    column = 0;
-	  }
+            column = 0;
+          }
 
           if (tolower(buf[0]) == 'h' && isdigit(buf[1]))
-	  {
-	    font  = FL_HELVETICA_BOLD;
-	    fsize = (uchar)(textsize_ + '7' - buf[1]);
-	  }
-	  else if (strcasecmp(buf, "DT") == 0)
-	  {
-	    font  = (uchar)(textfont_ | FL_ITALIC);
-	    fsize = textsize_;
-	  }
-	  else if (strcasecmp(buf, "PRE") == 0)
-	  {
-	    font  = FL_COURIER;
-	    fsize = textsize_;
-	    pre   = 1;
-	  }
-	  else
-	  {
-	    font  = textfont_;
-	    fsize = textsize_;
-	  }
+          {
+            font  = FL_HELVETICA_BOLD;
+            fsize = textsize_ + '7' - buf[1];
+          }
+          else if (buf.cmp("DT"))
+          {
+            font  = textfont_ | FL_ITALIC;
+            fsize = textsize_;
+          }
+          else if (buf.cmp("PRE"))
+          {
+            font  = FL_COURIER;
+            fsize = textsize_;
+            pre   = 1;
+          }
+          else
+          {
+            font  = textfont_;
+            fsize = textsize_;
+          }
 
-	  pushfont(font, fsize);
+          pushfont(font, fsize);
 
           yy = block->y + block->h;
           hh = 0;
 
           if ((tolower(buf[0]) == 'h' && isdigit(buf[1])) ||
-	      strcasecmp(buf, "DD") == 0 ||
-	      strcasecmp(buf, "DT") == 0 ||
-	      strcasecmp(buf, "P") == 0)
+              buf.cmp("DD") ||
+              buf.cmp("DT") ||
+              buf.cmp("P"))
             yy += fsize + 2;
-	  else if (strcasecmp(buf, "HR") == 0)
-	  {
-	    hh += 2 * fsize;
-	    yy += fsize;
-	  }
+          else if (buf.cmp("HR"))
+          {
+            hh += 2 * fsize;
+            yy += fsize;
+          }
 
           if (row)
-	    block = add_block(start, xx, yy, block->w, 0);
-	  else
-	    block = add_block(start, xx, yy, hsize_, 0);
+            block = add_block(start, xx, yy, block->w, 0);
+          else
+            block = add_block(start, xx, yy, hsize_, 0);
 
-	  needspace = 0;
-	  line      = 0;
+          if (buf.cmp("LI")) {
+            block->ol = 0;
+            if (OL_num.size() && OL_num.back()>=0) {
+              block->ol = 1;
+              block->ol_num = (int)OL_num.back();
+              int nnum = OL_num.pop_back() + 1;
+              OL_num.push_back(nnum);
+            }
+          }
 
-	  if (strcasecmp(buf, "CENTER") == 0)
-	    newalign = talign = CENTER;
-	  else
-	    newalign = get_align(attrs, talign);
-	}
-	else if (strcasecmp(buf, "/CENTER") == 0 ||
-		 strcasecmp(buf, "/P") == 0 ||
-		 strcasecmp(buf, "/H1") == 0 ||
-		 strcasecmp(buf, "/H2") == 0 ||
-		 strcasecmp(buf, "/H3") == 0 ||
-		 strcasecmp(buf, "/H4") == 0 ||
-		 strcasecmp(buf, "/H5") == 0 ||
-		 strcasecmp(buf, "/H6") == 0 ||
-		 strcasecmp(buf, "/PRE") == 0 ||
-		 strcasecmp(buf, "/UL") == 0 ||
-		 strcasecmp(buf, "/OL") == 0 ||
-		 strcasecmp(buf, "/DL") == 0 ||
-		 strcasecmp(buf, "/TABLE") == 0)
-	{
+          needspace = 0;
+          line      = 0;
+
+          if (buf.cmp("CENTER"))
+            newalign = talign = CENTER;
+          else
+            newalign = get_align(attrs, talign);
+        }
+        else if (buf.cmp("/CENTER") ||
+                 buf.cmp("/P") ||
+                 buf.cmp("/H1") ||
+                 buf.cmp("/H2") ||
+                 buf.cmp("/H3") ||
+                 buf.cmp("/H4") ||
+                 buf.cmp("/H5") ||
+                 buf.cmp("/H6") ||
+                 buf.cmp("/PRE") ||
+                 buf.cmp("/UL") ||
+                 buf.cmp("/OL") ||
+                 buf.cmp("/DL") ||
+                 buf.cmp("/TABLE"))
+        {
           line       = do_align(block, line, xx, newalign, links);
           xx         = block->x;
           block->end = ptr;
 
-          if (strcasecmp(buf, "/UL") == 0 ||
-	      strcasecmp(buf, "/OL") == 0 ||
-	      strcasecmp(buf, "/DL") == 0)
-	  {
-	    xx       = margins.pop();
-	    block->h += fsize + 2;
-	  }
-          else if (strcasecmp(buf, "/TABLE") == 0) 
+          if (buf.cmp("/OL") ||
+              buf.cmp("/UL")) {
+            if (OL_num.size()) OL_num.pop_back();
+          }
+
+          if (buf.cmp("/UL") ||
+              buf.cmp("/OL") ||
+              buf.cmp("/DL"))
           {
-	    block->h += fsize + 2;
+            xx       = margins.pop();
+            block->h += fsize + 2;
+          }
+          else if (buf.cmp("/TABLE"))
+          {
+            block->h += fsize + 2;
             xx       = margins.current();
           }
-	  else if (strcasecmp(buf, "/PRE") == 0)
-	  {
-	    pre = 0;
-	    hh  = 0;
-	  }
-	  else if (strcasecmp(buf, "/CENTER") == 0)
-	    talign = LEFT;
+          else if (buf.cmp("/PRE"))
+          {
+            pre = 0;
+            hh  = 0;
+          }
+          else if (buf.cmp("/CENTER"))
+            talign = LEFT;
 
-          popfont(font, fsize);
+          popfont(font, fsize, fcolor);
 
+          //#if defined(__GNUC__)
+          //#warning FIXME this isspace & 255 test will probably not work on a utf8 stream... And we use it everywhere!
+          //#endif /*__GNUC__*/
           while (isspace((*ptr)&255))
-	    ptr ++;
+            ptr ++;
 
           block->h += hh;
           yy       += hh;
@@ -1489,323 +1663,323 @@ Fl_Help_View::format()
             yy += fsize + 2;
 
           if (row)
-	    block = add_block(ptr, xx, yy, block->w, 0);
-	  else
-	    block = add_block(ptr, xx, yy, hsize_, 0);
+            block = add_block(ptr, xx, yy, block->w, 0);
+          else
+            block = add_block(ptr, xx, yy, hsize_, 0);
 
-	  needspace = 0;
-	  hh        = 0;
-	  line      = 0;
-	  newalign  = talign;
-	}
-	else if (strcasecmp(buf, "TR") == 0)
-	{
+          needspace = 0;
+          hh        = 0;
+          line      = 0;
+          newalign  = talign;
+        }
+        else if (buf.cmp("TR"))
+        {
           block->end = start;
           line       = do_align(block, line, xx, newalign, links);
           xx         = block->x;
           block->h   += hh;
 
           if (row)
-	  {
+          {
             yy = blocks_[row].y + blocks_[row].h;
 
-	    for (cell = blocks_ + row + 1; cell <= block; cell ++)
-	      if ((cell->y + cell->h) > yy)
-		yy = cell->y + cell->h;
+            for (cell = blocks_ + row + 1; cell <= block; cell ++)
+              if ((cell->y + cell->h) > yy)
+                yy = cell->y + cell->h;
 
             block = blocks_ + row;
 
             block->h = yy - block->y + 2;
 
-	    for (i = 0; i < column; i ++)
-	      if (cells[i])
-	      {
-		cell = blocks_ + cells[i];
-		cell->h = block->h;
-	      }
-	  }
+            for (i = 0; i < column; i ++)
+              if (cells[i])
+              {
+                cell = blocks_ + cells[i];
+                cell->h = block->h;
+              }
+          }
 
           memset(cells, 0, sizeof(cells));
 
-	  yy        = block->y + block->h - 4;
-	  hh        = 0;
+          yy        = block->y + block->h - 4;
+          hh        = 0;
           block     = add_block(start, xx, yy, hsize_, 0);
-	  row       = block - blocks_;
-	  needspace = 0;
-	  column    = 0;
-	  line      = 0;
+          row       = (int) (block - blocks_);
+          needspace = 0;
+          column    = 0;
+          line      = 0;
 
           rc = get_color(get_attr(attrs, "BGCOLOR", attr, sizeof(attr)), tc);
-	}
-	else if (strcasecmp(buf, "/TR") == 0 && row)
-	{
+        }
+        else if (buf.cmp("/TR") && row)
+        {
           line       = do_align(block, line, xx, newalign, links);
           block->end = start;
-	  block->h   += hh;
-	  talign     = LEFT;
+          block->h   += hh;
+          talign     = LEFT;
 
           xx = blocks_[row].x;
           yy = blocks_[row].y + blocks_[row].h;
 
-	  for (cell = blocks_ + row + 1; cell <= block; cell ++)
-	    if ((cell->y + cell->h) > yy)
-	      yy = cell->y + cell->h;
+          for (cell = blocks_ + row + 1; cell <= block; cell ++)
+            if ((cell->y + cell->h) > yy)
+              yy = cell->y + cell->h;
 
           block = blocks_ + row;
 
           block->h = yy - block->y + 2;
 
-	  for (i = 0; i < column; i ++)
-	    if (cells[i])
-	    {
-	      cell = blocks_ + cells[i];
-	      cell->h = block->h;
-	    }
+          for (i = 0; i < column; i ++)
+            if (cells[i])
+            {
+              cell = blocks_ + cells[i];
+              cell->h = block->h;
+            }
 
-	  yy        = block->y + block->h /*- 4*/;
+          yy        = block->y + block->h /*- 4*/;
           block     = add_block(start, xx, yy, hsize_, 0);
-	  needspace = 0;
-	  row       = 0;
-	  line      = 0;
-	}
-	else if ((strcasecmp(buf, "TD") == 0 ||
-                  strcasecmp(buf, "TH") == 0) && row)
-	{
-          int	colspan;		// COLSPAN attribute
+          needspace = 0;
+          row       = 0;
+          line      = 0;
+        }
+        else if ((buf.cmp("TD") ||
+                  buf.cmp("TH")) && row)
+        {
+          int   colspan;                // COLSPAN attribute
 
 
           line       = do_align(block, line, xx, newalign, links);
           block->end = start;
-	  block->h   += hh;
+          block->h   += hh;
 
-          if (strcasecmp(buf, "TH") == 0)
-	    font = (uchar)(textfont_ | FL_BOLD);
-	  else
-	    font = textfont_;
+          if (buf.cmp("TH"))
+            font = textfont_ | FL_BOLD;
+          else
+            font = textfont_;
 
           fsize = textsize_;
 
           xx = blocks_[row].x + fsize + 3 + table_offset;
-	  for (i = 0; i < column; i ++)
-	    xx += columns[i] + 6;
+          for (i = 0; i < column; i ++)
+            xx += columns[i] + 6;
 
           margins.push(xx - margins.current());
 
           if (get_attr(attrs, "COLSPAN", attr, sizeof(attr)) != NULL)
-	    colspan = atoi(attr);
-	  else
-	    colspan = 1;
+            colspan = atoi(attr);
+          else
+            colspan = 1;
 
           for (i = 0, ww = -6; i < colspan; i ++)
-	    ww += columns[column + i] + 6;
+            ww += columns[column + i] + 6;
 
           if (block->end == block->start && nblocks_ > 1)
-	  {
-	    nblocks_ --;
-	    block --;
-	  }
+          {
+            nblocks_ --;
+            block --;
+          }
 
-	  pushfont(font, fsize);
+          pushfont(font, fsize);
 
-	  yy        = blocks_[row].y;
-	  hh        = 0;
+          yy        = blocks_[row].y;
+          hh        = 0;
           block     = add_block(start, xx, yy, xx + ww, 0, border);
-	  needspace = 0;
-	  line      = 0;
-	  newalign  = get_align(attrs, tolower(buf[1]) == 'h' ? CENTER : LEFT);
-	  talign    = newalign;
+          needspace = 0;
+          line      = 0;
+          newalign  = get_align(attrs, tolower(buf[1]) == 'h' ? CENTER : LEFT);
+          talign    = newalign;
 
-          cells[column] = block - blocks_;
+          cells[column] = (int) (block - blocks_);
 
-	  column += colspan;
+          column += colspan;
 
           block->bgcolor = get_color(get_attr(attrs, "BGCOLOR", attr,
-	                                      sizeof(attr)), rc);
-	}
-	else if ((strcasecmp(buf, "/TD") == 0 ||
-                  strcasecmp(buf, "/TH") == 0) && row)
-	{
+                                              sizeof(attr)), rc);
+        }
+        else if ((buf.cmp("/TD") ||
+                  buf.cmp("/TH")) && row)
+        {
           line = do_align(block, line, xx, newalign, links);
-          popfont(font, fsize);
-	  xx = margins.pop();
-	  talign = LEFT;
-	}
-	else if (strcasecmp(buf, "FONT") == 0)
-	{
+          popfont(font, fsize, fcolor);
+          xx = margins.pop();
+          talign = LEFT;
+        }
+        else if (buf.cmp("FONT"))
+        {
           if (get_attr(attrs, "FACE", attr, sizeof(attr)) != NULL) {
-	    if (!strncasecmp(attr, "helvetica", 9) ||
-	        !strncasecmp(attr, "arial", 5) ||
-		!strncasecmp(attr, "sans", 4)) font = FL_HELVETICA;
+            if (!strncasecmp(attr, "helvetica", 9) ||
+                !strncasecmp(attr, "arial", 5) ||
+                !strncasecmp(attr, "sans", 4)) font = FL_HELVETICA;
             else if (!strncasecmp(attr, "times", 5) ||
-	             !strncasecmp(attr, "serif", 5)) font = FL_TIMES;
+                     !strncasecmp(attr, "serif", 5)) font = FL_TIMES;
             else if (!strncasecmp(attr, "symbol", 6)) font = FL_SYMBOL;
-	    else font = FL_COURIER;
+            else font = FL_COURIER;
           }
 
           if (get_attr(attrs, "SIZE", attr, sizeof(attr)) != NULL) {
             if (isdigit(attr[0] & 255)) {
-	      // Absolute size
-	      fsize = (int)(textsize_ * pow(1.2, atoi(attr) - 3.0));
-	    } else {
-	      // Relative size
-	      fsize = (int)(fsize * pow(1.2, atoi(attr)));
-	    }
-	  }
+              // Absolute size
+              fsize = (int)(textsize_ * pow(1.2, atoi(attr) - 3.0));
+            } else {
+              // Relative size
+              fsize = (int)(fsize * pow(1.2, atoi(attr)));
+            }
+          }
 
           pushfont(font, fsize);
-	}
-	else if (strcasecmp(buf, "/FONT") == 0)
-	  popfont(font, fsize);
-	else if (strcasecmp(buf, "B") == 0 ||
-        	 strcasecmp(buf, "STRONG") == 0)
-	  pushfont(font |= FL_BOLD, fsize);
-	else if (strcasecmp(buf, "I") == 0 ||
-        	 strcasecmp(buf, "EM") == 0)
-	  pushfont(font |= FL_ITALIC, fsize);
-	else if (strcasecmp(buf, "CODE") == 0 ||
-	         strcasecmp(buf, "TT") == 0)
-	  pushfont(font = FL_COURIER, fsize);
-	else if (strcasecmp(buf, "KBD") == 0)
-	  pushfont(font = FL_COURIER_BOLD, fsize);
-	else if (strcasecmp(buf, "VAR") == 0)
-	  pushfont(font = FL_COURIER_ITALIC, fsize);
-	else if (strcasecmp(buf, "/B") == 0 ||
-		 strcasecmp(buf, "/STRONG") == 0 ||
-		 strcasecmp(buf, "/I") == 0 ||
-		 strcasecmp(buf, "/EM") == 0 ||
-		 strcasecmp(buf, "/CODE") == 0 ||
-		 strcasecmp(buf, "/TT") == 0 ||
-		 strcasecmp(buf, "/KBD") == 0 ||
-		 strcasecmp(buf, "/VAR") == 0)
-	  popfont(font, fsize);
-	else if (strcasecmp(buf, "IMG") == 0)
-	{
-	  Fl_Shared_Image	*img = 0;
-	  int		width;
-	  int		height;
+        }
+        else if (buf.cmp("/FONT"))
+          popfont(font, fsize, fcolor);
+        else if (buf.cmp("B") ||
+                 buf.cmp("STRONG"))
+          pushfont(font |= FL_BOLD, fsize);
+        else if (buf.cmp("I") ||
+                 buf.cmp("EM"))
+          pushfont(font |= FL_ITALIC, fsize);
+        else if (buf.cmp("CODE") ||
+                 buf.cmp("TT"))
+          pushfont(font = FL_COURIER, fsize);
+        else if (buf.cmp("KBD"))
+          pushfont(font = FL_COURIER_BOLD, fsize);
+        else if (buf.cmp("VAR"))
+          pushfont(font = FL_COURIER_ITALIC, fsize);
+        else if (buf.cmp("/B") ||
+                 buf.cmp("/STRONG") ||
+                 buf.cmp("/I") ||
+                 buf.cmp("/EM") ||
+                 buf.cmp("/CODE") ||
+                 buf.cmp("/TT") ||
+                 buf.cmp("/KBD") ||
+                 buf.cmp("/VAR"))
+          popfont(font, fsize, fcolor);
+        else if (buf.cmp("IMG"))
+        {
+          Fl_Shared_Image       *img = 0;
+          int           width;
+          int           height;
 
 
           get_attr(attrs, "WIDTH", wattr, sizeof(wattr));
           get_attr(attrs, "HEIGHT", hattr, sizeof(hattr));
-	  width  = get_length(wattr);
-	  height = get_length(hattr);
+          width  = get_length(wattr);
+          height = get_length(hattr);
 
-	  if (get_attr(attrs, "SRC", attr, sizeof(attr))) {
-	    img    = get_image(attr, width, height);
-	    width  = img->w();
-	    height = img->h();
-	  }
+          if (get_attr(attrs, "SRC", attr, sizeof(attr))) {
+            img    = get_image(attr, width, height);
+            width  = img->w();
+            height = img->h();
+          }
 
-	  ww = width;
+          ww = width;
 
           if (ww > hsize_) {
-	    hsize_ = ww;
-	    done   = 0;
-	    break;
-	  }
+            hsize_ = ww;
+            done   = 0;
+            break;
+          }
 
-	  if (needspace && xx > block->x)
-	    ww += (int)fl_width(' ');
+          if (needspace && xx > block->x)
+            ww += (int)fl_width(' ');
 
-	  if ((xx + ww) > block->w)
-	  {
-	    line     = do_align(block, line, xx, newalign, links);
-	    xx       = block->x;
-	    yy       += hh;
-	    block->h += hh;
-	    hh       = 0;
-	  }
+          if ((xx + ww) > block->w)
+          {
+            line     = do_align(block, line, xx, newalign, links);
+            xx       = block->x;
+            yy       += hh;
+            block->h += hh;
+            hh       = 0;
+          }
 
-	  if (linkdest[0])
-	    add_link(linkdest, xx, yy - height, ww, height);
+          if (linkdest[0])
+            add_link(linkdest, xx, yy-fsize, ww, height);
 
-	  xx += ww;
-	  if ((height + 2) > hh)
-	    hh = height + 2;
+          xx += ww;
+          if ((height + 2) > hh)
+            hh = height + 2;
 
-	  needspace = 0;
-	}
+          needspace = 0;
+        }
+        buf.clear();
       }
       else if (*ptr == '\n' && pre)
       {
-	if (linkdest[0])
-	  add_link(linkdest, xx, yy - hh, ww, hh);
+        if (linkdest[0])
+          add_link(linkdest, xx, yy - hh, ww, hh);
 
         if (xx > hsize_) {
-	  hsize_ = xx;
+          hsize_ = xx;
           done   = 0;
-	  break;
-	}
+          break;
+        }
 
-	line      = do_align(block, line, xx, newalign, links);
-	xx        = block->x;
-	yy        += hh;
-	block->h  += hh;
-	needspace = 0;
-	ptr ++;
+        line      = do_align(block, line, xx, newalign, links);
+        xx        = block->x;
+        yy        += hh;
+        block->h  += hh;
+        needspace = 0;
+        ptr ++;
       }
       else if (isspace((*ptr)&255))
       {
-	needspace = 1;
-
-	ptr ++;
+        needspace = 1;
+        if ( pre ) {
+          xx += (int)fl_width(' ');
+        }
+        ptr ++;
       }
-      else if (*ptr == '&' && s < (buf + sizeof(buf) - 1))
+      else if (*ptr == '&')
       {
-	ptr ++;
+        // Handle html '&' codes, eg. "&amp;"
+        ptr ++;
 
         int qch = quote_char(ptr);
 
-	if (qch < 0)
-	  *s++ = '&';
-	else {
-	  *s++ = qch;
-	  ptr = strchr(ptr, ';') + 1;
-	}
+        if (qch < 0)
+          buf += '&';
+        else {
+          buf.add(qch);
+          ptr = strchr(ptr, ';') + 1;
+        }
 
-	if ((fsize + 2) > hh)
+        if ((fsize + 2) > hh)
           hh = fsize + 2;
       }
       else
       {
-	if (s < (buf + sizeof(buf) - 1))
-          *s++ = *ptr++;
-	else
-          ptr ++;
+        buf += *ptr++;
 
-	if ((fsize + 2) > hh)
+        if ((fsize + 2) > hh)
           hh = fsize + 2;
       }
     }
 
-    if (s > buf && !head)
+    if (buf.size() > 0 && !head)
     {
-      *s = '\0';
-      ww = (int)fl_width(buf);
+      ww = buf.width();
 
   //    printf("line = %d, xx = %d, ww = %d, block->x = %d, block->w = %d\n",
-  //	   line, xx, ww, block->x, block->w);
+  //       line, xx, ww, block->x, block->w);
 
       if (ww > hsize_) {
-	hsize_ = ww;
-	done   = 0;
-	break;
+        hsize_ = ww;
+        done   = 0;
+        break;
       }
 
       if (needspace && xx > block->x)
-	ww += (int)fl_width(' ');
+        ww += (int)fl_width(' ');
 
       if ((xx + ww) > block->w)
       {
-	line     = do_align(block, line, xx, newalign, links);
-	xx       = block->x;
-	yy       += hh;
-	block->h += hh;
-	hh       = 0;
+        line     = do_align(block, line, xx, newalign, links);
+        xx       = block->x;
+        yy       += hh;
+        block->h += hh;
+        hh       = 0;
       }
 
       if (linkdest[0])
-	add_link(linkdest, xx, yy - fsize, ww, fsize);
+        add_link(linkdest, xx, yy - fsize, ww, fsize);
 
       xx += ww;
     }
@@ -1824,7 +1998,7 @@ Fl_Help_View::format()
 
   int dx = Fl::box_dw(b) - Fl::box_dx(b);
   int dy = Fl::box_dh(b) - Fl::box_dy(b);
-  int ss = Fl::scrollbar_size();
+  int ss = scrollbar_size_ ? scrollbar_size_ : Fl::scrollbar_size();
   int dw = Fl::box_dw(b) + ss;
   int dh = Fl::box_dh(b);
 
@@ -1871,35 +2045,34 @@ Fl_Help_View::format()
 }
 
 
-//
-// 'Fl_Help_View::format_table()' - Format a table...
-//
-
+/** Formats a table */
 void
-Fl_Help_View::format_table(int        *table_width,	// O - Total table width
-                           int        *columns,		// O - Column widths
-	                   const char *table)		// I - Pointer to start of table
+Fl_Help_View::format_table(int        *table_width,     // O - Total table width
+                           int        *columns,         // O - Column widths
+                           const char *table)           // I - Pointer to start of table
 {
-  int		column,					// Current column
-		num_columns,				// Number of columns
-		colspan,				// COLSPAN attribute
-		width,					// Current width
-		temp_width,				// Temporary width
-		max_width,				// Maximum width
-		incell,					// In a table cell?
-		pre,					// <PRE> text?
-		needspace;				// Need whitespace?
-  char		*s,					// Pointer into buffer
-		buf[1024],				// Text buffer
-		attr[1024],				// Other attribute
-		wattr[1024],				// WIDTH attribute
-		hattr[1024];				// HEIGHT attribute
-  const char	*ptr,					// Pointer into table
-		*attrs,					// Pointer to attributes
-		*start;					// Start of element
-  int		minwidths[MAX_COLUMNS];			// Minimum widths for each column
-  unsigned char	font, fsize;				// Current font and size
+  int           column,                                 // Current column
+                num_columns,                            // Number of columns
+                colspan,                                // COLSPAN attribute
+                width,                                  // Current width
+                temp_width,                             // Temporary width
+                max_width,                              // Maximum width
+                incell,                                 // In a table cell?
+                pre,                                    // <PRE> text?
+                needspace;                              // Need whitespace?
+  HV_Edit_Buffer buf;                                   // Text buffer
+  char          attr[1024],                             // Other attribute
+                wattr[1024],                            // WIDTH attribute
+                hattr[1024];                            // HEIGHT attribute
+  const char    *ptr,                                   // Pointer into table
+                *attrs,                                 // Pointer to attributes
+                *start;                                 // Start of element
+  int           minwidths[MAX_COLUMNS];                 // Minimum widths for each column
+  Fl_Font       font;
+  Fl_Fontsize   fsize;                                  // Current font and size
+  Fl_Color      fcolor;                                 // Currrent font color
 
+  DEBUG_FUNCTION(__LINE__,__FUNCTION__);
 
   // Clear widths...
   *table_width = 0;
@@ -1914,24 +2087,22 @@ Fl_Help_View::format_table(int        *table_width,	// O - Total table width
   max_width   = 0;
   pre         = 0;
   needspace   = 0;
-  font        = fonts_[nfonts_][0];
-  fsize       = fonts_[nfonts_][1];
+  fstack_.top(font, fsize, fcolor);
 
   // Scan the table...
-  for (ptr = table, column = -1, width = 0, s = buf, incell = 0; *ptr;)
+  for (ptr = table, column = -1, width = 0, incell = 0; *ptr;)
   {
-    if ((*ptr == '<' || isspace((*ptr)&255)) && s > buf && incell)
+    if ((*ptr == '<' || isspace((*ptr)&255)) && buf.size() > 0 && incell)
     {
       // Check width...
       if (needspace)
       {
-        *s++      = ' ';
-	needspace = 0;
+        buf += ' ';
+        needspace = 0;
       }
 
-      *s         = '\0';
-      temp_width = (int)fl_width(buf);
-      s          = buf;
+      temp_width = buf.width();
+      buf.clear();
 
       if (temp_width > minwidths[column])
         minwidths[column] = temp_width;
@@ -1946,14 +2117,8 @@ Fl_Help_View::format_table(int        *table_width,	// O - Total table width
     {
       start = ptr;
 
-      for (s = buf, ptr ++; *ptr && *ptr != '>' && !isspace((*ptr)&255);)
-        if (s < (buf + sizeof(buf) - 1))
-          *s++ = *ptr++;
-	else
-	  ptr ++;
-
-      *s = '\0';
-      s = buf;
+      for (buf.clear(), ptr ++; *ptr && *ptr != '>' && !isspace((*ptr)&255);)
+        buf += *ptr++;
 
       attrs = ptr;
       while (*ptr && *ptr != '>')
@@ -1962,222 +2127,223 @@ Fl_Help_View::format_table(int        *table_width,	// O - Total table width
       if (*ptr == '>')
         ptr ++;
 
-      if (strcasecmp(buf, "BR") == 0 ||
-	  strcasecmp(buf, "HR") == 0)
+      if (buf.cmp("BR") ||
+          buf.cmp("HR"))
       {
         width     = 0;
-	needspace = 0;
+        needspace = 0;
       }
-      else if (strcasecmp(buf, "TABLE") == 0 && start > table)
+      else if (buf.cmp("TABLE") && start > table)
         break;
-      else if (strcasecmp(buf, "CENTER") == 0 ||
-               strcasecmp(buf, "P") == 0 ||
-               strcasecmp(buf, "H1") == 0 ||
-	       strcasecmp(buf, "H2") == 0 ||
-	       strcasecmp(buf, "H3") == 0 ||
-	       strcasecmp(buf, "H4") == 0 ||
-	       strcasecmp(buf, "H5") == 0 ||
-	       strcasecmp(buf, "H6") == 0 ||
-	       strcasecmp(buf, "UL") == 0 ||
-	       strcasecmp(buf, "OL") == 0 ||
-	       strcasecmp(buf, "DL") == 0 ||
-	       strcasecmp(buf, "LI") == 0 ||
-	       strcasecmp(buf, "DD") == 0 ||
-	       strcasecmp(buf, "DT") == 0 ||
-	       strcasecmp(buf, "PRE") == 0)
+      else if (buf.cmp("CENTER") ||
+               buf.cmp("P") ||
+               buf.cmp("H1") ||
+               buf.cmp("H2") ||
+               buf.cmp("H3") ||
+               buf.cmp("H4") ||
+               buf.cmp("H5") ||
+               buf.cmp("H6") ||
+               buf.cmp("UL") ||
+               buf.cmp("OL") ||
+               buf.cmp("DL") ||
+               buf.cmp("LI") ||
+               buf.cmp("DD") ||
+               buf.cmp("DT") ||
+               buf.cmp("PRE"))
       {
         width     = 0;
-	needspace = 0;
+        needspace = 0;
 
         if (tolower(buf[0]) == 'h' && isdigit(buf[1]))
-	{
-	  font  = FL_HELVETICA_BOLD;
-	  fsize = (uchar)(textsize_ + '7' - buf[1]);
-	}
-	else if (strcasecmp(buf, "DT") == 0)
-	{
-	  font  = (uchar)(textfont_ | FL_ITALIC);
-	  fsize = textsize_;
-	}
-	else if (strcasecmp(buf, "PRE") == 0)
-	{
-	  font  = FL_COURIER;
-	  fsize = textsize_;
-	  pre   = 1;
-	}
-	else if (strcasecmp(buf, "LI") == 0)
-	{
-	  width  += 4 * fsize;
-	  font   = textfont_;
-	  fsize  = textsize_;
-	}
-	else
-	{
-	  font  = textfont_;
-	  fsize = textsize_;
-	}
+        {
+          font  = FL_HELVETICA_BOLD;
+          fsize = textsize_ + '7' - buf[1];
+        }
+        else if (buf.cmp("DT"))
+        {
+          font  = textfont_ | FL_ITALIC;
+          fsize = textsize_;
+        }
+        else if (buf.cmp("PRE"))
+        {
+          font  = FL_COURIER;
+          fsize = textsize_;
+          pre   = 1;
+        }
+        else if (buf.cmp("LI"))
+        {
+          width  += 4 * fsize;
+          font   = textfont_;
+          fsize  = textsize_;
+        }
+        else
+        {
+          font  = textfont_;
+          fsize = textsize_;
+        }
 
-	pushfont(font, fsize);
+        pushfont(font, fsize);
       }
-      else if (strcasecmp(buf, "/CENTER") == 0 ||
-	       strcasecmp(buf, "/P") == 0 ||
-	       strcasecmp(buf, "/H1") == 0 ||
-	       strcasecmp(buf, "/H2") == 0 ||
-	       strcasecmp(buf, "/H3") == 0 ||
-	       strcasecmp(buf, "/H4") == 0 ||
-	       strcasecmp(buf, "/H5") == 0 ||
-	       strcasecmp(buf, "/H6") == 0 ||
-	       strcasecmp(buf, "/PRE") == 0 ||
-	       strcasecmp(buf, "/UL") == 0 ||
-	       strcasecmp(buf, "/OL") == 0 ||
-	       strcasecmp(buf, "/DL") == 0)
+      else if (buf.cmp("/CENTER") ||
+               buf.cmp("/P") ||
+               buf.cmp("/H1") ||
+               buf.cmp("/H2") ||
+               buf.cmp("/H3") ||
+               buf.cmp("/H4") ||
+               buf.cmp("/H5") ||
+               buf.cmp("/H6") ||
+               buf.cmp("/PRE") ||
+               buf.cmp("/UL") ||
+               buf.cmp("/OL") ||
+               buf.cmp("/DL"))
       {
         width     = 0;
-	needspace = 0;
+        needspace = 0;
 
-        popfont(font, fsize);
+        popfont(font, fsize, fcolor);
       }
-      else if (strcasecmp(buf, "TR") == 0 || strcasecmp(buf, "/TR") == 0 ||
-               strcasecmp(buf, "/TABLE") == 0)
+      else if (buf.cmp("TR") || buf.cmp("/TR") ||
+               buf.cmp("/TABLE"))
       {
 //        printf("%s column = %d, colspan = %d, num_columns = %d\n",
-//	       buf, column, colspan, num_columns);
+//             buf.c_str(), column, colspan, num_columns);
 
         if (column >= 0)
-	{
-	  // This is a hack to support COLSPAN...
-	  max_width /= colspan;
+        {
+          // This is a hack to support COLSPAN...
+          max_width /= colspan;
 
-	  while (colspan > 0)
-	  {
-	    if (max_width > columns[column])
-	      columns[column] = max_width;
+          while (colspan > 0)
+          {
+            if (max_width > columns[column])
+              columns[column] = max_width;
 
-	    column ++;
-	    colspan --;
-	  }
-	}
+            column ++;
+            colspan --;
+          }
+        }
 
-	if (strcasecmp(buf, "/TABLE") == 0)
-	  break;
+        if (buf.cmp("/TABLE"))
+          break;
 
-	needspace = 0;
-	column    = -1;
-	width     = 0;
-	max_width = 0;
-	incell    = 0;
+        needspace = 0;
+        column    = -1;
+        width     = 0;
+        max_width = 0;
+        incell    = 0;
       }
-      else if (strcasecmp(buf, "TD") == 0 ||
-               strcasecmp(buf, "TH") == 0)
+      else if (buf.cmp("TD") ||
+               buf.cmp("TH"))
       {
 //        printf("BEFORE column = %d, colspan = %d, num_columns = %d\n",
-//	       column, colspan, num_columns);
+//             column, colspan, num_columns);
 
         if (column >= 0)
-	{
-	  // This is a hack to support COLSPAN...
-	  max_width /= colspan;
+        {
+          // This is a hack to support COLSPAN...
+          max_width /= colspan;
 
-	  while (colspan > 0)
-	  {
-	    if (max_width > columns[column])
-	      columns[column] = max_width;
+          while (colspan > 0)
+          {
+            if (max_width > columns[column])
+              columns[column] = max_width;
 
-	    column ++;
-	    colspan --;
-	  }
-	}
-	else
-	  column ++;
+            column ++;
+            colspan --;
+          }
+        }
+        else
+          column ++;
 
         if (get_attr(attrs, "COLSPAN", attr, sizeof(attr)) != NULL)
-	  colspan = atoi(attr);
-	else
-	  colspan = 1;
+          colspan = atoi(attr);
+        else
+          colspan = 1;
 
 //        printf("AFTER column = %d, colspan = %d, num_columns = %d\n",
-//	       column, colspan, num_columns);
+//             column, colspan, num_columns);
 
         if ((column + colspan) >= num_columns)
-	  num_columns = column + colspan;
+          num_columns = column + colspan;
 
-	needspace = 0;
-	width     = 0;
-	incell    = 1;
+        needspace = 0;
+        width     = 0;
+        incell    = 1;
 
-        if (strcasecmp(buf, "TH") == 0)
-	  font = (uchar)(textfont_ | FL_BOLD);
-	else
-	  font = textfont_;
+        if (buf.cmp("TH"))
+          font = textfont_ | FL_BOLD;
+        else
+          font = textfont_;
 
         fsize = textsize_;
 
-	pushfont(font, fsize);
+        pushfont(font, fsize);
 
         if (get_attr(attrs, "WIDTH", attr, sizeof(attr)) != NULL)
-	  max_width = get_length(attr);
-	else
-	  max_width = 0;
+          max_width = get_length(attr);
+        else
+          max_width = 0;
 
 //        printf("max_width = %d\n", max_width);
       }
-      else if (strcasecmp(buf, "/TD") == 0 ||
-               strcasecmp(buf, "/TH") == 0)
+      else if (buf.cmp("/TD") ||
+               buf.cmp("/TH"))
       {
-	incell = 0;
-        popfont(font, fsize);
+        incell = 0;
+        popfont(font, fsize, fcolor);
       }
-      else if (strcasecmp(buf, "B") == 0 ||
-               strcasecmp(buf, "STRONG") == 0)
-	pushfont(font |= FL_BOLD, fsize);
-      else if (strcasecmp(buf, "I") == 0 ||
-               strcasecmp(buf, "EM") == 0)
-	pushfont(font |= FL_ITALIC, fsize);
-      else if (strcasecmp(buf, "CODE") == 0 ||
-               strcasecmp(buf, "TT") == 0)
-	pushfont(font = FL_COURIER, fsize);
-      else if (strcasecmp(buf, "KBD") == 0)
-	pushfont(font = FL_COURIER_BOLD, fsize);
-      else if (strcasecmp(buf, "VAR") == 0)
-	pushfont(font = FL_COURIER_ITALIC, fsize);
-      else if (strcasecmp(buf, "/B") == 0 ||
-	       strcasecmp(buf, "/STRONG") == 0 ||
-	       strcasecmp(buf, "/I") == 0 ||
-	       strcasecmp(buf, "/EM") == 0 ||
-	       strcasecmp(buf, "/CODE") == 0 ||
-	       strcasecmp(buf, "/TT") == 0 ||
-	       strcasecmp(buf, "/KBD") == 0 ||
-	       strcasecmp(buf, "/VAR") == 0)
-	popfont(font, fsize);
-      else if (strcasecmp(buf, "IMG") == 0 && incell)
+      else if (buf.cmp("B") ||
+               buf.cmp("STRONG"))
+        pushfont(font |= FL_BOLD, fsize);
+      else if (buf.cmp("I") ||
+               buf.cmp("EM"))
+        pushfont(font |= FL_ITALIC, fsize);
+      else if (buf.cmp("CODE") ||
+               buf.cmp("TT"))
+        pushfont(font = FL_COURIER, fsize);
+      else if (buf.cmp("KBD"))
+        pushfont(font = FL_COURIER_BOLD, fsize);
+      else if (buf.cmp("VAR"))
+        pushfont(font = FL_COURIER_ITALIC, fsize);
+      else if (buf.cmp("/B") ||
+               buf.cmp("/STRONG") ||
+               buf.cmp("/I") ||
+               buf.cmp("/EM") ||
+               buf.cmp("/CODE") ||
+               buf.cmp("/TT") ||
+               buf.cmp("/KBD") ||
+               buf.cmp("/VAR"))
+        popfont(font, fsize, fcolor);
+      else if (buf.cmp("IMG") && incell)
       {
-	Fl_Shared_Image	*img = 0;
-	int		iwidth, iheight;
+        Fl_Shared_Image *img = 0;
+        int             iwidth, iheight;
 
 
         get_attr(attrs, "WIDTH", wattr, sizeof(wattr));
         get_attr(attrs, "HEIGHT", hattr, sizeof(hattr));
-	iwidth  = get_length(wattr);
-	iheight = get_length(hattr);
+        iwidth  = get_length(wattr);
+        iheight = get_length(hattr);
 
         if (get_attr(attrs, "SRC", attr, sizeof(attr))) {
-	  img     = get_image(attr, iwidth, iheight);
-	  iwidth  = img->w();
-	  iheight = img->h();
-	}
+          img     = get_image(attr, iwidth, iheight);
+          iwidth  = img->w();
+          iheight = img->h();
+        }
 
-	if (iwidth > minwidths[column])
+        if (iwidth > minwidths[column])
           minwidths[column] = iwidth;
 
         width += iwidth;
-	if (needspace)
-	  width += (int)fl_width(' ');
+        if (needspace)
+          width += (int)fl_width(' ');
 
-	if (width > max_width)
+        if (width > max_width)
           max_width = width;
 
-	needspace = 0;
+        needspace = 0;
       }
+      buf.clear();
     }
     else if (*ptr == '\n' && pre)
     {
@@ -2191,25 +2357,22 @@ Fl_Help_View::format_table(int        *table_width,	// O - Total table width
 
       ptr ++;
     }
-    else if (*ptr == '&' && s < (buf + sizeof(buf) - 1))
+    else if (*ptr == '&' )
     {
       ptr ++;
 
       int qch = quote_char(ptr);
 
       if (qch < 0)
-	*s++ = '&';
+        buf += '&';
       else {
-	*s++ = qch;
-	ptr = strchr(ptr, ';') + 1;
+        buf.add(qch);
+        ptr = strchr(ptr, ';') + 1;
       }
     }
     else
     {
-      if (s < (buf + sizeof(buf) - 1))
-        *s++ = *ptr++;
-      else
-        ptr ++;
+      buf += *ptr++;
     }
   }
 
@@ -2241,8 +2404,9 @@ Fl_Help_View::format_table(int        *table_width,	// O - Total table width
   // Adjust the width if needed...
   int scale_width = *table_width;
 
+  int scrollsize = scrollbar_size_ ? scrollbar_size_ : Fl::scrollbar_size();
   if (scale_width == 0) {
-    if (width > (hsize_ - Fl::scrollbar_size())) scale_width = hsize_ - Fl::scrollbar_size();
+    if (width > (hsize_ - scrollsize)) scale_width = hsize_ - scrollsize;
     else scale_width = width;
   }
 
@@ -2281,9 +2445,9 @@ Fl_Help_View::format_table(int        *table_width,	// O - Total table width
 
     if (width > 0) {
       for (column = 0; column < num_columns; column ++) {
-	columns[column] -= minwidths[column];
-	columns[column] = scale_width * columns[column] / width;
-	columns[column] += minwidths[column];
+        columns[column] -= minwidths[column];
+        columns[column] = scale_width * columns[column] / width;
+        columns[column] += minwidths[column];
       }
     }
 
@@ -2303,77 +2467,70 @@ Fl_Help_View::format_table(int        *table_width,	// O - Total table width
 }
 
 
-//
-// 'Fl_Help_View::free_data()' - Free memory used for the document.
-//
-
+/** Frees memory used for the document. */
 void
 Fl_Help_View::free_data() {
   // Release all images...
   if (value_) {
-    const char	*ptr,		// Pointer into block
-		*attrs;		// Pointer to start of element attributes
-    char	*s,		// Pointer into buffer
-		buf[1024],	// Text buffer
-		attr[1024],	// Attribute buffer
-		wattr[1024],	// Width attribute buffer
-		hattr[1024];	// Height attribute buffer
+    const char  *ptr,           // Pointer into block
+                *attrs;         // Pointer to start of element attributes
+    HV_Edit_Buffer buf;         // Text buffer
+    char        attr[1024],     // Attribute buffer
+                wattr[1024],    // Width attribute buffer
+                hattr[1024];    // Height attribute buffer
+
+    DEBUG_FUNCTION(__LINE__,__FUNCTION__);
 
     for (ptr = value_; *ptr;)
     {
       if (*ptr == '<')
       {
-	ptr ++;
+        ptr ++;
 
         if (strncmp(ptr, "!--", 3) == 0)
-	{
-	  // Comment...
-	  ptr += 3;
-	  if ((ptr = strstr(ptr, "-->")) != NULL)
-	  {
-	    ptr += 3;
-	    continue;
-	  }
-	  else
-	    break;
-	}
+        {
+          // Comment...
+          ptr += 3;
+          if ((ptr = strstr(ptr, "-->")) != NULL)
+          {
+            ptr += 3;
+            continue;
+          }
+          else
+            break;
+        }
 
-        s = buf;
+        buf.clear();
 
-	while (*ptr && *ptr != '>' && !isspace((*ptr)&255))
-          if (s < (buf + sizeof(buf) - 1))
-            *s++ = *ptr++;
-	  else
-	    ptr ++;
+        while (*ptr && *ptr != '>' && !isspace((*ptr)&255))
+          buf += *ptr++;
 
-	*s = '\0';
-
-	attrs = ptr;
-	while (*ptr && *ptr != '>')
+        attrs = ptr;
+        while (*ptr && *ptr != '>')
           ptr ++;
 
-	if (*ptr == '>')
+        if (*ptr == '>')
           ptr ++;
 
-	if (strcasecmp(buf, "IMG") == 0)
-	{
-	  Fl_Shared_Image	*img;
-	  int		width;
-	  int		height;
+        if (buf.cmp("IMG"))
+        {
+          Fl_Shared_Image       *img;
+          int           width;
+          int           height;
 
           get_attr(attrs, "WIDTH", wattr, sizeof(wattr));
           get_attr(attrs, "HEIGHT", hattr, sizeof(hattr));
-	  width  = get_length(wattr);
-	  height = get_length(hattr);
+          width  = get_length(wattr);
+          height = get_length(hattr);
 
-	  if (get_attr(attrs, "SRC", attr, sizeof(attr))) {
-	    // Get and release the image to free it from memory...
-	    img = get_image(attr, width, height);
-	    if ((void*)img != &broken_image) {
-	      img->release();
-	    }
-	  }
-	}
+          if (get_attr(attrs, "SRC", attr, sizeof(attr))) {
+            // Get and release the image to free it from memory...
+            img = get_image(attr, width, height);
+            if ((void*)img != &broken_image) {
+              img->release();
+            }
+          }
+        }
       }
       else
         ptr ++;
@@ -2407,17 +2564,14 @@ Fl_Help_View::free_data() {
     ntargets_ = 0;
     targets_  = 0;
   }
-}
+} // free_data()
 
-//
-// 'Fl_Help_View::get_align()' - Get an alignment attribute.
-//
-
-int					// O - Alignment
-Fl_Help_View::get_align(const char *p,	// I - Pointer to start of attrs
-                        int        a)	// I - Default alignment
+/** Gets an alignment attribute. */
+int                                     // O - Alignment
+Fl_Help_View::get_align(const char *p,  // I - Pointer to start of attrs
+                        int        a)   // I - Default alignment
 {
-  char	buf[255];			// Alignment value
+  char  buf[255];                       // Alignment value
 
 
   if (get_attr(p, "ALIGN", buf, sizeof(buf)) == NULL)
@@ -2432,19 +2586,16 @@ Fl_Help_View::get_align(const char *p,	// I - Pointer to start of attrs
 }
 
 
-//
-// 'Fl_Help_View::get_attr()' - Get an attribute value from the string.
-//
-
-const char *					// O - Pointer to buf or NULL
-Fl_Help_View::get_attr(const char *p,		// I - Pointer to start of attributes
-                      const char *n,		// I - Name of attribute
-		      char       *buf,		// O - Buffer for attribute value
-		      int        bufsize)	// I - Size of buffer
+/** Gets an attribute value from the string. */
+const char *                                    // O - Pointer to buf or NULL
+Fl_Help_View::get_attr(const char *p,           // I - Pointer to start of attributes
+                      const char *n,            // I - Name of attribute
+                      char       *buf,          // O - Buffer for attribute value
+                      int        bufsize)       // I - Size of buffer
 {
-  char	name[255],				// Name from string
-	*ptr,					// Pointer into name or value
-	quote;					// Quote
+  char  name[255],                              // Name from string
+        *ptr,                                   // Pointer into name or value
+        quote;                                  // Quote
 
 
   buf[0] = '\0';
@@ -2474,22 +2625,22 @@ Fl_Help_View::get_attr(const char *p,		// I - Pointer to start of attributes
 
       for (ptr = buf; *p && !isspace((*p)&255) && *p != '>';)
         if (*p == '\'' || *p == '\"')
-	{
-	  quote = *p++;
+        {
+          quote = *p++;
 
-	  while (*p && *p != quote)
-	    if ((ptr - buf + 1) < bufsize)
-	      *ptr++ = *p++;
-	    else
-	      p ++;
+          while (*p && *p != quote)
+            if ((ptr - buf + 1) < bufsize)
+              *ptr++ = *p++;
+            else
+              p ++;
 
           if (*p == quote)
-	    p ++;
-	}
-	else if ((ptr - buf + 1) < bufsize)
-	  *ptr++ = *p++;
-	else
-	  p ++;
+            p ++;
+        }
+        else if ((ptr - buf + 1) < bufsize)
+          *ptr++ = *p++;
+        else
+          p ++;
 
       *ptr = '\0';
     }
@@ -2507,39 +2658,36 @@ Fl_Help_View::get_attr(const char *p,		// I - Pointer to start of attributes
 }
 
 
-//
-// 'Fl_Help_View::get_color()' - Get a color attribute.
-//
-
-Fl_Color				// O - Color value
-Fl_Help_View::get_color(const char *n,	// I - Color name
-                        Fl_Color   c)	// I - Default color value
+/** Gets a color attribute. */
+Fl_Color                                // O - Color value
+Fl_Help_View::get_color(const char *n,  // I - Color name
+                        Fl_Color   c)   // I - Default color value
 {
-  int	i;				// Looping var
-  int	rgb, r, g, b;			// RGB values
-  static const struct {			// Color name table
+  int   i;                              // Looping var
+  int   rgb, r, g, b;                   // RGB values
+  static const struct {                 // Color name table
     const char *name;
     int r, g, b;
-  }	colors[] = {
-    { "black",		0x00, 0x00, 0x00 },
-    { "red",		0xff, 0x00, 0x00 },
-    { "green",		0x00, 0x80, 0x00 },
-    { "yellow",		0xff, 0xff, 0x00 },
-    { "blue",		0x00, 0x00, 0xff },
-    { "magenta",	0xff, 0x00, 0xff },
-    { "fuchsia",	0xff, 0x00, 0xff },
-    { "cyan",		0x00, 0xff, 0xff },
-    { "aqua",		0x00, 0xff, 0xff },
-    { "white",		0xff, 0xff, 0xff },
-    { "gray",		0x80, 0x80, 0x80 },
-    { "grey",		0x80, 0x80, 0x80 },
-    { "lime",		0x00, 0xff, 0x00 },
-    { "maroon",		0x80, 0x00, 0x00 },
-    { "navy",		0x00, 0x00, 0x80 },
-    { "olive",		0x80, 0x80, 0x00 },
-    { "purple",		0x80, 0x00, 0x80 },
-    { "silver",		0xc0, 0xc0, 0xc0 },
-    { "teal",		0x00, 0x80, 0x80 }
+  }     colors[] = {
+    { "black",          0x00, 0x00, 0x00 },
+    { "red",            0xff, 0x00, 0x00 },
+    { "green",          0x00, 0x80, 0x00 },
+    { "yellow",         0xff, 0xff, 0x00 },
+    { "blue",           0x00, 0x00, 0xff },
+    { "magenta",        0xff, 0x00, 0xff },
+    { "fuchsia",        0xff, 0x00, 0xff },
+    { "cyan",           0x00, 0xff, 0xff },
+    { "aqua",           0x00, 0xff, 0xff },
+    { "white",          0xff, 0xff, 0xff },
+    { "gray",           0x80, 0x80, 0x80 },
+    { "grey",           0x80, 0x80, 0x80 },
+    { "lime",           0x00, 0xff, 0x00 },
+    { "maroon",         0x80, 0x00, 0x00 },
+    { "navy",           0x00, 0x00, 0x80 },
+    { "olive",          0x80, 0x80, 0x00 },
+    { "purple",         0x80, 0x00, 0x80 },
+    { "silver",         0xc0, 0xc0, 0xc0 },
+    { "teal",           0x00, 0x80, 0x80 }
   };
 
 
@@ -2547,7 +2695,7 @@ Fl_Help_View::get_color(const char *n,	// I - Color name
 
   if (n[0] == '#') {
     // Do hex color lookup
-    rgb = strtol(n + 1, NULL, 16);
+    rgb = (int)strtol(n + 1, NULL, 16);
 
     if (strlen(n) > 4) {
       r = rgb >> 16;
@@ -2569,17 +2717,13 @@ Fl_Help_View::get_color(const char *n,	// I - Color name
 }
 
 
-//
-// 'Fl_Help_View::get_image()' - Get an inline image.
-//
-
 /** Gets an inline image.
 
   The image reference count is maintained accordingly, such that
   the image can be released exactly once when the document is closed.
 
   \return a pointer to a cached Fl_Shared_Image, if the image can be loaded,
-  	  otherwise a pointer to an internal Fl_Pixmap (broken_image).
+          otherwise a pointer to an internal Fl_Pixmap (broken_image).
 
   \todo Fl_Help_View::get_image() returns a pointer to the internal
   Fl_Pixmap broken_image, but this is _not_ compatible with the
@@ -2617,18 +2761,19 @@ Fl_Help_View::get_color(const char *n,	// I - Color name
 
 Fl_Shared_Image *
 Fl_Help_View::get_image(const char *name, int W, int H) {
-  const char	*localname;		// Local filename
-  char		dir[1024];		// Current directory
-  char		temp[1024],		// Temporary filename
-		*tempptr;		// Pointer into temporary name
-  Fl_Shared_Image *ip;			// Image pointer...
+  const char    *localname;             // Local filename
+  char          dir[FL_PATH_MAX];       // Current directory
+  char          temp[3 * FL_PATH_MAX],  // Temporary filename
+                *tempptr;               // Pointer into temporary name
+  Fl_Shared_Image *ip;                  // Image pointer...
 
   // See if the image can be found...
   if (strchr(directory_, ':') != NULL && strchr(name, ':') == NULL) {
     if (name[0] == '/') {
       strlcpy(temp, directory_, sizeof(temp));
-
-      if ((tempptr = strrchr(strchr(directory_, ':') + 3, '/')) != NULL) {
+      // the following search (strchr) will always succeed, see condition above!
+      tempptr = skip_bytes(strchr(temp, ':'), 3);
+      if ((tempptr = strrchr(tempptr, '/')) != NULL) {
         strlcpy(tempptr, name, sizeof(temp) - (tempptr - temp));
       } else {
         strlcat(temp, name, sizeof(temp));
@@ -2642,7 +2787,7 @@ Fl_Help_View::get_image(const char *name, int W, int H) {
   } else if (name[0] != '/' && strchr(name, ':') == NULL) {
     if (directory_[0]) snprintf(temp, sizeof(temp), "%s/%s", directory_, name);
     else {
-      getcwd(dir, sizeof(dir));
+      fl_getcwd(dir, sizeof(dir));
       snprintf(temp, sizeof(temp), "file:%s/%s", dir, name);
     }
 
@@ -2671,13 +2816,10 @@ Fl_Help_View::get_image(const char *name, int W, int H) {
 }
 
 
-//
-// 'Fl_Help_View::get_length()' - Get a length value, either absolute or %.
-//
-
+/** Gets a length value, either absolute or %. */
 int
-Fl_Help_View::get_length(const char *l) {	// I - Value
-  int	val;					// Integer value
+Fl_Help_View::get_length(const char *l) {       // I - Value
+  int   val;                                    // Integer value
 
   if (!l[0]) return 0;
 
@@ -2686,7 +2828,8 @@ Fl_Help_View::get_length(const char *l) {	// I - Value
     if (val > 100) val = 100;
     else if (val < 0) val = 0;
 
-    val = val * (hsize_ - Fl::scrollbar_size()) / 100;
+    int scrollsize = scrollbar_size_ ? scrollbar_size_ : Fl::scrollbar_size();
+    val = val * (hsize_ - scrollsize) / 100;
   }
 
   return val;
@@ -2695,8 +2838,8 @@ Fl_Help_View::get_length(const char *l) {	// I - Value
 
 Fl_Help_Link *Fl_Help_View::find_link(int xx, int yy)
 {
-  int		i;
-  Fl_Help_Link	*linkp;
+  int           i;
+  Fl_Help_Link  *linkp;
   for (i = nlinks_, linkp = links_; i > 0; i --, linkp ++) {
     if (xx >= linkp->x && xx < linkp->w &&
         yy >= linkp->y && yy < linkp->h)
@@ -2707,7 +2850,7 @@ Fl_Help_Link *Fl_Help_View::find_link(int xx, int yy)
 
 void Fl_Help_View::follow_link(Fl_Help_Link *linkp)
 {
-  char		target[32];	// Current target
+  char          target[32];     // Current target
 
   clear_selection();
 
@@ -2717,9 +2860,9 @@ void Fl_Help_View::follow_link(Fl_Help_Link *linkp)
 
   if (strcmp(linkp->filename, filename_) != 0 && linkp->filename[0])
   {
-    char	dir[1024];	// Current directory
-    char	temp[1024],	// Temporary filename
-	      *tempptr;	// Pointer into temporary filename
+    char        dir[FL_PATH_MAX];       // Current directory
+    char        temp[3 * FL_PATH_MAX],  // Temporary filename
+               *tempptr;                // Pointer into temporary filename
 
 
     if (strchr(directory_, ':') != NULL &&
@@ -2728,22 +2871,25 @@ void Fl_Help_View::follow_link(Fl_Help_Link *linkp)
       if (linkp->filename[0] == '/')
       {
         strlcpy(temp, directory_, sizeof(temp));
-        if ((tempptr = strrchr(strchr(directory_, ':') + 3, '/')) != NULL)
-	  strlcpy(tempptr, linkp->filename, sizeof(temp));
-	else
-	  strlcat(temp, linkp->filename, sizeof(temp));
+        // the following search (strchr) will always succeed, see condition above!
+        tempptr = skip_bytes(strchr(temp, ':'), 3);
+        if ((tempptr = strrchr(tempptr, '/')) != NULL) {
+          strlcpy(tempptr, linkp->filename, sizeof(temp) - (tempptr - temp));
+        } else {
+          strlcat(temp, linkp->filename, sizeof(temp));
+        }
       }
       else
-	snprintf(temp, sizeof(temp), "%s/%s", directory_, linkp->filename);
+        snprintf(temp, sizeof(temp), "%s/%s", directory_, linkp->filename);
     }
     else if (linkp->filename[0] != '/' && strchr(linkp->filename, ':') == NULL)
     {
       if (directory_[0])
-	snprintf(temp, sizeof(temp), "%s/%s", directory_, linkp->filename);
+        snprintf(temp, sizeof(temp), "%s/%s", directory_, linkp->filename);
       else
       {
-	getcwd(dir, sizeof(dir));
-	snprintf(temp, sizeof(temp), "file:%s/%s", dir, linkp->filename);
+          fl_getcwd(dir, sizeof(dir));
+        snprintf(temp, sizeof(temp), "file:%s/%s", dir, linkp->filename);
       }
     }
     else
@@ -2751,7 +2897,7 @@ void Fl_Help_View::follow_link(Fl_Help_Link *linkp)
 
     if (linkp->name[0])
       snprintf(temp + strlen(temp), sizeof(temp) - strlen(temp), "#%s",
-	       linkp->name);
+               linkp->name);
 
     load(temp);
   }
@@ -2763,28 +2909,29 @@ void Fl_Help_View::follow_link(Fl_Help_Link *linkp)
   leftline(0);
 }
 
+/** Removes the current text selection. */
 void Fl_Help_View::clear_selection()
 {
-  if (current_view==this)
+  if (current_view_==this)
     clear_global_selection();
 }
-
+/** Selects all the text in the view. */
 void Fl_Help_View::select_all()
 {
   clear_global_selection();
   if (!value_) return;
-  current_view = this;
-  selection_drag_last = selection_last = strlen(value_);
-  selected = 1;
+  current_view_ = this;
+  selection_drag_last_ = selection_last_ = (int) strlen(value_);
+  selected_ = 1;
 }
 
 void Fl_Help_View::clear_global_selection()
 {
-  if (selected) redraw();
-  selection_push_first = selection_push_last = 0;
-  selection_drag_first = selection_drag_last = 0;
-  selection_first = selection_last = 0;
-  selected = 0;
+  if (selected_) redraw();
+  selection_push_first_ = selection_push_last_ = 0;
+  selection_drag_first_ = selection_drag_last_ = 0;
+  selection_first_ = selection_last_ = 0;
+  selected_ = 0;
 }
 
 char Fl_Help_View::begin_selection()
@@ -2793,18 +2940,18 @@ char Fl_Help_View::begin_selection()
 
   if (!fl_help_view_buffer) fl_help_view_buffer = fl_create_offscreen(1, 1);
 
-  mouse_x = Fl::event_x();
-  mouse_y = Fl::event_y();
-  draw_mode = 1;
+  mouse_x_ = Fl::event_x();
+  mouse_y_ = Fl::event_y();
+  draw_mode_ = 1;
 
-    current_view = this;
+    current_view_ = this;
     fl_begin_offscreen(fl_help_view_buffer);
     draw();
     fl_end_offscreen();
 
-  draw_mode = 0;
+  draw_mode_ = 0;
 
-  if (selection_push_last) return 1;
+  if (selection_push_last_) return 1;
   else return 0;
 }
 
@@ -2813,38 +2960,44 @@ char Fl_Help_View::extend_selection()
   if (Fl::event_is_click())
     return 0;
 
-//  printf("old selection_first=%d, selection_last=%d\n",
-//         selection_first, selection_last);
+  // Give this widget the focus during the selection process. This will
+  // deselect other text selection and make sure, we receive the Copy
+  // keyboard shortcut.
+  if (Fl::focus()!=this)
+    Fl::focus(this);
 
-  int sf = selection_first, sl = selection_last;
+//  printf("old selection_first_=%d, selection_last_=%d\n",
+//         selection_first_, selection_last_);
 
-  selected = 1;
-  mouse_x = Fl::event_x();
-  mouse_y = Fl::event_y();
-  draw_mode = 2;
+  int sf = selection_first_, sl = selection_last_;
+
+  selected_ = 1;
+  mouse_x_ = Fl::event_x();
+  mouse_y_ = Fl::event_y();
+  draw_mode_ = 2;
 
     fl_begin_offscreen(fl_help_view_buffer);
     draw();
     fl_end_offscreen();
 
-  draw_mode = 0;
+  draw_mode_ = 0;
 
-  if (selection_push_first < selection_drag_first) {
-    selection_first = selection_push_first;
+  if (selection_push_first_ < selection_drag_first_) {
+    selection_first_ = selection_push_first_;
   } else {
-    selection_first = selection_drag_first;
+    selection_first_ = selection_drag_first_;
   }
 
-  if (selection_push_last > selection_drag_last) {
-    selection_last = selection_push_last;
+  if (selection_push_last_ > selection_drag_last_) {
+    selection_last_ = selection_push_last_;
   } else {
-    selection_last = selection_drag_last;
+    selection_last_ = selection_drag_last_;
   }
 
-//  printf("new selection_first=%d, selection_last=%d\n",
-//         selection_first, selection_last);
+//  printf("new selection_first_=%d, selection_last_=%d\n",
+//         selection_first_, selection_last_);
 
-  if (sf!=selection_first || sl!=selection_last) {
+  if (sf!=selection_first_ || sl!=selection_last_) {
 //    puts("REDRAW!!!\n");
     return 1;
   } else {
@@ -2873,28 +3026,30 @@ static unsigned int command(const char *cmd)
 
 #define CMD(a, b, c, d) ((a<<24)|(b<<16)|(c<<8)|d)
 
-void Fl_Help_View::end_selection(int clipboard) 
+void Fl_Help_View::end_selection(int clipboard)
 {
-  if (!selected || current_view!=this) 
+  if (!selected_ || current_view_!=this)
     return;
-  // convert the select part of our html text into some kind of somewhat readable ASCII
+  // convert the select part of our html text into some kind of somewhat readable UTF-8
   // and store it in the selection buffer
-  char p = 0, pre = 0;;
-  int len = strlen(value_);
+  int p = 0;
+  char pre = 0;
+  int len = (int) strlen(value_);
   char *txt = (char*)malloc(len+1), *d = txt;
   const char *s = value_, *cmd, *src;
   for (;;) {
-    char c = *s++;
+    int c = (*s++) & 0xff;
     if (c==0) break;
     if (c=='<') { // begin of some html command. Skip until we find a '>'
       cmd = s;
       for (;;) {
-        c = *s++;
+        c = (*s++) & 0xff;
         if (c==0 || c=='>') break;
       }
       if (c==0) break;
       // do something with this command... .
-      // the replacement string must not be longer that the command itself plus '<' and '>'
+      // The replacement string must not be longer than the command
+      // itself plus '<' and '>'
       src = 0;
       switch (command(cmd)) {
         case CMD('p','r','e', 0 ): pre = 1; break;
@@ -2920,47 +3075,74 @@ void Fl_Help_View::end_selection(int clipboard)
         case CMD('d','t', 0 , 0 ): src = "\n "; break;
         case CMD('d','d', 0 , 0 ): src = "\n - "; break;
       }
-      int n = s-value_;
-      if (src && n>selection_first && n<=selection_last) {
+      int n = (int) (s-value_);
+      if (src && n>selection_first_ && n<=selection_last_) {
         while (*src) {
           *d++ = *src++;
         }
-        c = src[-1];
-        p = isspace(c&255) ? ' ' : c;
+        c = src[-1] & 0xff;
+        p = isspace(c) ? ' ' : c;
       }
       continue;
     }
-    if (c=='&') { // special characters
+    const char *s2 = s;
+    if (c=='&') { // special characters (HTML entities)
       int xx = quote_char(s);
-      if (xx>=0) {
-        c = (char)xx;
+      if (xx >= 0) {
+        c = xx;
         for (;;) {
           char cc = *s++;
           if (!cc || cc==';') break;
         }
       }
     }
-    int n = s-value_;
-    if (n>selection_first && n<=selection_last) {
-      if (!pre && isspace(c&255)) c = ' ';
-      if (p!=' '||c!=' ')
-        *d++ = c;
+    int n = (int) (s2-value_);
+    if (n>selection_first_ && n<=selection_last_) {
+      if (!pre && c < 256 && isspace(c)) c = ' ';
+      if (p != ' ' || c != ' ') {
+        if (s2 != s) { // c was an HTML entity
+          d += fl_utf8encode(c, d);
+        }
+        else *d++ = c;
+      }
       p = c;
     }
+    if (n>selection_last_) break; // stop parsing html after end of selection
   }
   *d = 0;
-  Fl::copy(txt, strlen(txt), clipboard);
+  Fl::copy(txt, (int) strlen(txt), clipboard);
+  // printf("copy [%s]\n", txt);
   free(txt);
 }
 
-#define ctrl(x) ((x)&0x1f)
+/**
+ \brief Check if the user selected text in this view.
+ \return 1 if text is selected, 0 if no text is selected
+ */
+int Fl_Help_View::text_selected() {
+  if (current_view_==this)
+    return selected_;
+  else
+    return 0;
+}
 
-//
-// 'Fl_Help_View::handle()' - Handle events in the widget.
-//
+/**
+ \brief If text is selected in this view, copy it to a clipboard.
+ \param[in] clipboard for x11 only, 0=selection buffer, 1=clipboard, 2=both
+ \return 1 if text is selected, 0 if no text is selected
+ */
+int Fl_Help_View::copy(int clipboard) {
+  if (text_selected()) {
+    end_selection(clipboard);
+    return 1;
+  } else {
+    return 0;
+  }
+}
 
-int				// O - 1 if we handled it, 0 otherwise
-Fl_Help_View::handle(int event)	// I - Event to handle
+/** Handles events in the widget. */
+int                             // O - 1 if we handled it, 0 otherwise
+Fl_Help_View::handle(int event) // I - Event to handle
 {
   static Fl_Help_Link *linkp;   // currently clicked link
 
@@ -2987,6 +3169,20 @@ Fl_Help_View::handle(int event)	// I - Event to handle
       else fl_cursor(FL_CURSOR_DEFAULT);
       return 1;
     case FL_PUSH:
+      if (Fl::event_button() == FL_RIGHT_MOUSE) {
+        rmb_menu[0].label(copy_menu_text);
+        if (text_selected())
+          rmb_menu[0].activate();
+        else
+          rmb_menu[0].deactivate();
+        fl_cursor(FL_CURSOR_DEFAULT);
+        const Fl_Menu_Item *mi = rmb_menu->popup(Fl::event_x(), Fl::event_y());
+        if (mi) switch (mi->argument()) {
+          case 1:
+            copy();
+            break;
+        }
+      }
       if (Fl_Group::handle(event)) return 1;
       linkp = find_link(xx, yy);
       if (linkp) {
@@ -3008,7 +3204,7 @@ Fl_Help_View::handle(int event)	// I - Event to handle
         }
         return 1;
       }
-      if (current_view==this && selection_push_last) {
+      if (current_view_==this && selection_push_last_) {
         if (extend_selection()) redraw();
         fl_cursor(FL_CURSOR_INSERT);
         return 1;
@@ -3024,32 +3220,34 @@ Fl_Help_View::handle(int event)	// I - Event to handle
         linkp = 0;
         return 1;
       }
-      if (current_view==this && selection_push_last) {
+      if (current_view_==this && selection_push_last_) {
         end_selection();
         return 1;
       }
       return 1;
     case FL_SHORTCUT: {
-      char ascii = Fl::event_text()[0];
-      switch (ascii) {
-        case ctrl('A'): select_all(); redraw(); return 1;
-        case ctrl('C'):
-        case ctrl('X'): end_selection(1); return 1;
+      int mods = Fl::event_state() & (FL_META|FL_CTRL|FL_ALT|FL_SHIFT);
+      if ( mods == FL_COMMAND) {
+        switch ( Fl::event_key() ) {
+          case 'a': select_all(); redraw(); return 1;
+          case 'c':
+          case 'x': end_selection(1); return 1;
+        }
       }
       break; }
   }
   return (Fl_Group::handle(event));
 }
 
-//
-// 'Fl_Help_View::Fl_Help_View()' - Build a Fl_Help_View widget.
-//
-
-Fl_Help_View::Fl_Help_View(int        xx,	// I - Left position
-                	   int        yy,	// I - Top position
-			   int        ww,	// I - Width in pixels
-			   int        hh,	// I - Height in pixels
-			   const char *l)
+/**
+  The constructor creates the Fl_Help_View widget at the specified
+  position and size.
+*/
+Fl_Help_View::Fl_Help_View(int        xx,       // I - Left position
+                           int        yy,       // I - Top position
+                           int        ww,       // I - Width in pixels
+                           int        hh,       // I - Height in pixels
+                           const char *l)
     : Fl_Group(xx, yy, ww, hh, l),
       scrollbar_(xx + ww - Fl::scrollbar_size(), yy,
                  Fl::scrollbar_size(), hh - Fl::scrollbar_size()),
@@ -3071,8 +3269,6 @@ Fl_Help_View::Fl_Help_View(int        xx,	// I - Left position
   nblocks_      = 0;
   blocks_       = (Fl_Help_Block *)0;
 
-  nfonts_       = 0;
-
   link_         = (Fl_Help_Func *)0;
 
   alinks_       = 0;
@@ -3090,6 +3286,7 @@ Fl_Help_View::Fl_Help_View(int        xx,	// I - Left position
   leftline_     = 0;
   size_         = 0;
   hsize_        = 0;
+  scrollbar_size_ = 0;
 
   scrollbar_.value(0, hh, 0, 1);
   scrollbar_.step(8.0);
@@ -3107,10 +3304,11 @@ Fl_Help_View::Fl_Help_View(int        xx,	// I - Left position
 }
 
 
-//
-// 'Fl_Help_View::~Fl_Help_View()' - Destroy a Fl_Help_View widget.
-//
+/** Destroys the Fl_Help_View widget.
 
+  The destructor destroys the widget and frees all memory that has been
+  allocated for the current document.
+*/
 Fl_Help_View::~Fl_Help_View()
 {
   clear_selection();
@@ -3118,20 +3316,84 @@ Fl_Help_View::~Fl_Help_View()
 }
 
 
-//
-// 'Fl_Help_View::load()' - Load the specified file.
-//
+/** Loads the specified file.
 
-int				// O - 0 on success, -1 on error
-Fl_Help_View::load(const char *f)// I - Filename to load (may also have target)
+ This method loads the specified file or URL. The filename may end in a
+ \c \#name style target.
+
+ If the URL starts with \a ftp, \a http, \a https, \a ipp, \a mailto, or
+ \a news, followed by a colon, FLTK will use fl_open_uri() to show the
+ requested page in an external browser.
+
+ In all other cases, the URL is interpreted as a filename. The file is read and
+ displayed in this browser. Note that Windows style backslashes are not
+ supported in the file name.
+
+ \param[in] f filename or URL
+
+ \return 0 on success, -1 on error
+
+ \see fl_open_uri()
+*/
+int Fl_Help_View::load(const char *f)
 {
-  FILE		*fp;		// File to read from
-  long		len;		// Length of file
-  char		*target;	// Target in file
-  char		*slash;		// Directory separator
-  const char	*localname;	// Local filename
-  char		error[1024];	// Error buffer
-  char		newname[1024];	// New filename buffer
+  FILE          *fp;            // File to read from
+  long          len;            // Length of file
+  char          *target;        // Target in file
+  char          *slash;         // Directory separator
+  const char    *localname;     // Local filename
+  char          error[2 * FL_PATH_MAX]; // Error buffer
+  char          newname[FL_PATH_MAX];   // New filename buffer
+
+  // printf("load(%s)\n",f); fflush(stdout);
+
+  if (strncmp(f, "ftp:", 4) == 0 ||
+      strncmp(f, "http:", 5) == 0 ||
+      strncmp(f, "https:", 6) == 0 ||
+      strncmp(f, "ipp:", 4) == 0 ||
+      strncmp(f, "mailto:", 7) == 0 ||
+      strncmp(f, "news:", 5) == 0)
+  {
+    char urimsg[FL_PATH_MAX];
+    if ( fl_open_uri(f, urimsg, sizeof(urimsg)) == 0 ) {
+      clear_selection();
+
+      strlcpy(newname, f, sizeof(newname));
+      if ((target = strrchr(newname, '#')) != NULL)
+        *target++ = '\0';
+
+      if (link_)
+        localname = (*link_)(this, newname);
+      else
+        localname = filename_;
+
+      if (!localname)
+        return (0);
+
+      free_data();
+
+      strlcpy(filename_, newname, sizeof(filename_));
+      strlcpy(directory_, newname, sizeof(directory_));
+
+      // Note: We do not support Windows backslashes, since they are illegal
+      //       in URLs...
+      if ((slash = strrchr(directory_, '/')) == NULL)
+        directory_[0] = '\0';
+      else if (slash > directory_ && slash[-1] != '/')
+        *slash = '\0';
+
+      snprintf(error, sizeof(error),
+               "<HTML><HEAD><TITLE>Error</TITLE></HEAD>"
+               "<BODY><H1>Error</H1>"
+               "<P>Unable to follow the link \"%s\" - "
+               "%s.</P></BODY>",
+               f, urimsg);
+      value(error);
+      return -1;
+    } else {
+      return 0;
+    }
+  }
 
   clear_selection();
 
@@ -3145,7 +3407,7 @@ Fl_Help_View::load(const char *f)// I - Filename to load (may also have target)
     localname = filename_;
 
   if (!localname)
-    return (0);
+    return -1;
 
   free_data();
 
@@ -3159,47 +3421,30 @@ Fl_Help_View::load(const char *f)// I - Filename to load (may also have target)
   else if (slash > directory_ && slash[-1] != '/')
     *slash = '\0';
 
-  if (strncmp(localname, "ftp:", 4) == 0 ||
-      strncmp(localname, "http:", 5) == 0 ||
-      strncmp(localname, "https:", 6) == 0 ||
-      strncmp(localname, "ipp:", 4) == 0 ||
-      strncmp(localname, "mailto:", 7) == 0 ||
-      strncmp(localname, "news:", 5) == 0)
+  if (strncmp(localname, "file:", 5) == 0)
+    localname += 5;     // Adjust for local filename...
+
+  int ret = 0;
+  if ((fp = fl_fopen(localname, "rb")) != NULL)
   {
-    // Remote link wasn't resolved...
-    snprintf(error, sizeof(error),
-             "<HTML><HEAD><TITLE>Error</TITLE></HEAD>"
-             "<BODY><H1>Error</H1>"
-	     "<P>Unable to follow the link \"%s\" - "
-	     "no handler exists for this URI scheme.</P></BODY>",
-	     localname);
-    value_ = strdup(error);
+    fseek(fp, 0, SEEK_END);
+    len = ftell(fp);
+    rewind(fp);
+
+    value_ = (const char *)calloc(len + 1, 1);
+    if (fread((void *)value_, 1, len, fp)==0) { /* use default 0 */ }
+    fclose(fp);
   }
   else
   {
-    if (strncmp(localname, "file:", 5) == 0)
-      localname += 5;	// Adjust for local filename...
-
-    if ((fp = fopen(localname, "rb")) != NULL)
-    {
-      fseek(fp, 0, SEEK_END);
-      len = ftell(fp);
-      rewind(fp);
-
-      value_ = (const char *)calloc(len + 1, 1);
-      fread((void *)value_, 1, len, fp);
-      fclose(fp);
-    }
-    else
-    {
-      snprintf(error, sizeof(error),
-               "<HTML><HEAD><TITLE>Error</TITLE></HEAD>"
-               "<BODY><H1>Error</H1>"
-	       "<P>Unable to follow the link \"%s\" - "
-	       "%s.</P></BODY>",
-	       localname, strerror(errno));
-      value_ = strdup(error);
-    }
+    snprintf(error, sizeof(error),
+             "<HTML><HEAD><TITLE>Error</TITLE></HEAD>"
+             "<BODY><H1>Error</H1>"
+             "<P>Unable to follow the link \"%s\" - "
+             "%s.</P></BODY>",
+             localname, strerror(errno));
+    value_ = fl_strdup(error);
+    ret = -1;
   }
 
   initial_load = 1;
@@ -3211,46 +3456,44 @@ Fl_Help_View::load(const char *f)// I - Filename to load (may also have target)
   else
     topline(0);
 
-  return (0);
+  return ret;
 }
 
 
-//
-// 'Fl_Help_View::resize()' - Resize the help widget.
-//
+/** Resizes the help widget. */
 
 void
-Fl_Help_View::resize(int xx,	// I - New left position
-                     int yy,	// I - New top position
-		     int ww,	// I - New width
-		     int hh)	// I - New height
+Fl_Help_View::resize(int xx,    // I - New left position
+                     int yy,    // I - New top position
+                     int ww,    // I - New width
+                     int hh)    // I - New height
 {
-  Fl_Boxtype		b = box() ? box() : FL_DOWN_BOX;
-					// Box to draw...
+  Fl_Boxtype            b = box() ? box() : FL_DOWN_BOX;
+                                        // Box to draw...
 
 
   Fl_Widget::resize(xx, yy, ww, hh);
 
-  int ss = Fl::scrollbar_size();
-  scrollbar_.resize(x() + w() - ss - Fl::box_dw(b) + Fl::box_dx(b),
-                    y() + Fl::box_dy(b), ss, h() - ss - Fl::box_dh(b));
+  int scrollsize = scrollbar_size_ ? scrollbar_size_ : Fl::scrollbar_size();
+  scrollbar_.resize(x() + w() - scrollsize - Fl::box_dw(b) + Fl::box_dx(b),
+                    y() + Fl::box_dy(b), scrollsize, h() - scrollsize - Fl::box_dh(b));
   hscrollbar_.resize(x() + Fl::box_dx(b),
-                     y() + h() - ss - Fl::box_dh(b) + Fl::box_dy(b),
-                     w() - ss - Fl::box_dw(b), ss);
+                     y() + h() - scrollsize - Fl::box_dh(b) + Fl::box_dy(b),
+                     w() - scrollsize - Fl::box_dw(b), scrollsize);
 
   format();
 }
 
 
-//
-// 'Fl_Help_View::topline()' - Set the top line to the named target.
-//
+/** Scrolls the text to the indicated position, given a named destination.
 
+  \param[in] n target name
+*/
 void
-Fl_Help_View::topline(const char *n)	// I - Target name
+Fl_Help_View::topline(const char *n)    // I - Target name
 {
-  Fl_Help_Target key,			// Target name key
-		*target;		// Pointer to matching target
+  Fl_Help_Target key,                   // Target name key
+                *target;                // Pointer to matching target
 
 
   if (ntargets_ == 0)
@@ -3266,69 +3509,80 @@ Fl_Help_View::topline(const char *n)	// I - Target name
 }
 
 
-//
-// 'Fl_Help_View::topline()' - Set the top line by number.
-//
+/** Scrolls the text to the indicated position, given a pixel line.
 
+  If the given pixel value \p top is out of range, then the text is
+  scrolled to the top or bottom of the document, resp.
+
+  \param[in] top top line number in pixels (0 = start of document)
+*/
 void
-Fl_Help_View::topline(int t)	// I - Top line number
+Fl_Help_View::topline(int top)  // I - Top line number
 {
   if (!value_)
     return;
 
-  if (size_ < (h() - Fl::scrollbar_size()) || t < 0)
-    t = 0;
-  else if (t > size_)
-    t = size_;
+  int scrollsize = scrollbar_size_ ? scrollbar_size_ : Fl::scrollbar_size();
+  if (size_ < (h() - scrollsize) || top < 0)
+    top = 0;
+  else if (top > size_)
+    top = size_;
 
-  topline_ = t;
+  topline_ = top;
 
-  scrollbar_.value(topline_, h() - Fl::scrollbar_size(), 0, size_);
+  scrollbar_.value(topline_, h() - scrollsize, 0, size_);
 
-  do_callback();
+  do_callback(FL_REASON_DRAGGED);
 
   redraw();
 }
 
 
-//
-// 'Fl_Help_View::leftline()' - Set the left position.
-//
+/** Scrolls the text to the indicated position, given a pixel column.
 
+  If the given pixel value \p left is out of range, then the text is
+  scrolled to the left or right side of the document, resp.
+
+  \param[in] left left column number in pixels (0 = left side)
+*/
 void
-Fl_Help_View::leftline(int l)	// I - Left position
+Fl_Help_View::leftline(int left)        // I - Left position
 {
   if (!value_)
     return;
 
-  if (hsize_ < (w() - Fl::scrollbar_size()) || l < 0)
-    l = 0;
-  else if (l > hsize_)
-    l = hsize_;
+  int scrollsize = scrollbar_size_ ? scrollbar_size_ : Fl::scrollbar_size();
+  if (hsize_ < (w() - scrollsize) || left < 0)
+    left = 0;
+  else if (left > hsize_)
+    left = hsize_;
 
-  leftline_ = l;
+  leftline_ = left;
 
-  hscrollbar_.value(leftline_, w() - Fl::scrollbar_size(), 0, hsize_);
+  hscrollbar_.value(leftline_, w() - scrollsize, 0, hsize_);
 
   redraw();
 }
 
 
-//
-// 'Fl_Help_View::value()' - Set the help text directly.
-//
+/** Sets the current help text buffer to the string provided and reformats the text.
 
+  The provided character string \p val is copied internally and will be
+  freed when value() is called again, or when the widget is destroyed.
+
+  If \p val is NULL, then the widget is cleared.
+*/
 void
-Fl_Help_View::value(const char *v)	// I - Text to view
+Fl_Help_View::value(const char *val)    // I - Text to view
 {
   clear_selection();
   free_data();
   set_changed();
 
-  if (!v)
+  if (!val)
     return;
 
-  value_ = strdup(v);
+  value_ = fl_strdup(val);
 
   initial_load = 1;
   format();
@@ -3338,138 +3592,152 @@ Fl_Help_View::value(const char *v)	// I - Text to view
   leftline(0);
 }
 
-#ifdef ENC
-# undef ENC
-#endif
-#ifdef __APPLE__
-# define ENC(a, b) b
-#else
-# define ENC(a, b) a
-#endif
 
-//
-// 'quote_char()' - Return the character code associated with a quoted char.
-//
+/*  Returns the Unicode Code Point associated with a quoted character
+    (aka "HTML Entity").
 
-static int			// O - Code or -1 on error
-quote_char(const char *p) {	// I - Quoted string
-  int	i;			// Looping var
-  static struct {
-    const char	*name;
-    int		namelen;
-    int		code;
-  }	*nameptr,		// Pointer into name array
-	names[] = {		// Quoting names
-    { "Aacute;", 7, ENC(193,231) },
-    { "aacute;", 7, ENC(225,135) },
-    { "Acirc;",  6, ENC(194,229) },
-    { "acirc;",  6, ENC(226,137) },
-    { "acute;",  6, ENC(180,171) },
-    { "AElig;",  6, ENC(198,174) },
-    { "aelig;",  6, ENC(230,190) },
-    { "Agrave;", 7, ENC(192,203) },
-    { "agrave;", 7, ENC(224,136) },
-    { "amp;",    4, ENC('&','&') },
-    { "Aring;",  6, ENC(197,129) },
-    { "aring;",  6, ENC(229,140) },
-    { "Atilde;", 7, ENC(195,204) },
-    { "atilde;", 7, ENC(227,139) },
-    { "Auml;",   5, ENC(196,128) },
-    { "auml;",   5, ENC(228,138) },
-    { "brvbar;", 7, ENC(166, -1) },
-    { "bull;",   5, ENC(149,165) },
-    { "Ccedil;", 7, ENC(199,199) },
-    { "ccedil;", 7, ENC(231,141) },
-    { "cedil;",  6, ENC(184,252) },
-    { "cent;",   5, ENC(162,162) },
-    { "copy;",   5, ENC(169,169) },
-    { "curren;", 7, ENC(164, -1) },
-    { "deg;",    4, ENC(176,161) },
-    { "divide;", 7, ENC(247,214) },
-    { "Eacute;", 7, ENC(201,131) },
-    { "eacute;", 7, ENC(233,142) },
-    { "Ecirc;",  6, ENC(202,230) },
-    { "ecirc;",  6, ENC(234,144) },
-    { "Egrave;", 7, ENC(200,233) },
-    { "egrave;", 7, ENC(232,143) },
-    { "ETH;",    4, ENC(208, -1) },
-    { "eth;",    4, ENC(240, -1) },
-    { "Euml;",   5, ENC(203,232) },
-    { "euml;",   5, ENC(235,145) },
-    { "euro;",   5, ENC(128,219) },
-    { "frac12;", 7, ENC(189, -1) },
-    { "frac14;", 7, ENC(188, -1) },
-    { "frac34;", 7, ENC(190, -1) },
-    { "gt;",     3, ENC('>','>') },
-    { "Iacute;", 7, ENC(205,234) },
-    { "iacute;", 7, ENC(237,146) },
-    { "Icirc;",  6, ENC(206,235) },
-    { "icirc;",  6, ENC(238,148) },
-    { "iexcl;",  6, ENC(161,193) },
-    { "Igrave;", 7, ENC(204,237) },
-    { "igrave;", 7, ENC(236,147) },
-    { "iquest;", 7, ENC(191,192) },
-    { "Iuml;",   5, ENC(207,236) },
-    { "iuml;",   5, ENC(239,149) },
-    { "laquo;",  6, ENC(171,199) },
-    { "lt;",     3, ENC('<','<') },
-    { "macr;",   5, ENC(175,248) },
-    { "micro;",  6, ENC(181,181) },
-    { "middot;", 7, ENC(183,225) },
-    { "nbsp;",   5, ENC(' ',' ') },
-    { "not;",    4, ENC(172,194) },
-    { "Ntilde;", 7, ENC(209,132) },
-    { "ntilde;", 7, ENC(241,150) },
-    { "Oacute;", 7, ENC(211,238) },
-    { "oacute;", 7, ENC(243,151) },
-    { "Ocirc;",  6, ENC(212,239) },
-    { "ocirc;",  6, ENC(244,153) },
-    { "Ograve;", 7, ENC(210,241) },
-    { "ograve;", 7, ENC(242,152) },
-    { "ordf;",   5, ENC(170,187) },
-    { "ordm;",   5, ENC(186,188) },
-    { "Oslash;", 7, ENC(216,175) },
-    { "oslash;", 7, ENC(248,191) },
-    { "Otilde;", 7, ENC(213,205) },
-    { "otilde;", 7, ENC(245,155) },
-    { "Ouml;",   5, ENC(214,133) },
-    { "ouml;",   5, ENC(246,154) },
-    { "para;",   5, ENC(182,166) },
-    { "premil;", 7, ENC(137,228) },
-    { "plusmn;", 7, ENC(177,177) },
-    { "pound;",  6, ENC(163,163) },
-    { "quot;",   5, ENC('\"','\"') },
-    { "raquo;",  6, ENC(187,200) },
-    { "reg;",    4, ENC(174,168) },
-    { "sect;",   5, ENC(167,164) },
-    { "shy;",    4, ENC(173,'-') },
-    { "sup1;",   5, ENC(185, -1) },
-    { "sup2;",   5, ENC(178, -1) },
-    { "sup3;",   5, ENC(179, -1) },
-    { "szlig;",  6, ENC(223,167) },
-    { "THORN;",  6, ENC(222, -1) },
-    { "thorn;",  6, ENC(254, -1) },
-    { "times;",  6, ENC(215,'x') },
-    { "trade;",  6, ENC(153,170) },
-    { "Uacute;", 7, ENC(218,242) },
-    { "uacute;", 7, ENC(250,156) },
-    { "Ucirc;",  6, ENC(219,243) },
-    { "ucirc;",  6, ENC(251,158) },
-    { "Ugrave;", 7, ENC(217,244) },
-    { "ugrave;", 7, ENC(249,157) },
-    { "uml;",    4, ENC(168,172) },
-    { "Uuml;",   5, ENC(220,134) },
-    { "uuml;",   5, ENC(252,159) },
-    { "Yacute;", 7, ENC(221, -1) },
-    { "yacute;", 7, ENC(253, -1) },
-    { "yen;",    4, ENC(165,180) },
-    { "Yuml;",   5, ENC(159,217) },
-    { "yuml;",   5, ENC(255,216) }
+    Possible encoding formats:
+     - &name;           named entity
+     - &#nn..;          numeric (decimal) Unicode Code Point
+     - &#xnn..;         numeric (hexadecimal) Unicode Code Point
+     - &#Xnn..;         numeric (hexadecimal) Unicode Code Point
+    'nn..' = decimal or hexadecimal number, resp.
+
+    Contents of the table names[] below:
+
+    All printable ASCII (32-126) and ISO-8859-1 (160-255) characters
+    are encoded with the same value in Unicode. Special characters
+    outside the range [0-255] are encoded with their Unicode Code Point
+    as hexadecimal constants. Example:
+     - Euro sign: (Unicode) U+20ac = (hex) 0x20ac
+
+    Note: Converted to correct Unicode values and tested (compared with
+    the display of Firefox). AlbrechtS, 14 Feb. 2016.
+
+    Note to devs: if you add or remove items to/from this list, please
+    update the documentation in FL/Fl_Help_View.H.
+*/
+static int                      // O - Code or -1 on error
+quote_char(const char *p) {     // I - Quoted string
+  int   i;                      // Looping var
+  static const struct {
+    const char  *name;
+    int         namelen;
+    int         code;
+  }     *nameptr,               // Pointer into name array
+        names[] = {             // Quoting names
+    { "Aacute;", 7, 193 },
+    { "aacute;", 7, 225 },
+    { "Acirc;",  6, 194 },
+    { "acirc;",  6, 226 },
+    { "acute;",  6, 180 },
+    { "AElig;",  6, 198 },
+    { "aelig;",  6, 230 },
+    { "Agrave;", 7, 192 },
+    { "agrave;", 7, 224 },
+    { "amp;",    4, '&' },
+    { "Aring;",  6, 197 },
+    { "aring;",  6, 229 },
+    { "Atilde;", 7, 195 },
+    { "atilde;", 7, 227 },
+    { "Auml;",   5, 196 },
+    { "auml;",   5, 228 },
+    { "brvbar;", 7, 166 },
+    { "bull;",   5, 0x2022 },
+    { "Ccedil;", 7, 199 },
+    { "ccedil;", 7, 231 },
+    { "cedil;",  6, 184 },
+    { "cent;",   5, 162 },
+    { "copy;",   5, 169 },
+    { "curren;", 7, 164 },
+    { "dagger;", 7, 0x2020 },
+    { "deg;",    4, 176 },
+    { "divide;", 7, 247 },
+    { "Eacute;", 7, 201 },
+    { "eacute;", 7, 233 },
+    { "Ecirc;",  6, 202 },
+    { "ecirc;",  6, 234 },
+    { "Egrave;", 7, 200 },
+    { "egrave;", 7, 232 },
+    { "ETH;",    4, 208 },
+    { "eth;",    4, 240 },
+    { "Euml;",   5, 203 },
+    { "euml;",   5, 235 },
+    { "euro;",   5, 0x20ac },
+    { "frac12;", 7, 189 },
+    { "frac14;", 7, 188 },
+    { "frac34;", 7, 190 },
+    { "gt;",     3, '>' },
+    { "Iacute;", 7, 205 },
+    { "iacute;", 7, 237 },
+    { "Icirc;",  6, 206 },
+    { "icirc;",  6, 238 },
+    { "iexcl;",  6, 161 },
+    { "Igrave;", 7, 204 },
+    { "igrave;", 7, 236 },
+    { "iquest;", 7, 191 },
+    { "Iuml;",   5, 207 },
+    { "iuml;",   5, 239 },
+    { "laquo;",  6, 171 },
+    { "lt;",     3, '<' },
+    { "macr;",   5, 175 },
+    { "micro;",  6, 181 },
+    { "middot;", 7, 183 },
+    { "nbsp;",   5, ' ' },
+    { "ndash;",  6, 0x2013 },
+    { "not;",    4, 172 },
+    { "Ntilde;", 7, 209 },
+    { "ntilde;", 7, 241 },
+    { "Oacute;", 7, 211 },
+    { "oacute;", 7, 243 },
+    { "Ocirc;",  6, 212 },
+    { "ocirc;",  6, 244 },
+    { "Ograve;", 7, 210 },
+    { "ograve;", 7, 242 },
+    { "ordf;",   5, 170 },
+    { "ordm;",   5, 186 },
+    { "Oslash;", 7, 216 },
+    { "oslash;", 7, 248 },
+    { "Otilde;", 7, 213 },
+    { "otilde;", 7, 245 },
+    { "Ouml;",   5, 214 },
+    { "ouml;",   5, 246 },
+    { "para;",   5, 182 },
+    { "permil;", 7, 0x2030 },
+    { "plusmn;", 7, 177 },
+    { "pound;",  6, 163 },
+    { "quot;",   5, '\"' },
+    { "raquo;",  6, 187 },
+    { "reg;",    4, 174 },
+    { "sect;",   5, 167 },
+    { "shy;",    4, 173 },
+    { "sup1;",   5, 185 },
+    { "sup2;",   5, 178 },
+    { "sup3;",   5, 179 },
+    { "szlig;",  6, 223 },
+    { "THORN;",  6, 222 },
+    { "thorn;",  6, 254 },
+    { "times;",  6, 215 },
+    { "trade;",  6, 0x2122 },
+    { "Uacute;", 7, 218 },
+    { "uacute;", 7, 250 },
+    { "Ucirc;",  6, 219 },
+    { "ucirc;",  6, 251 },
+    { "Ugrave;", 7, 217 },
+    { "ugrave;", 7, 249 },
+    { "uml;",    4, 168 },
+    { "Uuml;",   5, 220 },
+    { "uuml;",   5, 252 },
+    { "Yacute;", 7, 221 },
+    { "yacute;", 7, 253 },
+    { "yen;",    4, 165 },
+    { "Yuml;",   5, 0x0178 },
+    { "yuml;",   5, 255 }
   };
 
   if (!strchr(p, ';')) return -1;
   if (*p == '#') {
-    if (*(p+1) == 'x' || *(p+1) == 'X') return strtol(p+2, NULL, 16);
+    if (*(p+1) == 'x' || *(p+1) == 'X') return (int)strtol(p+2, NULL, 16);
     else return atoi(p+1);
   }
   for (i = (int)(sizeof(names) / sizeof(names[0])), nameptr = names; i > 0; i --, nameptr ++)
@@ -3480,10 +3748,7 @@ quote_char(const char *p) {	// I - Quoted string
 }
 
 
-//
-// 'scrollbar_callback()' - A callback for the scrollbar.
-//
-
+/** The vertical scrollbar callback. */
 static void
 scrollbar_callback(Fl_Widget *s, void *)
 {
@@ -3491,17 +3756,9 @@ scrollbar_callback(Fl_Widget *s, void *)
 }
 
 
-//
-// 'hscrollbar_callback()' - A callback for the horizontal scrollbar.
-//
-
+/** The horizontal scrollbar callback. */
 static void
 hscrollbar_callback(Fl_Widget *s, void *)
 {
   ((Fl_Help_View *)(s->parent()))->leftline(int(((Fl_Scrollbar*)s)->value()));
 }
-
-
-//
-// End of "$Id: Fl_Help_View.cxx 6745 2009-04-07 18:37:25Z AlbrechtS $".
-//

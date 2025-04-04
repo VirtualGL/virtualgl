@@ -1,97 +1,89 @@
 //
-// "$Id: Fl_Window_fullscreen.cxx 5190 2006-06-09 16:16:34Z mike $"
-//
 // Fullscreen window support for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2025 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
-// Turning the border on/off by changing the motif_wm_hints property
-// works on Irix 4DWM.  Does not appear to work for any other window
-// manager.  Fullscreen still works on some window managers (fvwm is one)
-// because they allow the border to be placed off-screen.
-
-// Unfortunatly most X window managers ignore changes to the border
-// and refuse to position the border off-screen, so attempting to make
-// the window full screen will lose the size of the border off the
-// bottom and right.
-
-#include <FL/Fl.H>
-#include <FL/x.H>
-
-#ifdef __APPLE__
-#include <config.h>
-#endif 
+#include <FL/Fl_Window.H>
+#include "Fl_Window_Driver.H"
 
 void Fl_Window::border(int b) {
   if (b) {
     if (border()) return;
-    clear_flag(FL_NOBORDER);
+    clear_flag(NOBORDER);
   } else {
     if (!border()) return;
-    set_flag(FL_NOBORDER);
+    set_flag(NOBORDER);
   }
-#ifdef WIN32
-  // not yet implemented, but it's possible
-  // for full fullscreen we have to make the window topmost as well
-#elif defined(__APPLE_QD__)
-  // warning: not implemented in Quickdraw/Carbon
-#elif defined(__APPLE_QUARTZ__)
-  // warning: not implemented in Quartz/Carbon
-#else
-  if (shown()) Fl_X::i(this)->sendxjunk();
-#endif
+  pWindowDriver->use_border();
 }
 
+/* Note: The previous implementation toggled border(). With this new
+   implementation this is not necessary. Additionally, if we do that,
+   the application may lose focus when switching out of fullscreen
+   mode with some window managers. Besides, the API does not say that
+   the FLTK border state should be toggled; it only says that the
+   borders should not be *visible*.
+*/
 void Fl_Window::fullscreen() {
-#ifndef WIN32
-  //this would clobber the fake wm, since it relies on the border flags to
-  //determine its thickness
-  border(0);
-#endif
-#if defined(__APPLE__) || defined(WIN32)
-  int sx, sy, sw, sh;
-  Fl::screen_xywh(sx, sy, sw, sh, x()+w()/2, y()+h()/2);
-  // if we are on the main screen, we will leave the system menu bar unobstructed
-  if (Fl::x()>=sx && Fl::y()>=sy && Fl::x()+Fl::w()<=sx+sw && Fl::y()+Fl::h()<=sy+sh) {
-    sx = Fl::x(); sy = Fl::y(); 
-    sw = Fl::w(); sh = Fl::h();
+  if (!is_resizable()) return;
+  if (!maximize_active()) {
+    no_fullscreen_x = x();
+    no_fullscreen_y = y();
+    no_fullscreen_w = w();
+    no_fullscreen_h = h();
   }
-  if (x()==sx) x(sx+1); // make sure that we actually execute the resize
-  resize(sx, sy, sw, sh);
-#else
-  if (!x()) x(1); // force it to call XResizeWindow()
-  resize(0,0,Fl::w(),Fl::h());
-#endif
+  if (shown() && !(flags() & Fl_Widget::FULLSCREEN)) {
+    pWindowDriver->fullscreen_on();
+  } else {
+    set_flag(FULLSCREEN);
+  }
 }
 
 void Fl_Window::fullscreen_off(int X,int Y,int W,int H) {
-  // this order produces less blinking on IRIX:
-  resize(X,Y,W,H);
-#ifndef WIN32
-  border(1);
-#endif
+  if (shown() && (flags() & Fl_Widget::FULLSCREEN)) {
+    pWindowDriver->fullscreen_off(X, Y, W, H);
+  } else {
+    clear_flag(FULLSCREEN);
+  }
+  if (!maximize_active())
+    no_fullscreen_x = no_fullscreen_y = no_fullscreen_w = no_fullscreen_h = 0;
 }
 
-//
-// End of "$Id: Fl_Window_fullscreen.cxx 5190 2006-06-09 16:16:34Z mike $".
-//
+void Fl_Window::fullscreen_off() {
+  if (!no_fullscreen_x && !no_fullscreen_y) {
+    // Window was initially created fullscreen - default to current monitor
+    no_fullscreen_x = x();
+    no_fullscreen_y = y();
+  }
+  fullscreen_off(no_fullscreen_x, no_fullscreen_y, no_fullscreen_w, no_fullscreen_h);
+}
+
+void Fl_Window::fullscreen_screens(int top, int bottom, int left, int right) {
+  if ((top < 0) || (bottom < 0) || (left < 0) || (right < 0)) {
+    fullscreen_screen_top = -1;
+    fullscreen_screen_bottom = -1;
+    fullscreen_screen_left = -1;
+    fullscreen_screen_right = -1;
+    pWindowDriver->fullscreen_screens(false);
+  } else {
+    fullscreen_screen_top = top;
+    fullscreen_screen_bottom = bottom;
+    fullscreen_screen_left = left;
+    fullscreen_screen_right = right;
+    pWindowDriver->fullscreen_screens(true);
+  }
+
+  if (shown() && fullscreen_active())
+    pWindowDriver->fullscreen_on();
+}

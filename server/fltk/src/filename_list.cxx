@@ -1,45 +1,28 @@
 //
-// "$Id: filename_list.cxx 6832 2009-07-23 22:36:04Z AlbrechtS $"
-//
 // Filename list routines for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2018 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 // Wrapper for scandir with const-correct function prototypes.
 
 #include <FL/filename.H>
+#include <FL/Fl.H>
+#include "Fl_System_Driver.H"
+#include <FL/fl_utf8.h>
 #include "flstring.h"
 #include <stdlib.h>
 
-
-extern "C" {
-#ifndef HAVE_SCANDIR
-  int fl_scandir (const char *dir, dirent ***namelist,
-	          int (*select)(dirent *),
-	          int (*compar)(dirent **, dirent **));
-#  define scandir	fl_scandir
-#endif
-}
 
 int fl_alphasort(struct dirent **a, struct dirent **b) {
   return strcmp((*a)->d_name, (*b)->d_name);
@@ -50,58 +33,60 @@ int fl_casealphasort(struct dirent **a, struct dirent **b) {
 }
 
 
-int fl_filename_list(const char *d, dirent ***list,
-                     Fl_File_Sort_F *sort) {
-#ifndef HAVE_SCANDIR
-  int n = scandir(d, list, 0, sort);
-#elif defined(HAVE_SCANDIR_POSIX)
-  // POSIX (2008) defines the comparison function like this:
-  int n = scandir(d, list, 0, (int(*)(const dirent **, const dirent **))sort);
-#elif defined(__osf__)
-  // OSF, DU 4.0x
-  int n = scandir(d, list, 0, (int(*)(dirent **, dirent **))sort);
-#elif defined(_AIX)
-  // AIX is almost standard...
-  int n = scandir(d, list, 0, (int(*)(void*, void*))sort);
-#elif !defined(__sgi)
-  // The vast majority of UNIX systems want the sort function to have this
-  // prototype, most likely so that it can be passed to qsort without any
-  // changes:
-  int n = scandir(d, list, 0, (int(*)(const void*,const void*))sort);
-#else
-  // This version is when we define our own scandir (WIN32 and perhaps
-  // some Unix systems) and apparently on IRIX:
-  int n = scandir(d, list, 0, sort);
-#endif
+/**
+  Portable and const-correct wrapper for the scandir() function.
 
-#if defined(WIN32) && !defined(__CYGWIN__)
-  // we did this already during fl_scandir/win32
-#else
-  // append a '/' to all filenames that are directories
-  int i, dirlen = strlen(d);
-  char *fullname = (char*)malloc(dirlen+FL_PATH_MAX+3); // Add enough extra for two /'s and a nul
-  // Use memcpy for speed since we already know the length of the string...
-  memcpy(fullname, d, dirlen+1);
-  char *name = fullname + dirlen;
-  if (name!=fullname && name[-1]!='/') *name++ = '/';
-  for (i=0; i<n; i++) {
-    dirent *de = (*list)[i];
-    int len = strlen(de->d_name);
-    if (de->d_name[len-1]=='/' || len>FL_PATH_MAX) continue;
-    // Use memcpy for speed since we already know the length of the string...
-    memcpy(name, de->d_name, len+1);
-    if (fl_filename_isdir(fullname)) {
-      (*list)[i] = de = (dirent*)realloc(de, de->d_name - (char*)de + len + 2);
-      char *dst = de->d_name + len;
-      *dst++ = '/';
-      *dst = 0;
-    }
-  }
-  free(fullname);
-#endif
-  return n;
+  For each file in that directory a "dirent" structure is created.
+  The only portable thing about a dirent is that dirent.d_name is the
+  nul-terminated file name. A pointers array to these dirent's is created
+  and a pointer to the array is returned in *list.
+  The number of entries is given as a return value.
+  If there is an error reading the directory a number less than zero is
+  returned, and errno has the reason; errno does not work under Windows.
+
+  \b Include:
+  \code
+  #include <FL/filename.H>
+  \endcode
+
+  \param[in] d the name of the directory to list.  It does not matter if it has a trailing slash.
+  \param[out] list table containing the resulting directory listing
+  \param[in] sort sorting functor:
+  - fl_alphasort: The files are sorted in ascending alphabetical order;
+      upper and lowercase letters are compared according to their ASCII ordering  uppercase before lowercase.
+  - fl_casealphasort: The files are sorted in ascending alphabetical order;
+      upper and lowercase letters are compared equally case is not significant.
+  - fl_casenumericsort: The files are sorted in ascending "alphanumeric" order, where an attempt is made
+      to put unpadded numbers in consecutive order; upper and lowercase letters
+      are compared equally case is not significant.
+  - fl_numericsort: The files are sorted in ascending "alphanumeric" order, where an attempt is made
+      to put unpadded numbers in consecutive order; upper and lowercase letters are compared
+      according to their ASCII ordering - uppercase before lowercase.
+  \return the number of entries if no error, a negative value otherwise.
+  \todo should support returning OS error messages
+*/
+int fl_filename_list(const char *d, dirent ***list, Fl_File_Sort_F *sort) {
+  return Fl::system_driver()->filename_list(d, list, sort, NULL, 0);
 }
 
-//
-// End of "$Id: filename_list.cxx 6832 2009-07-23 22:36:04Z AlbrechtS $".
-//
+/**
+ \brief Free the list of filenames that is generated by fl_filename_list().
+
+ Free everything that was allocated by a previous call to fl_filename_list().
+ Use the return values as parameters for this function.
+
+ \param[in,out] list table containing the resulting directory listing
+ \param[in] n number of entries in the list
+ */
+void fl_filename_free_list(struct dirent ***list, int n)
+{
+  if (n<0) return;
+
+  int i;
+  for (i = 0; i < n; i ++) {
+    if ((*list)[i])
+      free((*list)[i]);
+  }
+  free(*list);
+  *list = 0;
+}

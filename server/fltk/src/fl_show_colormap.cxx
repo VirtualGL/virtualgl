@@ -1,32 +1,18 @@
 //
-// "$Id: fl_show_colormap.cxx 6926 2009-11-07 21:01:08Z matt $"
-//
 // Colormap color selection dialog for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2010 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
+//     https://www.fltk.org/bugs.php
 //
-//     http://www.fltk.org/str.php
-//
-
-// Select a color from the colormap.
-// Pretty much unchanged from Forms.
 
 #include <FL/Fl.H>
 #include <FL/Fl_Single_Window.H>
@@ -37,13 +23,17 @@
 #define BOXSIZE 14
 #define BORDER 4
 
+/**
+ This widget creates a modal window for selecting a color from the colormap.
+ Pretty much unchanged from Forms.
+*/
 class ColorMenu : public Fl_Window {
   Fl_Color initial;
   Fl_Color which, previous;
   int done;
   void drawbox(Fl_Color);
-  void draw();
-  int handle(int);
+  void draw() FL_OVERRIDE;
+  int handle(int) FL_OVERRIDE;
 public:
   ColorMenu(Fl_Color oldcol);
   Fl_Color run();
@@ -53,12 +43,11 @@ ColorMenu::ColorMenu(Fl_Color oldcol) :
   Fl_Window(BOXSIZE*8+1+2*BORDER, BOXSIZE*32+1+2*BORDER) {
   clear_border();
   set_modal();
-  initial = which = previous = oldcol;
-  done = 0;
+  initial = which = oldcol;
 }
 
 void ColorMenu::drawbox(Fl_Color c) {
-  if (c < 0 || c > 255) return;
+  if (c > 255) return;
   int X = (c%8)*BOXSIZE+BORDER;
   int Y = (c/8)*BOXSIZE+BORDER;
 #if BORDER_WIDTH < 3
@@ -66,7 +55,7 @@ void ColorMenu::drawbox(Fl_Color c) {
   else fl_draw_box(FL_BORDER_BOX, X, Y, BOXSIZE+1, BOXSIZE+1, c);
 #else
   fl_draw_box(c == which ? FL_DOWN_BOX : FL_BORDER_BOX,
-	      X, Y, BOXSIZE+1, BOXSIZE+1, c);
+              X, Y, BOXSIZE+1, BOXSIZE+1, c);
 #endif
 }
 
@@ -82,7 +71,7 @@ void ColorMenu::draw() {
 }
 
 int ColorMenu::handle(int e) {
-  int c = which;
+  Fl_Color c = which;
   switch (e) {
   case FL_PUSH:
   case FL_DRAG: {
@@ -138,17 +127,17 @@ extern char fl_override_redirect; // hack for menus
 #pragma optimize("a",off) // needed to get the done check to work
 #endif
 Fl_Color ColorMenu::run() {
-  if (which < 0 || which > 255) {
+  if (which > 255) {
     position(Fl::event_x_root()-w()/2, Fl::event_y_root()-y()/2);
   } else {
     position(Fl::event_x_root()-(initial%8)*BOXSIZE-BOXSIZE/2-BORDER,
-	     Fl::event_y_root()-(initial/8)*BOXSIZE-BOXSIZE/2-BORDER);
+             Fl::event_y_root()-(initial/8)*BOXSIZE-BOXSIZE/2-BORDER);
   }
   show();
   Fl::grab(*this);
   done = 0;
   while (!done) Fl::wait();
-  Fl::release();
+  Fl::grab(0);
   return which;
 }
 
@@ -156,7 +145,3 @@ Fl_Color fl_show_colormap(Fl_Color oldcol) {
   ColorMenu m(oldcol);
   return m.run();
 }
-
-//
-// End of "$Id: fl_show_colormap.cxx 6926 2009-11-07 21:01:08Z matt $".
-//

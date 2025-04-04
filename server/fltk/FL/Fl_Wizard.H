@@ -1,62 +1,58 @@
 //
-// "$Id: Fl_Wizard.H 4288 2005-04-16 00:13:17Z mike $"
-//
 // Fl_Wizard widget definitions.
 //
-// Copyright 1999-2005 by Easy Software Products.
+// Copyright 1999-2010 by Easy Software Products.
+// Copyright 2011-2020 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
+//     https://www.fltk.org/bugs.php
 //
-//     http://www.fltk.org/str.php
-//
+
+/* \file
+   Fl_Wizard widget . */
 
 //
 // Include necessary header files...
 //
 
 #ifndef _Fl_Wizard_H_
-#  define _Fl_Wizard_H_
+#define _Fl_Wizard_H_
 
-#  include <FL/Fl_Group.H>
+#include <FL/Fl_Group.H>
 
+/**
+  This widget is based off the Fl_Tabs widget, but instead of
+  displaying tabs it only changes "tabs" under program control.
 
-//
-// Fl_Wizard class...
-//
+  Its primary purpose is to support "wizards" that step a user
+  through configuration or troubleshooting tasks.
 
-class FL_EXPORT Fl_Wizard : public Fl_Group
-{
+  As with Fl_Tabs, wizard panes are composed of child (usually
+  Fl_Group) widgets. Navigation buttons must be added separately.
+*/
+class FL_EXPORT Fl_Wizard : public Fl_Group {
+
   Fl_Widget *value_;
 
-  void draw();
+protected:
 
-  public:
+  void draw() FL_OVERRIDE;
+
+public:
 
   Fl_Wizard(int, int, int, int, const char * = 0);
 
-  void		next();
-  void		prev();
-  Fl_Widget	*value();
-  void		value(Fl_Widget *);
+  void next();
+  void prev();
+  Fl_Widget *value();
+  void value(Fl_Widget *);
 };
 
 #endif // !_Fl_Wizard_H_
-
-//
-// End of "$Id: Fl_Wizard.H 4288 2005-04-16 00:13:17Z mike $".
-//

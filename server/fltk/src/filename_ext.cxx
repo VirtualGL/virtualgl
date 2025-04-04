@@ -1,47 +1,63 @@
 //
-// "$Id: filename_ext.cxx 5190 2006-06-09 16:16:34Z mike $"
-//
 // Filename extension routines for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2010 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
-// returns pointer to the last '.' or to the null if none:
+#include "Fl_System_Driver.H"
+#include <FL/Fl.H>
 
-#include <FL/filename.H>
-
+/** Gets the extension of a filename.
+   \code
+   #include <FL/filename.H>
+   [..]
+   const char *out;
+   out = fl_filename_ext("/some/path/foo.txt");        // result: ".txt"
+   out = fl_filename_ext("/some/path/foo");            // result: NULL
+   \endcode
+   \param[in] buf the filename to be parsed
+   \return a pointer to the extension (including '.') if any or NULL otherwise
+ */
 const char *fl_filename_ext(const char *buf) {
+  return Fl::system_driver()->filename_ext(buf);
+}
+
+
+/**
+ \cond DriverDev
+ \addtogroup DriverDeveloper
+ \{
+ */
+
+/**
+ Finds a filename extension.
+
+ The default implementation assumes that the last `.` character separates
+ the extension from the basename of a file.
+
+ \see fl_filename_ext(const char*)
+ */
+const char *Fl_System_Driver::filename_ext(const char *buf) {
   const char *q = 0;
   const char *p = buf;
   for (p=buf; *p; p++) {
     if (*p == '/') q = 0;
-#if defined(WIN32) || defined(__EMX__) && !defined(__CYGWIN__)
-    else if (*p == '\\') q = 0;
-#endif
     else if (*p == '.') q = p;
   }
   return q ? q : p;
 }
 
-//
-// End of "$Id: filename_ext.cxx 5190 2006-06-09 16:16:34Z mike $".
-//
+/**
+ \}
+ \endcond
+ */

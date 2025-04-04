@@ -1,32 +1,21 @@
 //
-// "$Id: fl_round_box.cxx 6537 2008-12-02 17:21:36Z matt $"
-//
 // Round box drawing routines for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2010 by Bill Spitzak and others.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Library General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file.  If this
+// file is missing or damaged, see the license at:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Library General Public License for more details.
+//     https://www.fltk.org/COPYING.php
 //
-// You should have received a copy of the GNU Library General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-// USA.
+// Please see the following page on how to report bugs and issues:
 //
-// Please report all bugs and problems on the following page:
-//
-//     http://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 // Box drawing code for an obscure box type.
-// These box types are in seperate files so they are not linked
+// These box types are in separate files so they are not linked
 // in if not used.
 
 #include <FL/Fl.H>
@@ -35,13 +24,13 @@
 // A compiler from a certain very large software company will not compile
 // the function pointer assignment due to the name conflict with fl_arc.
 // This function is to fix that:
-void fl_arc_i(int x,int y,int w,int h,double a1,double a2) {
+static void fl_arc_i(int x,int y,int w,int h,double a1,double a2) {
   fl_arc(x,y,w,h,a1,a2);
 }
 
 enum {UPPER_LEFT, LOWER_RIGHT, CLOSED, FILL};
 
-static void draw(int which, int x,int y,int w,int h, int inset, unsigned int color)
+static void draw(int which, int x,int y,int w,int h, int inset, Fl_Color color)
 {
   if (inset*2 >= w) inset = (w-1)/2;
   if (inset*2 >= h) inset = (h-1)/2;
@@ -55,20 +44,29 @@ static void draw(int which, int x,int y,int w,int h, int inset, unsigned int col
   void (*f)(int,int,int,int,double,double);
   f = (which==FILL) ? fl_pie : fl_arc_i;
   if (which >= CLOSED) {
-    f(x+w-d, y, d, d, w<=h ? 0 : -90, w<=h ? 180 : 90);
-    f(x, y+h-d, d, d, w<=h ? 180 : 90, w<=h ? 360 : 270);
+    if (w == h) f(x, y, d, d, 0, 360);
+    else {
+      f(x+w-d, y, d, d, w<=h ? 0 : -90, w<=h ? 180 : 90);
+      f(x, y+h-d, d, d, w<=h ? 180 : 90, w<=h ? 360 : 270);
+    }
   } else if (which == UPPER_LEFT) {
-    f(x+w-d, y, d, d, 45, w<=h ? 180 : 90);
-    f(x, y+h-d, d, d, w<=h ? 180 : 90, 225);
+    if (w == h) f(x, y, d, d, 45, 225);
+    else {
+      f(x+w-d, y, d, d, 45, w<=h ? 180 : 90);
+      f(x, y+h-d, d, d, w<=h ? 180 : 90, 225);
+    }
   } else { // LOWER_RIGHT
-    f(x, y+h-d, d, d, 225, w<=h ? 360 : 270);
-    f(x+w-d, y, d, d, w<=h ? 360 : 270, 360+45);
+    if (w == h) f(x, y, d, d, 225, 405);
+    else {
+      f(x, y+h-d, d, d, 225, w<=h ? 360 : 270);
+      f(x+w-d, y, d, d, w<=h ? 360 : 270, 360+45);
+    }
   }
   if (which == FILL) {
     if (w < h)
-      fl_rectf(x, y+d/2, w, h-(d&-2));
+      fl_rectf(x, y+d/2, w, h-(d&-2)+1);
     else if (w > h)
-      fl_rectf(x+d/2, y, w-(d&-2), h);
+      fl_rectf(x+d/2, y, w-(d&-2)+1, h);
   } else {
     if (w < h) {
       if (which != UPPER_LEFT) fl_yxline(x+w-1, y+d/2-1, y+h-d/2+1);
@@ -80,43 +78,51 @@ static void draw(int which, int x,int y,int w,int h, int inset, unsigned int col
   }
 }
 
-extern uchar* fl_gray_ramp();
+extern const uchar* fl_gray_ramp();
 
 void fl_round_down_box(int x, int y, int w, int h, Fl_Color bgcolor) {
-  uchar *g = fl_gray_ramp();
-  draw(FILL,	    x,   y, w,   h, 2, bgcolor);
-  draw(UPPER_LEFT,  x+1, y, w-2, h, 0, g['N']);
-  draw(UPPER_LEFT,  x+1, y, w-2, h, 1, g['H']);
-  draw(UPPER_LEFT,  x,   y, w,   h, 0, g['N']);
-  draw(UPPER_LEFT,  x,   y, w,   h, 1, g['H']);
-  draw(LOWER_RIGHT, x,   y, w,   h, 0, g['S']);
-  draw(LOWER_RIGHT, x+1, y, w-2, h, 0, g['U']);
-  draw(LOWER_RIGHT, x,   y, w,   h, 1, g['U']);
-  draw(LOWER_RIGHT, x+1, y, w-2, h, 1, g['W']);
-  draw(CLOSED,	    x,   y, w,   h, 2, g['A']);
+  const uchar *g = fl_gray_ramp();
+  draw(FILL,        x,   y, w,   h, 2, Fl::box_color(bgcolor));
+  draw(UPPER_LEFT,  x+1, y, w-2, h, 0, (Fl_Color)g[(int)'N']);
+  draw(UPPER_LEFT,  x+1, y, w-2, h, 1, (Fl_Color)g[(int)'H']);
+  draw(UPPER_LEFT,  x,   y, w,   h, 0, (Fl_Color)g[(int)'N']);
+  draw(UPPER_LEFT,  x,   y, w,   h, 1, (Fl_Color)g[(int)'H']);
+  draw(LOWER_RIGHT, x,   y, w,   h, 0, (Fl_Color)g[(int)'S']);
+  draw(LOWER_RIGHT, x+1, y, w-2, h, 0, (Fl_Color)g[(int)'U']);
+  draw(LOWER_RIGHT, x,   y, w,   h, 1, (Fl_Color)g[(int)'U']);
+  draw(LOWER_RIGHT, x+1, y, w-2, h, 1, (Fl_Color)g[(int)'W']);
+  draw(CLOSED,      x,   y, w,   h, 2, (Fl_Color)g[(int)'A']);
 }
 
 void fl_round_up_box(int x, int y, int w, int h, Fl_Color bgcolor) {
-  uchar *g = fl_gray_ramp();
-  draw(FILL,	    x,   y, w,   h, 2, bgcolor);
-  draw(LOWER_RIGHT, x+1, y, w-2, h, 0, g['H']);
-  draw(LOWER_RIGHT, x+1, y, w-2, h, 1, g['N']);
-  draw(LOWER_RIGHT, x,   y, w,   h, 1, g['H']);
-  draw(LOWER_RIGHT, x,   y, w,   h, 2, g['N']);
-  draw(UPPER_LEFT,  x,   y, w,   h, 2, g['U']);
-  draw(UPPER_LEFT,  x+1, y, w-2, h, 1, g['S']);
-  draw(UPPER_LEFT,  x,   y, w,   h, 1, g['W']);
-  draw(UPPER_LEFT,  x+1, y, w-2, h, 0, g['U']);
-  draw(CLOSED,	    x,   y, w,   h, 0, g['A']);
+  const uchar *g = fl_gray_ramp();
+  draw(FILL,        x,   y, w,   h, 2, Fl::box_color(bgcolor));
+  draw(LOWER_RIGHT, x+1, y, w-2, h, 0, (Fl_Color)g[(int)'H']);
+  draw(LOWER_RIGHT, x+1, y, w-2, h, 1, (Fl_Color)g[(int)'N']);
+  draw(LOWER_RIGHT, x,   y, w,   h, 1, (Fl_Color)g[(int)'H']);
+  draw(LOWER_RIGHT, x,   y, w,   h, 2, (Fl_Color)g[(int)'N']);
+  draw(UPPER_LEFT,  x,   y, w,   h, 2, (Fl_Color)g[(int)'U']);
+  draw(UPPER_LEFT,  x+1, y, w-2, h, 1, (Fl_Color)g[(int)'S']);
+  draw(UPPER_LEFT,  x,   y, w,   h, 1, (Fl_Color)g[(int)'W']);
+  draw(UPPER_LEFT,  x+1, y, w-2, h, 0, (Fl_Color)g[(int)'U']);
+  draw(CLOSED,      x,   y, w,   h, 0, (Fl_Color)g[(int)'A']);
 }
 
-extern void fl_internal_boxtype(Fl_Boxtype, Fl_Box_Draw_F*);
+void fl_round_focus(Fl_Boxtype bt, int x, int y, int w, int h, Fl_Color fg, Fl_Color bg) {
+  x += Fl::box_dx(bt);
+  y += Fl::box_dy(bt);
+  w -= Fl::box_dw(bt);
+  h -= Fl::box_dh(bt);
+  Fl_Color savecolor = fl_color();
+  fl_line_style(FL_DOT);
+  draw(CLOSED, x, y, w, h, 0, fl_contrast(fg, bg));
+  fl_line_style(FL_SOLID);
+  fl_color(savecolor);
+}
+
+extern void fl_internal_boxtype(Fl_Boxtype, Fl_Box_Draw_F*, Fl_Box_Draw_Focus_F* =NULL);
 Fl_Boxtype fl_define_FL_ROUND_UP_BOX() {
-  fl_internal_boxtype(_FL_ROUND_DOWN_BOX, fl_round_down_box);
-  fl_internal_boxtype(_FL_ROUND_UP_BOX, fl_round_up_box);
+  fl_internal_boxtype(_FL_ROUND_DOWN_BOX, fl_round_down_box, fl_round_focus);
+  fl_internal_boxtype(_FL_ROUND_UP_BOX, fl_round_up_box, fl_round_focus);
   return _FL_ROUND_UP_BOX;
 }
-
-//
-// End of "$Id: fl_round_box.cxx 6537 2008-12-02 17:21:36Z matt $".
-//
