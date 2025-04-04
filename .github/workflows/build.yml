@@ -49,3 +49,35 @@ jobs:
           docker run -v $HOME/src/vgl.nightly:/root/src/vgl.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $GITHUB_WORKSPACE:/root/src/virtualgl -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-rpm:/rpms -v $HOME/rpmkeys:/rpmkeys -t dcommander/buildvgl:$BRANCH bash -c "rpm --import /rpmkeys/LJT-GPG-KEY && rpm -K /rpms/*.rpm && rpm -i /rpms/*.rpm && rpm --import /rpmkeys/VGLPR-GPG-KEY && ~/src/buildscripts/buildvgl -d /root/src/virtualgl -v"
           sudo chown -R runner:runner $HOME/src/vgl.nightly
           mv $HOME/src/vgl.nightly/latest/log-${{github.job}}.txt $HOME/src/vgl.nightly/latest/files/
+  linux-non-default-options:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set global environment variables
+        run: |
+          echo "BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >$GITHUB_ENV
+          echo "LJT_URL=https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/$LJT_VERSION" >>$GITHUB_ENV
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up build
+        run: |
+          sudo apt update
+          sudo apt install -y libegl1-mesa-dev libfltk1.3-dev libxtst-dev
+          mkdir $HOME/libjpeg-turbo-deb
+          pushd $HOME/libjpeg-turbo-deb
+          wget --no-check-certificate $LJT_URL/libjpeg-turbo-official_$LJT_VERSION\_amd64.deb $LJT_URL/libjpeg-turbo-official32_$LJT_VERSION\_amd64.deb
+          sudo dpkg -i *.deb
+          rm *.deb
+          popd
+          rmdir $HOME/libjpeg-turbo-deb
+      - name: Build
+        run: |
+          mkdir build
+          pushd build
+          cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DVGL_FAKEOPENCL=0 -DVGL_FAKEXCB=0 -DVGL_SYSTEMFLTK=1 -DVGL_USESSL=1 -DVGL_USEXV=0 \
+            -DCMAKE_C_FLAGS='-ansi -Wall -Werror -Wextra -Wno-missing-field-initializers -Wformat-overflow=2 -Wformat=2 -Wformat-truncation=2 -Wmissing-include-dirs -Wshift-overflow=2 -Wunused -Wno-unused-parameter -Wunused-const-variable=1 -Wuninitialized -Wstrict-overflow=2 -Wstringop-overflow=4 -Wstringop-truncation -Wduplicated-branches -Wduplicated-cond -Wdeclaration-after-statement -Wshadow -Wunsafe-loop-optimizations -Wpointer-arith -Wundef -Wcast-align -Wjump-misses-init -Wlogical-op -Waggregate-return -Wstrict-prototypes -Wold-style-definition -Wmissing-prototypes -Wmissing-declarations -Wpacked -Wredundant-decls -Wnested-externs -Winline -Wvariadic-macros -Wdisabled-optimization' \
+            -DCMAKE_CXX_FLAGS='-ansi -Wall -Werror -Wextra -Wpedantic -pedantic-errors -Wno-missing-field-initializers -Wformat-overflow=2 -Wformat=2 -Wno-format-nonliteral -Wmissing-include-dirs -Wshift-overflow=2 -Wunused -Wno-unused-parameter -Wunused-const-variable=1 -Wuninitialized -Wstrict-overflow=2 -Wstringop-overflow=4 -Wstringop-truncation -Wduplicated-branches -Wduplicated-cond -Wshadow -Wunsafe-loop-optimizations -Wpointer-arith -Wundef -Wcast-align -Wcatch-value=3 -Wextra-semi -Wlogical-op -Wpacked -Wredundant-decls -Winline -Wvariadic-macros -Wdisabled-optimization' \
+            ..
+          export NUMCPUS=`grep -c '^processor' /proc/cpuinfo`
+          make -j$NUMCPUS --load-average=$NUMCPUS
+          popd
