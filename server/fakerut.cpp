@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2010-2015, 2017-2022 D. R. Commander
+// Copyright (C)2010-2015, 2017-2022, 2025 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -59,11 +59,11 @@ using namespace vglutil;
 { \
 	GLint __drawBuf = -1; \
 	glGetIntegerv(GL_DRAW_BUFFER, &__drawBuf); \
-	if(__drawBuf != (GLint)drawBuf) \
+	if(__drawBuf != drawBuf) \
 		PRERROR2("Draw buffer is 0x%.4x, should be 0x%.4x", __drawBuf, drawBuf); \
 	GLint __readBuf = -1; \
 	glGetIntegerv(GL_READ_BUFFER, &__readBuf); \
-	if(__readBuf != (GLint)readBuf) \
+	if(__readBuf != readBuf) \
 		PRERROR2("Read buffer is 0x%.4x, should be 0x%.4x", __readBuf, readBuf); \
 }
 
@@ -893,8 +893,8 @@ int cfgid(Display *dpy, GLXFBConfig config);
 	GET_CFG_ATTRIB(config, attrib, ctemp); \
 	GET_VIS_ATTRIB(vis, attrib, vtemp); \
 	if(ctemp != vtemp) \
-		PRERROR5("%s=%d in C%.2x & %d in V%.2x", #attrib, ctemp, \
-			cfgid(dpy, config), vtemp, vis ? (unsigned int)vis->visualid : 0); \
+		PRERROR5("%s=%d in C%.2x & %d in V%.2lx", #attrib, ctemp, \
+			cfgid(dpy, config), vtemp, vis ? vis->visualid : 0); \
 }
 
 
@@ -1310,8 +1310,7 @@ int visTest(void)
 				if(!useGL) continue;
 
 				if(!(config = getFBConfigFromVisual(dpy, &vis0[i])))
-					PRERROR1("No matching CFG for X Visual 0x%.2x",
-						(int)vis0[i].visualid);
+					PRERROR1("No matching CFG for X Visual 0x%.2lx", vis0[i].visualid);
 				configVsVisual(dpy, config, &vis0[i]);
 
 				vis2 = glXGetVisualFromFBConfig(dpy, config);
@@ -3128,7 +3127,7 @@ int extensionQueryTest(void)
 #define TEST_PROC_SYM_OPT(f) \
 	if((sym1 = (void *)glXGetProcAddressARB((const GLubyte *)#f)) == NULL) \
 		THROW("glXGetProcAddressARB(\"" #f "\") returned NULL"); \
-	if((sym2 = (void *)dlsym(RTLD_DEFAULT, #f)) == NULL) \
+	if((sym2 = dlsym(RTLD_DEFAULT, #f)) == NULL) \
 		THROW("dlsym(RTLD_DEFAULT, \"" #f "\") returned NULL"); \
 	if(sym1 != sym2) \
 		THROW("glXGetProcAddressARB(\"" #f "\")!=dlsym(RTLD_DEFAULT, \"" #f "\")");

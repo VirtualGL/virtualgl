@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2014 D. R. Commander
+// Copyright (C)2014, 2025 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -59,6 +59,8 @@ namespace vglutil
 			{
 				#ifdef _WIN32
 				return GetCurrentThreadId();
+				#elif defined(__linux__)
+				return pthread_self();
 				#else
 				return (unsigned long)pthread_self();
 				#endif
