@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2014, 2019 D. R. Commander
+// Copyright (C)2014, 2019, 2025 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,6 +23,7 @@
 #include <string.h>
 #include <errno.h>
 #include <new>
+#include "vglutil.h"
 
 
 namespace vglutil
@@ -54,7 +55,7 @@ namespace vglutil
 			void init(const char *method_, char *message_, int line)
 			{
 				message[0] = 0;
-				if(line >= 1) sprintf(message, "%d: ", line);
+				if(line >= 1) snprintf(message, MLEN + 1, "%d: ", line);
 				if(!method_) method_ = "(Unknown error location)";
 				method = method_;
 				if(message_)

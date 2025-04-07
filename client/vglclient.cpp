@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2011-2012, 2014, 2017-2019 D. R. Commander
+// Copyright (C)2011-2012, 2014, 2017-2019, 2025 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -145,9 +145,9 @@ void killproc(bool userOnly)
 
 				if(pid == getpid()) continue;
 				#ifdef sun
-				sprintf(temps, "/proc/%s/psinfo", dent->d_name);
+				snprintf(temps, 1024, "/proc/%s/psinfo", dent->d_name);
 				#else
-				sprintf(temps, "/proc/%s/stat", dent->d_name);
+				snprintf(temps, 1024, "/proc/%s/stat", dent->d_name);
 				#endif
 				if((fd = open(temps, O_RDONLY)) == -1) continue;
 				if(fstat(fd, &fsbuf) != -1 && (fsbuf.st_uid == getuid() || !userOnly))

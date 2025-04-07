@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011, 2014, 2019 D. R. Commander
+// Copyright (C)2009, 2011, 2014, 2019, 2025 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -71,7 +71,7 @@ void ClientWin::initGL(void)
 {
 	GLFrame *newfb = NULL;
 	char dpystr[80];
-	sprintf(dpystr, ":%d.0", dpynum);
+	snprintf(dpystr, 80, ":%d.0", dpynum);
 	CriticalSection::SafeLock l(mutex);
 
 	if(drawMethod == RR_DRAWOGL)
@@ -108,7 +108,7 @@ void ClientWin::initX11(void)
 {
 	FBXFrame *newfb = NULL;
 	char dpystr[80];
-	sprintf(dpystr, ":%d.0", dpynum);
+	snprintf(dpystr, 80, ":%d.0", dpynum);
 	CriticalSection::SafeLock l(mutex);
 
 	if(drawMethod == RR_DRAWX11)
@@ -154,7 +154,7 @@ Frame *ClientWin::getFrame(bool useXV)
 		if(!xvframes[cfindex])
 		{
 			char dpystr[80];
-			sprintf(dpystr, ":%d.0", dpynum);
+			snprintf(dpystr, 80, ":%d.0", dpynum);
 			NEWCHECK(xvframes[cfindex] = new XVFrame(dpystr, window));
 			if(!xvframes[cfindex]) THROW("Could not allocate class instance");
 		}

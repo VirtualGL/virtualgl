@@ -1,5 +1,5 @@
 // Copyright (C)2007 Sun Microsystems, Inc.
-// Copyright (C)2014, 2018-2019 D. R. Commander
+// Copyright (C)2014, 2018-2019, 2025 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -56,7 +56,7 @@ namespace vglserver
 					unsetenv("LD_PRELOAD");
 					unsetenv("LD_PRELOAD_32");
 					unsetenv("LD_PRELOAD_64");
-					sprintf(commandLine, "%s -display %s -shmid %d -ppid %d",
+					snprintf(commandLine, 1024, "%s -display %s -shmid %d -ppid %d",
 						fconfig.config, DisplayString(dpy), shmid, getpid());
 					if(system(commandLine) == -1) THROW_UNIX();
 				}
@@ -89,9 +89,9 @@ namespace vglserver
 				{
 					errno = ENOMEM;  return -1;
 				}
-				sprintf(str, "%s=", name);
+				snprintf(str, strlen(name) + 2, "%s=", name);
 				putenv(str);
-				strcpy(str, "=");
+				strncpy(str, "=", strlen(name) + 2);
 				putenv(str);
 				return 0;
 			}
