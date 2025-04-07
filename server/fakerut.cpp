@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2010-2015, 2017-2024 D. R. Commander
+// Copyright (C)2010-2015, 2017-2025 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -85,17 +85,17 @@ using namespace util;
 		PRERROR2("Read FBO is %d, should be %d", __readFBO, readFBO); \
 	GLint __drawBuf0 = -1; \
 	glGetIntegerv(GL_DRAW_BUFFER0, &__drawBuf0); \
-	if(__drawBuf0 != (GLint)drawBuf0) \
+	if(__drawBuf0 != drawBuf0) \
 		PRERROR2("Draw buffer 0 is 0x%.4x, should be 0x%.4x", __drawBuf0, \
 			drawBuf0); \
 	GLint __drawBuf1 = -1; \
 	glGetIntegerv(GL_DRAW_BUFFER1, &__drawBuf1); \
-	if(__drawBuf1 != (GLint)drawBuf1) \
+	if(__drawBuf1 != drawBuf1) \
 		PRERROR2("Draw buffer 1 is 0x%.4x, should be 0x%.4x", __drawBuf1, \
 			drawBuf1); \
 	GLint __readBuf = -1; \
 	glGetIntegerv(GL_READ_BUFFER, &__readBuf); \
-	if(__readBuf != (GLint)readBuf) \
+	if(__readBuf != readBuf) \
 		PRERROR2("Read buffer is 0x%.4x, should be 0x%.4x", __readBuf, readBuf); \
 }
 
@@ -348,7 +348,8 @@ bool stereoTest(void)
 	if((err = glGetError()) != GL_NO_ERROR) \
 		PRERROR1("OpenGL error 0x%.4x in glGetFloatv()\n", err); \
 	if(fval != (GLfloat)ival) \
-		PRERROR3("glGetFloatv(0x%.4x) %f != %f\n", param, fval, (GLfloat)ival); \
+		PRERROR3("glGetFloatv(0x%.4x) %f != %f\n", param, (double)fval, \
+			(double)ival); \
 	\
 	GLint64 ival64 = -1; \
 	glGetInteger64v(param, &ival64); \
@@ -632,7 +633,7 @@ int readbackTest(bool stereo, bool doNamedFB)
 						THROW("glNamedFramebufferReadBuffer() not available");
 					__glNamedFramebufferReadBuffer(0, GL_FRONT);
 				}
-				VERIFY_FBO(0, GL_BACK, GL_NONE, 0, GL_FRONT);
+				VERIFY_FBO(0U, GL_BACK, GL_NONE, 0U, GL_FRONT);
 				glFinish();
 				checkFrame(dpy, win1, 1, lastFrame1);
 				checkWindowColor(dpy, win1, clr.bits(-2));
@@ -685,7 +686,7 @@ int readbackTest(bool stereo, bool doNamedFB)
 						THROW("glNamedFramebufferDrawBuffer() not available");
 					__glNamedFramebufferDrawBuffer(0, GL_BACK);
 				}
-				VERIFY_FBO(0, GL_BACK, GL_NONE, 0, GL_BACK);
+				VERIFY_FBO(0U, GL_BACK, GL_NONE, 0U, GL_BACK);
 				glXWaitGL();
 				checkFrame(dpy, win1, 1, lastFrame1);
 				checkWindowColor(dpy, win1, clr.bits(-2));
@@ -1018,7 +1019,7 @@ int readbackTestMS(void)
 		VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, fbo,
 			GL_COLOR_ATTACHMENT1);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		VERIFY_FBO(0, GL_BACK, GL_NONE, 0, GL_BACK);
+		VERIFY_FBO(0U, GL_BACK, GL_NONE, 0U, GL_BACK);
 		checkBufferState(GL_BACK, GL_BACK, dpy, win, win, ctx);
 		clr.clear(0);
 		VERIFY_BUF_COLOR(0, clr.bits(-1), "GL_BACK");
@@ -1168,8 +1169,8 @@ int cfgid(Display *dpy, GLXFBConfig config);
 	GET_CFG_ATTRIB(config, attrib, ctemp); \
 	GET_VIS_ATTRIB(vis, attrib, vtemp); \
 	if(ctemp != vtemp) \
-		PRERROR5("%s=%d in C%.2x & %d in V%.2x", #attrib, ctemp, \
-			cfgid(dpy, config), vtemp, vis ? (unsigned int)vis->visualid : 0); \
+		PRERROR5("%s=%d in C%.2x & %d in V%.2lx", #attrib, ctemp, \
+			cfgid(dpy, config), vtemp, vis ? vis->visualid : 0); \
 }
 
 
@@ -1608,8 +1609,7 @@ int visTest(void)
 				if(!useGL) continue;
 
 				if(!(config = getFBConfigFromVisual(dpy, &vis0[i])))
-					PRERROR1("No matching CFG for X Visual 0x%.2x",
-						(int)vis0[i].visualid);
+					PRERROR1("No matching CFG for X Visual 0x%.2lx", vis0[i].visualid);
 				configVsVisual(dpy, config, &vis0[i]);
 
 				vis2 = glXGetVisualFromFBConfig(dpy, config);
@@ -2118,7 +2118,8 @@ int offScreenTest(bool dbPixmap, bool doUseXFont, bool doSelectEvent)
 			VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0_EXT, GL_NONE, fbo,
 				GL_COLOR_ATTACHMENT0_EXT);
 			glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
-			VERIFY_FBO(0, GL_FRONT_AND_BACK, GL_NONE, fbo, GL_COLOR_ATTACHMENT0_EXT);
+			VERIFY_FBO(0U, GL_FRONT_AND_BACK, GL_NONE, fbo,
+				GL_COLOR_ATTACHMENT0_EXT);
 			glDrawBuffer(GL_BACK);
 			glXSwapBuffers(dpy, glxwin);
 			checkFrame(dpy, win, 1, lastFrame);
@@ -2126,10 +2127,10 @@ int offScreenTest(bool dbPixmap, bool doUseXFont, bool doSelectEvent)
 				ctx);
 			checkWindowColor(dpy, win, clr.bits(-3), false);
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-			VERIFY_FBO(0, GL_BACK, GL_NONE, 0, GL_FRONT);
+			VERIFY_FBO(0U, GL_BACK, GL_NONE, 0U, GL_FRONT);
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				THROWNL("Could not make context current");
-			VERIFY_FBO(0, GL_BACK, GL_NONE, 0, GL_FRONT);
+			VERIFY_FBO(0U, GL_BACK, GL_NONE, 0U, GL_FRONT);
 			clr.clear(GL_FRONT);
 			clr.clear(GL_BACK);
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
@@ -2141,11 +2142,11 @@ int offScreenTest(bool dbPixmap, bool doUseXFont, bool doSelectEvent)
 			checkWindowColor(dpy, win, clr.bits(-1), false);
 			glDeleteRenderbuffersEXT(1, &rbo);  rbo = 0;
 			glDeleteFramebuffersEXT(1, &fbo);  fbo = 0;
-			VERIFY_FBO(0, GL_BACK, GL_NONE, 0, GL_FRONT);
+			VERIFY_FBO(0U, GL_BACK, GL_NONE, 0U, GL_FRONT);
 			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "Win");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				THROWNL("Could not make context current");
-			VERIFY_FBO(0, GL_BACK, GL_NONE, 0, GL_FRONT);
+			VERIFY_FBO(0U, GL_BACK, GL_NONE, 0U, GL_FRONT);
 			printf("SUCCESS\n");
 		}
 		catch(std::exception &e)
@@ -3528,7 +3529,7 @@ int extensionQueryTest(void)
 #define TEST_PROC_SYM_OPT(f) \
 	if((sym1 = (void *)glXGetProcAddressARB((const GLubyte *)#f)) == NULL) \
 		THROW("glXGetProcAddressARB(\"" #f "\") returned NULL"); \
-	if((sym2 = (void *)dlsym(RTLD_DEFAULT, #f)) == NULL) \
+	if((sym2 = dlsym(RTLD_DEFAULT, #f)) == NULL) \
 		THROW("dlsym(RTLD_DEFAULT, \"" #f "\") returned NULL"); \
 	if(sym1 != sym2) \
 		THROW("glXGetProcAddressARB(\"" #f "\")!=dlsym(RTLD_DEFAULT, \"" #f "\")");
