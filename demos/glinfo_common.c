@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1999-2014  Brian Paul   All Rights Reserved.
  * Copyright (C) 2005  Sun Microsystems, Inc.   All Rights Reserved.
- * Copyright (C) 2014, 2018-2019  D. R. Commander   All Rights Reserved.
+ * Copyright (C) 2014, 2018-2019, 2025  D. R. Commander   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -28,9 +28,7 @@
 #include <string.h>
 #include "glinfo_common.h"
 
-#ifdef _WIN32
-#define snprintf _snprintf
-#endif
+#include "vglutil.h"
 
 #ifndef GL_CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT
 #define GL_CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT 0x00000001
