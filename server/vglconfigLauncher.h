@@ -57,7 +57,7 @@ namespace faker
 					unsetenv("LD_PRELOAD_32");
 					unsetenv("LD_PRELOAD_64");
 					sprintf(commandLine, "%s -display %s -shmid %d -ppid %d",
-						fconfig.config, DisplayString(dpy), shmid, (int)getpid());
+						fconfig.config, DisplayString(dpy), shmid, getpid());
 					if(system(commandLine) == -1) THROW_UNIX();
 				}
 				catch(std::exception &e)

@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2012, 2015, 2017-2021, 2024 D. R. Commander
+ * Copyright (C)2009, 2012, 2015, 2017-2021, 2024-2025 D. R. Commander
  * Copyright (C)2015 Open Text SA and/or Open Text ULC (in Canada)
  *
  * This library is free software and may be redistributed and/or modified under
@@ -164,7 +164,7 @@ void *dlopen(const char *filename, int flag)
 
 	if(trace)
 	{
-		fprintf(file, " retval=0x%.8lx)\n", (long)retval);
+		fprintf(file, " retval=0x%.8lx)\n", (unsigned long)retval);
 	}
 
 	setDLFakerLevel(getDLFakerLevel() - 1);

@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2014, 2017, 2019, 2021 D. R. Commander
+ * Copyright (C)2014, 2017, 2019, 2021, 2025 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -55,7 +55,7 @@ int test(const char *testName, int testOpenCL, int testEGLX);
 static int checkWindowColor(Display *dpy, Window win, unsigned int color)
 {
 	int fakerColor, retval = 0;
-	typedef unsigned int (*_vgl_getAutotestColorType)(Display *, Window, int);
+	typedef int (*_vgl_getAutotestColorType)(Display *, Window, int);
 	_vgl_getAutotestColorType _vgl_getAutotestColor;
 
 	_vgl_getAutotestColor =

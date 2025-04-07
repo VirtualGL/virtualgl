@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2010-2015, 2017-2021, 2023-2024 D. R. Commander
+// Copyright (C)2010-2015, 2017-2021, 2023-2025 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -62,17 +62,17 @@ using namespace util;
 		PRERROR2("Read FBO is %d, should be %d", __readFBO, readFBO); \
 	GLint __drawBuf0 = -1; \
 	glGetIntegerv(GL_DRAW_BUFFER0, &__drawBuf0); \
-	if(__drawBuf0 != (GLint)drawBuf0) \
+	if(__drawBuf0 != drawBuf0) \
 		PRERROR2("Draw buffer 0 is 0x%.4x, should be 0x%.4x", __drawBuf0, \
 			drawBuf0); \
 	GLint __drawBuf1 = -1; \
 	glGetIntegerv(GL_DRAW_BUFFER1, &__drawBuf1); \
-	if(__drawBuf1 != (GLint)drawBuf1) \
+	if(__drawBuf1 != drawBuf1) \
 		PRERROR2("Draw buffer 1 is 0x%.4x, should be 0x%.4x", __drawBuf1, \
 			drawBuf1); \
 	GLint __readBuf = -1; \
 	glGetIntegerv(GL_READ_BUFFER, &__readBuf); \
-	if(__readBuf != (GLint)readBuf) \
+	if(__readBuf != readBuf) \
 		PRERROR2("Read buffer is 0x%.4x, should be 0x%.4x", __readBuf, readBuf); \
 }
 
@@ -942,7 +942,7 @@ int offScreenTest(void)
 			VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0_EXT, GL_NONE, fbo,
 				GL_COLOR_ATTACHMENT0_EXT);
 			glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
-			VERIFY_FBO(0, GL_BACK, GL_NONE, fbo, GL_COLOR_ATTACHMENT0_EXT);
+			VERIFY_FBO(0U, GL_BACK, GL_NONE, fbo, GL_COLOR_ATTACHMENT0_EXT);
 			glFramebufferRenderbufferEXT(GL_DRAW_FRAMEBUFFER_EXT,
 				GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, 0);
 			eglSwapBuffers(edpy, winSurface);
@@ -950,7 +950,7 @@ int offScreenTest(void)
 			checkReadbackState(edpy, winSurface, winSurface, ctx);
 			checkWindowColor(dpy, win, clr.bits(-2));
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-			VERIFY_FBO(0, GL_BACK, GL_NONE, 0, GL_BACK);
+			VERIFY_FBO(0U, GL_BACK, GL_NONE, 0U, GL_BACK);
 			clr.clear();
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 			VERIFY_FBO(fbo, GL_COLOR_ATTACHMENT0_EXT, GL_NONE, fbo,
@@ -961,7 +961,7 @@ int offScreenTest(void)
 			checkWindowColor(dpy, win, clr.bits(-1));
 			glDeleteRenderbuffersEXT(1, &rbo);  rbo = 0;
 			glDeleteFramebuffersEXT(1, &fbo);  fbo = 0;
-			VERIFY_FBO(0, GL_BACK, GL_NONE, 0, GL_BACK);
+			VERIFY_FBO(0U, GL_BACK, GL_NONE, 0U, GL_BACK);
 			VERIFY_BUF_COLOR(clr.bits(-1), "Win");
 
 			printf("SUCCESS\n");
@@ -1227,7 +1227,7 @@ int extensionQueryTest(void)
 #define TEST_PROC_SYM_OPT(f) \
 	if((sym1 = (void *)eglGetProcAddress(#f)) == NULL) \
 		THROW("eglGetProcAddress(\"" #f "\") returned NULL"); \
-	if((sym2 = (void *)dlsym(RTLD_DEFAULT, #f)) == NULL) \
+	if((sym2 = dlsym(RTLD_DEFAULT, #f)) == NULL) \
 		THROW("dlsym(RTLD_DEFAULT, \"" #f "\") returned NULL"); \
 	if(sym1 != sym2) \
 		THROW("eglGetProcAddress(\"" #f "\")!=dlsym(RTLD_DEFAULT, \"" #f "\")");

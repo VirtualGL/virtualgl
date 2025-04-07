@@ -72,7 +72,7 @@ jobs:
       - name: Set up build
         run: |
           sudo apt update
-          sudo apt install -y libegl1-mesa-dev libfltk1.3-dev libxtst-dev
+          sudo apt install -y libegl1-mesa-dev libfltk1.3-dev ocl-icd-opencl-dev libx11-xcb-dev libxcb-glx0-dev libxcb-keysyms1-dev libxtst-dev
           mkdir $HOME/libjpeg-turbo-deb
           pushd $HOME/libjpeg-turbo-deb
           wget --no-check-certificate $LJT_URL/libjpeg-turbo-official_$LJT_VERSION\_amd64.deb $LJT_URL/libjpeg-turbo-official32_$LJT_VERSION\_amd64.deb
@@ -85,10 +85,19 @@ jobs:
           mkdir build
           pushd build
           cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            -DVGL_FAKEOPENCL=0 -DVGL_FAKEXCB=0 -DVGL_SYSTEMFLTK=1 -DVGL_USEXV=0 \
-            -DCMAKE_C_FLAGS='-ansi -Wall -Werror -Wextra -Wno-missing-field-initializers -Wformat-overflow=2 -Wformat=2 -Wformat-truncation=2 -Wmissing-include-dirs -Wshift-overflow=2 -Wunused -Wno-unused-parameter -Wunused-const-variable=1 -Wuninitialized -Wstrict-overflow=2 -Wstringop-overflow=4 -Wstringop-truncation -Wduplicated-branches -Wduplicated-cond -Wdeclaration-after-statement -Wshadow -Wunsafe-loop-optimizations -Wpointer-arith -Wundef -Wcast-align -Wjump-misses-init -Wlogical-op -Waggregate-return -Wstrict-prototypes -Wold-style-definition -Wmissing-prototypes -Wmissing-declarations -Wpacked -Wredundant-decls -Wnested-externs -Winline -Wvariadic-macros -Wdisabled-optimization' \
-            -DCMAKE_CXX_FLAGS='-ansi -Wall -Werror -Wextra -Wpedantic -pedantic-errors -Wno-missing-field-initializers -Wformat-overflow=2 -Wformat=2 -Wno-format-nonliteral -Wmissing-include-dirs -Wshift-overflow=2 -Wunused -Wno-unused-parameter -Wunused-const-variable=1 -Wuninitialized -Wstrict-overflow=2 -Wstringop-overflow=4 -Wstringop-truncation -Wduplicated-branches -Wduplicated-cond -Wshadow -Wunsafe-loop-optimizations -Wpointer-arith -Wundef -Wcast-align -Wcatch-value=3 -Wextra-semi -Wlogical-op -Wpacked -Wredundant-decls -Winline -Wvariadic-macros -Wdisabled-optimization' \
+            -DCMAKE_C_FLAGS='-ansi -Wall -Werror -Wextra -Wformat=2 -Wformat-overflow=2 -Wformat-truncation=2 -Wmissing-include-dirs -Wshift-overflow=2 -Wunused -Wno-unused-parameter -Wuse-after-free=3 -Wuninitialized -Wstrict-overflow=2 -Wstringop-overflow=4 -Wstringop-truncation -Warray-bounds=2 -Wattribute-alias=2 -Wbidi-chars=any -Wduplicated-branches -Wduplicated-cond -Wtrampolines -Wfloat-equal -Wdeclaration-after-statement -Wshadow -Wunsafe-loop-optimizations -Wpointer-arith -Wundef -Wcast-align -Wjump-misses-init -Wlogical-op -Waggregate-return -Wstrict-prototypes -Wold-style-definition -Wmissing-prototypes -Wmissing-declarations -Wpacked -Wredundant-decls -Wnested-externs -Winline -Wvariadic-macros -Wdisabled-optimization' \
+            -DCMAKE_CXX_FLAGS='-ansi -Wall -Werror -Wextra -Wpedantic -pedantic-errors -Wno-missing-field-initializers -Wdouble-promotion -Wformat=2 -Wno-format-nonliteral -Wformat-overflow=2 -Wmissing-include-dirs -Wshift-overflow=2 -Wunused -Wno-unused-parameter -Wunused-const-variable=1 -Wuse-after-free=3 -Wuseless-cast -Wuninitialized -Wstrict-overflow=2 -Wstringop-overflow=4 -Wstringop-truncation -Warray-bounds=2 -Wattribute-alias=2 -Wbidi-chars=any -Wduplicated-branches -Wduplicated-cond -Wtrampolines -Wshadow -Wunsafe-loop-optimizations -Wpointer-arith -Wundef -Wcast-align -Wcatch-value=3 -Wextra-semi -Wlogical-op -Wpacked -Wredundant-decls -Winline -Wvariadic-macros -Wdisabled-optimization' \
             ..
           export NUMCPUS=`grep -c '^processor' /proc/cpuinfo`
+          make -j$NUMCPUS --load-average=$NUMCPUS
+          popd
+          rm -rf build
+          mkdir build
+          pushd build
+          cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DVGL_FAKEOPENCL=0 -DVGL_FAKEXCB=0 -DVGL_SYSTEMFLTK=1 -DVGL_USEXV=0 \
+            -DCMAKE_C_FLAGS='-ansi -Wall -Werror -Wextra -Wformat=2 -Wformat-overflow=2 -Wformat-truncation=2 -Wmissing-include-dirs -Wshift-overflow=2 -Wunused -Wno-unused-parameter -Wuse-after-free=3 -Wuninitialized -Wstrict-overflow=2 -Wstringop-overflow=4 -Wstringop-truncation -Warray-bounds=2 -Wattribute-alias=2 -Wbidi-chars=any -Wduplicated-branches -Wduplicated-cond -Wtrampolines -Wfloat-equal -Wdeclaration-after-statement -Wshadow -Wunsafe-loop-optimizations -Wpointer-arith -Wundef -Wcast-align -Wjump-misses-init -Wlogical-op -Waggregate-return -Wstrict-prototypes -Wold-style-definition -Wmissing-prototypes -Wmissing-declarations -Wpacked -Wredundant-decls -Wnested-externs -Winline -Wvariadic-macros -Wdisabled-optimization' \
+            -DCMAKE_CXX_FLAGS='-ansi -Wall -Werror -Wextra -Wpedantic -pedantic-errors -Wno-missing-field-initializers -Wdouble-promotion -Wformat=2 -Wno-format-nonliteral -Wformat-overflow=2 -Wmissing-include-dirs -Wshift-overflow=2 -Wunused -Wno-unused-parameter -Wunused-const-variable=1 -Wuse-after-free=3 -Wuseless-cast -Wuninitialized -Wstrict-overflow=2 -Wstringop-overflow=4 -Wstringop-truncation -Warray-bounds=2 -Wattribute-alias=2 -Wbidi-chars=any -Wduplicated-branches -Wduplicated-cond -Wtrampolines -Wshadow -Wunsafe-loop-optimizations -Wpointer-arith -Wundef -Wcast-align -Wcatch-value=3 -Wextra-semi -Wlogical-op -Wpacked -Wredundant-decls -Winline -Wvariadic-macros -Wdisabled-optimization' \
+            ..
           make -j$NUMCPUS --load-average=$NUMCPUS
           popd
