@@ -14,6 +14,10 @@ attempting to run a GLX application using the EGL back end and `vglrun -nodl`.
 3. Fixed an issue whereby the VirtualGL Configuration dialog did not pop up if
 the Num Lock key was on.
 
+4. `vglserver_config` now creates a configuration file under
+**/etc/lightdm/lightdm.conf.d** rather than modifying
+**/etc/lightdm/lightdm.conf**.
+
 
 3.1.2
 =====
