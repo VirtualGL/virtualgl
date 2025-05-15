@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011, 2013-2016, 2018-2021 D. R. Commander
+// Copyright (C)2009, 2011, 2013-2016, 2018-2021, 2025 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -72,8 +72,10 @@ namespace faker
 			XFindOnExtensionList(XEHeadOfExtensionList(obj), 0) ? 0 : 1;
 		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj),
 			minExtensionNumber);
-		ERRIFNOT(extData);
-		ERRIFNOT(extData->private_data);
+		if(!extData || !extData->private_data)
+			THROW("VirtualGL extensions not found on X display.  If the 3D\n"
+				"[VGL]    application uses dlopen()/dlsym() to load X11 functions, then\n"
+				"[VGL]    VirtualGL's dlopen() interposer must be preloaded.");
 
 		return *(bool *)extData->private_data;
 	}
@@ -92,8 +94,10 @@ namespace faker
 			XFindOnExtensionList(XEHeadOfExtensionList(obj), 0) ? 0 : 1;
 		extData = XFindOnExtensionList(XEHeadOfExtensionList(obj),
 			minExtensionNumber + 1);
-		ERRIFNOT(extData);
-		ERRIFNOT(extData->private_data);
+		if(!extData || !extData->private_data)
+			THROW("VirtualGL extensions not found on X display.  If the 3D\n"
+				"[VGL]    application uses dlopen()/dlsym() to load X11 functions, then\n"
+				"[VGL]    VirtualGL's dlopen() interposer must be preloaded.");
 
 		return *(util::CriticalSection *)extData->private_data;
 	}
