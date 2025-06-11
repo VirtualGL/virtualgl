@@ -101,3 +101,50 @@ jobs:
             ..
           make -j$NUMCPUS --load-average=$NUMCPUS
           popd
+  windows:
+    runs-on: windows-2025
+    steps:
+      - name: Set global environment variables
+        shell: bash
+        run: |
+          echo "BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >$GITHUB_ENV
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up build
+        shell: bash
+        run: |
+          set -x
+          choco install -y nsis
+          git clone --depth=1 https://github.com/nathan818fr/vcvars-bash.git c:/vcvars-bash
+          git clone --depth=1 https://github.com/VirtualGL/buildscripts.git -b $BRANCH c:/buildscripts
+      - name: Configure GPG signing
+        if: ${{github.event_name != 'pull_request'}}
+        shell: bash
+        run: |
+          printf "${{secrets.GPG_KEY}}" | base64 --decode | gpg --batch --import -
+          echo "GPG_KEY_NAME=\"${{secrets.GPG_KEY_NAME}}\"" >c:/buildscripts/gpgsign
+          echo "GPG_KEY_ID=${{secrets.GPG_KEY_ID}}" >>c:/buildscripts/gpgsign
+          echo "GPG_KEY_PASS=${{secrets.GPG_KEY_PASS}}" >>c:/buildscripts/gpgsign
+      - name: Build
+        shell: bash
+        run: |
+          export PATH="/c/Program Files (x86)/NSIS/:$PATH"
+          export VSINSTALLDIR='C:\Program Files\Microsoft Visual Studio\2022\Enterprise\'
+          eval "$(c:/vcvars-bash/vcvarsall.sh amd64)"
+          echo INCLUDE=$INCLUDE
+          echo LIB=$LIB
+          echo PATH=$PATH
+          c:/buildscripts/buildvgl -d $GITHUB_WORKSPACE -b /c/vgl.nightly -v
+          mv /c/vgl.nightly/log-${{github.job}}.txt /c/vgl.nightly/files/
+      - name: Configure AWS
+        if: ${{github.event_name != 'pull_request'}}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+          aws-region: ${{secrets.AWS_REGION}}
+      - name: Deploy
+        if: ${{github.event_name != 'pull_request' && !contains(github.ref, 'refs/tags/')}}
+        shell: bash
+        run: |
+          aws s3 sync --acl public-read --delete c:/vgl.nightly/files s3://virtualgl-pr/${{env.BRANCH}}/${{github.job}}/
