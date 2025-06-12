@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2025-03-06T15:10:42">
+<meta name="date" content="2025-06-12T11:01:33">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.0.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2238,10 +2238,10 @@ procedures:</p>
   </tr>
   <tr class="standard">
     <td class="standard">MATLAB</td>
-    <td class="standard">All</td>
+    <td class="standard">R2024b and earlier</td>
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun /usr/local/MATLAB/<em>version</em>/bin/matlab \</code><br /> <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-nosoftwareopengl</code></td>
-    <td class="standard">MATLAB will automatically use its built-in (unaccelerated) OpenGL implementation if it detects that it is running in a remote display environment.  More specifically, it will always enable software OpenGL if the X server has an X extension called <code>VNC-EXTENSION</code>, which is the case with TurboVNC, TigerVNC, and RealVNC.</td>
+    <td class="standard">MATLAB will automatically use its built-in (unaccelerated) OpenGL implementation if it detects that it is running in a remote display environment.  More specifically, it will always enable software OpenGL if the X server has an X extension called <code>VNC-EXTENSION</code>, which is the case with TurboVNC, TigerVNC, and RealVNC. <br /><br /> MATLAB R2025a and later use Vulkan rather than OpenGL, so it is not possible to use VirtualGL with these releases.</td>
   </tr>
   <tr class="standard">
     <td class="standard">PyTorch</td>
