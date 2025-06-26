@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2009-2016, 2019-2024 D. R. Commander
+// Copyright (C)2009-2016, 2019-2025 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -607,7 +607,10 @@ static void buildCfgAttribTable(Display *dpy, int screen)
 
 		for(int i = 0; i < nConfigs; i++)
 		{
-			ca[i].visualID = matchVisual2D(dpy, screen, &ca[i]);
+			if(fconfig.chromeHack && ca[i].attr.alphaSize == 8)
+				ca[i].visualID = getHighestScoringVisualID(dpy, screen);
+			if(!ca[i].visualID)
+				ca[i].visualID = matchVisual2D(dpy, screen, &ca[i]);
 			if(fconfig.trace && ca[i].visualID)
 				vglout.println("[VGL] FB config 0x%.2x has attached visual 0x%.2x",
 					ca[i].id, (unsigned int)ca[i].visualID);
@@ -1088,9 +1091,9 @@ VGLFBConfig getDefaultFBConfig(Display *dpy, int screen, VisualID vid)
 }
 
 
-XVisualInfo *getHighestScoringVisual(Display *dpy, int screen)
+VisualID getHighestScoringVisualID(Display *dpy, int screen)
 {
-	if(!dpy) return NULL;
+	if(!dpy) return 0;
 
 	int highestScore = -1;
 	VisualID bestVisualID =
@@ -1107,8 +1110,7 @@ XVisualInfo *getHighestScoringVisual(Display *dpy, int screen)
 		}
 	}
 
-	if(bestVisualID) return visualFromID(dpy, screen, bestVisualID);
-	else return NULL;
+	return bestVisualID;
 }
 
 }  // namespace

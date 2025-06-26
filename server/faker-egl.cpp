@@ -1,5 +1,5 @@
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2011, 2014-2015, 2018, 2021-2024 D. R. Commander
+// Copyright (C)2011, 2014-2015, 2018, 2021-2025 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -122,9 +122,11 @@ static XVisualInfo *getVisualFromConfig(faker::EGLXDisplay *eglxdpy,
 		&& _eglGetConfigAttrib(eglxdpy->edpy, config, EGL_ALPHA_SIZE, &alphaSize)
 		&& alphaSize == 8)
 	{
-		XVisualInfo *v = glxvisual::getHighestScoringVisual(eglxdpy->x11dpy,
-			eglxdpy->screen);
-		if(v) return v;
+		VisualID bestVisualID =
+			glxvisual::getHighestScoringVisualID(eglxdpy->x11dpy, eglxdpy->screen);
+		if(bestVisualID)
+			return glxvisual::visualFromID(eglxdpy->x11dpy, eglxdpy->screen,
+				bestVisualID);
 	}
 
 	return getVisual(eglxdpy->x11dpy, eglxdpy->screen, depth, TrueColor);
