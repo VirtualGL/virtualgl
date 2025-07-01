@@ -103,12 +103,35 @@
 		rather than a separate process for 3D rendering, which prevents it from \
 		complaining about the X11 function calls that the VirtualGL Faker makes. \
 		The ''--use-gl=egl'' option forces Chrome/Chromium to use desktop OpenGL \
-		rather than ANGLE, which works around an issue whereby, when using ANGLE, \
-		Chrome/Chromium assumes that every X visual has an EGL framebuffer \
-		configuration associated with it. \
+		rather than ANGLE, which works around the X visual selection issue \
+		described below. \
+	|
+| Google Chrome/Chromium | v129 and later | Linux \
+	| Set the ''VGL_CHROMEHACK'' environment variable to ''1'', then launch the \
+		application with \
 		{nl}{nl} \
-		As of this writing, there are no known workarounds that allow Chrome v129 \
-		and later to be used with VirtualGL. |
+		''vglrun google-chrome --in-process-gpu''{nl} \
+		or{nl} \
+		''vglrun chromium --in-process-gpu'' \
+	| Chrome uses ANGLE, an OpenGL ES emulator that translates OpenGL ES \
+		function calls into OpenGL, OpenGL ES, or Vulkan function calls.  When \
+		using ANGLE's OpenGL back end, Chrome chooses an X visual by sending raw \
+		GLX requests to the 2D X server, bypassing VirtualGL.  Thus, the X visual \
+		it chooses has rendering attributes that are only relevant for the 2D X \
+		server's OpenGL implementation.  Chrome then expects to find a GLX or EGL \
+		framebuffer configuration to which the chosen X visual is assigned.  That \
+		will normally never happen when using VirtualGL.  ''VGL_CHROMEHACK'' \
+		works around this issue by emulating Chrome's X visual selection \
+		mechanism and assigning the chosen visual to all GLX and EGL framebuffer \
+		configurations that have an 8-bit alpha channel. \
+		{nl}{nl} \
+		When using nVidia's proprietary Vulkan driver, which does something \
+		VirtualGL-like in an X proxy environment, or when using an X proxy that \
+		implements the DRI3 X extension, you can also enable GPU acceleration by \
+		passing ''--use-angle=vulkan'' to ''google-chrome'' or ''chromium''.  No \
+		additional arguments or environment variables are necessary in this case, \
+		nor is it necessary to launch the application with ''vglrun''. \
+	|
 | Compiz | All | Linux \
 	| Set the ''VGL_WM'' environment variable to ''1'' prior to launching the \
 		window manager with ''vglrun'', or pass an argument of ''+wm'' to \
@@ -176,9 +199,25 @@
 		environment.  More specifically, it will always enable software OpenGL \
 		if the X server has an X extension called ''VNC-EXTENSION'', which is \
 		the case with TurboVNC, TigerVNC, and RealVNC. \
+	|
+| MATLAB | R2025a and later | Linux \
+	| Set the ''VGL_CHROMEHACK'' environment variable to ''1'', then launch the \
+		application with \
 		{nl}{nl} \
-		MATLAB R2025a and later use Vulkan rather than OpenGL, so it is not \
-		possible to use VirtualGL with these releases. \
+		{pcode: vglrun /usr/local/MATLAB/__version__/bin/matlab \\}{nl} \
+		''       -nosoftwareopengl'' \
+	| MATLAB R2025a and later use the Chromium Embedded Framework (CEF), so \
+		''VGL_CHROMEHACK'' is necessary to work around Chrome's X visual \
+		selection mechanism.  (Refer to the application recipe for Chrome v129 \
+		and later.) \
+		{nl}{nl} \
+		When using nVidia's proprietary Vulkan driver, which does something \
+		VirtualGL-like in an X proxy environment, or when using an X proxy that \
+		implements the DRI3 X extension, you can also enable GPU acceleration by \
+		setting the ''MW_CEF_STARTUP_OPTIONS'' environment variable to \
+		''--use-angle=vulkan'' prior to launching MATLAB.  No additional \
+		arguments or environment variables are necessary in this case, nor is it \
+		necessary to launch the application with ''vglrun''. \
 	|
 | PyTorch | All | Linux \
 	| {pcode: vglrun -ld __path-to-PyTorch-libs__ __application__}{nl} \

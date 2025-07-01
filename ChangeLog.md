@@ -1,3 +1,14 @@
+3.1.4
+=====
+
+### Significant changes relative to 3.1.3:
+
+1. The VirtualGL Faker now includes an optional workaround for an interaction
+issue with the X visual selection mechanism in Chrome/Chromium v129 and later
+and MATLAB R2025a and later.  Refer to the "Other Application Recipes" chapter
+in the VirtualGL User's Guide for more information.
+
+
 3.1.3
 =====
 

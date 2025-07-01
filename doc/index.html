@@ -3,9 +3,9 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2025-06-12T11:00:51">
+<meta name="date" content="2025-07-01T12:15:57">
 <meta name="generator" content="deplate.rb 0.8.5">
-<title>User&rsquo;s Guide for VirtualGL 3.1.3</title>
+<title>User&rsquo;s Guide for VirtualGL 3.1.4</title>
 <link rel="start" href="index.html" title="Frontpage">
 <link rel="chapter" href="index.html#hd001" title="1 Legal Information">
 <link rel="chapter" href="index.html#hd002" title="2 Conventions Used in This Document">
@@ -30,7 +30,7 @@
 <body >
 <a name="#pagetop"></a>
 <div class="title">
-<p class="title">User&rsquo;s Guide for VirtualGL 3.1.3</p>
+<p class="title">User&rsquo;s Guide for VirtualGL 3.1.4</p>
 </div>
 <a name="file000"></a>
 <p><em>Intended audience:</em> System Administrators, Graphics Programmers, 
@@ -746,7 +746,7 @@ If you are installing VirtualGL onto a fresh server, and you also intend to inst
         packages are provided for Linux distributions that contain GLIBC 2.17 or 
         later. <br />
         <div class="important"><p class="important">
-        If you want to run both 32-bit and 64-bit OpenGL applications with VirtualGL on 64-bit x86 Linux systems, then you will need to install both <strong class="filename">VirtualGL-3.1.3.x86_64.rpm</strong> and <strong class="filename">VirtualGL-3.1.3.i386.rpm</strong>, or both <strong class="filename">virtualgl_3.1.3_amd64.deb</strong> and <strong class="filename">virtualgl32_3.1.3_amd64.deb</strong>. (<strong class="filename">virtualgl32_3.1.3_amd64.deb</strong> is a supplementary package that contains only the 32-bit server components.)
+        If you want to run both 32-bit and 64-bit OpenGL applications with VirtualGL on 64-bit x86 Linux systems, then you will need to install both <strong class="filename">VirtualGL-3.1.4.x86_64.rpm</strong> and <strong class="filename">VirtualGL-3.1.4.i386.rpm</strong>, or both <strong class="filename">virtualgl_3.1.4_amd64.deb</strong> and <strong class="filename">virtualgl32_3.1.4_amd64.deb</strong>. (<strong class="filename">virtualgl32_3.1.4_amd64.deb</strong> is a supplementary package that contains only the 32-bit server components.)
         </p></div>
     </li>
     <li class="Ordered-1 Ordered" value="2">
@@ -804,7 +804,7 @@ apt&nbsp;install&nbsp;-f
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
         Download the VirtualGL Mac disk image 
-        (<strong class="filename">VirtualGL-3.1.3.dmg</strong>) from the 
+        (<strong class="filename">VirtualGL-3.1.4.dmg</strong>) from the 
         <span class="remote"><a href="https://github.com/VirtualGL/virtualgl/releases" class="remote">Releases 
         area</a></span><a name="idx0017"></a> of the 
         <span class="remote"><a href="https://github.com/VirtualGL/virtualgl" class="remote">VirtualGL 
@@ -812,7 +812,7 @@ apt&nbsp;install&nbsp;-f
     </li>
     <li class="Ordered-1 Ordered">
         Open the disk image, then open 
-        <strong class="filename">VirtualGL-3.1.3.pkg</strong> inside the disk 
+        <strong class="filename">VirtualGL-3.1.4.pkg</strong> inside the disk 
         image.  Follow the instructions to install the Mac VirtualGL Client.
     </li>
 </ol>
@@ -829,12 +829,12 @@ apt&nbsp;install&nbsp;-f
 
 <p>If you are using a platform for which there is not a pre-built VirtualGL 
 binary package available, then download the VirtualGL source tarball 
-(<strong class="filename">VirtualGL-3.1.3.tar.gz</strong>) from the 
+(<strong class="filename">VirtualGL-3.1.4.tar.gz</strong>) from the 
 <span class="remote"><a href="https://github.com/VirtualGL/virtualgl/releases" class="remote">Releases 
 area</a></span><a name="idx0019"></a> of the 
 <span class="remote"><a href="https://github.com/VirtualGL/virtualgl" class="remote">VirtualGL 
 GitHub project page</a></span><a name="idx0020"></a>, uncompress it, 
-<code>cd VirtualGL-3.1.3</code>, and read the contents of 
+<code>cd VirtualGL-3.1.4</code>, and read the contents of 
 <strong class="filename">BUILDING.md</strong> for further instructions 
 on how to build and install VirtualGL from source.</p>
 
@@ -2131,7 +2131,14 @@ displaying Windows 3D applications remotely.</p>
     <td class="standard">v85 through v128</td>
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun&nbsp;google-chrome&nbsp;--in-process-gpu&nbsp;--use-gl=egl</code><br /> or<br /> <code>vglrun&nbsp;chromium&nbsp;--in-process-gpu&nbsp;--use-gl=egl</code></td>
-    <td class="standard">The <code>--in-process-gpu</code> option causes Chrome/Chromium to use a thread rather than a separate process for 3D rendering, which prevents it from complaining about the X11 function calls that the VirtualGL Faker makes. The <code>--use-gl=egl</code> option forces Chrome/Chromium to use desktop OpenGL rather than ANGLE, which works around an issue whereby, when using ANGLE, Chrome/Chromium assumes that every X visual has an EGL framebuffer configuration associated with it. <br /><br /> As of this writing, there are no known workarounds that allow Chrome v129 and later to be used with VirtualGL.</td>
+    <td class="standard">The <code>--in-process-gpu</code> option causes Chrome/Chromium to use a thread rather than a separate process for 3D rendering, which prevents it from complaining about the X11 function calls that the VirtualGL Faker makes. The <code>--use-gl=egl</code> option forces Chrome/Chromium to use desktop OpenGL rather than ANGLE, which works around the X visual selection issue described below.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">Google Chrome/Chromium</td>
+    <td class="standard">v129 and later</td>
+    <td class="standard">Linux</td>
+    <td class="standard">Set the <code>VGL_CHROMEHACK</code> environment variable to <code>1</code>, then launch the application with <br /><br /> <code>vglrun&nbsp;google-chrome&nbsp;--in-process-gpu</code><br /> or<br /> <code>vglrun&nbsp;chromium&nbsp;--in-process-gpu</code></td>
+    <td class="standard">Chrome uses ANGLE, an OpenGL ES emulator that translates OpenGL ES function calls into OpenGL, OpenGL ES, or Vulkan function calls.  When using ANGLE&rsquo;s OpenGL back end, Chrome chooses an X visual by sending raw GLX requests to the 2D X server, bypassing VirtualGL.  Thus, the X visual it chooses has rendering attributes that are only relevant for the 2D X server&rsquo;s OpenGL implementation.  Chrome then expects to find a GLX or EGL framebuffer configuration to which the chosen X visual is assigned.  That will normally never happen when using VirtualGL.  <code>VGL_CHROMEHACK</code> works around this issue by emulating Chrome&rsquo;s X visual selection mechanism and assigning the chosen visual to all GLX and EGL framebuffer configurations that have an 8-bit alpha channel. <br /><br /> When using nVidia&rsquo;s proprietary Vulkan driver, which does something VirtualGL-like in an X proxy environment, or when using an X proxy that implements the DRI3 X extension, you can also enable GPU acceleration by passing <code>--use-angle=vulkan</code> to <code>google-chrome</code> or <code>chromium</code>.  No additional arguments or environment variables are necessary in this case, nor is it necessary to launch the application with <code>vglrun</code>.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Compiz</td>
@@ -2187,7 +2194,14 @@ displaying Windows 3D applications remotely.</p>
     <td class="standard">R2024b and earlier</td>
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun /usr/local/MATLAB/<em>version</em>/bin/matlab \</code><br /> <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-nosoftwareopengl</code></td>
-    <td class="standard">MATLAB will automatically use its built-in (unaccelerated) OpenGL implementation if it detects that it is running in a remote display environment.  More specifically, it will always enable software OpenGL if the X server has an X extension called <code>VNC-EXTENSION</code>, which is the case with TurboVNC, TigerVNC, and RealVNC. <br /><br /> MATLAB R2025a and later use Vulkan rather than OpenGL, so it is not possible to use VirtualGL with these releases.</td>
+    <td class="standard">MATLAB will automatically use its built-in (unaccelerated) OpenGL implementation if it detects that it is running in a remote display environment.  More specifically, it will always enable software OpenGL if the X server has an X extension called <code>VNC-EXTENSION</code>, which is the case with TurboVNC, TigerVNC, and RealVNC.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">MATLAB</td>
+    <td class="standard">R2025a and later</td>
+    <td class="standard">Linux</td>
+    <td class="standard">Set the <code>VGL_CHROMEHACK</code> environment variable to <code>1</code>, then launch the application with <br /><br /> <code>vglrun /usr/local/MATLAB/<em>version</em>/bin/matlab \</code><br /> <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-nosoftwareopengl</code></td>
+    <td class="standard">MATLAB R2025a and later use the Chromium Embedded Framework (CEF), so <code>VGL_CHROMEHACK</code> is necessary to work around Chrome&rsquo;s X visual selection mechanism.  (Refer to the application recipe for Chrome v129 and later.) <br /><br /> When using nVidia&rsquo;s proprietary Vulkan driver, which does something VirtualGL-like in an X proxy environment, or when using an X proxy that implements the DRI3 X extension, you can also enable GPU acceleration by setting the <code>MW_CEF_STARTUP_OPTIONS</code> environment variable to <code>--use-angle=vulkan</code> prior to launching MATLAB.  No additional arguments or environment variables are necessary in this case, nor is it necessary to launch the application with <code>vglrun</code>.</td>
   </tr>
   <tr class="standard">
     <td class="standard">PyTorch</td>
