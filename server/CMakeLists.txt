@@ -134,6 +134,7 @@ foreach(fakerlib ${FAKERLIBS})
 	else()
 		add_library(${fakerlib} SHARED ${FAKER_SOURCES})
 	endif()
+	set_property(TARGET ${fakerlib} APPEND PROPERTY COMPILE_DEFINITIONS INFAKER)
 	if(${fakerlib} STREQUAL ${VGL_FAKER_NAME} AND
 		CMAKE_SYSTEM_NAME MATCHES "Linux")
 		# GCC 4.6 and later on Linux apparently passes --as-needed to the linker,

@@ -1,4 +1,4 @@
-// Copyright (C)2009-2024 D. R. Commander
+// Copyright (C)2009-2025 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -18,6 +18,13 @@
 #include "Log.h"
 #include "Mutex.h"
 #include "fakerconfig.h"
+#ifdef INFAKER
+#include "faker-sym.h"
+#else
+#define _XFree  XFree
+#define _XQueryExtension  XQueryExtension
+#define _XServerVendor  XServerVendor
+#endif
 #include <stdio.h>
 #include <X11/keysym.h>
 #if FCONFIG_USESHM == 1
@@ -531,7 +538,7 @@ void fconfig_setdefaultsfromdpy(Display *dpy)
 				&prop) == Success && n >= 1 && actualFormat == 16
 				&& actualType == XA_INTEGER && prop)
 				fconfig.port = *(unsigned short *)prop;
-			if(prop) XFree(prop);
+			if(prop) _XFree(prop);
 		}
 	}
 
@@ -542,7 +549,7 @@ void fconfig_setdefaultsfromdpy(Display *dpy)
 	XvAdaptorInfo *ai = NULL;
 	XvImageFormatValues *ifv = NULL;
 
-	if(XQueryExtension(dpy, "XVideo", &dummy1, &dummy2, &dummy3)
+	if(_XQueryExtension(dpy, "XVideo", &dummy1, &dummy2, &dummy3)
 		&& XvQueryAdaptors(dpy, DefaultRootWindow(dpy), &nadaptors,
 		&ai) == Success && nadaptors >= 1 && ai)
 	{
@@ -559,12 +566,12 @@ void fconfig_setdefaultsfromdpy(Display *dpy)
 					{
 						if(ifv[k].id == 0x30323449)
 						{
-							XFree(ifv);  port = j;
+							_XFree(ifv);  port = j;
 							goto found;
 						}
 					}
 				}
-				XFree(ifv);
+				_XFree(ifv);
 			}
 		}
 		found:
@@ -607,7 +614,20 @@ void fconfig_setprobeglxfromdpy(Display *dpy)
 		fconfig_setcompressfromdpy(dpy, fc);
 
 		if(strlen(fc.transport) != 0 || fc.transvalid[RRTRANS_VGL] == 1)
-			fconfig.probeglx = 1;
+		{
+			int majorOpcode, firstEvent, firstError;
+
+			// XQuartz and Cygwin/X do not support stereo visuals, so there is no
+			// point in probing the 2D X server's visuals.
+			if(strstr(_XServerVendor(dpy), "Cygwin")
+				|| _XQueryExtension(dpy, "Apple-DRI", &majorOpcode, &firstEvent,
+						&firstError)
+				|| _XQueryExtension(dpy, "Apple-WM", &majorOpcode, &firstEvent,
+						&firstError))
+				fconfig.probeglx = 0;
+			else
+				fconfig.probeglx = 1;
+		}
 		else
 			fconfig.probeglx = 0;
 	}
