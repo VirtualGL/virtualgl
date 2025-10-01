@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009-2015, 2017-2021 D. R. Commander
+// Copyright (C)2009-2015, 2017-2021, 2025 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -81,7 +81,7 @@ VirtualWin::VirtualWin(Display *dpy_, Window win) :
 				win);
 	}
 	stereoVisual = false;
-	if(edpy != EGL_NO_DISPLAY)
+	if(edpy == EGL_NO_DISPLAY)
 		stereoVisual = glxvisual::visAttrib(dpy, DefaultScreen(dpy),
 			xwa.visual->visualid, GLX_STEREO);
 }

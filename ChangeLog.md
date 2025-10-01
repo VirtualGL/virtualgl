@@ -8,6 +8,10 @@ issue with the X visual selection mechanism in Chrome/Chromium v129 and later
 and MATLAB R2025a and later.  Refer to the "Other Application Recipes" chapter
 in the VirtualGL User's Guide for more information.
 
+2. Fixed a regression introduced by 3.1 beta1[3] that prevented the faker from
+enabling quad-buffered stereo, even if the requirements for quad-buffered
+stereo had been met.
+
 
 3.1.3
 =====
