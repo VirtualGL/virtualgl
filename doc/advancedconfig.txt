@@ -119,7 +119,7 @@ previous method:
 | Summary | __''{d}''__ = the X display/screen or EGL device to use for 3D \
 	rendering |
 | Image Transports | All |
-| Default Value | '':0'' |
+| Default Value | '':0'' or '':1024'' |
 #OPT: hiCol=first
 
 	Description :: If the VirtualGL server has multiple GPUs, then you can use
@@ -127,12 +127,17 @@ previous method:
 	instance, setting ''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with)
 	'':0.1'' would cause VirtualGL to use the GLX back end and redirect all of
 	the OpenGL rendering from the 3D application to a GPU attached to Screen 1 on
-	X display :0.  Setting ''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with)
+	X Display :0.  Setting ''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with)
 	a DRI device path (such as ''/dev/dri/card0'') or an EGL device ID (such as
 	''egl0'') would cause VirtualGL to use the EGL back end and redirect all of
 	the OpenGL rendering from the 3D application to the specified EGL device.
 	''/opt/VirtualGL/bin/eglinfo -e'' lists all valid EGL device IDs and their
 	associated DRI device paths.
+
+	!!! ''vglrun'' automatically sets ''VGL_DISPLAY'' to '':1024'' if
+	''VGL_DISPLAY'' is unset, X Display :1024 exists, and X Display :0 does not
+	exist.  This allows VirtualGL to use the GDM greeter's Xwayland instance as a
+	3D X server.
 
 | Environment Variable | {pcode: VGL_EGLLIB = __{l}__ } |
 | Summary | __''{l}''__ = the location of an alternate EGL library |

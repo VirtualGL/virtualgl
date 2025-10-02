@@ -20,7 +20,6 @@ RMMODNEEDED=0
 NVIDIADRMNEEDED=0
 UNATTENDED=0
 SELINUX=0
-WAYLAND=0
 BACKEND=glx
 
 GID=
@@ -279,22 +278,6 @@ disallowgdmtcp()
 {
 	echo ... Commenting out DisallowTCP line \(if it exists\) in $1 ...
 	commentline $1 "DisallowTCP.*=.*"
-}
-
-disablewaylandgdm()
-{
-	backup $1
-	echo ... Disabling Wayland in $1 ...
-	grep -q "WaylandEnable.*=.*false" $1 && (
-		uncommentline $1 "WaylandEnable.*=.*false"
-	) || (
-		grep -q "WaylandEnable" $1 && (
-			replaceline $1 WaylandEnable "WaylandEnable=false"
-		) || (
-			removeline $1 WaylandEnable
-			addtoconf $1 "daemon" "daemon" WaylandEnable=false
-		)
-	)
 }
 
 setdripermissions()
@@ -579,37 +562,6 @@ checkselinux()
 	fi
 }
 
-checkwayland()
-{
-	which Xwayland >/dev/null 2>&1 || return 0
-	if [ -f /etc/systemd/system/display-manager.service ]; then
-		DM=`grep ExecStart=\/usr /etc/systemd/system/display-manager.service | sed 's/.*\///g'`
-		if [ ! "$DM" = "gdm" -a ! "$DM" = "gdm3" ]; then
-			return 0
-		fi
-	elif [ -f /etc/alternatives/default-displaymanager ]; then
-		DM=`grep DISPLAYMANAGER=\/usr /etc/alternatives/default-displaymanager | sed 's/.*\///g'`
-		if [ ! "$DM" = "gdm" ]; then
-			return 0
-		fi
-	else
-		return 0
-	fi
-	WAYLAND=1
-	echo
-	echo WARNING: Configuring this server for use with VirtualGL will disable the
-	echo ability to log in locally with a Wayland session.
-	if [ $UNATTENDED = 0 ]; then
-		ynprompt "Continue?"
-		if [ ! "$?" = "1" ]; then
-			return 1
-		fi
-	else
-		echo
-	fi
-	return 0
-}
-
 unconfigglx()
 {
 	if [ -d /etc/opt/VirtualGL ]; then
@@ -793,8 +745,6 @@ configegl()
 
 configglx()
 {
-	checkwayland || return
-
 	if [ $UNATTENDED = 0 ]; then
 		ynprompt "Restrict 3D X server access to vglusers group (recommended)?"
 		if [ $? = 1 ]; then VGLUSERSONLY=1; else VGLUSERSONLY=0; fi
@@ -916,8 +866,8 @@ EOF
 		/etc/X11/gdm/custom.conf \
 		/etc/gdm3/custom.conf \
 		/etc/gdm3/daemon.conf; do
-		if [ -f $file -a ! -h $file -a $WAYLAND = 1 ]; then
-			disablewaylandgdm $file
+		if [ -f $file -a ! -h $file ]; then
+			commentline $file "WaylandEnable.*=.*false"
 		fi
 	done
 

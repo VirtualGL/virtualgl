@@ -21,13 +21,6 @@ LightDM) installed and has been configured to start the display manager and 3D
 X server at boot time.  This is the default with most modern Linux and Unix
 distributions.
 
-	!!! On Wayland-enabled Linux machines running GDM, configuring the machine
-	for use with the GLX back end will disable the ability to log in locally with
-	a Wayland session.  In general, logging in locally once the machine has been
-	configured for use with the GLX back end is discouraged, as this could
-	disrupt VirtualGL's connection to the 3D X server and thus cause OpenGL
-	applications running with VirtualGL to abort or freeze.
-
 3. Accelerated OpenGL is working properly in the 3D X server.
 	* If the 3D X server is not headless, then this can be verified by logging
 	into the X server locally and running ''glxinfo''.
@@ -60,8 +53,10 @@ disallow access to the GPU.  Thus, it is necessary to grant full, trusted
 access to the 3D X server for any users that will need to use the GLX back end.
 Unless you fully trust the users to whom you are granting this access, then
 you should avoid logging in locally to the 3D X server (particularly as root)
-unless absolutely necessary.  (Logging in locally to the 3D X server is
-discouraged anyhow, for reasons explained in the previous section.)
+unless absolutely necessary.  (In general, logging in locally once the machine
+has been configured for use with the GLX back end is discouraged, as this could
+disrupt VirtualGL's connection to the 3D X server and thus cause OpenGL
+applications running with VirtualGL to abort or freeze.)
 
 This section will explain how to configure a VirtualGL server such that
 selected users can use the GLX back end, even if the server is sitting at the
@@ -206,22 +201,23 @@ end, log out of the server, log back into the server using SSH, and execute the
 following commands in the SSH session:
 
 	If you restricted 3D X server access to ''vglusers'' :: {:}
-	#Verb <<---
-	xauth merge /etc/opt/VirtualGL/vgl_xauth_key
-	xdpyinfo -display :0
-	/opt/VirtualGL/bin/glxinfo -display :0 -c
-	---
+#Pverb <<---
+xauth merge /etc/opt/VirtualGL/vgl_xauth_key
+xdpyinfo -display :__n__
+/opt/VirtualGL/bin/glxinfo -display :__n__ -c
+---
 
 	If you did not restrict 3D X server access :: {:}
-	#Verb <<---
-	xdpyinfo -display :0
-	/opt/VirtualGL/bin/glxinfo -display :0 -c
-	---
+#Pverb <<---
+xdpyinfo -display :__n__
+/opt/VirtualGL/bin/glxinfo -display :__n__ -c
+---
 
-Both commands should output a list of visuals and should complete with no
-errors.  If you chose to disable the ''XTEST'' extension, then check the output
-of the ''xdpyinfo'' command to verify that ''XTEST'' does not show up in the
-list of extensions.
+(where __''n''__ is the display number of the 3D X server.)  Both commands
+should output a list of visuals and should complete with no errors.  If you
+chose to disable the ''XTEST'' extension, then check the output of the
+''xdpyinfo'' command to verify that ''XTEST'' does not show up in the list of
+extensions.
 
 You should also examine the output of the ''glxinfo'' command to ensure that at
 least one of the visuals is 24-bit or 32-bit TrueColor and has Pbuffer support.

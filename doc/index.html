@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2025-07-01T12:15:57">
+<meta name="date" content="2025-10-07T13:56:21">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.1.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -921,10 +921,6 @@ LightDM) installed and has been configured to start the display manager
 and 3D X server at boot time.  This is the default with most modern 
 Linux and Unix distributions.</p>
 
-<div class="important"><p class="important">
-On Wayland-enabled Linux machines running GDM, configuring the machine for use with the GLX back end will disable the ability to log in locally with a Wayland session.  In general, logging in locally once the machine has been configured for use with the GLX back end is discouraged, as this could disrupt VirtualGL&rsquo;s connection to the 3D X server and thus cause OpenGL applications running with VirtualGL to abort or freeze.
-</p></div>
-
 <p>3. Accelerated OpenGL is working properly in the 3D X server.</p>
 
 <ul class="Itemize">
@@ -969,8 +965,10 @@ to grant full, trusted access to the 3D X server for any users that will
 need to use the GLX back end. Unless you fully trust the users to whom 
 you are granting this access, then you should avoid logging in locally 
 to the 3D X server (particularly as root) unless absolutely necessary.  
-(Logging in locally to the 3D X server is discouraged anyhow, for 
-reasons explained in the previous section.)</p>
+(In general, logging in locally once the machine has been configured for 
+use with the GLX back end is discouraged, as this could disrupt 
+VirtualGL&rsquo;s connection to the 3D X server and thus cause OpenGL 
+applications running with VirtualGL to abort or freeze.)</p>
 
 <p>This section will explain how to configure a VirtualGL server such that 
 selected users can use the GLX back end, even if the server is sitting 
@@ -1166,27 +1164,26 @@ execute the following commands in the SSH session:</p>
 <dl class="Description">
     <dt class="Description-1 Description">If you restricted 3D X server access to <code>vglusers</code></dt>
     <dd class="Description-1 Description">
-<pre class="verbatim">
-xauth&nbsp;merge&nbsp;/etc/opt/VirtualGL/vgl_xauth_key
-xdpyinfo&nbsp;-display&nbsp;:0
-/opt/VirtualGL/bin/glxinfo&nbsp;-display&nbsp;:0&nbsp;-c
-</pre>
-
-    </dd>
-    <dt class="Description-1 Description">If you did not restrict 3D X server access</dt>
-    <dd class="Description-1 Description">
-<pre class="verbatim">
-xdpyinfo&nbsp;-display&nbsp;:0
-/opt/VirtualGL/bin/glxinfo&nbsp;-display&nbsp;:0&nbsp;-c
-</pre>
-
     </dd>
 </dl>
 
-<p>Both commands should output a list of visuals and should complete with 
-no errors.  If you chose to disable the <code>XTEST</code> extension, 
-then check the output of the <code>xdpyinfo</code> command to verify 
-that <code>XTEST</code> does not show up in the list of extensions.</p>
+<pre class="verbatim">xauth merge /etc/opt/VirtualGL/vgl_xauth_key
+xdpyinfo -display :<em>n</em>
+/opt/VirtualGL/bin/glxinfo -display :<em>n</em> -c</pre>
+<dl class="Description">
+    <dt class="Description-1 Description">If you did not restrict 3D X server access</dt>
+    <dd class="Description-1 Description">
+    </dd>
+</dl>
+
+<pre class="verbatim">xdpyinfo -display :<em>n</em>
+/opt/VirtualGL/bin/glxinfo -display :<em>n</em> -c</pre>
+<p>(where <em><code>n</code></em> is the display number of the 3D X 
+server.)  Both commands should output a list of visuals and should 
+complete with no errors.  If you chose to disable the <code>XTEST</code> 
+extension, then check the output of the <code>xdpyinfo</code> command to 
+verify that <code>XTEST</code> does not show up in the list of 
+extensions.</p>
 
 <p>You should also examine the output of the <code>glxinfo</code> command 
 to ensure that at least one of the visuals is 24-bit or 32-bit TrueColor 
@@ -3103,7 +3100,7 @@ Image transport plugins are free to handle or ignore any configuration option as
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
-    <td class="standard"><code>:0</code></td>
+    <td class="standard"><code>:0</code> or <code>:1024</code></td>
   </tr>
 </table>
 </div>
@@ -3118,13 +3115,16 @@ Image transport plugins are free to handle or ignore any configuration option as
         <code>vglrun&nbsp;-d</code> with) <code>:0.1</code> would cause 
         VirtualGL to use the GLX back end and redirect all of the OpenGL 
         rendering from the 3D application to a GPU attached to Screen 1 on X 
-        display :0.  Setting <code>VGL_DISPLAY</code> to (or invoking 
+        Display :0.  Setting <code>VGL_DISPLAY</code> to (or invoking 
         <code>vglrun&nbsp;-d</code> with) a DRI device path (such as 
         <code>/dev/dri/card0</code>) or an EGL device ID (such as 
         <code>egl0</code>) would cause VirtualGL to use the EGL back end and 
         redirect all of the OpenGL rendering from the 3D application to the 
         specified EGL device. <code>/opt/VirtualGL/bin/eglinfo&nbsp;-e</code> 
         lists all valid EGL device IDs and their associated DRI device paths.
+        <div class="important"><p class="important">
+        <code>vglrun</code> automatically sets <code>VGL_DISPLAY</code> to <code>:1024</code> if <code>VGL_DISPLAY</code> is unset, X Display :1024 exists, and X Display :0 does not exist.  This allows VirtualGL to use the GDM greeter&rsquo;s Xwayland instance as a 3D X server.
+        </p></div>
     </dd>
 </dl>
 

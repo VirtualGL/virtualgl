@@ -12,6 +12,12 @@ in the VirtualGL User's Guide for more information.
 enabling quad-buffered stereo, even if the requirements for quad-buffered
 stereo had been met.
 
+3. On Wayland-enabled Linux systems running GDM, `vglserver_config` no longer
+disables the ability to log in locally with a Wayland session.  Instead,
+`vglrun` automatically sets `VGL_DISPLAY` to `:1024` if `VGL_DISPLAY` is unset,
+X Display :1024 exists, and X Display :0 does not exist.  This allows VirtualGL
+to use the GDM greeter's Xwayland instance as a 3D X server.
+
 
 3.1.3
 =====

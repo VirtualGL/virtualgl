@@ -2,7 +2,7 @@
 
 # Copyright (C)2004 Landmark Graphics Corporation
 # Copyright (C)2005 Sun Microsystems, Inc.
-# Copyright (C)2009-2016, 2018-2019, 2021, 2024 D. R. Commander
+# Copyright (C)2009-2016, 2018-2019, 2021, 2024-2025 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
 # the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -41,7 +41,7 @@ usage()
 	echo "            library."
 	echo
 	echo "-d <d>    : <d> = the X display/screen or EGL device to use for 3D rendering"
-	echo "           [default = :0]"
+	echo "           [default = :0 or :1024]"
 	echo
 	echo "-fps <f>  : Limit image transport frame rate to <f> frames/sec"
 	echo
@@ -193,10 +193,18 @@ else
 		if [ ! -z "$SSH_IP" -a -z "$VGL_CLIENT" -a -z "$RRCLIENT" ]; then
 			VGL_CLIENT=$SSH_IP
 			export VGL_CLIENT
-			echo "[VGL] NOTICE: Automatically setting VGL_CLIENT environment variable to"
+			echo "[VGL] NOTICE: Automatically setting the VGL_CLIENT environment variable to"
 			echo "[VGL]    $SSH_IP, the IP address of your SSH client."
 		fi
 	fi
+fi
+
+if [ -z "$VGL_DISPLAY" -a ! -e /tmp/.X11-unix/X0 -a \
+	-e /tmp/.X11-unix/X1024 ]; then
+	echo "[VGL] NOTICE: Automatically setting the VGL_DISPLAY environment variable to"
+	echo "[VGL]    :1024, the X display number of the GDM greeter's Xwayland instance."
+	VGL_DISPLAY=:1024
+	export VGL_DISPLAY
 fi
 
 # This is so we can launch both 32-bit and 64-bit executables using the same
