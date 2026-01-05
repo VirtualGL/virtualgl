@@ -71,10 +71,6 @@
 		inside the disk image.  Follow the instructions to install the Mac
 		VirtualGL Client.
 
-** Installing the VirtualGL Client on Windows (Cygwin)
-
-Use Cygwin Setup to install the VirtualGL package.
-
 ** Installing VirtualGL from Source
 
 If you are using a platform for which there is not a pre-built VirtualGL binary
@@ -121,8 +117,3 @@ execute:
 #Verb: <<---
 sudo /opt/VirtualGL/bin/uninstall
 ---
-
-*** Windows (Cygwin)
-#OPT: noList! plain!
-
-Use Cygwin Setup to uninstall the VirtualGL package.

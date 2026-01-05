@@ -10,6 +10,8 @@ Build Requirements
 - libjpeg-turbo SDK v1.2 or later
   * The libjpeg-turbo SDK binary packages can be downloaded from
     <https://github.com/libjpeg-turbo/libjpeg-turbo/releases>.
+  * If building the VirtualGL Client for Cygwin, use Cygwin Setup to install
+    the **libturbojpeg-devel** package.
   * The VirtualGL build system will search for the TurboJPEG header and
     library under **/opt/libjpeg-turbo** on Un*x, but you can override this by
     setting the `TJPEG_INCLUDE_DIR` CMake variable to the directory containing
