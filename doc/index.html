@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2025-06-12T11:02:00">
+<meta name="date" content="2026-01-08T12:29:29">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.6.7</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -675,16 +675,6 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
 <li class="Itemize-0">
     The 2D X server should be configured to export stereo visuals.
 </li></ul></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Mac/x86</td>
-    <td class="standard">N/A</td>
-    <td class="standard">GPU that supports stereo (example: nVidia Quadro)</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Windows</td>
-    <td class="standard">N/A</td>
-    <td class="standard">This version of VirtualGL does not support quad-buffered stereo with Windows clients.</td>
   </tr>
 </table>
 </div>
@@ -2218,10 +2208,10 @@ this is the only way that VirtualGL can obtain a stereo Pbuffer.</p>
 <p>When a 3D application tries to render something in stereo, VirtualGL 
 will default to using quad-buffered stereo rendering if the 2D X server 
 supports OpenGL and has stereo visuals available (not currently 
-supported in Cygwin/X.) Otherwise, VirtualGL will fall back to using 
-anaglyphic stereo (see below.)  It is usually necessary to explicitly 
-enable stereo in the graphics driver configuration for both the client 
-and VirtualGL server.  The 
+supported except with Un*x clients.)  Otherwise, VirtualGL will fall 
+back to using anaglyphic stereo (see below.)  It is usually necessary to 
+explicitly enable stereo in the graphics driver configuration for both 
+the client and VirtualGL server.  The 
 <a href="#Troubleshooting">Troubleshooting</a><a name="idx0028"></a> 
 section below lists a way to verify that both the 3D X server and the 2D 
 X server have stereo visuals available.</p>
