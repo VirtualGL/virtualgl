@@ -47,7 +47,7 @@
 	|
 #OPT: hiCol=first
 
-** Mac/x86
+** Mac
 
 || || Client (if using the VGL Transport) ||
 | CPU \
@@ -96,16 +96,5 @@
 	| {list type=ul: \
 			{item:GPU that supports stereo} \
 			{item:The 2D X server should be configured to export stereo visuals.}} \
-	|
-| Mac/x86 \
-	| N/A \
-	| N/A \
-	| GPU that supports stereo (example: nVidia Quadro) \
-	|
-| Windows \
-	| N/A \
-	| N/A \
-	| This version of VirtualGL does not support quad-buffered stereo with \
-		Windows clients. \
 	|
 #OPT: hiCol=first

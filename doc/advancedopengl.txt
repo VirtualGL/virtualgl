@@ -36,12 +36,13 @@ VirtualGL can create a stereo off-screen buffer.
 
 When a 3D application tries to render something in stereo, VirtualGL will
 default to using quad-buffered stereo rendering if the 2D X server supports
-OpenGL and has stereo visuals available (not currently supported in Cygwin/X.)
-Otherwise, VirtualGL will fall back to using anaglyphic stereo (see below.)  It
-is usually necessary to explicitly enable stereo in the graphics driver
-configuration for both the client and, if using the GLX back end, the VirtualGL
-server.  The [[#Troubleshooting]] section below lists a way to verify that both
-the 3D X server and the 2D X server have stereo visuals available.
+OpenGL and has stereo visuals available (not currently supported except with
+Un*x clients.)  Otherwise, VirtualGL will fall back to using anaglyphic stereo
+(see below.)  It is usually necessary to explicitly enable stereo in the
+graphics driver configuration for both the client and, if using the GLX back
+end, the VirtualGL server.  The [[#Troubleshooting]] section below lists a way
+to verify that both the 3D X server and the 2D X server have stereo visuals
+available.
 
 In quad-buffered mode, VirtualGL reads back both the left and right eye buffers
 on the server and sends the contents as a pair of compressed images to the
