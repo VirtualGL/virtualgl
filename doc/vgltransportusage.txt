@@ -34,6 +34,8 @@ traffic is encrypted, but the VGL Transport is left unencrypted.
 
 	#. Start the 2D X server if it isn't started already.
 
+		!!! This is not necessary with WSL.
+
 		Mac clients :: Start XQuartz.
 
 		Cygwin clients :: Start Cygwin/X.

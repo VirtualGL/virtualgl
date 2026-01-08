@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2026-01-08T12:18:45">
+<meta name="date" content="2026-01-08T12:18:57">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.0.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -13,7 +13,7 @@
 <link rel="chapter" href="index.html#hd004" title="4 System Requirements">
 <link rel="chapter" href="index.html#hd005" title="5 Obtaining and Installing VirtualGL">
 <link rel="chapter" href="index.html#hd006" title="6 Configuring a Linux or Unix Machine as a VirtualGL Server">
-<link rel="chapter" href="index.html#hd007" title="7 Configuring a Windows Machine as a VGL Transport Client">
+<link rel="chapter" href="index.html#hd007" title="7 Configuring a Windows/Cygwin Machine as a VGL Transport Client">
 <link rel="chapter" href="index.html#hd008" title="8 Using VirtualGL with the VGL Transport">
 <link rel="chapter" href="index.html#hd009" title="9 Using VirtualGL with X Proxies Such as VNC">
 <link rel="chapter" href="index.html#hd0010" title="10 Support for the X Video Extension">
@@ -78,7 +78,8 @@ systems, OpenGL and GLX, and the X Window System.</p>
         <a href="#hd005" class="hd">5 Obtaining and Installing VirtualGL</a>
         <ul class="hd">
             <li class="Itemize-3 hd">
-                <a href="#hd005001" class="hd">5.1 Installing VirtualGL on Linux</a>
+                <a href="#hd005001" class="hd">5.1 Installing VirtualGL on Linux 
+                (Including WSL)</a>
             </li>
             <li class="Itemize-3 hd">
                 <a href="#hd005002" class="hd">5.2 Installing the VirtualGL Client on OS 
@@ -129,8 +130,8 @@ systems, OpenGL and GLX, and the X Window System.</p>
         </ul>
     </li>
     <li class="Itemize-1 hd">
-        <a href="#hd007" class="hd">7 Configuring a Windows Machine as a VGL 
-        Transport Client</a>
+        <a href="#hd007" class="hd">7 Configuring a Windows/Cygwin Machine as a 
+        VGL Transport Client</a>
     </li>
     <li class="Itemize-1 hd">
         <a href="#hd008" class="hd">8 Using VirtualGL with the VGL Transport</a>
@@ -645,6 +646,7 @@ transport plugins.</p>
   <tr class="standard">
     <td class="high standard">Other Software</td>
     <td class="standard"><ul class="Itemize"><li class="Itemize-0">
+    Windows Subsystem for Linux (WSL) 2 or 
     <span class="remote"><a href="http://x.cygwin.com" class="remote">Cygwin/X</a></span><a name="idx0013"></a>
 </li>
 <li class="Itemize-0">
@@ -709,7 +711,7 @@ VirtualGL must be installed on any machine that will act as a VirtualGL server o
 </p></div>
 
 
-<h2 id="hd005001">5.1&nbsp;Installing VirtualGL on Linux</h2>
+<h2 id="hd005001">5.1&nbsp;Installing VirtualGL on Linux (Including WSL)</h2>
 
 <div class="important"><p class="important">
 If you are installing VirtualGL onto a fresh server, and you also intend to install the nVidia proprietary drivers, install VirtualGL prior to the nVidia drivers.  Otherwise, installing VirtualGL may trigger an installation of Mesa, which can modify the libGL symlinks that the nVidia drivers created.
@@ -726,7 +728,7 @@ If you are installing VirtualGL onto a fresh server, and you also intend to inst
         packages are provided for Linux distributions that contain GLIBC 2.17 or 
         later. <br />
         <div class="important"><p class="important">
-        If you want to run both 32-bit and 64-bit OpenGL applications with VirtualGL on 64-bit x86 Linux systems, then you will need to install both <strong class="filename">VirtualGL-3.0.3.x86_64.rpm</strong> and <strong class="filename">VirtualGL-3.0.3.i386.rpm</strong>, or both <strong class="filename">virtualgl_3.0.3_amd64.deb</strong> and <strong class="filename">virtualgl32_3.0.3_amd64.deb</strong>. (<strong class="filename">virtualgl32_3.0.3_amd64.deb</strong> is a supplementary package that contains only the 32-bit server components.)
+        If you want to run both 32-bit and 64-bit OpenGL applications with VirtualGL on x86-64 Linux servers, then you will need to install both <strong class="filename">VirtualGL-3.0.3.x86_64.rpm</strong> and <strong class="filename">VirtualGL-3.0.3.i386.rpm</strong>, or both <strong class="filename">virtualgl_3.0.3_amd64.deb</strong> and <strong class="filename">virtualgl32_3.0.3_amd64.deb</strong>. (<strong class="filename">virtualgl32_3.0.3_amd64.deb</strong> is a supplementary package that contains only the 32-bit server components.)
         </p></div>
     </li>
     <li class="Ordered-1 Ordered" value="2">
@@ -817,7 +819,7 @@ on how to build and install VirtualGL from source.</p>
 <h2 id="hd005004">5.4&nbsp;Uninstalling VirtualGL</h2>
 
 
-<h3 id="hd005004001">Linux</h3>
+<h3 id="hd005004001">Linux (Including WSL)</h3>
 
 <p>As root, issue one of the following commands:</p>
 
@@ -1324,7 +1326,7 @@ Unconfiguring the server does not remove the <code>vglusers</code> group.
 
 
 
-<h1 id="hd007"><a name="file007"></a>7&nbsp;Configuring a Windows Machine as a VGL Transport Client</h1>
+<h1 id="hd007"><a name="file007"></a>7&nbsp;Configuring a Windows/Cygwin Machine as a VGL Transport Client</h1>
 
 <p>The VirtualGL Client can take advantage of the <code>MIT-SHM</code> 
 extension in Cygwin/X to accelerate the compositing of rendered frames 
@@ -1423,6 +1425,9 @@ The X11 traffic is encrypted, but the VGL Transport is left unencrypted.</p>
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
         Start the 2D X server if it isn&rsquo;t started already.
+        <div class="important"><p class="important">
+        This is not necessary with WSL.
+        </p></div>
         <dl class="Description">
             <dt class="Description-3 Description">Mac clients</dt>
             <dd class="Description-3 Description">
