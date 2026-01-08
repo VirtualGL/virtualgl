@@ -73,7 +73,8 @@
 	|
 | Other Software \
 	| {list type=ul: \
-			{item:[[http://x.cygwin.com][Cygwin/X]]} \
+			{item:Windows Subsystem for Linux (WSL) 2 or \
+				[[http://x.cygwin.com][Cygwin/X]]} \
 			{item:Client display must have a 24-bit or 32-bit color depth \
 				(True Color.)}} \
 	|

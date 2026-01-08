@@ -1,4 +1,4 @@
-* Configuring a Windows Machine as a VGL Transport Client
+* Configuring a Windows/Cygwin Machine as a VGL Transport Client
 
 The VirtualGL Client can take advantage of the ''MIT-SHM'' extension in
 Cygwin/X to accelerate the compositing of rendered frames into the 3D

@@ -5,7 +5,7 @@
 	It is not necessary to install VirtualGL on the client if using VNC or
 	another type of X proxy.
 
-** Installing VirtualGL on Linux
+** Installing VirtualGL on Linux (Including WSL)
 
 	!!! If you are installing VirtualGL onto a fresh server, and you also intend
 	to install the nVidia proprietary drivers, install VirtualGL prior to the
@@ -19,7 +19,7 @@
 		GLIBC 2.17 or later.
 		{nl}
 		!!! If you want to run both 32-bit and 64-bit OpenGL applications with
-		VirtualGL on 64-bit x86 Linux systems, then you will need to install both
+		VirtualGL on x86-64 Linux servers, then you will need to install both
 		{file: VirtualGL-{val: _VERSION}.x86_64.rpm} and
 		{file: VirtualGL-{val: _VERSION}.i386.rpm}, or both
 		{file: virtualgl_{val: _VERSION}_amd64.deb} and
@@ -84,7 +84,7 @@ VirtualGL from source.
 
 ** Uninstalling VirtualGL
 
-*** Linux
+*** Linux (Including WSL)
 #OPT: noList! plain!
 
 As root, issue one of the following commands:
