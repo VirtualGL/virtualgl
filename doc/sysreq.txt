@@ -3,16 +3,7 @@
 ** Linux and Other Un*x Operating Systems
 {anchor: Linux_Requirements}
 
-|| || Server (x86) || Server (x86-64, AArch64) \
-	|| Client (if using the VGL Transport) ||
-| Recommended CPU \
-	| {list type=ul: \
-			{item:For optimal performance, the CPU should support SSE2 \
-				extensions.} \
-			{item:Dual processors or dual cores recommended}} \
-	| Dual processors or dual cores recommended \
-	| For optimal performance, the CPU should support SSE2 extensions. \
-	|
+|| || Server (x86-64, AArch64) || Client (if using the VGL Transport) ||
 | Graphics \
 	| AMD or nVidia GPU \
 		{list type=ul: \
@@ -22,7 +13,6 @@
 			{item:Install the AMD or nVidia proprietary drivers.  Open source \
 				drivers for these GPUs do not always provide full 3D acceleration, \
 				and some of those drivers are not fully compatible with VirtualGL.}} \
-	| < \
 	| Any graphics adapter with decent 2D performance \
 		{list type=ul: \
 			{item:If using a 3D graphics adapter (GPU), install the vendor drivers \
@@ -38,11 +28,9 @@
 		[[http://www.suse.com][SuSE]] Linux Enterprise tend to receive the most \
 		attention from the VirtualGL community. \
 	| < \
-	| < \
 	|
 | Other Software \
 	| X server configured to export True Color (24-bit or 32-bit) visuals \
-	| < \
 	| < \
 	|
 #OPT: hiCol=first
@@ -50,9 +38,6 @@
 ** Mac
 
 || || Client (if using the VGL Transport) ||
-| CPU \
-	| 64-bit Intel or Apple silicon required \
-	|
 | O/S \
 	| OS X/macOS 10.9 "Mavericks" or later (Intel); macOS 11 "Big Sur" or later \
 		(Apple silicon) \
@@ -65,9 +50,6 @@
 ** Windows
 
 || || Client (if using the VGL Transport) ||
-| Recommended CPU \
-	| For optimal performance, the CPU should support SSE2 extensions. \
-	|
 | Graphics \
 	| Any graphics adapter with decent 2D performance \
 	|
