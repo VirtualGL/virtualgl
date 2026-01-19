@@ -1,3 +1,10 @@
+3.1.5
+=====
+
+1. `vglserver_config` now works properly with SUSE Linux Enterprise/openSUSE
+Leap 16.
+
+
 3.1.4
 =====
 
