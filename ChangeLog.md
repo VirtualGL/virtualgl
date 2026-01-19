@@ -66,6 +66,9 @@ attempting to run a GLX application using the EGL back end and `vglrun -nodl`.
 14. Fixed an issue whereby the VirtualGL Configuration dialog did not pop up if
 the Num Lock key was on.
 
+15. `vglserver_config` now works properly with SUSE Linux Enterprise/openSUSE
+Leap 16.
+
 
 3.0.2
 =====
