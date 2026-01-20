@@ -1,4 +1,13 @@
 #!/bin/sh
+
+# Abort if the DISPLAY environment variable is unset, which may be the case if
+# the display manager is launched in a remote display session via XDMCP.
+# Otherwise this script will clobber the existing xauth key with no possibility
+# of regenerating it.
+if [ -z "$DISPLAY" ]; then
+	exit 0
+fi
+
 XAUTH=xauth
 if [ -x /usr/X11R6/bin/xauth ]; then
 	XAUTH=/usr/X11R6/bin/xauth
