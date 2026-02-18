@@ -35,7 +35,7 @@ target_link_libraries(nettest vglsocket)
 if(CMAKE_SYSTEM_NAME MATCHES "SunOS")
 	target_link_libraries(nettest kstat)
 endif()
-install(TARGETS nettest DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS nettest DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 
 add_library(fbx STATIC fbx.c)
 target_link_libraries(fbx vglutil)
@@ -83,7 +83,7 @@ if(UNIX)
 	target_link_libraries(glreadtest ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY}
 		${X11_X11_LIB} ${IFRLIB} vglutil)
 	if(VGL_BUILDSERVER)
-		install(TARGETS glreadtest DESTINATION ${CMAKE_INSTALL_BINDIR})
+		install(TARGETS glreadtest DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 	endif()
 endif()
 
