@@ -6,7 +6,7 @@
  * this stuff is worth it, you can buy me a beer in return.   Poul-Henning Kamp
  * ----------------------------------------------------------------------------
  * Modifications:
- * Copyright (C)2016, 2018-2019 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2016, 2018-2019 D. R. Commander
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
