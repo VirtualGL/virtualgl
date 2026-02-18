@@ -173,7 +173,7 @@ foreach(fakerlib ${FAKERLIBS})
 		# can remove this if we ever require a version later than that.)
 		target_link_libraries(${fakerlib} stdc++)
 	endif()
-	install(TARGETS ${fakerlib} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+	install(TARGETS ${fakerlib} DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
 endforeach()
 
 add_library(${VGL_DLFAKER_NAME} SHARED dlfaker.c)
@@ -181,15 +181,15 @@ if(VGL_FAKEOPENCL)
 	target_compile_definitions(${VGL_DLFAKER_NAME} PUBLIC -DFAKEOPENCL)
 endif()
 target_link_libraries(${VGL_DLFAKER_NAME} ${LIBDL})
-install(TARGETS ${VGL_DLFAKER_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS ${VGL_DLFAKER_NAME} DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
 
 add_library(${VGL_GEFAKER_NAME} SHARED gefaker.c)
 set_target_properties(${VGL_GEFAKER_NAME} PROPERTIES LINK_FLAGS "${MINUSZ}defs")
 target_link_libraries(${VGL_GEFAKER_NAME} ${LIBDL})
-install(TARGETS ${VGL_GEFAKER_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS ${VGL_GEFAKER_NAME} DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
 
 set(HEADERS ../common/rr.h rrtransport.h)
-install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 
 include_directories(SYSTEM ${FLTK_INCLUDE_DIR})
 add_executable(vglconfig vglconfig.cpp fakerconfig.cpp)
@@ -197,24 +197,24 @@ target_link_libraries(vglconfig ${X11_X11_LIB} ${FLTK_BASE_LIBRARY} vglutil)
 if(VGL_USEXV)
 	target_link_libraries(vglconfig ${X11_Xv_LIB})
 endif()
-install(TARGETS vglconfig DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS vglconfig DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 set_property(SOURCE vglconfig.cpp APPEND_STRING PROPERTY COMPILE_FLAGS
 	"-fno-strict-aliasing")
 
 install(PROGRAMS vglgenkey vgllogin vglserver_config DESTINATION
-	${CMAKE_INSTALL_BINDIR})
+	${CMAKE_INSTALL_FULL_BINDIR})
 
 configure_file(vglrun.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vglrun @ONLY)
 execute_process(COMMAND chmod +x vglrun
 	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vglrun
-	DESTINATION ${CMAKE_INSTALL_BINDIR})
+	DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 configure_file(vglrun.vars.in
 	${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/.vglrun.vars${BITS} @ONLY)
 execute_process(COMMAND chmod +x .vglrun.vars${BITS}
 	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/.vglrun.vars${BITS}
-	DESTINATION ${CMAKE_INSTALL_BINDIR})
+	DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 
 
 ###############################################################################

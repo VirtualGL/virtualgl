@@ -402,7 +402,7 @@ add_subdirectory(doc)
 
 else()
 
-install(FILES LICENSE.txt LGPL.txt DESTINATION ${CMAKE_INSTALL_DOCDIR})
+install(FILES LICENSE.txt LGPL.txt DESTINATION ${CMAKE_INSTALL_FULL_DOCDIR})
 
 endif() # WIN32
 
