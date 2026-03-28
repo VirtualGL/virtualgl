@@ -17,12 +17,12 @@ target_link_libraries(glxinfo ${OPENGL_gl_LIBRARY} ${X11_X11_LIB}
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
 	target_link_libraries(glxinfo Xmu)
 endif()
-install(TARGETS glxinfo DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+install(TARGETS glxinfo DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 if(VGL_EGLBACKEND)
 	add_executable(eglinfo eglinfo.c glinfo_common.c)
 	target_link_libraries(eglinfo ${OPENGL_gl_LIBRARY} ${OPENGL_egl_LIBRARY})
-	install(TARGETS eglinfo DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+	install(TARGETS eglinfo DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 
 set(GLXSPHERES glxspheres)
@@ -32,7 +32,7 @@ endif()
 add_executable(${GLXSPHERES} glxspheres.c)
 target_link_libraries(${GLXSPHERES} ${OPENGL_gl_LIBRARY} ${X11_X11_LIB}
 	${OPENGL_glu_LIBRARY} m)
-install(TARGETS ${GLXSPHERES} DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+install(TARGETS ${GLXSPHERES} DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 foreach(program pbdemo)
 	add_executable(${program} ${program}.c pbutil.c)

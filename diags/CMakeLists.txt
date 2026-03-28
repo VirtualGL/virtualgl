@@ -1,6 +1,6 @@
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	add_executable(cpustat cpustat.c)
-	install(TARGETS cpustat DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+	install(TARGETS cpustat DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 
 add_executable(imgdiff imgdiff.c)
@@ -20,4 +20,4 @@ else()
 	target_link_libraries(tcbench ${X11_XTest_LIB})
 endif()
 target_link_libraries(tcbench fbx)
-install(TARGETS tcbench DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+install(TARGETS tcbench DESTINATION ${CMAKE_INSTALL_BINDIR})
