@@ -155,6 +155,12 @@ if(VGL_BUILDSERVER)
 	list(APPEND DIRLIST "INCLUDEDIR;LIBDIR")
 endif()
 foreach(dir ${DIRLIST})
+	# CMAKE_INSTALL_BINDIR, CMAKE_INSTALL_DOCDIR, CMAKE_INSTALL_INCLUDEDIR, and
+	# CMAKE_INSTALL_LIBDIR cannot be blank, because CMake will fail to configure
+	# the build.
+	if(NOT dir STREQUAL "DATAROOTDIR" AND NOT CMAKE_INSTALL_${dir})
+		message(FATAL_ERROR "CMAKE_INSTALL_${dir} cannot be blank")
+	endif()
 	report_directory(${dir})
 endforeach()
 
@@ -402,7 +408,7 @@ add_subdirectory(doc)
 
 else()
 
-install(FILES LICENSE.txt LGPL.txt DESTINATION ${CMAKE_INSTALL_FULL_DOCDIR})
+install(FILES LICENSE.txt LGPL.txt DESTINATION ${CMAKE_INSTALL_DOCDIR})
 
 endif() # WIN32
 
