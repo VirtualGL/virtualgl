@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2026-01-08T12:34:30">
+<meta name="date" content="2026-03-31T18:06:01">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.0.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -877,6 +877,10 @@ Linux and Unix distributions.</p>
 
 <div class="important"><p class="important">
 On Wayland-enabled Linux machines running GDM, configuring the machine for use with the GLX back end will disable the ability to log in locally with a Wayland session.  In general, logging in locally once the machine has been configured for use with the GLX back end is discouraged, as this could disrupt VirtualGL&rsquo;s connection to the 3D X server and thus cause OpenGL applications running with VirtualGL to abort or freeze.
+</p></div>
+
+<div class="important"><p class="important">
+GDM 49 and later no longer supports X11 and is thus incompatible with VirtualGL&rsquo;s GLX back end.
 </p></div>
 
 <p>3. Accelerated OpenGL is working properly in the 3D X server.</p>
