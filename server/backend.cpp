@@ -65,6 +65,16 @@ static FakePbuffer *getCurrentFakePbuffer(EGLint readdraw)
 }
 
 
+static void resolveDefaultFB(GLuint &framebuffer, EGLint readdraw = EGL_DRAW)
+{
+	FakePbuffer *pb;
+	if(framebuffer == 0
+		&& (pb = PBHASHEGL.find(readdraw == EGL_READ ?
+			getCurrentReadDrawableEGL() : getCurrentDrawableEGL())) != NULL)
+		framebuffer = pb->getFBO();
+}
+
+
 void bindFramebuffer(GLenum target, GLuint framebuffer, bool ext)
 {
 	const GLenum *oldDrawBufs = NULL;  GLsizei nDrawBufs = 0;
@@ -141,6 +151,62 @@ void deleteFramebuffers(GLsizei n, const GLuint *framebuffers)
 		}
 	}
 	_glDeleteFramebuffers(n, framebuffers);
+}
+
+
+void blitNamedFramebuffer(GLuint readFramebuffer, GLuint drawFramebuffer,
+	GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0,
+	GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter)
+{
+	if(fconfig.egl)
+	{
+		resolveDefaultFB(readFramebuffer, EGL_READ);
+		resolveDefaultFB(drawFramebuffer, EGL_DRAW);
+	}
+	_glBlitNamedFramebuffer(readFramebuffer, drawFramebuffer, srcX0, srcY0, srcX1,
+		srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+}
+
+
+GLenum checkNamedFramebufferStatus(GLuint framebuffer, GLenum target, bool ext)
+{
+	if(fconfig.egl)
+		resolveDefaultFB(framebuffer,
+			target == GL_READ_FRAMEBUFFER ? EGL_READ : EGL_DRAW);
+	if(ext) return _glCheckNamedFramebufferStatusEXT(framebuffer, target);
+	else return _glCheckNamedFramebufferStatus(framebuffer, target);
+}
+
+
+void clearNamedFramebufferfi(GLuint framebuffer, GLenum buffer,
+	GLint drawbuffer, GLfloat depth, GLint stencil)
+{
+	if(fconfig.egl) resolveDefaultFB(framebuffer);
+	_glClearNamedFramebufferfi(framebuffer, buffer, drawbuffer, depth, stencil);
+}
+
+
+void clearNamedFramebufferfv(GLuint framebuffer, GLenum buffer,
+	GLint drawbuffer, const GLfloat *value)
+{
+	if(fconfig.egl) resolveDefaultFB(framebuffer);
+	_glClearNamedFramebufferfv(framebuffer, buffer, drawbuffer, value);
+}
+
+
+void clearNamedFramebufferiv(GLuint framebuffer, GLenum buffer,
+	GLint drawbuffer, const GLint *value)
+{
+	if(fconfig.egl) resolveDefaultFB(framebuffer);
+	_glClearNamedFramebufferiv(framebuffer, buffer, drawbuffer, value);
+}
+
+
+void clearNamedFramebufferuiv(GLuint framebuffer, GLenum buffer,
+	GLint drawbuffer, const GLuint *value)
+{
+	if(fconfig.egl) resolveDefaultFB(framebuffer);
+	_glClearNamedFramebufferuiv(framebuffer, buffer, drawbuffer, value);
 }
 
 
@@ -531,6 +597,41 @@ int getFBConfigAttrib(Display *dpy, VGLFBConfig config, int attribute,
 }
 
 
+static bool mapDefaultFBAttachment(FakePbuffer *pb, GLenum &attachment)
+{
+	switch(attachment)
+	{
+		case GL_FRONT_LEFT:
+			attachment = GL_COLOR_ATTACHMENT0;  return true;
+		case GL_FRONT_RIGHT:
+			attachment = GL_COLOR_ATTACHMENT2;  return true;
+		case GL_BACK_LEFT:
+			attachment = GL_COLOR_ATTACHMENT1;  return true;
+		case GL_BACK_RIGHT:
+			attachment = GL_COLOR_ATTACHMENT3;  return true;
+		case GL_DEPTH:
+		{
+			VGLFBConfig config = pb->getFBConfig();
+			if(config->attr.stencilSize && config->attr.depthSize)
+				attachment = GL_DEPTH_STENCIL_ATTACHMENT;
+			else
+				attachment = GL_DEPTH_ATTACHMENT;
+			return true;
+		}
+		case GL_STENCIL:
+		{
+			VGLFBConfig config = pb->getFBConfig();
+			if(config->attr.stencilSize && config->attr.depthSize)
+				attachment = GL_DEPTH_STENCIL_ATTACHMENT;
+			else
+				attachment = GL_STENCIL_ATTACHMENT;
+			return true;
+		}
+	}
+	return false;
+}
+
+
 void getFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 	GLenum pname, GLint *params)
 {
@@ -552,43 +653,14 @@ void getFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 					&& (pb = getCurrentFakePbuffer(EGL_DRAW)) != NULL)
 				|| (target == GL_READ_FRAMEBUFFER
 					&& (pb = getCurrentFakePbuffer(EGL_READ)) != NULL))
-			{
-				switch(attachment)
-				{
-					case GL_FRONT_LEFT:
-						attachment = GL_COLOR_ATTACHMENT0;  isDefault = true;  break;
-					case GL_FRONT_RIGHT:
-						attachment = GL_COLOR_ATTACHMENT2;  isDefault = true;  break;
-					case GL_BACK_LEFT:
-						attachment = GL_COLOR_ATTACHMENT1;  isDefault = true;  break;
-					case GL_BACK_RIGHT:
-						attachment = GL_COLOR_ATTACHMENT3;  isDefault = true;  break;
-					case GL_DEPTH:
-					{
-						VGLFBConfig config = pb->getFBConfig();
-						if(config->attr.stencilSize && config->attr.depthSize)
-							attachment = GL_DEPTH_STENCIL_ATTACHMENT;
-						else
-							attachment = GL_DEPTH_ATTACHMENT;
-					  isDefault = true;  break;
-					}
-					case GL_STENCIL:
-					{
-						VGLFBConfig config = pb->getFBConfig();
-						if(config->attr.stencilSize && config->attr.depthSize)
-							attachment = GL_DEPTH_STENCIL_ATTACHMENT;
-						else
-							attachment = GL_STENCIL_ATTACHMENT;
-					  isDefault = true;  break;
-					}
-				}
-			}
+				isDefault = mapDefaultFBAttachment(pb, attachment);
 		}
 	}
 	_glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
 	if(fconfig.egl)
 	{
-		if(isDefault && *params == GL_RENDERBUFFER)
+		if(isDefault && pname == GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE
+			&& *params == GL_RENDERBUFFER)
 			*params = GL_FRAMEBUFFER_DEFAULT;
 	}
 }
@@ -622,6 +694,37 @@ void getFramebufferParameteriv(GLenum target, GLenum pname, GLint *params)
 		}
 	}
 	_glGetFramebufferParameteriv(target, pname, params);
+}
+
+
+void getFramebufferParameterivEXT(GLuint framebuffer, GLenum pname,
+	GLint *params)
+{
+	if(fconfig.egl)
+	{
+		if(!params)
+		{
+			_glGetFramebufferParameterivEXT(framebuffer, pname, params);
+			return;
+		}
+		FakePbuffer *pb;
+		if(framebuffer == 0
+			&& (pb = PBHASHEGL.find(getCurrentDrawableEGL())) != NULL)
+		{
+			if(pname == GL_DOUBLEBUFFER)
+			{
+				*params = pb->getFBConfig()->attr.doubleBuffer;
+				return;
+			}
+			else if(pname == GL_STEREO)
+			{
+				*params = pb->getFBConfig()->attr.stereo;
+				return;
+			}
+			else framebuffer = pb->getFBO();
+		}
+	}
+	_glGetFramebufferParameterivEXT(framebuffer, pname, params);
 }
 
 
@@ -737,6 +840,118 @@ void getNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname,
 		}
 	}
 	_glGetNamedFramebufferParameteriv(framebuffer, pname, param);
+}
+
+
+void getNamedFramebufferAttachmentParameteriv(GLuint framebuffer,
+	GLenum attachment, GLenum pname, GLint *params, bool ext)
+{
+	bool isDefault = false;
+
+	if(fconfig.egl)
+	{
+		if(!params)
+		{
+			if(ext)
+				_glGetNamedFramebufferAttachmentParameterivEXT(framebuffer,
+					attachment, pname, params);
+			else
+				_glGetNamedFramebufferAttachmentParameteriv(framebuffer, attachment,
+					pname, params);
+			return;
+		}
+		FakePbuffer *pb;
+		if(framebuffer == 0
+			&& (pb = PBHASHEGL.find(getCurrentDrawableEGL())) != NULL)
+		{
+			if((attachment >= GL_FRONT_LEFT && attachment <= GL_BACK_RIGHT)
+				|| (attachment >= GL_DEPTH && attachment <= GL_STENCIL))
+				isDefault = mapDefaultFBAttachment(pb, attachment);
+			framebuffer = pb->getFBO();
+		}
+	}
+	if(ext)
+		_glGetNamedFramebufferAttachmentParameterivEXT(framebuffer, attachment,
+			pname, params);
+	else
+		_glGetNamedFramebufferAttachmentParameteriv(framebuffer, attachment, pname,
+			params);
+	if(fconfig.egl)
+	{
+		if(isDefault && params && pname == GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE
+			&& *params == GL_RENDERBUFFER)
+			*params = GL_FRAMEBUFFER_DEFAULT;
+	}
+}
+
+
+static GLenum *mapInvalidateAttachments(FakePbuffer *pb,
+	GLsizei numAttachments, const GLenum *attachments)
+{
+	if(numAttachments <= 0 || !attachments) return NULL;
+	VGLFBConfig config = pb->getFBConfig();
+	bool combined = (config->attr.stencilSize && config->attr.depthSize);
+	GLenum *out = new GLenum[numAttachments];
+	for(GLsizei i = 0; i < numAttachments; i++)
+	{
+		switch(attachments[i])
+		{
+			case GL_COLOR:  out[i] = GL_COLOR_ATTACHMENT0;  break;
+			case GL_DEPTH:
+				out[i] = combined ? GL_DEPTH_STENCIL_ATTACHMENT : GL_DEPTH_ATTACHMENT;
+				break;
+			case GL_STENCIL:
+				out[i] = combined ? GL_DEPTH_STENCIL_ATTACHMENT :
+					GL_STENCIL_ATTACHMENT;
+				break;
+			default:  out[i] = attachments[i];  break;
+		}
+	}
+	return out;
+}
+
+
+void invalidateNamedFramebufferData(GLuint framebuffer, GLsizei numAttachments,
+	const GLenum *attachments)
+{
+	GLenum *mapped = NULL;
+
+	if(fconfig.egl)
+	{
+		FakePbuffer *pb;
+		if(framebuffer == 0
+			&& (pb = PBHASHEGL.find(getCurrentDrawableEGL())) != NULL)
+		{
+			mapped = mapInvalidateAttachments(pb, numAttachments, attachments);
+			if(mapped) attachments = mapped;
+			framebuffer = pb->getFBO();
+		}
+	}
+	_glInvalidateNamedFramebufferData(framebuffer, numAttachments, attachments);
+	delete [] mapped;
+}
+
+
+void invalidateNamedFramebufferSubData(GLuint framebuffer,
+	GLsizei numAttachments, const GLenum *attachments, GLint x, GLint y,
+	GLsizei width, GLsizei height)
+{
+	GLenum *mapped = NULL;
+
+	if(fconfig.egl)
+	{
+		FakePbuffer *pb;
+		if(framebuffer == 0
+			&& (pb = PBHASHEGL.find(getCurrentDrawableEGL())) != NULL)
+		{
+			mapped = mapInvalidateAttachments(pb, numAttachments, attachments);
+			if(mapped) attachments = mapped;
+			framebuffer = pb->getFBO();
+		}
+	}
+	_glInvalidateNamedFramebufferSubData(framebuffer, numAttachments, attachments,
+		x, y, width, height);
+	delete [] mapped;
 }
 
 

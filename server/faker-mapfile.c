@@ -164,6 +164,13 @@
 		/* OpenGL */
 		glBindFramebuffer;
 		glBindFramebufferEXT;
+		glBlitNamedFramebuffer;
+		glCheckNamedFramebufferStatus;
+		glCheckNamedFramebufferStatusEXT;
+		glClearNamedFramebufferfi;
+		glClearNamedFramebufferfv;
+		glClearNamedFramebufferiv;
+		glClearNamedFramebufferuiv;
 		glDeleteFramebuffers;
 		glDeleteFramebuffersEXT;
 		glFinish;
@@ -180,11 +187,16 @@
 		glGetFloatv;
 		glGetFramebufferAttachmentParameteriv;
 		glGetFramebufferParameteriv;
+		glGetFramebufferParameterivEXT;
 		glGetIntegerv;
 		glGetInteger64v;
+		glGetNamedFramebufferAttachmentParameteriv;
+		glGetNamedFramebufferAttachmentParameterivEXT;
 		glGetNamedFramebufferParameteriv;
 		glGetString;
 		glGetStringi;
+		glInvalidateNamedFramebufferData;
+		glInvalidateNamedFramebufferSubData;
 		glNamedFramebufferDrawBuffer;
 		glNamedFramebufferDrawBuffers;
 		glNamedFramebufferReadBuffer;

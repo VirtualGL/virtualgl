@@ -348,6 +348,20 @@ extern "C" {
 		return retval; \
 	}
 
+#define VFUNCDEF12(f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, at6, a6, \
+	at7, a7, at8, a8, at9, a9, at10, a10, at11, a11, at12, a12, fake_f) \
+	typedef void (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7, at8, at9, \
+		at10, at11, at12); \
+	SYMDEF(f); \
+	static INLINE void _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
+		at7 a7, at8 a8, at9 a9, at10 a10, at11 a11, at12 a12) \
+	{ \
+		CHECKSYM(f, fake_f); \
+		DISABLE_FAKER(); \
+		__##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12); \
+		ENABLE_FAKER(); \
+	}
+
 #define FUNCDEF13(RetType, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
 	at6, a6, at7, a7, at8, a8, at9, a9, at10, a10, at11, a11, at12, a12, \
 	at13, a13, fake_f) \
@@ -787,6 +801,50 @@ VFUNCDEF2(glGetInteger64v, GLenum, pname, GLint64 *, data, glGetInteger64v)
 
 VFUNCDEF3(glGetNamedFramebufferParameteriv, GLuint, framebuffer,
 	GLenum, pname, GLint *, param, glGetNamedFramebufferParameteriv)
+
+// Named framebuffer functions that accept the default framebuffer (0)
+
+VFUNCDEF12(glBlitNamedFramebuffer, GLuint, readFramebuffer, GLuint,
+	drawFramebuffer, GLint, srcX0, GLint, srcY0, GLint, srcX1, GLint, srcY1,
+	GLint, dstX0, GLint, dstY0, GLint, dstX1, GLint, dstY1, GLbitfield, mask,
+	GLenum, filter, glBlitNamedFramebuffer)
+
+FUNCDEF2(GLenum, glCheckNamedFramebufferStatus, GLuint, framebuffer,
+	GLenum, target, glCheckNamedFramebufferStatus)
+
+FUNCDEF2(GLenum, glCheckNamedFramebufferStatusEXT, GLuint, framebuffer,
+	GLenum, target, glCheckNamedFramebufferStatusEXT)
+
+VFUNCDEF5(glClearNamedFramebufferfi, GLuint, framebuffer, GLenum, buffer,
+	GLint, drawbuffer, GLfloat, depth, GLint, stencil, glClearNamedFramebufferfi)
+
+VFUNCDEF4(glClearNamedFramebufferfv, GLuint, framebuffer, GLenum, buffer,
+	GLint, drawbuffer, const GLfloat *, value, glClearNamedFramebufferfv)
+
+VFUNCDEF4(glClearNamedFramebufferiv, GLuint, framebuffer, GLenum, buffer,
+	GLint, drawbuffer, const GLint *, value, glClearNamedFramebufferiv)
+
+VFUNCDEF4(glClearNamedFramebufferuiv, GLuint, framebuffer, GLenum, buffer,
+	GLint, drawbuffer, const GLuint *, value, glClearNamedFramebufferuiv)
+
+VFUNCDEF3(glGetFramebufferParameterivEXT, GLuint, framebuffer, GLenum, pname,
+	GLint *, params, glGetFramebufferParameterivEXT)
+
+VFUNCDEF4(glGetNamedFramebufferAttachmentParameteriv, GLuint, framebuffer,
+	GLenum, attachment, GLenum, pname, GLint *, params,
+	glGetNamedFramebufferAttachmentParameteriv)
+
+VFUNCDEF4(glGetNamedFramebufferAttachmentParameterivEXT, GLuint, framebuffer,
+	GLenum, attachment, GLenum, pname, GLint *, params,
+	glGetNamedFramebufferAttachmentParameterivEXT)
+
+VFUNCDEF3(glInvalidateNamedFramebufferData, GLuint, framebuffer,
+	GLsizei, numAttachments, const GLenum *, attachments,
+	glInvalidateNamedFramebufferData)
+
+VFUNCDEF7(glInvalidateNamedFramebufferSubData, GLuint, framebuffer,
+	GLsizei, numAttachments, const GLenum *, attachments, GLint, x, GLint, y,
+	GLsizei, width, GLsizei, height, glInvalidateNamedFramebufferSubData)
 
 FUNCDEF1(const GLubyte *, glGetString, GLenum, name, glGetString)
 

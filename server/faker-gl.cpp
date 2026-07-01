@@ -166,6 +166,130 @@ void glBindFramebufferEXT(GLenum target, GLuint framebuffer)
 }
 
 
+void glBlitNamedFramebuffer(GLuint readFramebuffer, GLuint drawFramebuffer,
+	GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0,
+	GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glBlitNamedFramebuffer(readFramebuffer, drawFramebuffer, srcX0, srcY0,
+			srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+		return;
+	}
+
+	TRY();
+
+	backend::blitNamedFramebuffer(readFramebuffer, drawFramebuffer, srcX0, srcY0,
+		srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+
+	CATCH();
+}
+
+
+GLenum glCheckNamedFramebufferStatus(GLuint framebuffer, GLenum target)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+		return _glCheckNamedFramebufferStatus(framebuffer, target);
+
+	GLenum ret = GL_FRAMEBUFFER_UNDEFINED;
+
+	TRY();
+
+	ret = backend::checkNamedFramebufferStatus(framebuffer, target);
+
+	CATCH();
+
+	return ret;
+}
+
+
+GLenum glCheckNamedFramebufferStatusEXT(GLuint framebuffer, GLenum target)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+		return _glCheckNamedFramebufferStatusEXT(framebuffer, target);
+
+	GLenum ret = GL_FRAMEBUFFER_UNDEFINED;
+
+	TRY();
+
+	ret = backend::checkNamedFramebufferStatus(framebuffer, target, true);
+
+	CATCH();
+
+	return ret;
+}
+
+
+void glClearNamedFramebufferfi(GLuint framebuffer, GLenum buffer,
+	GLint drawbuffer, GLfloat depth, GLint stencil)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glClearNamedFramebufferfi(framebuffer, buffer, drawbuffer, depth,
+			stencil);
+		return;
+	}
+
+	TRY();
+
+	backend::clearNamedFramebufferfi(framebuffer, buffer, drawbuffer, depth,
+		stencil);
+
+	CATCH();
+}
+
+
+void glClearNamedFramebufferfv(GLuint framebuffer, GLenum buffer,
+	GLint drawbuffer, const GLfloat *value)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glClearNamedFramebufferfv(framebuffer, buffer, drawbuffer, value);
+		return;
+	}
+
+	TRY();
+
+	backend::clearNamedFramebufferfv(framebuffer, buffer, drawbuffer, value);
+
+	CATCH();
+}
+
+
+void glClearNamedFramebufferiv(GLuint framebuffer, GLenum buffer,
+	GLint drawbuffer, const GLint *value)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glClearNamedFramebufferiv(framebuffer, buffer, drawbuffer, value);
+		return;
+	}
+
+	TRY();
+
+	backend::clearNamedFramebufferiv(framebuffer, buffer, drawbuffer, value);
+
+	CATCH();
+}
+
+
+void glClearNamedFramebufferuiv(GLuint framebuffer, GLenum buffer,
+	GLint drawbuffer, const GLuint *value)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glClearNamedFramebufferuiv(framebuffer, buffer, drawbuffer, value);
+		return;
+	}
+
+	TRY();
+
+	backend::clearNamedFramebufferuiv(framebuffer, buffer, drawbuffer, value);
+
+	CATCH();
+}
+
+
 void glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers)
 {
 	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
@@ -536,6 +660,22 @@ void glGetFramebufferParameteriv(GLenum target, GLenum pname, GLint *params)
 }
 
 
+void glGetFramebufferParameterivEXT(GLuint framebuffer, GLenum pname,
+	GLint *params)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glGetFramebufferParameterivEXT(framebuffer, pname, params);  return;
+	}
+
+	TRY();
+
+	backend::getFramebufferParameterivEXT(framebuffer, pname, params);
+
+	CATCH();
+}
+
+
 void glGetIntegerv(GLenum pname, GLint *params)
 {
 	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
@@ -601,6 +741,44 @@ void glGetNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname,
 }
 
 
+void glGetNamedFramebufferAttachmentParameteriv(GLuint framebuffer,
+	GLenum attachment, GLenum pname, GLint *params)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glGetNamedFramebufferAttachmentParameteriv(framebuffer, attachment, pname,
+			params);
+		return;
+	}
+
+	TRY()
+
+	backend::getNamedFramebufferAttachmentParameteriv(framebuffer, attachment,
+		pname, params);
+
+	CATCH();
+}
+
+
+void glGetNamedFramebufferAttachmentParameterivEXT(GLuint framebuffer,
+	GLenum attachment, GLenum pname, GLint *params)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glGetNamedFramebufferAttachmentParameterivEXT(framebuffer, attachment,
+			pname, params);
+		return;
+	}
+
+	TRY()
+
+	backend::getNamedFramebufferAttachmentParameteriv(framebuffer, attachment,
+		pname, params, true);
+
+	CATCH();
+}
+
+
 const GLubyte *glGetString(GLenum name)
 {
 	char *string = NULL;
@@ -660,6 +838,45 @@ const GLubyte *glGetStringi(GLenum name, GLuint index)
 	CATCH();
 
 	return string;
+}
+
+
+void glInvalidateNamedFramebufferData(GLuint framebuffer,
+	GLsizei numAttachments, const GLenum *attachments)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glInvalidateNamedFramebufferData(framebuffer, numAttachments,
+			attachments);
+		return;
+	}
+
+	TRY();
+
+	backend::invalidateNamedFramebufferData(framebuffer, numAttachments,
+		attachments);
+
+	CATCH();
+}
+
+
+void glInvalidateNamedFramebufferSubData(GLuint framebuffer,
+	GLsizei numAttachments, const GLenum *attachments, GLint x, GLint y,
+	GLsizei width, GLsizei height)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glInvalidateNamedFramebufferSubData(framebuffer, numAttachments,
+			attachments, x, y, width, height);
+		return;
+	}
+
+	TRY();
+
+	backend::invalidateNamedFramebufferSubData(framebuffer, numAttachments,
+		attachments, x, y, width, height);
+
+	CATCH();
 }
 
 
