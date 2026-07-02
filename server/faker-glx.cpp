@@ -1,6 +1,7 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
 // Copyright (C)2009, 2011-2024 D. R. Commander
+// Copyright (C)2026 Tahmid Zaman
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
