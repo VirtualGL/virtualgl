@@ -34,6 +34,25 @@ namespace backend
 {
 	void bindFramebuffer(GLenum target, GLuint framebuffer, bool ext = false);
 
+	void blitNamedFramebuffer(GLuint readFramebuffer, GLuint drawFramebuffer,
+		GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0,
+		GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
+
+	GLenum checkNamedFramebufferStatus(GLuint framebuffer, GLenum target,
+		bool ext = false);
+
+	void clearNamedFramebufferfi(GLuint framebuffer, GLenum buffer,
+		GLint drawbuffer, GLfloat depth, GLint stencil);
+
+	void clearNamedFramebufferfv(GLuint framebuffer, GLenum buffer,
+		GLint drawbuffer, const GLfloat *value);
+
+	void clearNamedFramebufferiv(GLuint framebuffer, GLenum buffer,
+		GLint drawbuffer, const GLint *value);
+
+	void clearNamedFramebufferuiv(GLuint framebuffer, GLenum buffer,
+		GLint drawbuffer, const GLuint *value);
+
 	GLXContext createContext(Display *dpy, VGLFBConfig config, GLXContext share,
 		Bool direct, const int *glxAttribs);
 
@@ -67,10 +86,23 @@ namespace backend
 
 	void getFramebufferParameteriv(GLenum target, GLenum pname, GLint *params);
 
+	void getFramebufferParameterivEXT(GLuint framebuffer, GLenum pname,
+		GLint *params);
+
 	void getIntegerv(GLenum pname, GLint *params);
+
+	void getNamedFramebufferAttachmentParameteriv(GLuint framebuffer,
+		GLenum attachment, GLenum pname, GLint *params, bool ext = false);
 
 	void getNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname,
 		GLint *param, bool ext = false);
+
+	void invalidateNamedFramebufferData(GLuint framebuffer,
+		GLsizei numAttachments, const GLenum *attachments);
+
+	void invalidateNamedFramebufferSubData(GLuint framebuffer,
+		GLsizei numAttachments, const GLenum *attachments, GLint x, GLint y,
+		GLsizei width, GLsizei height);
 
 	Bool isDirect(GLXContext ctx);
 

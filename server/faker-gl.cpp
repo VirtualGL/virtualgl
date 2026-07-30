@@ -170,6 +170,143 @@ void glBindFramebufferEXT(GLenum target, GLuint framebuffer)
 }
 
 
+// OpenGL 4.5+
+
+void glBlitNamedFramebuffer(GLuint readFramebuffer, GLuint drawFramebuffer,
+	GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0,
+	GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glBlitNamedFramebuffer(readFramebuffer, drawFramebuffer, srcX0, srcY0,
+			srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+		return;
+	}
+
+	TRY();
+
+	backend::blitNamedFramebuffer(readFramebuffer, drawFramebuffer, srcX0, srcY0,
+		srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+
+	CATCH();
+}
+
+
+// OpenGL 4.5+
+
+GLenum glCheckNamedFramebufferStatus(GLuint framebuffer, GLenum target)
+{
+	GLenum retval = 0;
+
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+		return _glCheckNamedFramebufferStatus(framebuffer, target);
+
+	TRY();
+
+	retval = backend::checkNamedFramebufferStatus(framebuffer, target);
+
+	CATCH();
+
+	return retval;
+}
+
+// GL_EXT_direct_state_access
+
+GLenum glCheckNamedFramebufferStatusEXT(GLuint framebuffer, GLenum target)
+{
+	GLenum retval = 0;
+
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+		return _glCheckNamedFramebufferStatusEXT(framebuffer, target);
+
+	TRY();
+
+	retval = backend::checkNamedFramebufferStatus(framebuffer, target, true);
+
+	CATCH();
+
+	return retval;
+}
+
+
+// OpenGL 4.5+
+
+void glClearNamedFramebufferfi(GLuint framebuffer, GLenum buffer,
+	GLint drawbuffer, GLfloat depth, GLint stencil)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glClearNamedFramebufferfi(framebuffer, buffer, drawbuffer, depth,
+			stencil);
+		return;
+	}
+
+	TRY();
+
+	backend::clearNamedFramebufferfi(framebuffer, buffer, drawbuffer, depth,
+		stencil);
+
+	CATCH();
+}
+
+
+// OpenGL 4.5+
+
+void glClearNamedFramebufferfv(GLuint framebuffer, GLenum buffer,
+	GLint drawbuffer, const GLfloat *value)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glClearNamedFramebufferfv(framebuffer, buffer, drawbuffer, value);
+		return;
+	}
+
+	TRY();
+
+	backend::clearNamedFramebufferfv(framebuffer, buffer, drawbuffer, value);
+
+	CATCH();
+}
+
+
+// OpenGL 4.5+
+
+void glClearNamedFramebufferiv(GLuint framebuffer, GLenum buffer,
+	GLint drawbuffer, const GLint *value)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glClearNamedFramebufferiv(framebuffer, buffer, drawbuffer, value);
+		return;
+	}
+
+	TRY();
+
+	backend::clearNamedFramebufferiv(framebuffer, buffer, drawbuffer, value);
+
+	CATCH();
+}
+
+
+// OpenGL 4.5+
+
+void glClearNamedFramebufferuiv(GLuint framebuffer, GLenum buffer,
+	GLint drawbuffer, const GLuint *value)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glClearNamedFramebufferuiv(framebuffer, buffer, drawbuffer, value);
+		return;
+	}
+
+	TRY();
+
+	backend::clearNamedFramebufferuiv(framebuffer, buffer, drawbuffer, value);
+
+	CATCH();
+}
+
+
 // OpenGL 3.0+
 
 void glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers)
@@ -585,6 +722,24 @@ void glGetFramebufferParameteriv(GLenum target, GLenum pname, GLint *params)
 }
 
 
+// GL_EXT_direct_state_access
+
+void glGetFramebufferParameterivEXT(GLuint framebuffer, GLenum pname,
+	GLint *params)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glGetFramebufferParameterivEXT(framebuffer, pname, params);  return;
+	}
+
+	TRY();
+
+	backend::getFramebufferParameterivEXT(framebuffer, pname, params);
+
+	CATCH();
+}
+
+
 void glGetIntegerv(GLenum pname, GLint *params)
 {
 	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
@@ -635,6 +790,45 @@ void glGetInteger64v(GLenum pname, GLint64 *data)
 
 
 // OpenGL 4.5+
+
+void glGetNamedFramebufferAttachmentParameteriv(GLuint framebuffer,
+	GLenum attachment, GLenum pname, GLint *params)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glGetNamedFramebufferAttachmentParameteriv(framebuffer, attachment, pname,
+			params);
+		return;
+	}
+
+	TRY();
+
+	backend::getNamedFramebufferAttachmentParameteriv(framebuffer, attachment,
+		pname, params);
+
+	CATCH();
+}
+
+// GL_EXT_direct_state_access
+
+void glGetNamedFramebufferAttachmentParameterivEXT(GLuint framebuffer,
+	GLenum attachment, GLenum pname, GLint *params)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glGetNamedFramebufferAttachmentParameterivEXT(framebuffer, attachment,
+			pname, params);
+		return;
+	}
+
+	TRY();
+
+	backend::getNamedFramebufferAttachmentParameteriv(framebuffer, attachment,
+		pname, params, true);
+
+	CATCH();
+}
+
 
 void glGetNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname,
 	GLint *param)
@@ -728,6 +922,49 @@ const GLubyte *glGetStringi(GLenum name, GLuint index)
 	CATCH();
 
 	return string;
+}
+
+
+// OpenGL 4.5+
+
+void glInvalidateNamedFramebufferData(GLuint framebuffer,
+	GLsizei numAttachments, const GLenum *attachments)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glInvalidateNamedFramebufferData(framebuffer, numAttachments,
+			attachments);
+		return;
+	}
+
+	TRY();
+
+	backend::invalidateNamedFramebufferData(framebuffer, numAttachments,
+		attachments);
+
+	CATCH();
+}
+
+
+// OpenGL 4.3+
+
+void glInvalidateNamedFramebufferSubData(GLuint framebuffer,
+	GLsizei numAttachments, const GLenum *attachments, GLint x, GLint y,
+	GLsizei width, GLsizei height)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glInvalidateNamedFramebufferSubData(framebuffer, numAttachments,
+			attachments, x, y, width, height);
+		return;
+	}
+
+	TRY();
+
+	backend::invalidateNamedFramebufferSubData(framebuffer, numAttachments,
+		attachments, x, y, width, height);
+
+	CATCH();
 }
 
 

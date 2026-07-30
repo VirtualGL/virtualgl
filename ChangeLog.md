@@ -1,8 +1,27 @@
 3.1.5
 =====
 
+### Significant changes relative to 3.1.4:
+
 1. `vglserver_config` now works properly with SUSE Linux Enterprise/openSUSE
 Leap 16.
+
+2. Fixed issues in the EGL back end whereby the following OpenGL functions did
+not work properly with the default framebuffer:
+
+    - `glBlitNamedFramebuffer()`, `glCheckNamedFramebufferStatus()`,
+`glClearNamedFramebufferfi()`, `glClearNamedFramebufferfv()`,
+`glClearNamedFramebufferiv()`, `glClearNamedFramebufferuiv()`,
+`glGetNamedFramebufferAttachmentParameteriv()`, and
+`glInvalidateNamedFramebufferData()` from OpenGL 4.5
+    - `glInvalidateNamedFramebufferSubData()` from OpenGL 4.3
+    - `glCheckNamedFramebufferStatusEXT()`, `glGetFramebufferParameterivEXT()`,
+`glGetNamedFramebufferAttachmentParameterivEXT()`, and
+`glGetNamedFramebufferParameterivEXT()` from `GL_EXT_direct_state_access`
+    - `glGetFramebufferAttachmentParameterivEXT()` from
+`GL_EXT_framebuffer_object`
+
+This specifically fixes an interaction issue with Minecraft: Java Edition.
 
 
 3.1.4

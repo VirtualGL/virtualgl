@@ -1,4 +1,4 @@
-// Copyright (C)2019-2023 D. R. Commander
+// Copyright (C)2019-2023, 2026 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -50,6 +50,12 @@ FakePbuffer::FakePbuffer(Display *dpy_, VGLFBConfig config_,
 
 	if(width < 1) width = 1;
 	if(height < 1) height = 1;
+
+	nDrawBuffers = 0;
+	drawBuffers[0] = config->attr.doubleBuffer ? GL_BACK : GL_FRONT;
+	for(int i = 1; i < 16; i++)
+		drawBuffers[i] = GL_NONE;
+	readBuffer = config->attr.doubleBuffer ? GL_BACK : GL_FRONT;
 
 	try
 	{
@@ -293,6 +299,8 @@ void FakePbuffer::setDrawBuffer(GLenum drawBuf, bool deferred)
 	else
 		_glDrawBuffers(nActualBufs, actualBufs);
 	CTXHASHEGL.setDrawBuffers(_eglGetCurrentContext(), 1, &drawBuf);
+	drawBuffers[0] = drawBuf;
+	nDrawBuffers = 1;
 }
 
 
@@ -391,6 +399,9 @@ void FakePbuffer::setDrawBuffers(GLsizei n, const GLenum *bufs, bool deferred)
 	else
 		_glDrawBuffers(nActualBufs, actualBufs);
 	CTXHASHEGL.setDrawBuffers(_eglGetCurrentContext(), n, bufs);
+	for(GLsizei i = 0; i < n; i++)
+		drawBuffers[i] = bufs[i];
+	nDrawBuffers = n;
 }
 
 
@@ -426,4 +437,5 @@ void FakePbuffer::setReadBuffer(GLenum readBuf, bool deferred)
 	else
 		_glReadBuffer(actualReadBuf);
 	CTXHASHEGL.setReadBuffer(_eglGetCurrentContext(), readBuf);
+	readBuffer = readBuf;
 }

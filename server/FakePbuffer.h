@@ -1,4 +1,4 @@
-// Copyright (C)2019-2022 D. R. Commander
+// Copyright (C)2019-2022, 2026 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -36,6 +36,16 @@ namespace backend
 			GLuint getFBO(void) { return fbo; }
 			int getWidth(void) { return width; }
 			int getHeight(void) { return height; }
+
+			GLenum getDrawBuffer(int index)
+			{
+				if(index >= 0 && index < nDrawBuffers)
+					return drawBuffers[index];
+				return GL_NONE;
+			}
+
+			GLenum getReadBuffer(void) { return readBuffer; }
+
 			void setDrawBuffer(GLenum mode, bool deferred);
 			void setDrawBuffers(GLsizei n, const GLenum *bufs, bool deferred);
 			void setReadBuffer(GLenum readBuf, bool deferred);
@@ -48,6 +58,8 @@ namespace backend
 			Display *dpy;
 			VGLFBConfig config;
 			GLXDrawable id;
+			GLsizei nDrawBuffers;
+			GLenum drawBuffers[16], readBuffer;
 			// 0 = front left, 1 = back left, 2 = front right, 3 = back right
 			GLuint fbo, rboc[4], rbod;
 			int width, height;
