@@ -182,7 +182,17 @@ void glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers)
 
 void glDeleteFramebuffersEXT(GLsizei n, const GLuint *framebuffers)
 {
-	glDeleteFramebuffers(n, framebuffers);
+	if(faker::getExcludeCurrent())
+	{
+		_glDeleteFramebuffersEXT(n, framebuffers);
+		return;
+	}
+
+	TRY();
+
+	backend::deleteFramebuffers(n, framebuffers, true);
+
+	CATCH();
 }
 
 
