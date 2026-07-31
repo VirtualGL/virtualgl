@@ -1,4 +1,4 @@
-// Copyright (C)2019-2023, 2025 D. R. Commander
+// Copyright (C)2019-2023, 2025-2026 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -122,7 +122,7 @@ void bindFramebuffer(GLenum target, GLuint framebuffer, bool ext)
 }
 
 
-void deleteFramebuffers(GLsizei n, const GLuint *framebuffers)
+void deleteFramebuffers(GLsizei n, const GLuint *framebuffers, bool ext)
 {
 	if(fconfig.egl)
 	{
@@ -140,7 +140,8 @@ void deleteFramebuffers(GLsizei n, const GLuint *framebuffers)
 			}
 		}
 	}
-	_glDeleteFramebuffers(n, framebuffers);
+	if(ext) _glDeleteFramebuffersEXT(n, framebuffers);
+	else _glDeleteFramebuffers(n, framebuffers);
 }
 
 

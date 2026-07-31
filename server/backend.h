@@ -1,4 +1,4 @@
-// Copyright (C)2019-2021 D. R. Commander
+// Copyright (C)2019-2021, 2026 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -40,7 +40,8 @@ namespace backend
 	GLXPbuffer createPbuffer(Display *dpy, VGLFBConfig config,
 		const int *glxAttribs);
 
-	void deleteFramebuffers(GLsizei n, const GLuint *framebuffers);
+	void deleteFramebuffers(GLsizei n, const GLuint *framebuffers,
+		bool ext = false);
 
 	void destroyContext(Display *dpy, GLXContext ctx);
 
