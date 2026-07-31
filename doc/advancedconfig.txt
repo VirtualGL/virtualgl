@@ -842,7 +842,7 @@ previous method:
 	''XGetImage()'' or other X11 functions to obtain a bitmap of the pixels that
 	were rendered by OpenGL.  Enabling ''VGL_SYNC'' is a somewhat extreme measure
 	that may be needed to make such applications display properly with VirtualGL.
-	 It was developed initially as a way to pass the GLX conformance suite
+	It was developed initially as a way to pass the GLX conformance suite
 	(''conformx'', specifically), but at least one commercial application is
 	known to require it as well (see [[#Application_Recipes][Application
 	Recipes]].)

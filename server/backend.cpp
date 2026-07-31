@@ -610,7 +610,7 @@ void getFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 							attachment = GL_DEPTH_STENCIL_ATTACHMENT;
 						else
 							attachment = GL_DEPTH_ATTACHMENT;
-					  isDefault = true;  break;
+						isDefault = true;  break;
 					}
 					case GL_STENCIL:
 					{
@@ -619,7 +619,7 @@ void getFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 							attachment = GL_DEPTH_STENCIL_ATTACHMENT;
 						else
 							attachment = GL_STENCIL_ATTACHMENT;
-					  isDefault = true;  break;
+						isDefault = true;  break;
 					}
 				}
 			}
