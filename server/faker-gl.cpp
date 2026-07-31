@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011-2012, 2015, 2018-2021, 2023 D. R. Commander
+// Copyright (C)2009, 2011-2012, 2015, 2018-2021, 2023, 2026 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -126,6 +126,8 @@ void glXWaitGL(void)
 }
 
 
+// OpenGL 3.0+
+
 void glBindFramebuffer(GLenum target, GLuint framebuffer)
 {
 	if(faker::getExcludeCurrent())
@@ -140,6 +142,8 @@ void glBindFramebuffer(GLenum target, GLuint framebuffer)
 
 	CATCH();
 }
+
+// GL_EXT_framebuffer_object
 
 void glBindFramebufferEXT(GLenum target, GLuint framebuffer)
 {
@@ -157,6 +161,8 @@ void glBindFramebufferEXT(GLenum target, GLuint framebuffer)
 }
 
 
+// OpenGL 3.0+
+
 void glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers)
 {
 	if(faker::getExcludeCurrent())
@@ -171,6 +177,8 @@ void glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers)
 
 	CATCH();
 }
+
+// GL_EXT_framebuffer_object
 
 void glDeleteFramebuffersEXT(GLsizei n, const GLuint *framebuffers)
 {
@@ -276,6 +284,8 @@ void glDrawBuffersATI(GLsizei n, const GLenum *bufs)
 }
 
 
+// GL_EXT_direct_state_access
+
 void glFramebufferDrawBufferEXT(GLuint framebuffer, GLenum mode)
 {
 	if(faker::getExcludeCurrent())
@@ -320,6 +330,8 @@ void glFramebufferDrawBufferEXT(GLuint framebuffer, GLenum mode)
 	CATCH();
 }
 
+
+// GL_EXT_direct_state_access
 
 void glFramebufferDrawBuffersEXT(GLuint framebuffer, GLsizei n,
 	const GLenum *bufs)
@@ -370,6 +382,8 @@ void glFramebufferDrawBuffersEXT(GLuint framebuffer, GLsizei n,
 	CATCH();
 }
 
+
+// GL_EXT_direct_state_access
 
 void glFramebufferReadBufferEXT(GLuint framebuffer, GLenum mode)
 {
@@ -486,6 +500,8 @@ void glGetFloatv(GLenum pname, GLfloat *data)
 }
 
 
+// OpenGL 3.0+
+
 void glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 	GLenum pname, GLint *params)
 {
@@ -502,6 +518,8 @@ void glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 	CATCH();
 }
 
+
+// OpenGL 4.3+
 
 void glGetFramebufferParameteriv(GLenum target, GLenum pname, GLint *params)
 {
@@ -562,6 +580,8 @@ void glGetInteger64v(GLenum pname, GLint64 *data)
 	CATCH();
 }
 
+
+// OpenGL 4.5+
 
 void glGetNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname,
 	GLint *param)
@@ -639,6 +659,8 @@ const GLubyte *glGetStringi(GLenum name, GLuint index)
 }
 
 
+// OpenGL 4.5+
+
 void glNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf)
 {
 	if(faker::getExcludeCurrent())
@@ -683,6 +705,8 @@ void glNamedFramebufferDrawBuffer(GLuint framebuffer, GLenum buf)
 	CATCH();
 }
 
+
+// OpenGL 4.5+
 
 void glNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 	const GLenum *bufs)
@@ -733,6 +757,8 @@ void glNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n,
 	CATCH();
 }
 
+
+// OpenGL 4.5+
 
 void glNamedFramebufferReadBuffer(GLuint framebuffer, GLenum mode)
 {
