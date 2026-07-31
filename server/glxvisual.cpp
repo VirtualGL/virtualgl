@@ -122,8 +122,8 @@ static void assignDefaultFBConfigAttribs(Display *dpy, int screen,
 		char *arg = strtok(str, ", \t");
 		while(arg && argc < 512)
 		{
-		  argv[argc] = arg;  argc++;
-		  arg = strtok(NULL, ", \t");
+			argv[argc] = arg;  argc++;
+			arg = strtok(NULL, ", \t");
 		}
 		for(int i = 0; i < argc; i++)
 		{
