@@ -541,7 +541,28 @@ void glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 
 	TRY();
 
-	backend::getFramebufferAttachmentParameteriv(target, attachment, pname, params);
+	backend::getFramebufferAttachmentParameteriv(target, attachment, pname,
+		params);
+
+	CATCH();
+}
+
+// GL_EXT_framebuffer_object
+
+void glGetFramebufferAttachmentParameterivEXT(GLenum target, GLenum attachment,
+	GLenum pname, GLint *params)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glGetFramebufferAttachmentParameterivEXT(target, attachment, pname,
+			params);
+		return;
+	}
+
+	TRY();
+
+	backend::getFramebufferAttachmentParameteriv(target, attachment, pname,
+		params, true);
 
 	CATCH();
 }
@@ -626,6 +647,23 @@ void glGetNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname,
 	TRY()
 
 	backend::getNamedFramebufferParameteriv(framebuffer, pname, param);
+
+	CATCH();
+}
+
+// GL_EXT_direct_state_access
+
+void glGetNamedFramebufferParameterivEXT(GLuint framebuffer, GLenum pname,
+	GLint *param)
+{
+	if(faker::getOGLExcludeCurrent() || faker::getEGLXContextCurrent())
+	{
+		_glGetNamedFramebufferParameterivEXT(framebuffer, pname, param);  return;
+	}
+
+	TRY()
+
+	backend::getNamedFramebufferParameteriv(framebuffer, pname, param, true);
 
 	CATCH();
 }

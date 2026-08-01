@@ -1,5 +1,5 @@
 // Copyright (C)2005 Sun Microsystems, Inc.
-// Copyright (C)2011, 2014-2015, 2018, 2021-2025 D. R. Commander
+// Copyright (C)2011, 2014-2015, 2018, 2021-2026 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -1067,10 +1067,12 @@ void (*eglGetProcAddress(const char *procName))(void)
 		CHECK_FAKED(glGetDoublev)
 		CHECK_FAKED(glGetFloatv)
 		CHECK_FAKED(glGetFramebufferAttachmentParameteriv)
+		CHECK_FAKED(glGetFramebufferAttachmentParameterivEXT)
 		CHECK_FAKED(glGetFramebufferParameteriv)
 		CHECK_FAKED(glGetIntegerv)
 		CHECK_FAKED(glGetInteger64v)
 		CHECK_FAKED(glGetNamedFramebufferParameteriv)
+		CHECK_FAKED(glGetNamedFramebufferParameterivEXT)
 		CHECK_FAKED(glGetString)
 		CHECK_FAKED(glGetStringi)
 		CHECK_FAKED(glNamedFramebufferDrawBuffer)

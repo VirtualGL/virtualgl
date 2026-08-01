@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2010-2015, 2017-2025 D. R. Commander
+// Copyright (C)2010-2015, 2017-2026 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -3668,10 +3668,12 @@ int procAddrTest(void)
 		TEST_PROC_SYM(glGetDoublev)
 		TEST_PROC_SYM(glGetFloatv)
 		TEST_PROC_SYM(glGetFramebufferAttachmentParameteriv)
+		TEST_PROC_SYM(glGetFramebufferAttachmentParameterivEXT)
 		TEST_PROC_SYM_OPT(glGetFramebufferParameteriv)
 		TEST_PROC_SYM(glGetIntegerv)
 		TEST_PROC_SYM(glGetInteger64v)
 		TEST_PROC_SYM_OPT(glGetNamedFramebufferParameteriv)
+		TEST_PROC_SYM_OPT(glGetNamedFramebufferParameterivEXT)
 		TEST_PROC_SYM(glGetString)
 		TEST_PROC_SYM(glGetStringi)
 		TEST_PROC_SYM_OPT(glNamedFramebufferDrawBuffer);

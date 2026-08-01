@@ -63,14 +63,14 @@ namespace backend
 		int *value);
 
 	void getFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
-		GLenum pname, GLint *params);
+		GLenum pname, GLint *params, bool ext = false);
 
 	void getFramebufferParameteriv(GLenum target, GLenum pname, GLint *params);
 
 	void getIntegerv(GLenum pname, GLint *params);
 
 	void getNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname,
-		GLint *param);
+		GLint *param, bool ext = false);
 
 	Bool isDirect(GLXContext ctx);
 

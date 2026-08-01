@@ -533,7 +533,7 @@ int getFBConfigAttrib(Display *dpy, VGLFBConfig config, int attribute,
 
 
 void getFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
-	GLenum pname, GLint *params)
+	GLenum pname, GLint *params, bool ext)
 {
 	bool isDefault = false;
 
@@ -541,8 +541,12 @@ void getFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 	{
 		if(!params)
 		{
-			_glGetFramebufferAttachmentParameteriv(target, attachment, pname,
-				params);
+			if(ext)
+				_glGetFramebufferAttachmentParameterivEXT(target, attachment, pname,
+					params);
+			else
+				_glGetFramebufferAttachmentParameteriv(target, attachment, pname,
+					params);
 			return;
 		}
 		else if((attachment >= GL_FRONT_LEFT && attachment <= GL_BACK_RIGHT)
@@ -586,7 +590,11 @@ void getFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 			}
 		}
 	}
-	_glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
+	if(ext)
+		_glGetFramebufferAttachmentParameterivEXT(target, attachment, pname,
+			params);
+	else
+		_glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
 	if(fconfig.egl)
 	{
 		if(isDefault && *params == GL_RENDERBUFFER)
@@ -711,13 +719,14 @@ void getIntegerv(GLenum pname, GLint *params)
 
 
 void getNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname,
-	GLint *param)
+	GLint *param, bool ext)
 {
 	if(fconfig.egl)
 	{
 		if(!param)
 		{
-			_glGetNamedFramebufferParameteriv(framebuffer, pname, param);
+			if(ext) _glGetNamedFramebufferParameterivEXT(framebuffer, pname, param);
+			else _glGetNamedFramebufferParameteriv(framebuffer, pname, param);
 			return;
 		}
 		FakePbuffer *pb;
@@ -737,7 +746,8 @@ void getNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname,
 			else framebuffer = pb->getFBO();
 		}
 	}
-	_glGetNamedFramebufferParameteriv(framebuffer, pname, param);
+	if(ext) _glGetNamedFramebufferParameterivEXT(framebuffer, pname, param);
+	else _glGetNamedFramebufferParameteriv(framebuffer, pname, param);
 }
 
 

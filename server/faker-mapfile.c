@@ -179,10 +179,12 @@
 		glGetDoublev;
 		glGetFloatv;
 		glGetFramebufferAttachmentParameteriv;
+		glGetFramebufferAttachmentParameterivEXT;
 		glGetFramebufferParameteriv;
 		glGetIntegerv;
 		glGetInteger64v;
 		glGetNamedFramebufferParameteriv;
+		glGetNamedFramebufferParameterivEXT;
 		glGetString;
 		glGetStringi;
 		glNamedFramebufferDrawBuffer;

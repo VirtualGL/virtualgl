@@ -781,6 +781,10 @@ VFUNCDEF4(glGetFramebufferAttachmentParameteriv, GLenum, target,
 	GLenum, attachment, GLenum, pname, GLint *, params,
 	glGetFramebufferAttachmentParameteriv)
 
+VFUNCDEF4(glGetFramebufferAttachmentParameterivEXT, GLenum, target,
+	GLenum, attachment, GLenum, pname, GLint *, params,
+	glGetFramebufferAttachmentParameterivEXT)
+
 VFUNCDEF3(glGetFramebufferParameteriv, GLenum, target, GLenum, pname,
 	GLint *, params, glGetFramebufferParameteriv)
 
@@ -790,6 +794,9 @@ VFUNCDEF2(glGetInteger64v, GLenum, pname, GLint64 *, data, glGetInteger64v)
 
 VFUNCDEF3(glGetNamedFramebufferParameteriv, GLuint, framebuffer,
 	GLenum, pname, GLint *, param, glGetNamedFramebufferParameteriv)
+
+VFUNCDEF3(glGetNamedFramebufferParameterivEXT, GLuint, framebuffer,
+	GLenum, pname, GLint *, param, glGetNamedFramebufferParameterivEXT)
 
 FUNCDEF1(const GLubyte *, glGetString, GLenum, name, glGetString)
 
