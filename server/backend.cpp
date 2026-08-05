@@ -537,19 +537,9 @@ void getFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 {
 	bool isDefault = false;
 
-	if(fconfig.egl)
+	if(fconfig.egl && params)
 	{
-		if(!params)
-		{
-			if(ext)
-				_glGetFramebufferAttachmentParameterivEXT(target, attachment, pname,
-					params);
-			else
-				_glGetFramebufferAttachmentParameteriv(target, attachment, pname,
-					params);
-			return;
-		}
-		else if((attachment >= GL_FRONT_LEFT && attachment <= GL_BACK_RIGHT)
+		if((attachment >= GL_FRONT_LEFT && attachment <= GL_BACK_RIGHT)
 			|| (attachment >= GL_DEPTH && attachment <= GL_STENCIL))
 		{
 			FakePbuffer *pb;
@@ -595,7 +585,7 @@ void getFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 			params);
 	else
 		_glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
-	if(fconfig.egl)
+	if(fconfig.egl && params)
 	{
 		if(isDefault && *params == GL_RENDERBUFFER)
 			*params = GL_FRAMEBUFFER_DEFAULT;
@@ -605,13 +595,8 @@ void getFramebufferAttachmentParameteriv(GLenum target, GLenum attachment,
 
 void getFramebufferParameteriv(GLenum target, GLenum pname, GLint *params)
 {
-	if(fconfig.egl)
+	if(fconfig.egl && params)
 	{
-		if(!params)
-		{
-			_glGetFramebufferParameteriv(target, pname, params);
-			return;
-		}
 		FakePbuffer *pb;
 		if(((target == GL_FRAMEBUFFER || target == GL_DRAW_FRAMEBUFFER)
 				&& (pb = getCurrentFakePbuffer(EGL_DRAW)) != NULL)
@@ -721,14 +706,8 @@ void getIntegerv(GLenum pname, GLint *params)
 void getNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname,
 	GLint *param, bool ext)
 {
-	if(fconfig.egl)
+	if(fconfig.egl && param)
 	{
-		if(!param)
-		{
-			if(ext) _glGetNamedFramebufferParameterivEXT(framebuffer, pname, param);
-			else _glGetNamedFramebufferParameteriv(framebuffer, pname, param);
-			return;
-		}
 		FakePbuffer *pb;
 		if(framebuffer == 0
 			&& (pb = PBHASHEGL.find(getCurrentDrawableEGL())) != NULL)
