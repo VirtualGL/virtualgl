@@ -43,7 +43,7 @@ using namespace util;
 #define CHECK_GL_ERROR() \
 { \
 	int e = glGetError(); \
-	if(e != GL_NO_ERROR) THROW("OpenGL error"); \
+	if(e != GL_NO_ERROR) PRERROR2("%d: OpenGL error 0x%.4x", __LINE__, e); \
 	while(e != GL_NO_ERROR) e = glGetError(); \
 }
 
@@ -845,6 +845,137 @@ int readbackTest(bool stereo)
 			checkFrame(dpy, win1, 1, lastFrame1);
 			checkWindowColor(dpy, win1, clr.bits(-1));
 			if(stereo) checkWindowColor(dpy, win1, sclr.bits(-1), true);
+
+			// Verify that direct state access functions correctly handle the default
+			// framebuffer.  These tests will fail when using the EGL back end with
+			// VirtualGL 3.1.4 and earlier.
+			GLenum status = 0;
+			if((status = glCheckNamedFramebufferStatus(0, GL_FRAMEBUFFER))
+				!= GL_FRAMEBUFFER_COMPLETE)
+				PRERROR2("glCheckNamedFramebufferStatus() 0x%.4x != 0x%.4x", status,
+					GL_FRAMEBUFFER_COMPLETE);
+			CHECK_GL_ERROR();
+
+			status = 0;
+			if((status = glCheckNamedFramebufferStatusEXT(0, GL_FRAMEBUFFER))
+				!= GL_FRAMEBUFFER_COMPLETE)
+				PRERROR2("glCheckNamedFramebufferStatusEXT() 0x%.4x != 0x%.4x", status,
+					GL_FRAMEBUFFER_COMPLETE);
+			CHECK_GL_ERROR();
+
+			typedef union
+			{
+				GLfloat f[4];  GLint i[4];  GLuint ui[4];
+			} ClearColor;
+			ClearColor clearColor;
+
+			glDrawBuffer(GL_FRONT_LEFT);
+			clearColor.f[0] = clr.r();  clearColor.f[1] = clr.g();
+			clearColor.f[2] = clr.b();  clearColor.f[3] = 1.;
+			clr.next();
+			glClearNamedFramebufferfv(0, GL_COLOR, 0, clearColor.f);
+			CHECK_GL_ERROR();
+
+			glDrawBuffer(GL_BACK_LEFT);
+			clearColor.f[0] = clr.r();  clearColor.f[1] = clr.g();
+			clearColor.f[2] = clr.b();  clearColor.f[3] = 1.;
+			clr.next();
+			glClearNamedFramebufferiv(0, GL_COLOR, 0, clearColor.i);
+			CHECK_GL_ERROR();
+
+			if(stereo)
+			{
+				glDrawBuffer(GL_FRONT_RIGHT);
+				clearColor.f[0] = clr.r();  clearColor.f[1] = clr.g();
+				clearColor.f[2] = clr.b();  clearColor.f[3] = 1.;
+				clr.next();
+				glClearNamedFramebufferuiv(0, GL_COLOR, 0, clearColor.ui);
+				CHECK_GL_ERROR();
+
+				glDrawBuffer(GL_BACK_RIGHT);
+				clearColor.f[0] = clr.r();  clearColor.f[1] = clr.g();
+				clearColor.f[2] = clr.b();  clearColor.f[3] = 1.;
+				clr.next();
+				glClearNamedFramebufferfv(0, GL_COLOR, 0, clearColor.f);
+				CHECK_GL_ERROR();
+
+				VERIFY_BUF_COLOR(GL_FRONT_LEFT, clr.bits(-4), "Front left buffer");
+				VERIFY_BUF_COLOR(GL_BACK_LEFT, clr.bits(-3), "Back left buffer");
+				VERIFY_BUF_COLOR(GL_FRONT_RIGHT, clr.bits(-2), "Front right buffer");
+				VERIFY_BUF_COLOR(GL_BACK_RIGHT, clr.bits(-1), "Back right buffer");
+			}
+			else
+			{
+				VERIFY_BUF_COLOR(GL_FRONT_LEFT, clr.bits(-2), "Front left buffer");
+				VERIFY_BUF_COLOR(GL_BACK_LEFT, clr.bits(-1), "Back left buffer");
+			}
+
+			GLint param = -1;
+			glGetNamedFramebufferParameteriv(0, GL_DOUBLEBUFFER, &param);
+			if(param != 1)
+				PRERROR1("glGetNamedFramebufferParameteriv(0, GL_DOUBLEBUFFER, ...) %d != 1\n",
+					param);
+			CHECK_GL_ERROR();
+
+			param = -1;
+			glGetNamedFramebufferParameteriv(0, GL_STEREO, &param);
+			if(param != (GLint)stereo)
+				PRERROR2("glGetNamedFramebufferParameteriv(0, GL_STEREO, ...) %d != %d\n",
+					param, (GLint)stereo);
+			CHECK_GL_ERROR();
+
+			param = -1;
+			glGetNamedFramebufferParameterivEXT(0, GL_DOUBLEBUFFER, &param);
+			if(param != 1)
+				PRERROR1("glGetNamedFramebufferParameterivEXT(0, GL_DOUBLEBUFFER, ...) %d != 1\n",
+					param);
+			CHECK_GL_ERROR();
+
+			param = -1;
+			glGetNamedFramebufferParameterivEXT(0, GL_STEREO, &param);
+			if(param != (GLint)stereo)
+				PRERROR2("glGetNamedFramebufferParameterivEXT(0, GL_STEREO, ...) %d != %d\n",
+					param, (GLint)stereo);
+			CHECK_GL_ERROR();
+
+			param = -1;
+			glGetNamedFramebufferAttachmentParameteriv(0,
+				stereo ? GL_BACK_RIGHT : GL_FRONT_LEFT,
+				GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &param);
+			if(param != GL_FRAMEBUFFER_DEFAULT)
+				PRERROR2("glGetNamedFramebufferAttachmentParameteriv(...) 0x%.4x != 0x%.4x\n",
+					param, GL_FRAMEBUFFER_DEFAULT);
+			CHECK_GL_ERROR();
+
+			param = -1;
+			int redSize = -1;
+			glXGetFBConfigAttrib(dpy, config, GLX_RED_SIZE, &redSize);
+			glGetNamedFramebufferAttachmentParameteriv(0,
+				stereo ? GL_BACK_RIGHT : GL_FRONT_LEFT,
+				GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &param);
+			if(param != redSize)
+				PRERROR2("glGetNamedFramebufferAttachmentParameteriv(...) %d != %d\n",
+					param, redSize);
+			CHECK_GL_ERROR();
+
+			param = -1;
+			glGetNamedFramebufferAttachmentParameterivEXT(0,
+				stereo ? GL_BACK_RIGHT : GL_FRONT_LEFT,
+				GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &param);
+			if(param != GL_FRAMEBUFFER_DEFAULT)
+				PRERROR2("glGetNamedFramebufferAttachmentParameterivEXT(...) 0x%.4x != 0x%.4x\n",
+					param, GL_FRAMEBUFFER_DEFAULT);
+			CHECK_GL_ERROR();
+
+			param = -1;
+			glGetNamedFramebufferAttachmentParameterivEXT(0,
+				stereo ? GL_BACK_RIGHT : GL_FRONT_LEFT,
+				GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &param);
+			if(param != redSize)
+				PRERROR2("glGetNamedFramebufferAttachmentParameterivEXT(...) %d != %d\n",
+					param, redSize);
+			CHECK_GL_ERROR();
+
 			printf("SUCCESS\n");
 		}
 		catch(std::exception &e)
