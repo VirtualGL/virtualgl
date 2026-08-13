@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011, 2013-2016, 2018-2022 D. R. Commander
+// Copyright (C)2009, 2011, 2013-2016, 2018-2022, 2026 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -618,6 +618,10 @@ FUNCDEF6(cl_context, clCreateContext,
 
 // X11 functions
 
+typedef Bool (*pfn_predicateType)(Display *, XEvent *, XPointer);
+FUNCDEF4(Bool, XCheckIfEvent, Display *, dpy, XEvent *, event_return,
+	pfn_predicateType, predicate, XPointer, arg, XCheckIfEvent)
+
 FUNCDEF3(Bool, XCheckMaskEvent, Display *, dpy, long, event_mask, XEvent *, xe,
 	XCheckMaskEvent)
 
@@ -664,6 +668,9 @@ FUNCDEF9(Status, XGetGeometry, Display *, display, Drawable, d, Window *, root,
 FUNCDEF8(XImage *, XGetImage, Display *, display, Drawable, d, int, x, int, y,
 	unsigned int, width, unsigned int, height, unsigned long, plane_mask,
 	int, format, XGetImage)
+
+FUNCDEF4(int, XIfEvent, Display *, dpy, XEvent *, event_return,
+	pfn_predicateType, predicate, XPointer, arg, XIfEvent)
 
 FUNCDEF2(char **, XListExtensions, Display *, dpy, int *, next,
 	XListExtensions)

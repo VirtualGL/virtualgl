@@ -20,6 +20,11 @@ resized.
 5. Fixed an issue whereby the VirtualGL Configuration dialog did not pop up if
 the Num Lock key was on.
 
+6. The VirtualGL Faker now detects X11 window resize (`ConfigureNotify`) events
+delivered to the 3D application via the `XCheckIfEvent()` and `XIfEvent()`
+functions.  This fixes an issue whereby the OpenGL rendering area of SDL
+applications was not resized when the application window was resized.
+
 
 2.6.6 ESR
 =========
