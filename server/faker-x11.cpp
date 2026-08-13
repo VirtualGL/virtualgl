@@ -1,6 +1,6 @@
 // Copyright (C)2004 Landmark Graphics Corporation
 // Copyright (C)2005, 2006 Sun Microsystems, Inc.
-// Copyright (C)2009, 2011-2016, 2018-2025 D. R. Commander
+// Copyright (C)2009, 2011-2016, 2018-2026 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -734,6 +734,20 @@ static void handleEvent(Display *dpy, XEvent *xe)
 }
 
 
+Bool XCheckIfEvent(Display *dpy, XEvent *event_return,
+	Bool (*predicate)(Display *, XEvent *, XPointer), XPointer arg)
+{
+	Bool retval = 0;
+	TRY();
+
+	if((retval = _XCheckIfEvent(dpy, event_return, predicate, arg)) == True)
+		handleEvent(dpy, event_return);
+
+	CATCH();
+	return retval;
+}
+
+
 Bool XCheckMaskEvent(Display *dpy, long event_mask, XEvent *xe)
 {
 	Bool retval = 0;
@@ -812,6 +826,20 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 	/////////////////////////////////////////////////////////////////////////////
 	STOPTRACE();  CLOSETRACE();
 	/////////////////////////////////////////////////////////////////////////////
+
+	CATCH();
+	return retval;
+}
+
+
+Bool XIfEvent(Display *dpy, XEvent *event_return,
+	Bool (*predicate)(Display *, XEvent *, XPointer), XPointer arg)
+{
+	Bool retval = 0;
+	TRY();
+
+	if((retval = _XIfEvent(dpy, event_return, predicate, arg)) == True)
+		handleEvent(dpy, event_return);
 
 	CATCH();
 	return retval;

@@ -647,6 +647,10 @@ FUNCDEF6(cl_context, clCreateContext,
 
 // X11 functions
 
+typedef Bool (*pfn_predicateType)(Display *, XEvent *, XPointer);
+FUNCDEF4(Bool, XCheckIfEvent, Display *, dpy, XEvent *, event_return,
+	pfn_predicateType, predicate, XPointer, arg, XCheckIfEvent)
+
 FUNCDEF3(Bool, XCheckMaskEvent, Display *, dpy, long, event_mask, XEvent *, xe,
 	XCheckMaskEvent)
 
@@ -693,6 +697,9 @@ FUNCDEF9(Status, XGetGeometry, Display *, display, Drawable, d, Window *, root,
 FUNCDEF8(XImage *, XGetImage, Display *, display, Drawable, d, int, x, int, y,
 	unsigned int, width, unsigned int, height, unsigned long, plane_mask,
 	int, format, XGetImage)
+
+FUNCDEF4(int, XIfEvent, Display *, dpy, XEvent *, event_return,
+	pfn_predicateType, predicate, XPointer, arg, XIfEvent)
 
 FUNCDEF2(char **, XListExtensions, Display *, dpy, int *, next,
 	XListExtensions)

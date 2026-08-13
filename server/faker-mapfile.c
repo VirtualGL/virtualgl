@@ -127,6 +127,7 @@
 		#endif
 
 		/* X11 */
+		XCheckIfEvent;
 		XCheckMaskEvent;
 		XCheckTypedEvent;
 		XCheckTypedWindowEvent;
@@ -141,6 +142,7 @@
 		XFree;
 		XGetGeometry;
 		XGetImage;
+		XIfEvent;
 		XListExtensions;
 		XMaskEvent;
 		XMoveResizeWindow;

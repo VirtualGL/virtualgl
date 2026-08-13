@@ -69,6 +69,11 @@ the Num Lock key was on.
 15. `vglserver_config` now works properly with SUSE Linux Enterprise/openSUSE
 Leap 16.
 
+16. The VirtualGL Faker now detects X11 window resize (`ConfigureNotify`)
+events delivered to the 3D application via the `XCheckIfEvent()` and
+`XIfEvent()` functions.  This fixes an issue whereby the OpenGL rendering area
+of SDL applications was not resized when the application window was resized.
+
 
 3.0.2
 =====
