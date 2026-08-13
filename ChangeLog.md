@@ -21,7 +21,12 @@ not work properly with the default framebuffer:
     - `glGetFramebufferAttachmentParameterivEXT()` from
 `GL_EXT_framebuffer_object`
 
-This specifically fixes an interaction issue with Minecraft: Java Edition.
+    This specifically fixes an interaction issue with Minecraft: Java Edition.
+
+3. The VirtualGL Faker now detects X11 window resize (`ConfigureNotify`) events
+delivered to the 3D application via the `XCheckIfEvent()` and `XIfEvent()`
+functions.  This fixes an issue whereby the OpenGL rendering area of SDL
+applications was not resized when the application window was resized.
 
 
 3.1.4
