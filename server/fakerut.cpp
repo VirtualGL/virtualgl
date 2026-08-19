@@ -104,6 +104,11 @@ using namespace util;
 	strstr(glXQueryExtensionsString(dpy, DefaultScreen(dpy)), #ext)
 
 
+#define LOAD_GL_FUNCTION(FuncType, f) \
+	FuncType __##f = (FuncType)glXGetProcAddress((const GLubyte *)#f); \
+	if(!__##f) THROW(#f " not available")
+
+
 #if 0
 void clickToContinue(Display *dpy)
 {
@@ -595,15 +600,23 @@ int readbackTest(bool stereo)
 			if(stereo)
 			{
 				checkWindowColor(dpy, win1, sclr.bits(-2), true);
+				LOAD_GL_FUNCTION(PFNGLFRAMEBUFFERDRAWBUFFERSEXTPROC,
+					glFramebufferDrawBuffersEXT);
 				const GLenum buf = GL_BACK;
-				glFramebufferDrawBuffersEXT(0, 1, &buf);
-				glFramebufferReadBufferEXT(0, GL_FRONT);
+				__glFramebufferDrawBuffersEXT(0, 1, &buf);
+				LOAD_GL_FUNCTION(PFNGLFRAMEBUFFERREADBUFFEREXTPROC,
+					glFramebufferReadBufferEXT);
+				__glFramebufferReadBufferEXT(0, GL_FRONT);
 			}
 			else
 			{
+				LOAD_GL_FUNCTION(PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC,
+					glNamedFramebufferDrawBuffers);
 				const GLenum buf = GL_BACK;
-				glNamedFramebufferDrawBuffers(0, 1, &buf);
-				glNamedFramebufferReadBuffer(0, GL_FRONT);
+				__glNamedFramebufferDrawBuffers(0, 1, &buf);
+				LOAD_GL_FUNCTION(PFNGLNAMEDFRAMEBUFFERREADBUFFERPROC,
+					glNamedFramebufferReadBuffer);
+				__glNamedFramebufferReadBuffer(0, GL_FRONT);
 			}
 			VERIFY_FBO(0U, GL_BACK, GL_NONE, 0U, GL_FRONT);
 			glFinish();
@@ -635,10 +648,16 @@ int readbackTest(bool stereo)
 			if(stereo)
 			{
 				checkWindowColor(dpy, win1, sclr.bits(-2), true);
-				glFramebufferDrawBufferEXT(0, GL_BACK);
+				LOAD_GL_FUNCTION(PFNGLFRAMEBUFFERDRAWBUFFEREXTPROC,
+					glFramebufferDrawBufferEXT);
+				__glFramebufferDrawBufferEXT(0, GL_BACK);
 			}
 			else
-				glNamedFramebufferDrawBuffer(0, GL_BACK);
+			{
+				LOAD_GL_FUNCTION(PFNGLNAMEDFRAMEBUFFERDRAWBUFFERPROC,
+					glNamedFramebufferDrawBuffer);
+				__glNamedFramebufferDrawBuffer(0, GL_BACK);
+			}
 			VERIFY_FBO(0U, GL_BACK, GL_NONE, 0U, GL_BACK);
 			glXWaitGL();
 			checkFrame(dpy, win1, 1, lastFrame1);
@@ -850,14 +869,18 @@ int readbackTest(bool stereo)
 			// framebuffer.  These tests will fail when using the EGL back end with
 			// VirtualGL 3.1.4 and earlier.
 			GLenum status = 0;
-			if((status = glCheckNamedFramebufferStatus(0, GL_FRAMEBUFFER))
+			LOAD_GL_FUNCTION(PFNGLCHECKNAMEDFRAMEBUFFERSTATUSPROC,
+				glCheckNamedFramebufferStatus);
+			if((status = __glCheckNamedFramebufferStatus(0, GL_FRAMEBUFFER))
 				!= GL_FRAMEBUFFER_COMPLETE)
 				PRERROR2("glCheckNamedFramebufferStatus() 0x%.4x != 0x%.4x", status,
 					GL_FRAMEBUFFER_COMPLETE);
 			CHECK_GL_ERROR();
 
 			status = 0;
-			if((status = glCheckNamedFramebufferStatusEXT(0, GL_FRAMEBUFFER))
+			LOAD_GL_FUNCTION(PFNGLCHECKNAMEDFRAMEBUFFERSTATUSEXTPROC,
+				glCheckNamedFramebufferStatusEXT);
+			if((status = __glCheckNamedFramebufferStatusEXT(0, GL_FRAMEBUFFER))
 				!= GL_FRAMEBUFFER_COMPLETE)
 				PRERROR2("glCheckNamedFramebufferStatusEXT() 0x%.4x != 0x%.4x", status,
 					GL_FRAMEBUFFER_COMPLETE);
@@ -873,14 +896,18 @@ int readbackTest(bool stereo)
 			clearColor.f[0] = clr.r();  clearColor.f[1] = clr.g();
 			clearColor.f[2] = clr.b();  clearColor.f[3] = 1.;
 			clr.next();
-			glClearNamedFramebufferfv(0, GL_COLOR, 0, clearColor.f);
+			LOAD_GL_FUNCTION(PFNGLCLEARNAMEDFRAMEBUFFERFVPROC,
+				glClearNamedFramebufferfv);
+			__glClearNamedFramebufferfv(0, GL_COLOR, 0, clearColor.f);
 			CHECK_GL_ERROR();
 
 			glDrawBuffer(GL_BACK_LEFT);
 			clearColor.f[0] = clr.r();  clearColor.f[1] = clr.g();
 			clearColor.f[2] = clr.b();  clearColor.f[3] = 1.;
 			clr.next();
-			glClearNamedFramebufferiv(0, GL_COLOR, 0, clearColor.i);
+			LOAD_GL_FUNCTION(PFNGLCLEARNAMEDFRAMEBUFFERIVPROC,
+				glClearNamedFramebufferiv);
+			__glClearNamedFramebufferiv(0, GL_COLOR, 0, clearColor.i);
 			CHECK_GL_ERROR();
 
 			if(stereo)
@@ -889,14 +916,16 @@ int readbackTest(bool stereo)
 				clearColor.f[0] = clr.r();  clearColor.f[1] = clr.g();
 				clearColor.f[2] = clr.b();  clearColor.f[3] = 1.;
 				clr.next();
-				glClearNamedFramebufferuiv(0, GL_COLOR, 0, clearColor.ui);
+				LOAD_GL_FUNCTION(PFNGLCLEARNAMEDFRAMEBUFFERUIVPROC,
+					glClearNamedFramebufferuiv);
+				__glClearNamedFramebufferuiv(0, GL_COLOR, 0, clearColor.ui);
 				CHECK_GL_ERROR();
 
 				glDrawBuffer(GL_BACK_RIGHT);
 				clearColor.f[0] = clr.r();  clearColor.f[1] = clr.g();
 				clearColor.f[2] = clr.b();  clearColor.f[3] = 1.;
 				clr.next();
-				glClearNamedFramebufferfv(0, GL_COLOR, 0, clearColor.f);
+				__glClearNamedFramebufferfv(0, GL_COLOR, 0, clearColor.f);
 				CHECK_GL_ERROR();
 
 				VERIFY_BUF_COLOR(GL_FRONT_LEFT, clr.bits(-4), "Front left buffer");
@@ -911,35 +940,41 @@ int readbackTest(bool stereo)
 			}
 
 			GLint param = -1;
-			glGetNamedFramebufferParameteriv(0, GL_DOUBLEBUFFER, &param);
+			LOAD_GL_FUNCTION(PFNGLGETNAMEDFRAMEBUFFERPARAMETERIVPROC,
+				glGetNamedFramebufferParameteriv);
+			__glGetNamedFramebufferParameteriv(0, GL_DOUBLEBUFFER, &param);
 			if(param != 1)
 				PRERROR1("glGetNamedFramebufferParameteriv(0, GL_DOUBLEBUFFER, ...) %d != 1\n",
 					param);
 			CHECK_GL_ERROR();
 
 			param = -1;
-			glGetNamedFramebufferParameteriv(0, GL_STEREO, &param);
+			__glGetNamedFramebufferParameteriv(0, GL_STEREO, &param);
 			if(param != (GLint)stereo)
 				PRERROR2("glGetNamedFramebufferParameteriv(0, GL_STEREO, ...) %d != %d\n",
 					param, (GLint)stereo);
 			CHECK_GL_ERROR();
 
 			param = -1;
-			glGetNamedFramebufferParameterivEXT(0, GL_DOUBLEBUFFER, &param);
+			LOAD_GL_FUNCTION(PFNGLGETNAMEDFRAMEBUFFERPARAMETERIVEXTPROC,
+				glGetNamedFramebufferParameterivEXT);
+			__glGetNamedFramebufferParameterivEXT(0, GL_DOUBLEBUFFER, &param);
 			if(param != 1)
 				PRERROR1("glGetNamedFramebufferParameterivEXT(0, GL_DOUBLEBUFFER, ...) %d != 1\n",
 					param);
 			CHECK_GL_ERROR();
 
 			param = -1;
-			glGetNamedFramebufferParameterivEXT(0, GL_STEREO, &param);
+			__glGetNamedFramebufferParameterivEXT(0, GL_STEREO, &param);
 			if(param != (GLint)stereo)
 				PRERROR2("glGetNamedFramebufferParameterivEXT(0, GL_STEREO, ...) %d != %d\n",
 					param, (GLint)stereo);
 			CHECK_GL_ERROR();
 
 			param = -1;
-			glGetNamedFramebufferAttachmentParameteriv(0,
+			LOAD_GL_FUNCTION(PFNGLGETNAMEDFRAMEBUFFERATTACHMENTPARAMETERIVPROC,
+				glGetNamedFramebufferAttachmentParameteriv);
+			__glGetNamedFramebufferAttachmentParameteriv(0,
 				stereo ? GL_BACK_RIGHT : GL_FRONT_LEFT,
 				GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &param);
 			if(param != GL_FRAMEBUFFER_DEFAULT)
@@ -950,7 +985,7 @@ int readbackTest(bool stereo)
 			param = -1;
 			int redSize = -1;
 			glXGetFBConfigAttrib(dpy, config, GLX_RED_SIZE, &redSize);
-			glGetNamedFramebufferAttachmentParameteriv(0,
+			__glGetNamedFramebufferAttachmentParameteriv(0,
 				stereo ? GL_BACK_RIGHT : GL_FRONT_LEFT,
 				GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &param);
 			if(param != redSize)
@@ -959,7 +994,9 @@ int readbackTest(bool stereo)
 			CHECK_GL_ERROR();
 
 			param = -1;
-			glGetNamedFramebufferAttachmentParameterivEXT(0,
+			LOAD_GL_FUNCTION(PFNGLGETNAMEDFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC,
+				glGetNamedFramebufferAttachmentParameterivEXT);
+			__glGetNamedFramebufferAttachmentParameterivEXT(0,
 				stereo ? GL_BACK_RIGHT : GL_FRONT_LEFT,
 				GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &param);
 			if(param != GL_FRAMEBUFFER_DEFAULT)
@@ -968,7 +1005,7 @@ int readbackTest(bool stereo)
 			CHECK_GL_ERROR();
 
 			param = -1;
-			glGetNamedFramebufferAttachmentParameterivEXT(0,
+			__glGetNamedFramebufferAttachmentParameterivEXT(0,
 				stereo ? GL_BACK_RIGHT : GL_FRONT_LEFT,
 				GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &param);
 			if(param != redSize)
@@ -3736,13 +3773,13 @@ int procAddrTest(void)
 		// OpenGL
 		TEST_PROC_SYM(glBindFramebuffer)
 		TEST_PROC_SYM(glBindFramebufferEXT)
-		TEST_PROC_SYM(glBlitNamedFramebuffer)
-		TEST_PROC_SYM(glCheckNamedFramebufferStatus)
-		TEST_PROC_SYM(glCheckNamedFramebufferStatusEXT)
-		TEST_PROC_SYM(glClearNamedFramebufferfi)
-		TEST_PROC_SYM(glClearNamedFramebufferfv)
-		TEST_PROC_SYM(glClearNamedFramebufferiv)
-		TEST_PROC_SYM(glClearNamedFramebufferuiv)
+		TEST_PROC_SYM_OPT(glBlitNamedFramebuffer)
+		TEST_PROC_SYM_OPT(glCheckNamedFramebufferStatus)
+		TEST_PROC_SYM_OPT(glCheckNamedFramebufferStatusEXT)
+		TEST_PROC_SYM_OPT(glClearNamedFramebufferfi)
+		TEST_PROC_SYM_OPT(glClearNamedFramebufferfv)
+		TEST_PROC_SYM_OPT(glClearNamedFramebufferiv)
+		TEST_PROC_SYM_OPT(glClearNamedFramebufferuiv)
 		TEST_PROC_SYM(glDeleteFramebuffers)
 		TEST_PROC_SYM(glDeleteFramebuffersEXT)
 		TEST_PROC_SYM(glFinish)
@@ -3751,29 +3788,29 @@ int procAddrTest(void)
 		TEST_PROC_SYM(glDrawBuffers)
 		TEST_PROC_SYM(glDrawBuffersARB)
 		TEST_PROC_SYM(glDrawBuffersATI)
-		TEST_PROC_SYM(glFramebufferDrawBufferEXT);
-		TEST_PROC_SYM(glFramebufferDrawBuffersEXT);
-		TEST_PROC_SYM(glFramebufferReadBufferEXT);
+		TEST_PROC_SYM_OPT(glFramebufferDrawBufferEXT);
+		TEST_PROC_SYM_OPT(glFramebufferDrawBuffersEXT);
+		TEST_PROC_SYM_OPT(glFramebufferReadBufferEXT);
 		TEST_PROC_SYM(glGetBooleanv)
 		TEST_PROC_SYM(glGetDoublev)
 		TEST_PROC_SYM(glGetFloatv)
 		TEST_PROC_SYM(glGetFramebufferAttachmentParameteriv)
 		TEST_PROC_SYM(glGetFramebufferAttachmentParameterivEXT)
 		TEST_PROC_SYM(glGetFramebufferParameteriv)
-		TEST_PROC_SYM(glGetFramebufferParameterivEXT)
+		TEST_PROC_SYM_OPT(glGetFramebufferParameterivEXT)
 		TEST_PROC_SYM(glGetIntegerv)
 		TEST_PROC_SYM(glGetInteger64v)
-		TEST_PROC_SYM(glGetNamedFramebufferAttachmentParameteriv)
-		TEST_PROC_SYM(glGetNamedFramebufferAttachmentParameterivEXT)
-		TEST_PROC_SYM(glGetNamedFramebufferParameteriv)
-		TEST_PROC_SYM(glGetNamedFramebufferParameterivEXT)
+		TEST_PROC_SYM_OPT(glGetNamedFramebufferAttachmentParameteriv)
+		TEST_PROC_SYM_OPT(glGetNamedFramebufferAttachmentParameterivEXT)
+		TEST_PROC_SYM_OPT(glGetNamedFramebufferParameteriv)
+		TEST_PROC_SYM_OPT(glGetNamedFramebufferParameterivEXT)
 		TEST_PROC_SYM(glGetString)
 		TEST_PROC_SYM(glGetStringi)
-		TEST_PROC_SYM(glInvalidateNamedFramebufferData)
-		TEST_PROC_SYM(glInvalidateNamedFramebufferSubData)
-		TEST_PROC_SYM(glNamedFramebufferDrawBuffer);
-		TEST_PROC_SYM(glNamedFramebufferDrawBuffers);
-		TEST_PROC_SYM(glNamedFramebufferReadBuffer);
+		TEST_PROC_SYM_OPT(glInvalidateNamedFramebufferData)
+		TEST_PROC_SYM_OPT(glInvalidateNamedFramebufferSubData)
+		TEST_PROC_SYM_OPT(glNamedFramebufferDrawBuffer);
+		TEST_PROC_SYM_OPT(glNamedFramebufferDrawBuffers);
+		TEST_PROC_SYM_OPT(glNamedFramebufferReadBuffer);
 		TEST_PROC_SYM(glPopAttrib)
 		TEST_PROC_SYM(glReadBuffer)
 		TEST_PROC_SYM(glReadPixels);

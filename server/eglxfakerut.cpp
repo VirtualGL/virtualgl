@@ -1322,13 +1322,13 @@ int procAddrTest(void)
 		// OpenGL
 		TEST_PROC_SYM(glBindFramebuffer)
 		TEST_PROC_SYM(glBindFramebufferEXT)
-		TEST_PROC_SYM(glBlitNamedFramebuffer)
-		TEST_PROC_SYM(glCheckNamedFramebufferStatus)
-		TEST_PROC_SYM(glCheckNamedFramebufferStatusEXT)
-		TEST_PROC_SYM(glClearNamedFramebufferfi)
-		TEST_PROC_SYM(glClearNamedFramebufferfv)
-		TEST_PROC_SYM(glClearNamedFramebufferiv)
-		TEST_PROC_SYM(glClearNamedFramebufferuiv)
+		TEST_PROC_SYM_OPT(glBlitNamedFramebuffer)
+		TEST_PROC_SYM_OPT(glCheckNamedFramebufferStatus)
+		TEST_PROC_SYM_OPT(glCheckNamedFramebufferStatusEXT)
+		TEST_PROC_SYM_OPT(glClearNamedFramebufferfi)
+		TEST_PROC_SYM_OPT(glClearNamedFramebufferfv)
+		TEST_PROC_SYM_OPT(glClearNamedFramebufferiv)
+		TEST_PROC_SYM_OPT(glClearNamedFramebufferuiv)
 		TEST_PROC_SYM(glDeleteFramebuffers)
 		TEST_PROC_SYM(glDeleteFramebuffersEXT)
 		TEST_PROC_SYM(glFinish)
@@ -1337,29 +1337,29 @@ int procAddrTest(void)
 		TEST_PROC_SYM(glDrawBuffers)
 		TEST_PROC_SYM(glDrawBuffersARB)
 		TEST_PROC_SYM(glDrawBuffersATI)
-		TEST_PROC_SYM(glFramebufferDrawBufferEXT);
-		TEST_PROC_SYM(glFramebufferDrawBuffersEXT);
-		TEST_PROC_SYM(glFramebufferReadBufferEXT);
+		TEST_PROC_SYM_OPT(glFramebufferDrawBufferEXT);
+		TEST_PROC_SYM_OPT(glFramebufferDrawBuffersEXT);
+		TEST_PROC_SYM_OPT(glFramebufferReadBufferEXT);
 		TEST_PROC_SYM(glGetBooleanv)
 		TEST_PROC_SYM(glGetDoublev)
 		TEST_PROC_SYM(glGetFloatv)
 		TEST_PROC_SYM(glGetFramebufferAttachmentParameteriv)
 		TEST_PROC_SYM(glGetFramebufferAttachmentParameterivEXT)
 		TEST_PROC_SYM(glGetFramebufferParameteriv)
-		TEST_PROC_SYM(glGetFramebufferParameterivEXT)
+		TEST_PROC_SYM_OPT(glGetFramebufferParameterivEXT)
 		TEST_PROC_SYM(glGetIntegerv)
 		TEST_PROC_SYM(glGetInteger64v)
-		TEST_PROC_SYM(glGetNamedFramebufferAttachmentParameteriv)
-		TEST_PROC_SYM(glGetNamedFramebufferAttachmentParameterivEXT)
-		TEST_PROC_SYM(glGetNamedFramebufferParameteriv)
-		TEST_PROC_SYM(glGetNamedFramebufferParameterivEXT)
+		TEST_PROC_SYM_OPT(glGetNamedFramebufferAttachmentParameteriv)
+		TEST_PROC_SYM_OPT(glGetNamedFramebufferAttachmentParameterivEXT)
+		TEST_PROC_SYM_OPT(glGetNamedFramebufferParameteriv)
+		TEST_PROC_SYM_OPT(glGetNamedFramebufferParameterivEXT)
 		TEST_PROC_SYM(glGetString)
 		TEST_PROC_SYM(glGetStringi)
-		TEST_PROC_SYM(glInvalidateNamedFramebufferData)
-		TEST_PROC_SYM(glInvalidateNamedFramebufferSubData)
-		TEST_PROC_SYM(glNamedFramebufferDrawBuffer);
-		TEST_PROC_SYM(glNamedFramebufferDrawBuffers);
-		TEST_PROC_SYM(glNamedFramebufferReadBuffer);
+		TEST_PROC_SYM_OPT(glInvalidateNamedFramebufferData)
+		TEST_PROC_SYM_OPT(glInvalidateNamedFramebufferSubData)
+		TEST_PROC_SYM_OPT(glNamedFramebufferDrawBuffer);
+		TEST_PROC_SYM_OPT(glNamedFramebufferDrawBuffers);
+		TEST_PROC_SYM_OPT(glNamedFramebufferReadBuffer);
 		TEST_PROC_SYM(glPopAttrib)
 		TEST_PROC_SYM(glReadBuffer)
 		TEST_PROC_SYM(glReadPixels);
