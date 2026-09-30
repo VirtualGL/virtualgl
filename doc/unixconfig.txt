@@ -125,19 +125,22 @@ login prompt.
 	#. {:}
 
 		#Verb: <<---
-		Restrict framebuffer device access to vglusers group (recommended)?
+		Restrict framebuffer device access to vglusers group?
 		[Y/n]
 		---
 
 		Yes :: Only users in the ''vglusers'' group can run OpenGL applications on
 			the VirtualGL server.  (The configuration script will create the
-			''vglusers'' group if it doesn't already exist.)  This limits the
-			possibility that an unauthorized user could snoop the 3D framebuffer
-			device(s) and thus see (or alter) the output of a 3D application that is
-			being used with VirtualGL.
+			''vglusers'' group if it doesn't already exist.)  The original purpose of
+			this was to limit the possibility that an unauthorized user could snoop
+			the 3D framebuffer device(s) and thus see (or alter) the output of a 3D
+			application that was being used with VirtualGL.  However, modern GPUs and
+			drivers isolate GPU memory on a per-process basis, thus mitigating that
+			historical exploit.
 
-		!!! If you are using a recent release of GDM, then the ''gdm'' account must
-		be added to the ''vglusers'' group.
+		!!! If you choose this option, then the greeter account (example: ''gdm''
+		with modern GDM releases) must be added to the ''vglusers'' group if the
+		display manager greeter uses OpenGL.
 
 		No :: Any authenticated user can run OpenGL applications on the VirtualGL
 			server.  If it is necessary for users outside of the ''vglusers'' group
@@ -267,19 +270,20 @@ selected users can use the EGL back end.
 	#. {:}
 
 		#Verb: <<---
-		Restrict framebuffer device access to vglusers group (recommended)?
+		Restrict framebuffer device access to vglusers group?
 		[Y/n]
 		---
 
 		Yes :: Only users in the ''vglusers'' group can run OpenGL applications on
 			the VirtualGL server.  (The configuration script will create the
-			''vglusers'' group if it doesn't already exist.)  This limits the
-			possibility that an unauthorized user could snoop the 3D framebuffer
-			device(s) and thus see (or alter) the output of a 3D application that is
-			being used with VirtualGL.  Note, however, that such an exploit should
-			not normally be possible with the EGL back end, since it redirects 3D
-			rendering into renderbuffer objects that are not accessible by other
-			processes.
+			''vglusers'' group if it doesn't already exist.)  The original purpose of
+			this was to limit the possibility that an unauthorized user could snoop
+			the 3D framebuffer device(s) and thus see (or alter) the output of a 3D
+			application that was being used with VirtualGL.  However, modern GPUs and
+			drivers isolate GPU memory on a per-process basis, thus mitigating that
+			historical exploit.  Also, such an exploit should not have normally been
+			possible with the EGL back end, since it redirects 3D rendering into
+			renderbuffer objects that are not accessible by other processes.
 
 		No :: Any authenticated user can run OpenGL applications on the VirtualGL
 			server.  If it is necessary for users outside of the ''vglusers'' group
