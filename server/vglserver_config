@@ -724,7 +724,7 @@ EOF
 configegl()
 {
 	if [ $UNATTENDED = 0 ]; then
-		ynprompt "Restrict framebuffer device access to vglusers group (recommended)?"
+		ynprompt "Restrict framebuffer device access to vglusers group?"
 		if [ $? = 1 ]; then
 			VGLUSERSONLY=1; FBDEVVGLUSERSONLY=1;
 		else
@@ -750,7 +750,7 @@ configglx()
 		ynprompt "Restrict 3D X server access to vglusers group (recommended)?"
 		if [ $? = 1 ]; then VGLUSERSONLY=1; else VGLUSERSONLY=0; fi
 
-		ynprompt "Restrict framebuffer device access to vglusers group (recommended)?"
+		ynprompt "Restrict framebuffer device access to vglusers group?"
 		if [ $? = 1 ]; then FBDEVVGLUSERSONLY=1; else FBDEVVGLUSERSONLY=0; fi
 
 		ynprompt "Disable XTEST extension (recommended)?"

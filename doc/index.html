@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2026-03-31T17:44:18">
+<meta name="date" content="2026-09-30T13:37:08">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.1.5</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1009,7 +1009,7 @@ Restrict&nbsp;3D&nbsp;X&nbsp;server&nbsp;access&nbsp;to&nbsp;vglusers&nbsp;group
     <li class="Ordered-1 Ordered">
 
 <pre class="verbatim">
-Restrict&nbsp;framebuffer&nbsp;device&nbsp;access&nbsp;to&nbsp;vglusers&nbsp;group&nbsp;(recommended)?
+Restrict&nbsp;framebuffer&nbsp;device&nbsp;access&nbsp;to&nbsp;vglusers&nbsp;group?
 [Y/n]
 </pre>
 
@@ -1019,11 +1019,13 @@ Restrict&nbsp;framebuffer&nbsp;device&nbsp;access&nbsp;to&nbsp;vglusers&nbsp;gro
                 Only users in the <code>vglusers</code> group can run OpenGL 
                 applications on the VirtualGL server.  (The configuration script will 
                 create the <code>vglusers</code> group if it doesn&rsquo;t already 
-                exist.)  This limits the possibility that an unauthorized user could 
-                snoop the 3D framebuffer device(s) and thus see (or alter) the output of 
-                a 3D application that is being used with VirtualGL.
+                exist.)  The original purpose of this was to limit the possibility that 
+                an unauthorized user could snoop the 3D framebuffer device(s) and thus 
+                see (or alter) the output of a 3D application that was being used with 
+                VirtualGL.  However, modern GPUs and drivers isolate GPU memory on a 
+                per-process basis, thus mitigating that historical exploit.
                 <div class="important"><p class="important">
-                If you are using a recent release of GDM, then the <code>gdm</code> account must be added to the <code>vglusers</code> group.
+                If you choose this option, then the greeter account (example: <code>gdm</code> with modern GDM releases) must be added to the <code>vglusers</code> group if the display manager greeter uses OpenGL.
                 </p></div>
             </dd>
             <dt class="Description-3 Description">No</dt>
@@ -1192,7 +1194,7 @@ selected users can use the EGL back end.</p>
     <li class="Ordered-1 Ordered">
 
 <pre class="verbatim">
-Restrict&nbsp;framebuffer&nbsp;device&nbsp;access&nbsp;to&nbsp;vglusers&nbsp;group&nbsp;(recommended)?
+Restrict&nbsp;framebuffer&nbsp;device&nbsp;access&nbsp;to&nbsp;vglusers&nbsp;group?
 [Y/n]
 </pre>
 
@@ -1202,10 +1204,12 @@ Restrict&nbsp;framebuffer&nbsp;device&nbsp;access&nbsp;to&nbsp;vglusers&nbsp;gro
                 Only users in the <code>vglusers</code> group can run OpenGL 
                 applications on the VirtualGL server.  (The configuration script will 
                 create the <code>vglusers</code> group if it doesn&rsquo;t already 
-                exist.)  This limits the possibility that an unauthorized user could 
-                snoop the 3D framebuffer device(s) and thus see (or alter) the output of 
-                a 3D application that is being used with VirtualGL.  Note, however, that 
-                such an exploit should not normally be possible with the EGL back end, 
+                exist.)  The original purpose of this was to limit the possibility that 
+                an unauthorized user could snoop the 3D framebuffer device(s) and thus 
+                see (or alter) the output of a 3D application that was being used with 
+                VirtualGL.  However, modern GPUs and drivers isolate GPU memory on a 
+                per-process basis, thus mitigating that historical exploit.  Also, such 
+                an exploit should not have normally been possible with the EGL back end, 
                 since it redirects 3D rendering into renderbuffer objects that are not 
                 accessible by other processes.
             </dd>
