@@ -110,7 +110,8 @@ Display *dpy = NULL;  Window win = 0;
 EGLDisplay edpy = 0;  EGLSurface eglwin = 0;
 EGLContext ctx = 0;
 int useDC = 0, useImm = 0, interactive = 0, loColor = 0, maxFrames = 0,
-	totalFrames = 0, bpc = -1, deadYet = 0, swapInterval = -1, useSRGB = 0;
+	totalFrames = 0, maxIter = 0, iter = 0, bpc = -1, deadYet = 0,
+	swapInterval = -1, useSRGB = 0;
 int rshift = 0, gshift = 0, bshift = 0;
 double benchTime = DEFBENCHTIME;
 int nColors = 0, colorScheme = GRAY;
@@ -378,6 +379,11 @@ static int display(int advance)
 				(double)frames / elapsed, mpixels / elapsed);
 			printf("%s\n", temps);
 			elapsed = mpixels = 0.;  frames = 0;
+			iter++;
+			if(maxIter && iter >= maxIter)
+			{
+				deadYet = 1;  goto bailout;
+			}
 		}
 	}
 	if(maxFrames && totalFrames > maxFrames)
@@ -481,6 +487,7 @@ static void usage(char **argv)
 	printf("-f <n> = Render <n> frames and exit\n");
 	printf("-bt <t> = Print benchmark results every <t> seconds (default: %.1f)\n",
 		DEFBENCHTIME);
+	printf("-bi <n> = Print benchmark results <n> times and exit\n");
 	printf("-w <wxh> = Specify window width and height\n");
 	printf("-sc <s> = Create window on X screen # <s>\n");
 	printf("-si <n> = Set swap interval to <n> frames\n");
@@ -532,6 +539,12 @@ int main(int argc, char **argv)
 		{
 			benchTime = atof(argv[++i]);
 			if(benchTime <= 0.0) usage(argv);
+		}
+		else if(!stricmp(argv[i], "-bi") && i < argc - 1)
+		{
+			maxIter = atoi(argv[++i]);
+			if(maxIter <= 0) usage(argv);
+			printf("Number of benchmark iterations: %d\n", maxIter);
 		}
 		else if(!stricmp(argv[i], "-sc") && i < argc - 1)
 		{
