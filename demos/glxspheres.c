@@ -132,7 +132,7 @@ static void setSphereColor(GLfloat color)
 {
 	if(useDC)
 	{
-		GLfloat mat[] = { color, color, color };
+		GLfloat mat[] = { color, color, color, 0.9 };
 		glColor3f(color, color, color);
 		glMaterialfv(GL_FRONT, GL_AMBIENT, mat);
 		glMaterialfv(GL_FRONT, GL_DIFFUSE, mat);
@@ -141,7 +141,7 @@ static void setSphereColor(GLfloat color)
 	{
 		GLfloat mat[4] =
 		{
-			SPHERE_RED(color), SPHERE_GREEN(color), SPHERE_BLUE(color), 0.25
+			SPHERE_RED(color), SPHERE_GREEN(color), SPHERE_BLUE(color), 0.9
 		};
 		glColor3f(SPHERE_RED(color), SPHERE_GREEN(color), SPHERE_BLUE(color));
 		glMaterialfv(GL_FRONT, GL_AMBIENT, mat);
