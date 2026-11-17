@@ -1,5 +1,5 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
- * Copyright (C)2011, 2013-2015, 2017-2019, 2021 D. R. Commander
+ * Copyright (C)2011, 2013-2015, 2017-2019, 2021, 2026 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -89,7 +89,7 @@ int width = DEF_WIDTH, height = DEF_HEIGHT;
 
 static int setColorScheme(Colormap cmap, int colors, int bits, int scheme)
 {
-	XColor xc[1024];  int i, maxColors = (1 << bits), retval = 0;
+	XColor xc[2048];  int i, maxColors = (1 << bits), retval = 0;
 
 	if(!colors || !cmap) THROW("Color map not allocated");
 	if(scheme < 0 || scheme > NSCHEMES - 1 || !cmap) THROW("Invalid argument");
@@ -673,6 +673,7 @@ int main(int argc, char **argv)
 		swa.colormap = colormap = XCreateColormap(dpy, root, v->visual, AllocAll);
 		nColors = NP2(v->colormap_size);
 		if(nColors < 32) THROW("Color map is not large enough");
+		if(nColors > 2048) THROW("Color map is too large");
 		rshift = 0;  while((v->red_mask & (1 << rshift)) == 0) rshift++;
 		gshift = 0;  while((v->green_mask & (1 << gshift)) == 0) gshift++;
 		bshift = 0;  while((v->blue_mask & (1 << bshift)) == 0) bshift++;
