@@ -1,4 +1,4 @@
-// Copyright (C)2009-2023 D. R. Commander
+// Copyright (C)2009-2023, 2026 D. R. Commander
 //
 // This library is free software and may be redistributed and/or modified under
 // the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -602,7 +602,7 @@ void fconfig_setprobeglxfromdpy(Display *dpy)
 {
 	CriticalSection::SafeLock l(fcmutex);
 
-	if(fconfig.probeglx < 0)
+	if(fconfig.probeglx == (char)-1)
 	{
 		FakerConfig fc = fconfig;
 
