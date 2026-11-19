@@ -6,6 +6,9 @@ include_directories(../common)
 
 add_library(glframe STATIC GLFrame.cpp)
 target_link_libraries(glframe ${OPENGL_gl_LIBRARY})
+if(TURBOJPEG_TARGET)
+	target_link_libraries(glframe ${TURBOJPEG_TARGET})
+endif()
 
 add_executable(vglclient vglclient.cpp ClientWin.cpp VGLTransReceiver.cpp)
 target_link_libraries(vglclient vglcommon ${FBXLIB} glframe vglsocket)

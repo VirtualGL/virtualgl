@@ -222,12 +222,12 @@ install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/.vglrun.vars${BITS}
 ###############################################################################
 
 add_executable(x11transut x11transut.cpp fakerconfig.cpp X11Trans.cpp)
-target_link_libraries(x11transut vglcommon ${FBXLIB} ${TJPEG_LIBRARY})
+target_link_libraries(x11transut vglcommon ${FBXLIB} ${TURBOJPEG_LIBRARY})
 
 add_executable(vgltransut vgltransut.cpp VGLTrans.cpp
 	fakerconfig.cpp)
 target_link_libraries(vgltransut vglcommon ${FBXLIB} vglsocket
-	${TJPEG_LIBRARY})
+	${TURBOJPEG_LIBRARY})
 
 add_executable(dlfakerut dlfakerut.c)
 if(VGL_FAKEOPENCL)
@@ -273,8 +273,8 @@ if(VGLTRANS_TEST_LINK_FLAGS)
 	set_target_properties(vgltrans_test PROPERTIES LINK_FLAGS
 		"${VGLTRANS_TEST_LINK_FLAGS}")
 endif()
-target_link_libraries(vgltrans_test vglcommon ${FBXFAKERLIB} ${TJPEG_LIBRARY}
-	vglsocket)
+target_link_libraries(vgltrans_test vglcommon ${FBXFAKERLIB}
+	${TURBOJPEG_LIBRARY} vglsocket)
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND GNUCXX)
 	target_link_libraries(vgltrans_test stdc++)
 endif()
@@ -284,7 +284,8 @@ if(MAPFLAG)
 	set_target_properties(vgltrans_test2 PROPERTIES
 		LINK_FLAGS "${MAPFLAG}${CMAKE_CURRENT_SOURCE_DIR}/testplugin-mapfile")
 endif()
-target_link_libraries(vgltrans_test2 vglcommon ${FBXFAKERLIB} ${TJPEG_LIBRARY})
+target_link_libraries(vgltrans_test2 vglcommon ${FBXFAKERLIB}
+	${TURBOJPEG_LIBRARY})
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND GNUCXX)
 	target_link_libraries(vgltrans_test2 stdc++)
 endif()

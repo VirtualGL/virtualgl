@@ -7,18 +7,25 @@ Build Requirements
 
 - [CMake](http://www.cmake.org) v3.10 or later
 
-- libjpeg-turbo SDK v1.2 or later
-  * The libjpeg-turbo SDK binary packages can be downloaded from
-    <https://github.com/libjpeg-turbo/libjpeg-turbo/releases>.
-  * If building the VirtualGL Client for Cygwin, use Cygwin Setup to install
-    the **libturbojpeg-devel** package.
-  * The VirtualGL build system will search for the TurboJPEG header and
-    library under **/opt/libjpeg-turbo** on Un*x, but you can override this by
-    setting the `TJPEG_INCLUDE_DIR` CMake variable to the directory containing
-    turbojpeg.h and the `TJPEG_LIBRARY` CMake variable to either the full path
-    of the TurboJPEG library against which you want to link or a set of link
-    flags needed to link with the TurboJPEG library (for instance,
-    `-DTJPEG_LIBRARY="-L/opt/libjpeg-turbo/lib64 -lturbojpeg"`.)
+- The TurboJPEG SDK from
+  [libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo/releases) v1.2
+  or later
+
+  * The build system uses libjpeg-turbo's CMake package config file to find the
+    TurboJPEG API library and header.  You can set the `CMAKE_PREFIX_PATH`
+    CMake variable to specify an alternate search location for the CMake
+    package config file (for example, **/opt/libjpeg-turbo/lib64/cmake**.)
+
+  * The following advanced CMake variables also control finding and linking
+    with the TurboJPEG API library:
+
+      - `TURBOJPEG_VERSION`
+      - `TURBOJPEG_EXACT`
+      - `TURBOJPEG_PATH`
+      - `TURBOJPEG_STATIC`
+
+      Use `ccmake` or `cmake-gui`, as described below, to view documentation
+    for those variables.
 
 - G++ or Clang
   * On Mac platforms, these can be obtained from

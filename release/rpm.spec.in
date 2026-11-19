@@ -96,7 +96,23 @@ Ertl 2000.)
 #-->  -DCMAKE_INSTALL_DOCDIR=%{docdir} -DCMAKE_INSTALL_INCLUDEDIR=%{incdir} \
 #-->  -DCMAKE_INSTALL_LIBDIR=%{libdir} -DCMAKE_INSTALL_PREFIX=%{prefix} \
 #-->  -DVGL_BUILDSERVER=@VGL_BUILDSERVER@ -DVGL_SYSTEMFLTK=@VGL_SYSTEMFLTK@ \
-#-->  -DVGL_USEXV=@VGL_USEXV@ -DVGL_FAKEOPENCL=@VGL_FAKEOPENCL@ .
+#-->  -DVGL_USEXV=@VGL_USEXV@ -DVGL_FAKEOPENCL=@VGL_FAKEOPENCL@ \
+#-->  %if %{defined cmake_prefix_path}
+#-->  -DCMAKE_PREFIX_PATH=%{cmake_prefix_path} \
+#-->  %endif
+#-->  %if %{defined turbojpeg_version}
+#-->  -DTURBOJPEG_VERSION=%{turbojpeg_version} \
+#-->  %endif
+#-->  %if %{defined turbojpeg_exact}
+#-->  -DTURBOJPEG_EXACT=%{turbojpeg_exact} \
+#-->  %endif
+#-->  %if %{defined turbojpeg_path}
+#-->  -DTURBOJPEG_PATH=%{turbojpeg_path} \
+#-->  %endif
+#-->  %if %{defined turbojpeg_static}
+#-->  -DTURBOJPEG_STATIC=%{turbojpeg_static} \
+#-->  %endif
+#--> .
 #-->export NUMCPUS=`grep -c '^processor' /proc/cpuinfo`
 #-->make -j$NUMCPUS --load-average=$NUMCPUS
 

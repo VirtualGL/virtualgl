@@ -72,14 +72,7 @@ jobs:
       - name: Set up build
         run: |
           sudo apt update
-          sudo apt install -y libegl1-mesa-dev libfltk1.3-dev ocl-icd-opencl-dev libx11-xcb-dev libxcb-glx0-dev libxcb-keysyms1-dev libxtst-dev
-          mkdir $HOME/libjpeg-turbo-deb
-          pushd $HOME/libjpeg-turbo-deb
-          wget --no-check-certificate $LJT_URL/libjpeg-turbo-official_$LJT_VERSION\_amd64.deb $LJT_URL/libjpeg-turbo-official32_$LJT_VERSION\_amd64.deb
-          sudo dpkg -i *.deb
-          rm *.deb
-          popd
-          rmdir $HOME/libjpeg-turbo-deb
+          sudo apt install -y libegl1-mesa-dev libfltk1.3-dev libjpeg62-dev libturbojpeg0-dev ocl-icd-opencl-dev libx11-xcb-dev libxcb-glx0-dev libxcb-keysyms1-dev libxtst-dev
       - name: Build
         run: |
           mkdir build
