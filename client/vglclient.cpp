@@ -96,7 +96,7 @@ void killproc(bool userOnly)
 	try
 	{
 		int mib_all[4] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL, 0 };
-		int mib_user[4] = { CTL_KERN, KERN_PROC, KERN_PROC_UID, getuid() };
+		int mib_user[4] = { CTL_KERN, KERN_PROC, KERN_PROC_UID, (int)getuid() };
 		size_t len = 0;
 
 		TRY_UNIX(sysctl(userOnly ? mib_user : mib_all, 4, NULL, &len, NULL, 0));
