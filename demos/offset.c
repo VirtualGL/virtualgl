@@ -69,7 +69,7 @@ typedef float Vertex[3];
 typedef Vertex Quad[4];
 
 /* data to define the six faces of a unit cube */
-Quad quads[MAXQUAD] = {
+static Quad quads[MAXQUAD] = {
    { {0,0,0}, {0,0,1}, {0,1,1}, {0,1,0} }, /* x = 0 */
    { {0,0,0}, {1,0,0}, {1,0,1}, {0,0,1} }, /* y = 0 */
    { {0,0,0}, {1,0,0}, {1,1,0}, {0,1,0} }, /* z = 0 */

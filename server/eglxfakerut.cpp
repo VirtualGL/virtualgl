@@ -77,10 +77,6 @@ using namespace util;
 }
 
 
-#define EGL_EXTENSION_EXISTS(ext) \
-	strstr(eglQueryString(edpy, EGL_EXTENSIONS), #ext)
-
-
 // Same as THROW but without the line number
 #define THROWNL(m)  throw(Error(__FUNCTION__, m, 0))
 

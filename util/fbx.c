@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010-2013, 2015, 2017-2020 D. R. Commander
+ * Copyright (C)2010-2013, 2015, 2017-2020, 2026 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -65,14 +65,17 @@ static char lastError[1024] = "No error";
 
 #else
 
-static char *lastError = "No error";
+static char *lastError = (char *)"No error";
 
-#define THROW(m)  { lastError = m;  errorLine = __LINE__;  goto finally; }
+#define THROW(m) \
+{ \
+	lastError = (char *)m;  errorLine = __LINE__;  goto finally; \
+}
 
 #define TRY_X11(f) \
 	if(!(f)) \
 	{ \
-		lastError = "X11 Error (window may have disappeared)"; \
+		lastError = (char *)"X11 Error (window may have disappeared)"; \
 		errorLine = __LINE__;  goto finally; \
 	}
 

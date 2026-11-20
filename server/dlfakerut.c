@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2014-2015, 2017, 2019-2021, 2024 D. R. Commander
+ * Copyright (C)2009, 2014-2015, 2017, 2019-2021, 2024, 2026 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -48,111 +48,111 @@
 
 
 typedef XVisualInfo *(*_glXChooseVisualType)(Display *, int, int *);
-_glXChooseVisualType _glXChooseVisual = NULL;
+static _glXChooseVisualType _glXChooseVisual = NULL;
 
 typedef GLXContext (*_glXCreateContextType)(Display *, XVisualInfo *,
 	GLXContext, Bool);
-_glXCreateContextType _glXCreateContext = NULL;
+static _glXCreateContextType _glXCreateContext = NULL;
 
 typedef GLXContext (*_glXDestroyContextType)(Display *, GLXContext);
-_glXDestroyContextType _glXDestroyContext = NULL;
+static _glXDestroyContextType _glXDestroyContext = NULL;
 
 typedef void (*(*_glXGetProcAddressARBType)(const GLubyte *))(void);
-_glXGetProcAddressARBType _glXGetProcAddressARB = NULL;
+static _glXGetProcAddressARBType _glXGetProcAddressARB = NULL;
 
 typedef Bool (*_glXMakeCurrentType)(Display *, GLXDrawable, GLXContext);
-_glXMakeCurrentType _glXMakeCurrent = NULL;
+static _glXMakeCurrentType _glXMakeCurrent = NULL;
 
 typedef void (*_glXSwapBuffersType)(Display *, GLXDrawable);
-_glXSwapBuffersType _glXSwapBuffers = NULL;
+static _glXSwapBuffersType _glXSwapBuffers = NULL;
 
 typedef EGLBoolean (*_eglChooseConfigType)(EGLDisplay, const EGLint *,
 	EGLConfig *, EGLint, EGLint *);
-_eglChooseConfigType _eglChooseConfig = NULL;
+static _eglChooseConfigType _eglChooseConfig = NULL;
 
 typedef EGLContext (*_eglCreateContextType)(EGLDisplay, EGLConfig,
 	EGLContext, const EGLint *);
-_eglCreateContextType _eglCreateContext = NULL;
+static _eglCreateContextType _eglCreateContext = NULL;
 
 typedef EGLSurface (*_eglCreateWindowSurfaceType)(EGLDisplay, EGLConfig,
 	EGLNativeWindowType, const EGLint *);
-_eglCreateWindowSurfaceType _eglCreateWindowSurface = NULL;
+static _eglCreateWindowSurfaceType _eglCreateWindowSurface = NULL;
 
 typedef EGLBoolean (*_eglDestroyContextType)(EGLDisplay, EGLContext);
-_eglDestroyContextType _eglDestroyContext = NULL;
+static _eglDestroyContextType _eglDestroyContext = NULL;
 
 typedef EGLBoolean (*_eglDestroySurfaceType)(EGLDisplay, EGLSurface);
-_eglDestroySurfaceType _eglDestroySurface = NULL;
+static _eglDestroySurfaceType _eglDestroySurface = NULL;
 
 typedef EGLDisplay (*_eglGetDisplayType)(EGLNativeDisplayType);
-_eglGetDisplayType _eglGetDisplay = NULL;
+static _eglGetDisplayType _eglGetDisplay = NULL;
 
 typedef EGLint (*_eglGetErrorType)(void);
-_eglGetErrorType _eglGetError = NULL;
+static _eglGetErrorType _eglGetError = NULL;
 
 typedef __eglMustCastToProperFunctionPointerType
 	(*_eglGetProcAddressType)(const char *);
-_eglGetProcAddressType _eglGetProcAddress = NULL;
+static _eglGetProcAddressType _eglGetProcAddress = NULL;
 
 typedef EGLBoolean (*_eglInitializeType)(EGLDisplay, EGLint *, EGLint *);
-_eglInitializeType _eglInitialize = NULL;
+static _eglInitializeType _eglInitialize = NULL;
 
 typedef EGLBoolean (*_eglMakeCurrentType)(EGLDisplay, EGLSurface, EGLSurface,
 	EGLContext);
-_eglMakeCurrentType _eglMakeCurrent = NULL;
+static _eglMakeCurrentType _eglMakeCurrent = NULL;
 
 typedef EGLBoolean (*_eglSwapBuffersType)(EGLDisplay, EGLSurface);
-_eglSwapBuffersType _eglSwapBuffers = NULL;
+static _eglSwapBuffersType _eglSwapBuffers = NULL;
 
 typedef EGLBoolean (*_eglTerminateType)(EGLDisplay);
-_eglTerminateType _eglTerminate = NULL;
+static _eglTerminateType _eglTerminate = NULL;
 
 typedef void (*_glClearType)(GLbitfield);
-_glClearType _glClear = NULL;
+static _glClearType _glClear = NULL;
 
 typedef void (*_glClearColorType)(GLclampf, GLclampf, GLclampf, GLclampf);
-_glClearColorType _glClearColor = NULL;
+static _glClearColorType _glClearColor = NULL;
 
 #ifdef FAKEOPENCL
 
 typedef cl_context (*_clCreateContextType)(cl_context_properties *, cl_uint,
 	const cl_device_id *, void (*)(const char *, const void *, size_t, void *),
 	void *, cl_int *);
-_clCreateContextType _clCreateContext = NULL;
+static _clCreateContextType _clCreateContext = NULL;
 
 typedef cl_int (*_clGetContextInfoType)(cl_context, cl_context_info, size_t,
 	void *, size_t *);
-_clGetContextInfoType _clGetContextInfo = NULL;
+static _clGetContextInfoType _clGetContextInfo = NULL;
 
 typedef cl_int (*_clGetDeviceIDsType)(cl_platform_id, cl_device_type, cl_uint,
 	cl_device_id *, cl_uint *);
-_clGetDeviceIDsType _clGetDeviceIDs = NULL;
+static _clGetDeviceIDsType _clGetDeviceIDs = NULL;
 
 typedef cl_int (*_clGetDeviceInfoType)(cl_device_id, cl_device_info, size_t,
 	void *, size_t *);
-_clGetDeviceInfoType _clGetDeviceInfo = NULL;
+static _clGetDeviceInfoType _clGetDeviceInfo = NULL;
 
 typedef cl_int (*_clGetPlatformIDsType)(cl_uint, cl_platform_id *, cl_uint *);
-_clGetPlatformIDsType _clGetPlatformIDs = NULL;
+static _clGetPlatformIDsType _clGetPlatformIDs = NULL;
 
 typedef cl_int (*_clGetPlatformInfoType)(cl_platform_id, cl_platform_info,
 	size_t, void *, size_t *);
-_clGetPlatformInfoType _clGetPlatformInfo = NULL;
+static _clGetPlatformInfoType _clGetPlatformInfo = NULL;
 
 typedef cl_int (*_clReleaseContextType)(cl_context);
-_clReleaseContextType _clReleaseContext = NULL;
+static _clReleaseContextType _clReleaseContext = NULL;
 
 #endif
 
-void *glxdllhnd = NULL;
-void *egldllhnd = NULL;
-void *gldllhnd = NULL;
+static void *glxdllhnd = NULL;
+static void *egldllhnd = NULL;
+static void *gldllhnd = NULL;
 #ifdef FAKEOPENCL
-void *ocldllhnd = NULL;
+static void *ocldllhnd = NULL;
 #endif
-int fakeOpenCL = 0, eglx = 0;
-const char *libGLX = "libGL.so", *libOpenGL = "libGL.so";
-const char *libEGL = "libEGL.so";
+static int fakeOpenCL = 0, eglx = 0;
+static const char *libGLX = "libGL.so", *libOpenGL = "libGL.so";
+static const char *libEGL = "libEGL.so";
 
 #define LSYM(dllhnd, s) \
 	dlerror(); \
@@ -311,7 +311,7 @@ static int loadSymbols2(void)
    This will fail on VGL 2.1.2 and prior */
 
 typedef void (*_myTestFunctionType)(void);
-_myTestFunctionType _myTestFunction = NULL;
+static _myTestFunctionType _myTestFunction = NULL;
 
 static int nameMatchTest(void)
 {
@@ -341,7 +341,7 @@ static int nameMatchTest(void)
 /* Test whether libdlfaker.so properly circumvents RTLD_DEEPBIND */
 
 typedef void (*_testType)(const char *, int, int);
-_testType _test = NULL;
+static _testType _test = NULL;
 
 static int deepBindTest(void)
 {

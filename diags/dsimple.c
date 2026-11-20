@@ -2,7 +2,7 @@
 /*
 
 Copyright 1993, 1998  The Open Group
-Copyright 2019  D. R. Commander
+Copyright 2019, 2026  D. R. Commander
 
 Permission to use, copy, modify, distribute, and sell this software and its
 documentation for any purpose is hereby granted without fee, provided that
@@ -41,7 +41,7 @@ from The Open Group.
 #include "dsimple.h"
 
 
-char *program_name = "unknown_program";
+const char *program_name = "unknown_program";
 
 
 /*
@@ -95,7 +95,7 @@ Window Select_Window(Display *dpy)
  * Standard fatal error routine - call like printf but maximum of 7 arguments.
  * Does not require dpy or screen defined.
  */
-void Fatal_Error(char *msg, ...)
+void Fatal_Error(const char *msg, ...)
 {
         va_list args;
         fflush(stdout);
