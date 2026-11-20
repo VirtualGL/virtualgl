@@ -1,4 +1,4 @@
-/* Copyright (C)2014, 2017-2019 D. R. Commander
+/* Copyright (C)2014, 2017-2019, 2026 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -29,8 +29,8 @@
 }
 
 
-double testTime = BENCHTIME;
-int getSetRGB = 0;
+static double testTime = BENCHTIME;
+static int getSetRGB = 0;
 
 
 static void initBuf(unsigned char *buf, int width, int pitch, int height,

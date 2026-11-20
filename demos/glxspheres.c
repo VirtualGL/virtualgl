@@ -70,25 +70,24 @@ enum { GRAY = 0, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN };
 
 #define DEFBENCHTIME  2.0
 
-Display *dpy = NULL;  Window win = 0;
-GLXContext ctx = 0;
-int useStereo = 0, useDC = 0, useImm = 0, interactive = 0, loColor = 0,
+static Display *dpy = NULL;  static Window win = 0;
+static GLXContext ctx = 0;
+static int useStereo = 0, useDC = 0, useImm = 0, interactive = 0, loColor = 0,
 	maxFrames = 0, totalFrames = 0, directCtx = True, bpc = -1, deadYet = 0,
 	swapInterval = -1, useSRGB = 0;
-int rshift = 0, gshift = 0, bshift = 0;
-double benchTime = DEFBENCHTIME;
-int nColors = 0, colorScheme = GRAY;
-Colormap colormap = 0;
+static int rshift = 0, gshift = 0, bshift = 0;
+static double benchTime = DEFBENCHTIME;
+static int nColors = 0, colorScheme = GRAY;
+static Colormap colormap = 0;
 
-int sphereList = 0, fontListBase = 0;
-GLUquadricObj *sphereQuad = NULL;
-int slices = DEF_SLICES, stacks = DEF_STACKS, spheres = DEF_SPHERES;
-GLfloat x = 0., y = 0., z = -3.;
-GLfloat outerAngle = 0., middleAngle = 0., innerAngle = 0.;
-GLfloat loneSphereColor = 0.;
-unsigned int transPixel = 0;
+static int sphereList = 0, fontListBase = 0;
+static GLUquadricObj *sphereQuad = NULL;
+static int slices = DEF_SLICES, stacks = DEF_STACKS, spheres = DEF_SPHERES;
+static GLfloat z = -3.;
+static GLfloat outerAngle = 0., middleAngle = 0., innerAngle = 0.;
+static GLfloat loneSphereColor = 0.;
 
-int width = DEF_WIDTH, height = DEF_HEIGHT;
+static int width = DEF_WIDTH, height = DEF_HEIGHT;
 
 
 static int setColorScheme(Colormap cmap, int colors, int bits, int scheme)
@@ -373,7 +372,7 @@ static int display(int advance)
 }
 
 
-Atom protoAtom = 0, deleteAtom = 0;
+static Atom protoAtom = 0, deleteAtom = 0;
 
 
 static int eventLoop(void)

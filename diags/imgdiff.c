@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2014, 2017-2019 D. R. Commander
+ * Copyright (C)2014, 2017-2019, 2026 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -21,7 +21,7 @@
 #include "bmp.h"
 
 
-unsigned char redMap[256], greenMap[256], blueMap[256];
+static unsigned char redMap[256], greenMap[256], blueMap[256];
 
 
 static void usage(char **argv)
@@ -132,8 +132,8 @@ int main(int argc, char **argv)
 	totalSumSquares /= ((double)height * (double)width * (double)ps1);
 	totalRMS = sqrt(totalSumSquares);
 
-	if(bmp_save(usePPM ? "diff.ppm" : "diff.bmp", errImg, width, 0, height,
-		PF_BGR, BMPORN_TOPDOWN) == -1)
+	if(bmp_save(usePPM ? (char *)"diff.ppm" : (char *)"diff.bmp", errImg, width,
+		0, height, PF_BGR, BMPORN_TOPDOWN) == -1)
 	{
 		puts(bmp_geterr());  exit(1);
 	}

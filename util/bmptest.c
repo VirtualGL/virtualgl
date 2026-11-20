@@ -1,4 +1,4 @@
-/* Copyright (C)2014, 2017-2019 D. R. Commander
+/* Copyright (C)2014, 2017-2019, 2026 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -89,8 +89,8 @@ static int doTest(const char *ext, int width, int align, int height, PF *pf,
 	int pitch = BMPPAD(width * pf->size, align), loadWidth = 0, loadHeight = 0,
 		retval = 0;
 	unsigned char *buf = NULL;
-	char *md5ref = !stricmp(ext, "ppm") ? "c0c9f772b464d1896326883a5c79c545" :
-		"b03eec1eaaad38fed9cab5082bf37e52";
+	const char *md5ref = !stricmp(ext, "ppm") ?
+		"c0c9f772b464d1896326883a5c79c545" : "b03eec1eaaad38fed9cab5082bf37e52";
 
 	if((buf = (unsigned char *)malloc(pitch * height)) == NULL)
 		THROW("Could not allocate memory");

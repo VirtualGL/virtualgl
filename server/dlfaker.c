@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2012, 2015, 2017-2020, 2025 D. R. Commander
+ * Copyright (C)2009, 2012, 2015, 2017-2020, 2025-2026 D. R. Commander
  * Copyright (C)2015 Open Text SA and/or Open Text ULC (in Canada)
  *
  * This library is free software and may be redistributed and/or modified under
@@ -114,10 +114,10 @@ void *dlopen(const char *filename, int flag)
 	if((env = getenv(envname)) == NULL || strlen(env) < 1)
 	{
 		#ifdef FAKEOPENCL
-		if(fakeOpenCL) env = "lib"VGL_FAKER_NAME"-opencl.so";
+		if(fakeOpenCL) env = (char *)"lib"VGL_FAKER_NAME"-opencl.so";
 		else
 		#endif
-		env = "lib"VGL_FAKER_NAME".so";
+		env = (char *)"lib"VGL_FAKER_NAME".so";
 	}
 	if(filename
 		&& (!strncmp(filename, "libGL.", 6) || strstr(filename, "/libGL.")

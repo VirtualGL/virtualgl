@@ -2,6 +2,7 @@
 /*
 
 Copyright 1993, 1998  The Open Group
+Copyright 2026  D. R. Commander
 
 Permission to use, copy, modify, distribute, and sell this software and its
 documentation for any purpose is hereby granted without fee, provided that
@@ -32,11 +33,11 @@ from The Open Group.
  * Written by Mark Lillibridge.   Last updated 7/1/87
  */
 
-extern char *program_name;                   /* Name of this program */
+extern const char *program_name;             /* Name of this program */
 
 Window Select_Window(Display *);
 #ifdef __GNUC__
-void Fatal_Error(char *, ...) __attribute__((__noreturn__));
+void Fatal_Error(const char *, ...) __attribute__((__noreturn__));
 #else
-void Fatal_Error(char *, ...);
+void Fatal_Error(const char *, ...);
 #endif

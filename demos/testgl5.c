@@ -17,15 +17,15 @@
 void configure(unsigned int width, unsigned int height);
 void drawBuffer(void);
 
-int gWidth, gHeight;
+static int gWidth, gHeight;
 
-Display *xDisplay;
-GLXFBConfig glxFBConfig;
-GLXWindow glxWindow;
-GLXPbuffer glxPbuffer = 0;
-GLXContext glxContext;
-GLXContext glxPbufferContext;
-int interactive = 0, reproducebug = 0;
+static Display *xDisplay;
+static GLXFBConfig glxFBConfig;
+static GLXWindow glxWindow;
+static GLXPbuffer glxPbuffer = 0;
+static GLXContext glxContext;
+static GLXContext glxPbufferContext;
+static int interactive = 0, reproducebug = 0;
 
 void configure(unsigned int width, unsigned int height)
 {

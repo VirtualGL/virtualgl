@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2010, 2014, 2017, 2019 D. R. Commander
+/* Copyright (C)2009-2010, 2014, 2017, 2019, 2026 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -40,12 +40,12 @@
 }
 
 
-double testTime = BENCHTIME;
-Display *dpy = NULL;  Window win = 0;
-fbxv_struct s, s1;
-int width = -1, height = -1, useShm = 1, scale = 1, interactive = 0;
-char *filename = NULL;
-Atom protoAtom = 0, deleteAtom = 0;
+static double testTime = BENCHTIME;
+static Display *dpy = NULL;  static Window win = 0;
+static fbxv_struct s, s1;
+static int width = -1, height = -1, useShm = 1, scale = 1, interactive = 0;
+static char *filename = NULL;
+static Atom protoAtom = 0, deleteAtom = 0;
 
 
 static void initBuf(fbxv_struct *fb, int id, int seed)
@@ -91,7 +91,7 @@ static void initBuf(fbxv_struct *fb, int id, int seed)
 }
 
 
-static int doTest(int id, char *name)
+static int doTest(int id, const char *name)
 {
 	int iter = 0, i, retval = 0;
 	double elapsed = 0., t;
@@ -166,7 +166,7 @@ static int doTest(int id, char *name)
 }
 
 
-static int doInteractiveTest(int id, char *name)
+static int doInteractiveTest(int id, const char *name)
 {
 	int iter = 0, retval = 0;
 	printf("Interactive test, %s format (ID=0x%.8x) %s...\n", name, id,
