@@ -27,7 +27,7 @@ jobs:
         run: |
           mkdir -p $HOME/src/vgl.nightly
           docker pull dcommander/buildvgl:$BRANCH
-          git clone --depth=1 https://github.com/VirtualGL/buildscripts.git $HOME/src/buildscripts
+          git clone --depth=1 https://github.com/VirtualGL/buildscripts.git -b $BRANCH $HOME/src/buildscripts
           mkdir $HOME/libjpeg-turbo-rpm
           pushd $HOME/libjpeg-turbo-rpm
           wget --no-check-certificate $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.x86_64.rpm $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.aarch64.rpm $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.i386.rpm
