@@ -354,30 +354,62 @@ EGLBoolean eglChooseConfig(EGLDisplay display, const EGLint *attrib_list,
 EGLint eglClientWaitSync(EGLDisplay display, EGLSync sync, EGLint flags,
 	EGLTime timeout)
 {
+	EGLint retval = EGL_FALSE;
+
+	TRY();
+
 	WRAP_DISPLAY();
-	return _eglClientWaitSync(display, sync, flags, timeout);
+
+	retval = _eglClientWaitSync(display, sync, flags, timeout);
+
+	CATCH();
+	return retval;
 }
 
 EGLint eglClientWaitSyncKHR(EGLDisplay display, EGLSyncKHR sync, EGLint flags,
 	EGLTimeKHR timeout)
 {
+	EGLint retval = EGL_FALSE;
+
+	TRY();
+
 	WRAP_DISPLAY();
-	return _eglClientWaitSyncKHR(display, sync, flags, timeout);
+
+	retval = _eglClientWaitSyncKHR(display, sync, flags, timeout);
+
+	CATCH();
+	return retval;
 }
 
 
 EGLImage eglCreateImage(EGLDisplay display, EGLContext context, EGLenum target,
 	EGLClientBuffer buffer, const EGLAttrib *attrib_list)
 {
+	EGLImage retval = EGL_NO_IMAGE;
+
+	TRY();
+
 	WRAP_DISPLAY();
-	return _eglCreateImage(display, context, target, buffer, attrib_list);
+
+	retval = _eglCreateImage(display, context, target, buffer, attrib_list);
+
+	CATCH();
+	return retval;
 }
 
 EGLImageKHR eglCreateImageKHR(EGLDisplay display, EGLContext context,
 	EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list)
 {
+	EGLImageKHR retval = EGL_NO_IMAGE_KHR;
+
+	TRY();
+
 	WRAP_DISPLAY();
-	return _eglCreateImageKHR(display, context, target, buffer, attrib_list);
+
+	retval = _eglCreateImageKHR(display, context, target, buffer, attrib_list);
+
+	CATCH();
+	return retval;
 }
 
 
@@ -399,10 +431,17 @@ EGLBoolean eglCopyBuffers(EGLDisplay display, EGLSurface surface,
 EGLContext eglCreateContext(EGLDisplay display, EGLConfig config,
 	EGLContext share_context, const EGLint *attrib_list)
 {
+	EGLContext retval = EGL_NO_CONTEXT;
+
+	TRY();
+
 	WRAP_DISPLAY_INIT(EGL_NOT_INITIALIZED);
-	return _eglCreateContext(display, config, share_context, attrib_list);
+
+	retval = _eglCreateContext(display, config, share_context, attrib_list);
+
+	CATCH();
 	bailout:
-	return EGL_NO_CONTEXT;
+	return retval;
 }
 
 
@@ -455,29 +494,50 @@ EGLSurface eglCreatePlatformPixmapSurfaceEXT(EGLDisplay display,
 EGLSync eglCreateSync(EGLDisplay display, EGLenum type,
 	const EGLAttrib *attrib_list)
 {
+	EGLSync retval = EGL_NO_SYNC;
+
+	TRY();
+
 	WRAP_DISPLAY_INIT(EGL_BAD_DISPLAY);
-	return _eglCreateSync(display, type, attrib_list);
+
+	retval = _eglCreateSync(display, type, attrib_list);
+
+	CATCH();
 	bailout:
-	return EGL_NO_SYNC;
+	return retval;
 }
 
 EGLSyncKHR eglCreateSyncKHR(EGLDisplay display, EGLenum type,
 	const EGLint *attrib_list)
 {
+	EGLSyncKHR retval = EGL_NO_SYNC_KHR;
+
+	TRY();
+
 	WRAP_DISPLAY_INIT(EGL_BAD_DISPLAY);
-	return _eglCreateSyncKHR(display, type, attrib_list);
+
+	retval = _eglCreateSyncKHR(display, type, attrib_list);
+
+	CATCH();
 	bailout:
-	return EGL_NO_SYNC_KHR;
+	return retval;
 }
 
 
 EGLSyncKHR eglCreateSync64KHR(EGLDisplay display, EGLenum type,
 	const EGLAttribKHR *attrib_list)
 {
+	EGLSyncKHR retval = EGL_NO_SYNC_KHR;
+
+	TRY();
+
 	WRAP_DISPLAY_INIT(EGL_BAD_DISPLAY);
-	return _eglCreateSync64KHR(display, type, attrib_list);
+
+	retval = _eglCreateSync64KHR(display, type, attrib_list);
+
+	CATCH();
 	bailout:
-	return EGL_NO_SYNC_KHR;
+	return retval;
 }
 
 
@@ -485,21 +545,35 @@ EGLSurface eglCreatePbufferFromClientBuffer(EGLDisplay display,
 	EGLenum buftype, EGLClientBuffer buffer, EGLConfig config,
 	const EGLint *attrib_list)
 {
+	EGLSurface retval = EGL_NO_SURFACE;
+
+	TRY();
+
 	WRAP_DISPLAY_INIT(EGL_NOT_INITIALIZED);
-	return _eglCreatePbufferFromClientBuffer(display, buftype, buffer, config,
+
+	retval = _eglCreatePbufferFromClientBuffer(display, buftype, buffer, config,
 		attrib_list);
+
+	CATCH();
 	bailout:
-	return EGL_NO_SURFACE;
+	return retval;
 }
 
 
 EGLSurface eglCreatePbufferSurface(EGLDisplay display, EGLConfig config,
 	const EGLint *attrib_list)
 {
+	EGLSurface retval = EGL_NO_SURFACE;
+
+	TRY();
+
 	WRAP_DISPLAY_INIT(EGL_NOT_INITIALIZED);
-	return _eglCreatePbufferSurface(display, config, attrib_list);
+
+	retval = _eglCreatePbufferSurface(display, config, attrib_list);
+
+	CATCH();
 	bailout:
-	return EGL_NO_SURFACE;
+	return retval;
 }
 
 
@@ -611,23 +685,46 @@ EGLSurface eglCreatePlatformWindowSurfaceEXT(EGLDisplay display,
 
 EGLBoolean eglDestroyContext(EGLDisplay display, EGLContext context)
 {
+	EGLBoolean retval = EGL_FALSE;
+
+	TRY();
+
 	WRAP_DISPLAY_INIT(EGL_NOT_INITIALIZED);
-	return _eglDestroyContext(display, context);
+
+	retval = _eglDestroyContext(display, context);
+
+	CATCH();
 	bailout:
-	return EGL_FALSE;
+	return retval;
 }
 
 
 EGLBoolean eglDestroyImage(EGLDisplay display, EGLImage image)
 {
+	EGLBoolean retval = EGL_FALSE;
+
+	TRY();
+
 	WRAP_DISPLAY();
-	return _eglDestroyImage(display, image);
+
+	retval = _eglDestroyImage(display, image);
+
+	CATCH();
+	return retval;
 }
 
 EGLBoolean eglDestroyImageKHR(EGLDisplay display, EGLImageKHR image)
 {
+	EGLBoolean retval = EGL_FALSE;
+
+	TRY();
+
 	WRAP_DISPLAY();
-	return _eglDestroyImageKHR(display, image);
+
+	retval = _eglDestroyImageKHR(display, image);
+
+	CATCH();
+	return retval;
 }
 
 
@@ -672,14 +769,30 @@ EGLBoolean eglDestroySurface(EGLDisplay display, EGLSurface surface)
 
 EGLBoolean eglDestroySync(EGLDisplay display, EGLSync sync)
 {
+	EGLBoolean retval = EGL_FALSE;
+
+	TRY();
+
 	WRAP_DISPLAY();
-	return _eglDestroySync(display, sync);
+
+	retval = _eglDestroySync(display, sync);
+
+	CATCH();
+	return retval;
 }
 
 EGLBoolean eglDestroySyncKHR(EGLDisplay display, EGLSyncKHR sync)
 {
+	EGLBoolean retval = EGL_FALSE;
+
+	TRY();
+
 	WRAP_DISPLAY();
-	return _eglDestroySyncKHR(display, sync);
+
+	retval = _eglDestroySyncKHR(display, sync);
+
+	CATCH();
+	return retval;
 }
 
 
@@ -747,10 +860,17 @@ EGLBoolean eglGetConfigAttrib(EGLDisplay display, EGLConfig config,
 EGLBoolean eglGetConfigs(EGLDisplay display, EGLConfig *configs,
 	EGLint config_size, EGLint *num_config)
 {
+	EGLBoolean retval = EGL_FALSE;
+
+	TRY();
+
 	WRAP_DISPLAY_INIT(EGL_NOT_INITIALIZED);
-	return _eglGetConfigs(display, configs, config_size, num_config);
+
+	retval = _eglGetConfigs(display, configs, config_size, num_config);
+
+	CATCH();
 	bailout:
-	return EGL_FALSE;
+	return retval;
 }
 
 
@@ -943,13 +1063,18 @@ EGLDisplay eglGetPlatformDisplayEXT(EGLenum platform, void *native_display,
 
 EGLint eglGetError(void)
 {
-	EGLint error = faker::getEGLError();
+	EGLint error = EGL_SUCCESS;
+
+	TRY();
+
+	error = faker::getEGLError();
 
 	if(error != EGL_SUCCESS)
 		faker::setEGLError(EGL_SUCCESS);
 	else
 		error = _eglGetError();
 
+	CATCH();
 	return error;
 }
 
@@ -1121,15 +1246,31 @@ void (*eglGetProcAddress(const char *procName))(void)
 EGLBoolean eglGetSyncAttrib(EGLDisplay display, EGLSync sync, EGLint attribute,
 	EGLAttrib *value)
 {
+	EGLBoolean retval = EGL_FALSE;
+
+	TRY();
+
 	WRAP_DISPLAY();
-	return _eglGetSyncAttrib(display, sync, attribute, value);
+
+	retval = _eglGetSyncAttrib(display, sync, attribute, value);
+
+	CATCH();
+	return retval;
 }
 
 EGLBoolean eglGetSyncAttribKHR(EGLDisplay display, EGLSyncKHR sync,
 	EGLint attribute, EGLint *value)
 {
+	EGLBoolean retval = EGL_FALSE;
+
+	TRY();
+
 	WRAP_DISPLAY();
-	return _eglGetSyncAttribKHR(display, sync, attribute, value);
+
+	retval = _eglGetSyncAttribKHR(display, sync, attribute, value);
+
+	CATCH();
+	return retval;
 }
 
 
@@ -1248,20 +1389,34 @@ EGLBoolean eglMakeCurrent(EGLDisplay display, EGLSurface draw, EGLSurface read,
 EGLBoolean eglQueryContext(EGLDisplay display, EGLContext context,
 	EGLint attribute, EGLint *value)
 {
+	EGLBoolean retval = EGL_FALSE;
+
+	TRY();
+
 	WRAP_DISPLAY_INIT(EGL_NOT_INITIALIZED);
-	return _eglQueryContext(display, context, attribute, value);
+
+	retval = _eglQueryContext(display, context, attribute, value);
+
+	CATCH();
 	bailout:
-	return EGL_FALSE;
+	return retval;
 }
 
 
 EGLBoolean eglQueryDisplayAttribEXT(EGLDisplay display, EGLint attribute,
 	EGLAttrib *value)
 {
+	EGLBoolean retval = EGL_FALSE;
+
+	TRY();
+
 	WRAP_DISPLAY_INIT(EGL_NOT_INITIALIZED);
-	return _eglQueryDisplayAttribEXT(display, attribute, value);
+
+	retval = _eglQueryDisplayAttribEXT(display, attribute, value);
+
+	CATCH();
 	bailout:
-	return EGL_FALSE;
+	return retval;
 }
 
 
@@ -1457,8 +1612,16 @@ EGLBoolean eglReleaseTexImage(EGLDisplay display, EGLSurface surface,
 
 EGLBoolean eglSignalSyncKHR(EGLDisplay display, EGLSyncKHR sync, EGLenum mode)
 {
+	EGLBoolean retval = EGL_FALSE;
+
+	TRY();
+
 	WRAP_DISPLAY();
-	return _eglSignalSyncKHR(display, sync, mode);
+
+	retval = _eglSignalSyncKHR(display, sync, mode);
+
+	CATCH();
+	return retval;
 }
 
 
@@ -1637,14 +1800,30 @@ EGLBoolean eglTerminate(EGLDisplay display)
 
 EGLBoolean eglWaitSync(EGLDisplay display, EGLSync sync, EGLint flags)
 {
+	EGLBoolean retval = EGL_FALSE;
+
+	TRY();
+
 	WRAP_DISPLAY();
-	return _eglWaitSync(display, sync, flags);
+
+	retval = _eglWaitSync(display, sync, flags);
+
+	CATCH();
+	return retval;
 }
 
 EGLint eglWaitSyncKHR(EGLDisplay display, EGLSyncKHR sync, EGLint flags)
 {
+	EGLint retval = EGL_FALSE;
+
+	TRY();
+
 	WRAP_DISPLAY();
-	return _eglWaitSyncKHR(display, sync, flags);
+
+	retval = _eglWaitSyncKHR(display, sync, flags);
+
+	CATCH();
+	return retval;
 }
 
 
