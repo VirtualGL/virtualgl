@@ -606,17 +606,17 @@ int getFBConfigAttrib(Display *dpy, VGLFBConfig config, int attribute,
 			case GLX_MAX_PBUFFER_WIDTH:
 			{
 				*value = config->maxPBWidth;
-				return EGL_TRUE;
+				return Success;
 			}
 			case GLX_MAX_PBUFFER_HEIGHT:
 			{
 				*value = config->maxPBHeight;
-				return EGL_TRUE;
+				return Success;
 			}
 			case GLX_MAX_PBUFFER_PIXELS:
 			{
 				*value = config->maxPBWidth * config->maxPBHeight;
-				return EGL_TRUE;
+				return Success;
 			}
 			case GLX_SAMPLE_BUFFERS:
 				*value = !!config->attr.samples;

@@ -1,3 +1,15 @@
+3.1.6
+=====
+
+### Significant changes relative to 3.1.5:
+
+1. Fixed an issue in the EGL back end whereby `glXGetFBConfigAttrib()` returned
+`EGL_TRUE` rather than `Success` if passed `GLX_MAX_PBUFFER_WIDTH`,
+`GLX_MAX_PBUFFER_HEIGHT`, or `GLX_MAX_PBUFFER_PIXELS`.  This was known to cause
+failures in the Android Emulator, and it may have affected other applications
+as well.
+
+
 3.1.5
 =====
 
