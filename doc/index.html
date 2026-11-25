@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2026-11-24T14:07:55">
+<meta name="date" content="2026-11-25T09:20:53">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 3.1.6</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2174,10 +2174,17 @@ displaying Windows 3D applications remotely.</p>
   </tr>
   <tr class="standard">
     <td class="standard">Siemens Simcenter STAR-CCM+</td>
-    <td class="standard">v19.xx</td>
+    <td class="standard">v21.02.x and earlier</td>
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun <em>path-to-STAR-CCM+-scripts</em>/starccm+ \</code><br /> <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-clientldpreload&nbsp;libdlfaker.so:libvglfaker.so</code></td>
     <td class="standard">Failing to pass the aforementioned arguments to the STAR-CCM+ startup script prevents VirtualGL from being loaded into the application, resulting in unaccelerated OpenGL and error messages such as &ldquo;ERROR: in isDisplayExcluded&ndash; XX: Unexpected NULL condition&rdquo;</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">Siemens Simcenter STAR-CCM+</td>
+    <td class="standard">v21.04.x and later</td>
+    <td class="standard">Linux</td>
+    <td class="standard"><code>vglrun <em>path-to-STAR-CCM+-scripts</em>/starccm+ \</code><br /> <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-clientldpreload&nbsp;\</code><br /> <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>path-to</em>/libvglfaker.so:<em>path-to</em>/libdlfaker.so</code></td>
+    <td class="standard">For reasons unknown, STAR-CCM+ v21.04.x and later requires that the full paths to <strong class="filename">libvglfaker.so</strong> and <strong class="filename">libdlfaker.so</strong> be specified and that <strong class="filename">libvglfaker.so</strong> be specified first.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Tecplot 360</td>

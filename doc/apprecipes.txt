@@ -242,13 +242,21 @@
 		{file: /usr/local/lib64/python3.9/site-packages/nvidia/cudnn/lib}) to \
 		''LD_LIBRARY_PATH''.} \
 	|
-| Siemens Simcenter STAR-CCM+ | v19.xx | Linux \
+| Siemens Simcenter STAR-CCM+ | v21.02.x and earlier | Linux \
 	| {pcode: vglrun __path-to-STAR-CCM+-scripts__/starccm+ \\}{nl} \
 		''       -clientldpreload libdlfaker.so:libvglfaker.so'' \
 	| Failing to pass the aforementioned arguments to the STAR-CCM+ startup \
 		script prevents VirtualGL from being loaded into the application, \
 		resulting in unaccelerated OpenGL and error messages such as "ERROR: in \
 		isDisplayExcluded-- XX: Unexpected NULL condition" \
+	|
+| Siemens Simcenter STAR-CCM+ | v21.04.x and later | Linux \
+	| {pcode: vglrun __path-to-STAR-CCM+-scripts__/starccm+ \\}{nl} \
+		''       -clientldpreload \\''{nl} \
+		{pcode:\ \ \ \ \ \ \ __path-to__/libvglfaker.so:__path-to__/libdlfaker.so} \
+	| For reasons unknown, STAR-CCM+ v21.04.x and later requires that the full \
+		paths to {file: libvglfaker.so} and {file: libdlfaker.so} be specified \
+		and that {file: libvglfaker.so} be specified first. \
 	|
 | Tecplot 360 | 2011 and earlier | Linux \
 	| Set the ''VGL_GLFLUSHTRIGGER'' environment variable to ''0'' prior to \
